@@ -39,3 +39,6 @@ __pycache__/
 .venv/
 build/
 dist/
+
+# Local session pointer, not part of the published artifact.
+CLAUDE.md

@@ -1,6 +1,12 @@
-# CLAUDE.md
+# Codebase conventions
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+How this repository is organized and the rules it holds itself to. Written for anyone extending or
+reproducing the work; `README.md` is the entry point, `REPRODUCIBILITY.md` maps claims to commands, and
+`claims_dependency.md` in this directory is the lab notebook.
+
+Several conventions below look fussier than they need to be. Each exists because breaking it produced a
+plausible-looking wrong number at some point in this project's history; `claims_dependency.md` records
+which.
 
 ## What this is
 
@@ -54,7 +60,7 @@ python scripts/run_locomo_power.py        # what n the LoCoMo null would have ne
 python scripts/check_paper_numbers.py     # asserts every paper number matches experiments/*.json
 
 # LLM-backed task-utility (RQ1) — needs an OpenAI-compatible key in the ENV (never in code):
-export OPENAI_API_KEY=sk-...            # rotate any exposed key; do not commit or paste in chat
+export OPENAI_API_KEY=sk-...            # environment only; never in a file inside this tree
 pip install -e ".[eval]"
 python scripts/run_memqa.py [--multihop]   # synthetic accuracy-vs-budget with a real LLM
 python scripts/run_locomo.py               # real LoCoMo benchmark (auto-downloads data/)
@@ -165,4 +171,21 @@ simulator/training/eval) — keep it in sync when you add or rename config field
   since a log reports success for edits that matched nothing. Run it after any experiment re-run; it has
   already caught four double-rounding drifts (0.765 → "76" vs "77") and one claim that silently mixed two
   hyperparameter settings. When it fails, fix the paper, not the checker.
+- **A fraction is reported with its denominator characterized.** Any "share of headroom captured" must
+  be accompanied by the share a *causal* policy could reach (`sequential.attainable_ceiling`). Reporting
+  the first without the second is how this project's central claim came to be an artifact for three
+  revisions: 97% of the denominator was unreachable by construction.
+- **A shared convention is fixed in every routine that uses it, or in none.** `place_with_beliefs`,
+  `prefix_greedy_cost` and `_oracle_cost` all choose among equal-cost actions. Fixing the tie rule in one
+  left the numerator and denominator of every reported fraction computed under different rules, and the
+  only symptom was two artifacts quietly disagreeing. `tests/test_metric_fixes.py` pins their agreement.
+- **A change that alters nothing is investigated, not celebrated.** A sliding-window filter added to
+  `lrb.py` produced numbers identical to having no filter; the natural reading was "the window does not
+  bind here" and it was wrong — a guard read `train_t[0]` on a list a later subsample had reordered.
+- **A learned baseline asserts its own training signal.** `lrb.py` raises when label variance is zero.
+  Without that, a truncation bug silently turned it into random eviction and it was reported as a
+  measurement of LRB for two revisions.
+- **Beliefs are compared on one magnitude scale.** `sequential.quantile_match` (with mid-rank tie
+  handling) exists because the same policy with the same ordering scores +85% or −32% depending on the
+  scale its beliefs sit on. State the convention or the number is not a quantity.
 - `web/index.html` is a self-contained interactive visualization (no build step).
