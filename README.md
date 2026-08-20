@@ -44,6 +44,7 @@ claim to a command and an artifact.
 | `experiments/` | the artifacts every number in the paper is checked against |
 | `experiments/superseded/` | artifacts behind retracted claims, kept as record, read by nothing |
 | `paper/` | LaTeX source, PVLDB template vendored |
+| `docs/CONVENTIONS.md` | architecture, commands, and the conventions the codebase holds itself to |
 | `docs/claims_dependency.md` | the lab notebook: every claim, what it depends on, and what was retracted |
 | `tests/` | 173 tests, most of which pin a specific defect we hit |
 
