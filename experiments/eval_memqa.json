@@ -1,0 +1,101 @@
+{
+  "config": {
+    "facts": 30,
+    "questions": 40,
+    "zipf": 1.1,
+    "seed": 0,
+    "model": "gpt-4o-mini"
+  },
+  "stoa": [
+    {
+      "priority": "stoa",
+      "budget_tokens": 30,
+      "n_questions": 40,
+      "n_in_context": 24,
+      "n_correct": 24,
+      "calls": 24,
+      "context_facts": 5,
+      "accuracy": 0.6,
+      "in_context_rate": 0.6
+    },
+    {
+      "priority": "stoa",
+      "budget_tokens": 60,
+      "n_questions": 40,
+      "n_in_context": 34,
+      "n_correct": 34,
+      "calls": 34,
+      "context_facts": 10,
+      "accuracy": 0.85,
+      "in_context_rate": 0.85
+    },
+    {
+      "priority": "stoa",
+      "budget_tokens": 120,
+      "n_questions": 40,
+      "n_in_context": 40,
+      "n_correct": 40,
+      "calls": 40,
+      "context_facts": 20,
+      "accuracy": 1.0,
+      "in_context_rate": 1.0
+    },
+    {
+      "priority": "stoa",
+      "budget_tokens": 180,
+      "n_questions": 40,
+      "n_in_context": 40,
+      "n_correct": 40,
+      "calls": 40,
+      "context_facts": 30,
+      "accuracy": 1.0,
+      "in_context_rate": 1.0
+    }
+  ],
+  "random": [
+    {
+      "priority": "random",
+      "budget_tokens": 30,
+      "n_questions": 40,
+      "n_in_context": 15,
+      "n_correct": 15,
+      "calls": 15,
+      "context_facts": 5,
+      "accuracy": 0.375,
+      "in_context_rate": 0.375
+    },
+    {
+      "priority": "random",
+      "budget_tokens": 60,
+      "n_questions": 40,
+      "n_in_context": 24,
+      "n_correct": 24,
+      "calls": 24,
+      "context_facts": 10,
+      "accuracy": 0.6,
+      "in_context_rate": 0.6
+    },
+    {
+      "priority": "random",
+      "budget_tokens": 120,
+      "n_questions": 40,
+      "n_in_context": 30,
+      "n_correct": 30,
+      "calls": 30,
+      "context_facts": 20,
+      "accuracy": 0.75,
+      "in_context_rate": 0.75
+    },
+    {
+      "priority": "random",
+      "budget_tokens": 180,
+      "n_questions": 40,
+      "n_in_context": 40,
+      "n_correct": 40,
+      "calls": 40,
+      "context_facts": 30,
+      "accuracy": 1.0,
+      "in_context_rate": 1.0
+    }
+  ]
+}

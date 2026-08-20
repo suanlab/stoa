@@ -1,0 +1,25 @@
+% Positioning matrix. \checkmark = learned/decided; $\circ$ = fixed/heuristic; -- = not applicable.
+\begin{table}[t]
+  \centering
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{@{}lcccccc@{}}
+    \toprule
+    System & Repr. & Tier & Timing & \makecell{Task\\util.} & \makecell{Budget\\cond.} & \makecell{Joint\\credit} \\
+    \midrule
+    MemOS~\cite{F1_li2025memos}            & $\circ$ & $\circ$ & $\circ$ & $\circ$ & $\circ$ & -- \\
+    Memory-R1~\cite{F6_yan2025memoryr1}    & -- & -- & \checkmark & \checkmark & $\circ$ & $\circ$ \\
+    Mem-as-Act.~\cite{F7_zhang2025memoryasaction} & -- & -- & \checkmark & \checkmark & $\circ$ & \checkmark$^\dagger$ \\
+    LMCache~\cite{F5_liu2025lmcache}       & -- & \checkmark & $\circ$ & $\circ$ & $\circ$ & -- \\
+    Cold-RL~\cite{S4_coldrl2025}           & -- & \checkmark & -- & $\circ$ & $\circ$ & \checkmark$^\dagger$ \\
+    Sleep-time~\cite{F3_lin2025sleeptime}  & -- & -- & \checkmark & \checkmark & $\circ$ & -- \\
+    \textbf{STOA (proposed)}               & $\ast$ & $\ast$ & $\ast$ & $\ast$ & $\ast$ & $\ast$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{No prior system decides representation, tier, \emph{and} timing jointly---learned, under a
+  shared budget, with task utility as the objective. \checkmark: learned; $\circ$: fixed/heuristic; --:
+  not applicable. $\dagger$: credit for one axis only (content or eviction). \textbf{$\ast$: proposed in
+  \Cref{sec:formulation}--\ref{sec:arch} and \emph{not evaluated in this paper}} --- the row states an
+  intended design, not a measured capability, and \Cref{sec:evidence} gives reasons to doubt parts of it.}
+  \label{tab:positioning}
+\end{table}

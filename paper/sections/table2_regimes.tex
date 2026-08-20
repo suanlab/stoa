@@ -1,0 +1,24 @@
+\begin{table}[t]
+  \centering \small \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{@{}lrr@{}}
+    \toprule
+     & \makecell{Mooncake\\(serving)} & \makecell{kv-cache-tester\\(agentic)} \\
+    \midrule
+    requests analysed              & 23{,}608 / 12{,}031 & 4{,}215 (40 conv.) \\
+    blocks touched exactly once    & 78\%   & 15\% \\
+    mean reuse per block           & 1.9    & 24 \\
+    blocks per request             & $\sim$17 & $\sim$1{,}900 \\
+    block size (tokens)            & 256    & 64 \\
+    \midrule
+    headroom, heuristic vs.\ oracle & 87\%  & 81--94\% \\
+    headroom captured by a learned policy & $+2$\% & not measurable$^\dagger$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{The two sources, at the scales actually analysed. Descriptive statistics are
+  sample-dependent: the agentic figures shift with the number of pooled conversations (one-time fraction
+  ranges 7.5--21\% over 20--200 conversations), and the captured-headroom range spans a sign reversal
+  between 40 and 150 conversations (\Cref{sec:protocol}). We report the spread rather than a point
+  because the sampling is not randomized. $^\dagger$Under randomized draws the agentic figure has a 95\%
+  spread an order of magnitude wider than any effect (\Cref{sec:sampling}).}
+  \label{tab:regimes}
+\end{table}

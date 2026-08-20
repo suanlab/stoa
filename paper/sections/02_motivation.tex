@@ -1,0 +1,32 @@
+\section{Motivation: Why Now}
+\label{sec:motivation}
+
+\paragraph{The substrates exist; the orchestration does not.}
+By late 2025 every mechanism STOA needs had been built---in isolation. MemOS~\cite{F1_li2025memos}
+exposes a MemCube abstraction with primitives to migrate an item between plaintext, activation, and
+parameter forms. LMCache~\cite{F5_liu2025lmcache} tiers KV-cache bytes across GPU, CPU, and remote
+storage. M+~\cite{F2_wang2025mplus} maintains a latent memory with a co-trained retriever, and sleep-time
+compute~\cite{F3_lin2025sleeptime} shows that precomputing during idle windows cuts test-time cost by
+roughly $5\times$. RL memory managers~\cite{F6_yan2025memoryr1,F7_zhang2025memoryasaction} learn what to
+write and edit. What is absent is the layer that \emph{decides}, per item and under a shared budget, which
+of these mechanisms to invoke and when---a scheduler whose objective is downstream task utility rather
+than cache miss-rate.
+
+\paragraph{A worked coupling example.}
+Consider a single fact accessed $k$ times over a session (placeholder costs from our simulator).
+As \textsf{plaintext} on \textsf{CPU} it costs nothing to write but $\sim$800 tokens on every serve, so
+its serving cost grows as $800k$ tokens. Promoted once to a \textsf{latent} representation it costs a
+one-off consolidation but serves at $\approx$0 tokens thereafter. For a cold fact ($k{=}1$) the promotion
+never pays off; for a hot fact ($k{\gg}1$) it is decisively cheaper---and the crossover depends on the
+tier (which sets read latency), on the timing (paying the promotion \textsf{online} vs.\ amortizing it in
+a \textsf{sleep} window), and on the residual token budget $B$. The three axes cannot be set
+independently, and the right setting is data-dependent---exactly the regime where a learned policy beats a
+fixed heuristic.
+
+\paragraph{Why a control plane, and why learned.}
+Hand-tuned migration rules (as in today's memory-OS systems) cannot track this crossover across
+workloads, budgets, and backbones. But the decision is not intractable: it is a budget-constrained
+scheduling problem, and adjacent problems---cache replacement~\cite{S2_liu2020parrot,S4_coldrl2025} and
+cluster scheduling~\cite{S5_mao2019decima}---have repeatedly been shown learnable from traces. STOA
+applies that lesson to the joint representation--tier--timing decision, packaged as a control plane so it
+can sit above existing stores and tiers without replacing them.

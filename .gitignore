@@ -1,0 +1,41 @@
+# --- third-party data: NOT redistributed ------------------------------------------
+# Mooncake and LoCoMo carry no explicit licence for their data files, and the
+# kv-cache-tester corpus is anonymized conversations of unclear provenance. We ship
+# acquisition scripts instead; see data/README.md. This also keeps the repository at
+# ~4 MB instead of ~330 MB.
+data/*.jsonl
+data/*.json
+data/kvct/
+
+# --- derived caches: regenerate, never commit --------------------------------------
+# Embeddings and LLM rewrites of third-party text, produced through a paid API. Both
+# rebuild on demand (the scripts cache on miss), so committing them would redistribute
+# derivatives of data we do not redistribute, to save an hour of compute.
+data/emb_cache/
+data/repr_cache.json
+
+# --- secrets -----------------------------------------------------------------------
+# No key has ever lived in this tree and none should. Belt and braces.
+.env
+.env.*
+*.key
+**/key.sh
+
+# --- build products ----------------------------------------------------------------
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.synctex.gz
+paper/*.fdb_latexmk
+paper/*.fls
+
+# --- python ------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+build/
+dist/

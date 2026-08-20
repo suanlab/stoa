@@ -1,0 +1,121 @@
+\section{Introduction}
+\label{sec:intro}
+
+Large language model (LLM) agents increasingly depend on memory that outlives a single context
+window---the facts they extract, the turns they have seen, the tools they have run, the summaries they
+have written. How well an agent answers, how fast it responds, and how much it costs are all decided by
+one question asked of every memory item: \textbf{in what form should it be kept, where should it live,
+and when should it be (re)materialized?} Concretely, each item can be stored as plaintext, a vector, a
+graph, a latent/KV activation, or baked into parameters; it can sit on GPU, CPU, disk, or a remote tier;
+and it can be written inline while serving, consolidated during an idle window, or left untouched.
+
+Today this single decision is \textbf{fragmented across three research communities}, each of which
+optimizes one axis and freezes the others. Memory-operating-system work---MemOS~\cite{F1_li2025memos},
+MemGPT~\cite{P14_packer2023memgpt}---provides the primitives to migrate an item between representations
+and tiers, but \emph{decides when to migrate by hand-tuned heuristics}. Reinforcement-learned memory
+managers---Memory-R1~\cite{F6_yan2025memoryr1}, Memory-as-Action~\cite{F7_zhang2025memoryasaction}---learn
+\emph{what content} to add, update, or delete, but operate over a single fixed representation and never
+choose a tier or schedule an offline write. Systems-level cache tiering---LMCache~\cite{F5_liu2025lmcache}%
+---places bytes across GPU/CPU/disk/remote to minimize \emph{miss rate or time-to-first-token}, with no
+notion of the downstream task utility that the memory actually serves.
+
+Our central observation is that \textbf{these three axes are coupled and cannot be optimized separately.}
+Promoting an item to a latent or parameter representation is an expensive offline write, but it is then
+cheap and fast to serve; leaving it as plaintext on disk is cheap to write but slow to read and heavy on
+context tokens. The best representation depends on the tier and on how often the item will be reused; the
+best tier depends on the representation's serving cost and the item's size; and whether to pay the
+promotion cost at all depends on the budget. This is precisely a \textbf{budget-constrained scheduling
+problem}---and a large body of ML-for-systems work (Belady-oracle imitation for cache
+replacement~\cite{S2_liu2020parrot}, GNN schedulers for clusters~\cite{S5_mao2019decima}, offline-RL cache
+eviction in production~\cite{S4_coldrl2025}) demonstrates that such problems are learnable.
+
+The reason to act now is that every substrate exists but nothing orchestrates them: MemCube migration, RL
+memory managers, tiered KV caches, latent memory~\cite{F2_wang2025mplus}, and sleep-time
+consolidation~\cite{F3_lin2025sleeptime} all landed by late 2025, unconnected. What is missing is a
+\emph{learned scheduler} that, per item and under a shared budget, trades accuracy against latency and
+cost, with \textbf{task utility---not miss rate---as the objective.}
+
+We present \textbf{STOA} (Storage \& Tiered Orchestration for Agents), a learned control plane that
+decides \textbf{representation $\times$ tier $\times$ timing jointly}, per memory item, as a single
+budget-constrained Markov decision process. The operator sets a latency/cost/token budget $(L,C,B)$ at
+serving time and one policy adapts, tracing the accuracy--latency--cost frontier without retraining. To
+tame the combinatorics (fifty legal actions per item, across many items) STOA factors the policy into
+representation, tier, and timing heads over a graph network of the memory store, and evaluates it only
+over the legal joint actions so masking is exact. It warm-starts the policy by imitating a Belady oracle
+and assigns credit for delayed, query-time payoffs with a mix of oracle imitation and process
+supervision~\cite{F20_xiong2025raggym}.
+
+Having built the formulation, we take seriously the empirical question it invites---\emph{is this decision
+actually learnable?}---and answer it on production KV traces rather than on synthetic workloads. The
+answer turned out to depend less on the model than on \emph{when the model is asked}.
+
+Placement studies of this kind, including three revisions of this one, fix a split instant: observe a
+prefix, build features from it, place every block, and bill the result against the future. Feature
+construction can only describe a block that has been seen --- and on these traces 45--46\% of blocks have
+no pre-split access at all, while the hindsight oracle they are scored against ranks them anyway. Those
+blocks carry \textbf{97\% of the oracle's advantage}. A policy confined to the remaining 3\% looks flat
+however well it ranks, which is precisely what our earlier ``ranking does not convert into placement''
+result measured. We retract it.
+
+Moving the decision to each block's \emph{arrival} --- placing it the moment it first appears, from the
+session context available at that instant --- raises the reachable share from 3\% to \textbf{90\%} on one
+trace and 2\% to \textbf{53\%} on the other. What captures it is not prediction. First-come-first-served
+admission with a fixed action reaches \textbf{93\% and 90\%} of the ceiling; a learned arrival-time
+ranker at AUC 0.574 and 0.635 reaches 91.6\% and 88.9\%, slightly \emph{less}; and shuffling the arrival
+order costs under three points. Almost all of the recoverable benefit is in the timing of the decision,
+not in its content. The design implication is concrete and was invisible under the old framing: build an
+\textbf{admission point}, not a predictor.
+
+Reaction is competitive for a related reason. Tiering rules that forecast nothing at all --- LRU, LFU and
+a fill-once cache --- reach 75--99\% of Belady's hit rate on one Mooncake trace and 40--94\% on the other,
+and the whole adaptive-replacement family (ARC, LeCaR, CACHEUS) beats the best of them by \emph{at most
+4.6 points}. All of them adapt on a ghost hit, and 76--78\% of blocks here are never reused, so most
+evictions are correct and emit no signal: ARC gets one on 3.5--7.3\% of misses. A population of
+singletons starves the channel adaptive replacement runs on.
+
+We report how much measurement discipline this took, because it is the part most likely to transfer, and
+because it is not a flattering story. Three claims were retracted, the last two only under adversarial
+review \emph{after} the error catalogue below had been written: a headline that randomized sampling
+showed had never been measurable, the decoupling result above, and an LRB column that turned out to
+measure random eviction because a training buffer was truncated to its tail. In every case the aggregate
+looked reasonable, which is the point --- none of our checks asked whether a reported quantity was
+arithmetically able to be what it claimed.
+
+\paragraph{Contributions.}
+\begin{itemize}
+  \item \textbf{(C1)} A unifying formulation of agent-memory placement as a budget-constrained MDP over
+  representation $\times$ tier $\times$ timing, with a single serve-time $(L,C,B)$ knob
+  (\Cref{sec:formulation}), and a control-plane architecture for it (\Cref{sec:arch}).
+  \item \textbf{(C2)} A timing result on production traces. The split-instant protocol these studies use
+  makes 97\% of a hindsight oracle's advantage unreachable, because 45--46\% of blocks do not exist yet
+  when it decides (\Cref{sec:reachable}). Deciding at each block's \emph{arrival} raises the reachable
+  share from 3\% to 90\% and 2\% to 53\%; there, first-come-first-served admission captures 93\% and 90\%
+  of what is reachable and a learned ranker captures slightly less (\Cref{sec:arrival}). Once the metric
+  is repaired, ranking quality converts monotonically but never enough to help
+  (\Cref{sec:capacity}).
+  \item \textbf{(C3)} Measurements of reactive tiering on both sources against the adaptive-replacement
+  family (ARC, LeCaR, CACHEUS) and a reimplemented LRB --- the best of them beating the best plain rule by
+  at most 4.6 points of Belady across eight operating points --- together with an eviction-signal inversion
+  that makes a policy tuned on one source a poor default for the other, and a measured explanation: KV
+  traces are dominated by one-time blocks, which starve the ghost-hit channel all four adapt on
+  (\Cref{sec:reaction}).
+  \item \textbf{(C4)} A measured separation of placement from retrieval on LoCoMo at the sample size a
+  power analysis demanded (300 questions per arm, paired tests): retrieval leads by a factor of four in
+  10 of 10 dialogues, while placement still beats the same-regime embedding baseline
+  (\Cref{sec:placement-vs-retrieval}).
+  \item \textbf{(C5)} A first probe of the representation axis on real data --- three textual
+  fidelities, not the vector, graph, latent or parameter forms of \Cref{sec:formulation}, which we never
+  instantiate --- pointing \emph{against} our own framing: one representation leads at every budget
+  rather than crossing. Reported as a direction with the sample size that would settle it, since none of
+  the eight comparisons survives correction (\Cref{sec:representation}).
+  \item \textbf{(C6)} A reusable evaluation protocol: ten measurement defects that each manufactured a
+  plausible result here, grouped by mechanism, and the cheap controls that catch them --- including the
+  rule that a null is reportable only alongside the sample size that would have resolved it
+  (\Cref{sec:protocol}).
+\end{itemize}
+
+We position STOA against prior work along the three axes it unifies in \Cref{tab:positioning}; no prior
+system occupies their intersection---deciding representation, tier, \emph{and} timing, learned, under a
+shared budget, with task utility as the objective.
+
+\input{sections/table1_positioning}

@@ -1,0 +1,38 @@
+{
+  "config": {
+    "requests": 1500,
+    "protocol": "cross-trace, prefix features / future label, true-cost billing"
+  },
+  "results": [
+    {
+      "eval_trace": "conversation",
+      "train_trace": "toolagent",
+      "prefix_greedy": 26563.75,
+      "learned": 26478.56,
+      "oracle": 5047.56,
+      "headroom_captured_pct": 0.4,
+      "trace_summary": {
+        "items": 30634,
+        "accesses": 41702,
+        "one_time_frac": 0.7853,
+        "mean_reuse": 1.361,
+        "max_reuse": 1500
+      }
+    },
+    {
+      "eval_trace": "toolagent",
+      "train_trace": "conversation",
+      "prefix_greedy": 12711.31,
+      "learned": 12615.75,
+      "oracle": 2275.46,
+      "headroom_captured_pct": 0.92,
+      "trace_summary": {
+        "items": 16688,
+        "accesses": 28510,
+        "one_time_frac": 0.8586,
+        "mean_reuse": 1.708,
+        "max_reuse": 683
+      }
+    }
+  ]
+}

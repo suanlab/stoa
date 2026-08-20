@@ -1,0 +1,178 @@
+{
+  "config": {
+    "tier_frac": 0.1,
+    "seed": 0,
+    "grid": [
+      [
+        10000,
+        64,
+        30
+      ],
+      [
+        50000,
+        64,
+        30
+      ],
+      [
+        200000,
+        64,
+        30
+      ],
+      [
+        50000,
+        32,
+        30
+      ],
+      [
+        50000,
+        128,
+        30
+      ],
+      [
+        50000,
+        64,
+        100
+      ]
+    ]
+  },
+  "traces": {
+    "conversation": {
+      "belady": 0.3664,
+      "arc": 0.2841,
+      "arc_over_belady": 0.7754,
+      "lrb_min_over_belady": 0.5498,
+      "lrb_max_over_belady": 0.6569,
+      "rows": [
+        {
+          "memory_window": 10000,
+          "sample_size": 64,
+          "n_trees": 30,
+          "hit_rate": 0.2349,
+          "over_belady": 0.6411,
+          "censored_frac": 0.8645,
+          "train_rows": 12119349,
+          "n_fits": 13
+        },
+        {
+          "memory_window": 50000,
+          "sample_size": 64,
+          "n_trees": 30,
+          "hit_rate": 0.2343,
+          "over_belady": 0.6395,
+          "censored_frac": 0.7766,
+          "train_rows": 10527019,
+          "n_fits": 13
+        },
+        {
+          "memory_window": 200000,
+          "sample_size": 64,
+          "n_trees": 30,
+          "hit_rate": 0.2014,
+          "over_belady": 0.5498,
+          "censored_frac": 0.4882,
+          "train_rows": 4170125,
+          "n_fits": 13
+        },
+        {
+          "memory_window": 50000,
+          "sample_size": 32,
+          "n_trees": 30,
+          "hit_rate": 0.2291,
+          "over_belady": 0.6252,
+          "censored_frac": 0.7841,
+          "train_rows": 5315123,
+          "n_fits": 13
+        },
+        {
+          "memory_window": 50000,
+          "sample_size": 128,
+          "n_trees": 30,
+          "hit_rate": 0.2407,
+          "over_belady": 0.6569,
+          "censored_frac": 0.7732,
+          "train_rows": 20812380,
+          "n_fits": 13
+        },
+        {
+          "memory_window": 50000,
+          "sample_size": 64,
+          "n_trees": 100,
+          "hit_rate": 0.2373,
+          "over_belady": 0.6476,
+          "censored_frac": 0.7766,
+          "train_rows": 10471624,
+          "n_fits": 13
+        }
+      ]
+    },
+    "toolagent": {
+      "belady": 0.5525,
+      "arc": 0.5101,
+      "arc_over_belady": 0.9233,
+      "lrb_min_over_belady": 0.809,
+      "lrb_max_over_belady": 0.8542,
+      "rows": [
+        {
+          "memory_window": 10000,
+          "sample_size": 64,
+          "n_trees": 30,
+          "hit_rate": 0.472,
+          "over_belady": 0.8542,
+          "censored_frac": 0.8937,
+          "train_rows": 12074988,
+          "n_fits": 19
+        },
+        {
+          "memory_window": 50000,
+          "sample_size": 64,
+          "n_trees": 30,
+          "hit_rate": 0.4679,
+          "over_belady": 0.8469,
+          "censored_frac": 0.8252,
+          "train_rows": 11030408,
+          "n_fits": 19
+        },
+        {
+          "memory_window": 200000,
+          "sample_size": 64,
+          "n_trees": 30,
+          "hit_rate": 0.447,
+          "over_belady": 0.809,
+          "censored_frac": 0.7645,
+          "train_rows": 7064652,
+          "n_fits": 19
+        },
+        {
+          "memory_window": 50000,
+          "sample_size": 32,
+          "n_trees": 30,
+          "hit_rate": 0.4709,
+          "over_belady": 0.8523,
+          "censored_frac": 0.8204,
+          "train_rows": 5475727,
+          "n_fits": 19
+        },
+        {
+          "memory_window": 50000,
+          "sample_size": 128,
+          "n_trees": 30,
+          "hit_rate": 0.4689,
+          "over_belady": 0.8487,
+          "censored_frac": 0.8238,
+          "train_rows": 22024064,
+          "n_fits": 19
+        },
+        {
+          "memory_window": 50000,
+          "sample_size": 64,
+          "n_trees": 100,
+          "hit_rate": 0.4688,
+          "over_belady": 0.8484,
+          "censored_frac": 0.824,
+          "train_rows": 11009635,
+          "n_fits": 19
+        }
+      ]
+    }
+  }
+}

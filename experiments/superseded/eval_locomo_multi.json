@@ -1,0 +1,27 @@
+{
+  "config": {
+    "samples": 3,
+    "first_sample": 0,
+    "questions_total": 30,
+    "model": "gpt-4o-mini",
+    "metric": "substring"
+  },
+  "budget_fractions": [
+    0.1,
+    0.25,
+    0.5,
+    1.0
+  ],
+  "stoa": [
+    0.4,
+    0.4667,
+    0.4333,
+    0.4
+  ],
+  "random": [
+    0.0667,
+    0.0,
+    0.1,
+    0.4667
+  ]
+}

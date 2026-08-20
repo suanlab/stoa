@@ -1,0 +1,30 @@
+{
+  "config": {
+    "convs": 150,
+    "source": "kv-cache-tester",
+    "protocol": "single workload, single split instant, conversation-disjoint train/eval"
+  },
+  "prefix_greedy": 517131.92,
+  "oracle": 100578.12,
+  "headroom_pct": 80.55,
+  "results": [
+    {
+      "features": "block",
+      "auc": 0.8801,
+      "classifier_headroom_pct": -23.91,
+      "regression_headroom_pct": -23.99
+    },
+    {
+      "features": "block+session",
+      "auc": 0.8863,
+      "classifier_headroom_pct": -29.88,
+      "regression_headroom_pct": -37.49
+    },
+    {
+      "features": "block+session+think",
+      "auc": 0.8474,
+      "classifier_headroom_pct": -38.28,
+      "regression_headroom_pct": -48.32
+    }
+  ]
+}

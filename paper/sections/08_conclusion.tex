@@ -1,0 +1,21 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+For every item an agent remembers, three coupled questions---in what representation, on which tier, and
+when to (re)materialize it---are today answered separately by three research communities. We gave a single
+budget-constrained formulation that unifies them under one serve-time knob, and then asked whether the
+resulting decision is learnable.
+
+The answer is neither yes nor no but a decoupling, and that is the contribution. Reuse is predictable on
+production traces and becomes more so with data, yet the placement benefit that predictability buys stays
+near zero across the whole range; ordering, not calibration, is what the outcome turns on, and an oracle's
+ordering would recover almost all of the gap. Reactive tiering, forecasting nothing, already delivers most
+of the achievable benefit on one trace and rather less on the other, with the eviction signal itself
+inverting between sources.
+
+We arrived here only after removing ten measurement defects, each of which had
+produced a plausible positive result; we report those mechanisms and the controls that catch them, because
+the same traps are available to anyone measuring a memory scheduler. The useful next move is not a bigger model. It is to calibrate the cost
+model against real tiers, to sweep the parameters an experiment fixes for convenience before believing any
+result that depends on them, and to ask what a scheduler could do that ordering alone cannot. Agent memory
+is ready to be scheduled---but first it has to be measured in a way that can tell schedulers apart.

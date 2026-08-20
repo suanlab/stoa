@@ -1,0 +1,27 @@
+{
+  "config": {
+    "items": 64,
+    "horizon": 6000,
+    "steps": 500,
+    "device": "cpu"
+  },
+  "results": {
+    "random_feasible": {
+      "mean_cost": 5725.2,
+      "feasible": 3
+    },
+    "static_bc": {
+      "mean_cost": 867.63,
+      "feasible": 2
+    },
+    "sequential_rl": {
+      "mean_cost": 853.01,
+      "feasible": 3
+    },
+    "greedy_feasible_oracle": {
+      "mean_cost": 853.01,
+      "feasible": 3
+    }
+  },
+  "note": "Sequential occupancy-aware MDP makes feasible near-optimal placement learnable; resolves the static-formulation negative result (finetune_rl.py)."
+}

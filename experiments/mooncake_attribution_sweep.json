@@ -1,0 +1,72 @@
+{
+  "config": {
+    "protocol": "TRAINING length held fixed at 23,608; only the EVALUATION length varies",
+    "why": "the original sweep moved both with one flag, so a rising AUC could not be attributed. Holding training fixed isolates the effect: the AUC gain comes from the longer observation prefix each feature is computed over, i.e. from the task, not from the model seeing more data.",
+    "source_script": "scripts/train_session_features.py --train-requests 23608"
+  },
+  "summary": {
+    "auc_min": 0.5413,
+    "auc_max": 0.9255,
+    "auc_span_points": 38.4,
+    "captured_min": -2.25,
+    "captured_max": 2.94
+  },
+  "grid": [
+    {
+      "eval_requests": 1500,
+      "train_requests": 23608,
+      "trace": "conversation",
+      "auc": 0.581,
+      "headroom_captured_pct": -2.25
+    },
+    {
+      "eval_requests": 1500,
+      "train_requests": 23608,
+      "trace": "toolagent",
+      "auc": 0.5413,
+      "headroom_captured_pct": -0.35
+    },
+    {
+      "eval_requests": 6000,
+      "train_requests": 23608,
+      "trace": "conversation",
+      "auc": 0.7658,
+      "headroom_captured_pct": 2.43
+    },
+    {
+      "eval_requests": 6000,
+      "train_requests": 23608,
+      "trace": "toolagent",
+      "auc": 0.755,
+      "headroom_captured_pct": 1.53
+    },
+    {
+      "eval_requests": 12031,
+      "train_requests": 23608,
+      "trace": "conversation",
+      "auc": 0.8116,
+      "headroom_captured_pct": 2.31
+    },
+    {
+      "eval_requests": 12031,
+      "train_requests": 23608,
+      "trace": "toolagent",
+      "auc": 0.851,
+      "headroom_captured_pct": 2.94
+    },
+    {
+      "eval_requests": 23608,
+      "train_requests": 23608,
+      "trace": "conversation",
+      "auc": 0.8116,
+      "headroom_captured_pct": 2.31
+    },
+    {
+      "eval_requests": 23608,
+      "train_requests": 23608,
+      "trace": "toolagent",
+      "auc": 0.9255,
+      "headroom_captured_pct": 2.1
+    }
+  ]
+}

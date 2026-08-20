@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+# NOTE: distribution name is qualified ("stoa-mem") because the bare `stoa`
+# package name is already taken on PyPI/npm. Import name remains `stoa`.
+name = "stoa-mem"
+version = "0.0.1"
+description = "STOA — Storage & Tiered Orchestration for Agents: a learned memory-tier orchestrator for AI agents."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "STOA Project" }]
+keywords = ["llm", "agent", "memory", "vector-database", "ann", "orchestration", "rl"]
+
+dependencies = [
+  # Kept minimal for the scaffold. Add as milestones land:
+  #   M0-3: numpy, pyyaml       (simulator, configs)
+  #   M6-9: torch, torch-geometric  (GNN policy)
+  #   eval: datasets            (benchmark adapters)
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+# M0-3: synthetic traces / numeric baselines (stdlib-only core still works without these).
+sim = ["numpy>=1.24"]
+# M6-9: GNN factored policy + offline-RL. CPU torch is enough — the policy trains over
+# the tiering *simulator*, not an LLM, so no GPU is required. torch-geometric is
+# intentionally omitted; the small memory-graph GNN is hand-rolled in stoa/gnn.py.
+rl = ["torch>=2", "numpy>=1.24"]
+# Eval: LLM-backed task-utility measurement. Uses an LLM API (OpenAI-compatible) for
+# agent answers — NO GPU. The API key is read from $OPENAI_API_KEY, never hardcoded.
+eval = ["httpx>=0.27"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

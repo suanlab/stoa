@@ -1,0 +1,109 @@
+{
+  "config": {
+    "facts": 20,
+    "questions": 40,
+    "zipf": 1.1,
+    "seed": 0,
+    "model": "gpt-4o-mini"
+  },
+  "stoa": [
+    {
+      "priority": "stoa",
+      "budget_tokens": 30,
+      "n_questions": 40,
+      "n_answerable": 21,
+      "n_correct": 21,
+      "calls": 21,
+      "context_facts": 5,
+      "accuracy": 0.525,
+      "answerable_rate": 0.525,
+      "reasoning_acc": 1.0
+    },
+    {
+      "priority": "stoa",
+      "budget_tokens": 60,
+      "n_questions": 40,
+      "n_answerable": 29,
+      "n_correct": 29,
+      "calls": 29,
+      "context_facts": 10,
+      "accuracy": 0.725,
+      "answerable_rate": 0.725,
+      "reasoning_acc": 1.0
+    },
+    {
+      "priority": "stoa",
+      "budget_tokens": 120,
+      "n_questions": 40,
+      "n_answerable": 35,
+      "n_correct": 35,
+      "calls": 35,
+      "context_facts": 20,
+      "accuracy": 0.875,
+      "answerable_rate": 0.875,
+      "reasoning_acc": 1.0
+    },
+    {
+      "priority": "stoa",
+      "budget_tokens": 120,
+      "n_questions": 40,
+      "n_answerable": 35,
+      "n_correct": 35,
+      "calls": 35,
+      "context_facts": 20,
+      "accuracy": 0.875,
+      "answerable_rate": 0.875,
+      "reasoning_acc": 1.0
+    }
+  ],
+  "random": [
+    {
+      "priority": "random",
+      "budget_tokens": 30,
+      "n_questions": 40,
+      "n_answerable": 0,
+      "n_correct": 0,
+      "calls": 0,
+      "context_facts": 5,
+      "accuracy": 0.0,
+      "answerable_rate": 0.0,
+      "reasoning_acc": 0.0
+    },
+    {
+      "priority": "random",
+      "budget_tokens": 60,
+      "n_questions": 40,
+      "n_answerable": 2,
+      "n_correct": 2,
+      "calls": 2,
+      "context_facts": 10,
+      "accuracy": 0.05,
+      "answerable_rate": 0.05,
+      "reasoning_acc": 1.0
+    },
+    {
+      "priority": "random",
+      "budget_tokens": 120,
+      "n_questions": 40,
+      "n_answerable": 4,
+      "n_correct": 4,
+      "calls": 4,
+      "context_facts": 20,
+      "accuracy": 0.1,
+      "answerable_rate": 0.1,
+      "reasoning_acc": 1.0
+    },
+    {
+      "priority": "random",
+      "budget_tokens": 120,
+      "n_questions": 40,
+      "n_answerable": 4,
+      "n_correct": 4,
+      "calls": 4,
+      "context_facts": 20,
+      "accuracy": 0.1,
+      "answerable_rate": 0.1,
+      "reasoning_acc": 1.0
+    }
+  ]
+}

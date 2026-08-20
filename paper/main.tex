@@ -1,0 +1,100 @@
+% STOA @ PVLDB (Workload Characterization / EA&B track).
+% Template: the official VLDB-Template bundle (github.com/vldbproceedings/VLDB-Template),
+%   which pins acmart.cls v2.19 and layers pvldb.sty on top. Both are vendored here so the
+%   build does not depend on the local TeX install's acmart version.
+% CfP constraints (verified 2026-08-12, vldb.org/2027/submission-guidelines.html):
+%   deadline 1st of each month 5PM PT, abstract mandatory by the 25th of the prior month
+%   12 pages EXCLUDING references | EA&B papers must link a reproducibility package
+% Build: pdflatex main && bibtex main && pdflatex main && pdflatex main
+% The previous CIDR-formatted version is preserved as main_cidr.tex.
+\documentclass[sigconf, nonacm]{acmart}
+%%% do not modify the following VLDB block %%
+%%% VLDB block start %%%
+\usepackage{pvldb}
+%%% VLDB block end %%%
+\renewcommand\vldbdoi{XX.XX/XXX.XX}
+\renewcommand\vldbpages{XXX-XXX}
+\renewcommand\vldbavailabilityurl{https://github.com/ANONYMIZED/stoa}
+
+\let\Bbbk\relax        % avoid clash: acmart's newtxmath already defines \Bbbk
+\usepackage{amssymb}   % for \checkmark in Table 1
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage{cleveref}
+\graphicspath{{figs/}}
+\setlength{\footskip}{12pt}
+
+% --- Citation-key map (verified against docs/references.bib) ---
+% memos=F1_li2025memos  memgpt=P14_packer2023memgpt  memoryr1=F6_yan2025memoryr1
+% memaction=F7_zhang2025memoryasaction  lmcache=F5_liu2025lmcache  mplus=F2_wang2025mplus
+% sleeptime=F3_lin2025sleeptime  lightmem=F4_fang2025lightmem  raggym=F20_xiong2025raggym
+% parrot=S2_liu2020parrot  decima=S5_mao2019decima  coldrl=S4_coldrl2025  h2o=S1_zhang2023h2o
+% locomo=P51_maharana2024locomo  longmemeval=P52_wu2025longmemeval  memoryagentbench=F46_hu2025memoryagentbench
+
+\begin{document}
+
+\title{Decide on Arrival: Placement Timing Beats Placement Prediction on Production KV Traces}
+\subtitle{Why split-instant evaluation understates what placement can do, and what changes when the
+decision moves}
+
+\author{STOA Project}
+\affiliation{%
+  \institution{Semyung University}
+  \city{Jecheon}
+  \country{Republic of Korea}}
+\email{suanlee@semyung.ac.kr}
+
+\begin{abstract}
+LLM agents increasingly depend on external memory, and the decision that governs it---for each memory
+item, in what \emph{representation}, on which \emph{storage tier}, and \emph{when} to (re)materialize
+it---is today split across three communities that each optimize one axis and fix the others. We give a
+single budget-constrained MDP over representation~$\times$~tier~$\times$~timing with one serve-time
+$(L,C,B)$ knob, and then ask the empirical question it invites on two production KV-trace sources: what
+does a placement policy have to get right?
+
+Our answer is that it has to decide \emph{early}, not \emph{well}. Placement studies of this kind---ours
+included, for three revisions---fix a split instant, build features from the prefix, and place the
+blocks that already exist. On these traces 45--46\% of blocks have no pre-split access at all, and they
+carry \textbf{97\%} of a hindsight oracle's advantage: the protocol makes almost all of the benefit
+unreachable, and any policy measured inside it looks flat however well it ranks. Moving the decision to
+each block's \emph{arrival} raises the reachable share from 3\% to \textbf{90\%} on one trace and 2\% to
+\textbf{53\%} on the other. In that regime, first-come-first-served admission with a fixed action
+captures \textbf{93\% and 90\%} of what is reachable, and a learned arrival-time ranker (AUC 0.57, 0.64)
+captures slightly \emph{less}. Shuffling the arrival order costs under three points. Almost all of the
+recoverable benefit is in when the decision is taken.
+
+Reaction is competitive for the same reason. Rules that forecast nothing---LRU, LFU, a fill-once
+cache---reach 75--99\% of Belady's hit rate on one trace and 40--94\% on the other, and the whole
+adaptive-replacement family (ARC, LeCaR, CACHEUS) beats the best of them by at most 4.6 points; all four
+adapt on a ghost hit, and 76--78\% of blocks are never reused, so the signal is scarce by construction.
+
+The protocol finding is not specific to us. Split-instant evaluation is the standard way this decision is
+studied, and on any workload where a large share of items arrive after the split it will understate what
+placement can do --- by a factor of 29 here. We give the diagnostic that detects it in one line (compare
+the oracle's advantage against the share of it a causal policy could reach) and the correction that
+removes it. Our own three retractions are reported as evidence for how invisible the failure is: each
+produced a plausible aggregate, and none was caught by any check that did not compare a reported
+quantity against what it was arithmetically able to be.
+\end{abstract}
+
+\keywords{LLM agents, agent memory, memory tiering, learned scheduling, budget-constrained MDP}
+
+\maketitle
+
+%%% VLDB block start %%%
+\vldbtopmatter
+%%% VLDB block end %%%
+
+\input{sections/01_introduction}
+\input{sections/02_motivation}
+\input{sections/03_formulation}
+\input{sections/04_architecture}
+\input{sections/05_evidence}
+\input{sections/06_openproblems}
+\input{sections/07_related}
+\input{sections/08_conclusion}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{../docs/references}
+
+\end{document}

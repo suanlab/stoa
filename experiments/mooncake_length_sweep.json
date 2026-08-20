@@ -1,0 +1,65 @@
+{
+  "config": {
+    "protocol": "cross-trace; prefix features -> future label; placement billed at true cost",
+    "note": "conversation exhausts at 12,031 requests; toolagent at 23,608",
+    "source_script": "scripts/train_session_features.py"
+  },
+  "grid": [
+    {
+      "requests": 1500,
+      "trace": "conversation",
+      "auc": 0.6206,
+      "headroom_captured_pct": 0.76,
+      "full_trace": false
+    },
+    {
+      "requests": 1500,
+      "trace": "toolagent",
+      "auc": 0.5664,
+      "headroom_captured_pct": 1.32,
+      "full_trace": false
+    },
+    {
+      "requests": 6000,
+      "trace": "conversation",
+      "auc": 0.7689,
+      "headroom_captured_pct": 2.78,
+      "full_trace": false
+    },
+    {
+      "requests": 6000,
+      "trace": "toolagent",
+      "auc": 0.7654,
+      "headroom_captured_pct": 1.52,
+      "full_trace": false
+    },
+    {
+      "requests": 12031,
+      "trace": "conversation",
+      "auc": 0.8122,
+      "headroom_captured_pct": 2.43,
+      "full_trace": true
+    },
+    {
+      "requests": 12031,
+      "trace": "toolagent",
+      "auc": 0.851,
+      "headroom_captured_pct": 2.94,
+      "full_trace": false
+    },
+    {
+      "requests": 23608,
+      "trace": "conversation",
+      "auc": 0.8116,
+      "headroom_captured_pct": 2.31,
+      "full_trace": false
+    },
+    {
+      "requests": 23608,
+      "trace": "toolagent",
+      "auc": 0.9255,
+      "headroom_captured_pct": 2.1,
+      "full_trace": true
+    }
+  ]
+}

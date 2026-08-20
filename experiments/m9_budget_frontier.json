@@ -1,0 +1,85 @@
+{
+  "config": {
+    "items": 64,
+    "horizon": 8000,
+    "zipf": 1.1,
+    "seed": 0
+  },
+  "all_plaintext_tokens": 6400000,
+  "frontier": [
+    {
+      "budget_tokens": 6400000,
+      "tokens_used": 6400000,
+      "dollar_cost": 0.0,
+      "latency_ms": 16000.0,
+      "promotions": 0,
+      "feasible": true
+    },
+    {
+      "budget_tokens": 3200000,
+      "tokens_used": 3116960,
+      "dollar_cost": 0.00175,
+      "latency_ms": 16000.0,
+      "promotions": 7,
+      "feasible": true
+    },
+    {
+      "budget_tokens": 1600000,
+      "tokens_used": 1593080,
+      "dollar_cost": 0.008,
+      "latency_ms": 16000.0,
+      "promotions": 32,
+      "feasible": true
+    },
+    {
+      "budget_tokens": 640000,
+      "tokens_used": 593400,
+      "dollar_cost": 0.0255,
+      "latency_ms": 16000.0,
+      "promotions": 64,
+      "feasible": true
+    },
+    {
+      "budget_tokens": 320000,
+      "tokens_used": 315840,
+      "dollar_cost": 0.0635,
+      "latency_ms": 16000.0,
+      "promotions": 64,
+      "feasible": true
+    },
+    {
+      "budget_tokens": 0,
+      "tokens_used": 0,
+      "dollar_cost": 0.32,
+      "latency_ms": 16000.0,
+      "promotions": 64,
+      "feasible": true
+    }
+  ],
+  "static_baselines": {
+    "all_plaintext": {
+      "budget_tokens": 6400000,
+      "tokens_used": 6400000,
+      "dollar_cost": 0.0,
+      "latency_ms": 16000.0,
+      "promotions": 0,
+      "feasible": true
+    },
+    "all_vector": {
+      "budget_tokens": 960000,
+      "tokens_used": 960000,
+      "dollar_cost": 0.016,
+      "latency_ms": 16000.0,
+      "promotions": 64,
+      "feasible": true
+    },
+    "all_latent": {
+      "budget_tokens": 0,
+      "tokens_used": 0,
+      "dollar_cost": 0.32,
+      "latency_ms": 16000.0,
+      "promotions": 64,
+      "feasible": true
+    }
+  }
+}

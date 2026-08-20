@@ -1,0 +1,22 @@
+{
+  "source": "kv-cache-tester",
+  "note": "probe run; see reactive_kvct.json for the confirmation run",
+  "rows": [
+    {
+      "convs": 2,
+      "cache_frac": 0.02,
+      "belady": 0.081,
+      "lru": 0.0,
+      "h2o": 0.017,
+      "best_reactive_over_belady": 0.21
+    },
+    {
+      "convs": 4,
+      "cache_frac": 0.02,
+      "belady": 0.513,
+      "lru": 0.04,
+      "h2o": 0.13,
+      "best_reactive_over_belady": 0.253
+    }
+  ]
+}

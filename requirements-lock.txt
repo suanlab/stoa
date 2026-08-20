@@ -1,0 +1,24 @@
+# Exact versions of the reference environment every number in the paper was produced on.
+#
+# `pyproject.toml` deliberately keeps loose lower bounds so the package stays installable;
+# this file is what a reproducer should use to match our numbers bit-for-bit. The two are
+# not in conflict -- one is a compatibility statement, the other a provenance record.
+#
+# Reproduce with:   pip install -r requirements-lock.txt
+# Python 3.10.12 (any 3.10+ works for the code; the numbers were produced on 3.10)
+#
+# NOTE on determinism: torch is used only for the MLP rung of the capacity ladder and for
+# the GNN/RL scaffolding. `scripts/run_capacity_ladder.py` calls torch.set_num_threads(1)
+# because 300 epochs of Adam amplify floating-point reduction-order differences -- the MLP
+# rung's cross-trace AUC moves by 0.006 between 1 and 112 threads, and that rung supplies a
+# third of one of the paper's claims.
+#
+# NOTE on what is NOT here: scipy, scikit-learn and LightGBM are absent by design, not by
+# accident. Fisher/McNemar (src/stoa/stats.py), gradient-boosted trees (src/stoa/gbdt.py)
+# and every cache policy are hand-rolled with no library fallback path, so installing those
+# libraries changes nothing. See REPRODUCIBILITY.md.
+torch==2.13.0+cpu
+numpy==2.2.6
+httpx==0.28.1
+pytest==9.1.1
+matplotlib==3.10.9

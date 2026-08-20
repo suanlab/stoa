@@ -1,0 +1,32 @@
+# STOA default configuration
+# Serve-time budget knob (L, C, B) + learned Lagrangian duals + policy/training.
+# See docs/stoa_design.md §2-3.
+
+budget:            # (L, C, B) — the single control knob the policy conditions on
+  latency_ms: 500        # L: end-to-end latency ceiling
+  cost_usd: 1.0          # C: dollar budget per session
+  tokens: 8000           # B: context-token budget
+
+reward_weights:    # Lagrangian multipliers (learned, these are init values)
+  lambda_latency: 1.0
+  lambda_cost: 1.0
+  lambda_tokens: 1.0
+  freshness_bonus: 0.1
+
+policy:
+  hidden_dim: 256
+  gnn_layers: 3
+  factored: true         # pi_rep * pi_tier * pi_time
+
+simulator:
+  horizon: 1000
+
+training:
+  phase: offline_rl       # offline_rl (Cold-RL warm start) -> online_grpo
+  belady_warm_start: true
+  process_supervision: true
+
+eval:
+  benchmarks: [longmemeval, locomo, memoryagentbench]
+  baselines: [static_memos, lru, h2o, memory_r1, belady_oracle]
+  report: pareto_hypervolume   # accuracy x latency x cost x freshness

@@ -1,0 +1,65 @@
+% STOA @ CIDR 2027 — paper scaffold.
+% TODO(format): replace `article` with the OFFICIAL CIDR 2027 class from the CfP.
+%   CIDR is typically NON-ANONYMOUS (single-blind) — keep author names below.
+% Build: pdflatex main && bibtex main && pdflatex main && pdflatex main
+% Figures: run `python3 scripts/make_figures.py` first (writes paper/figs/*.pdf).
+% Bib: symlink or copy docs/references.bib next to this file, or keep the ../docs path below.
+\documentclass[10pt,twocolumn]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{makecell}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\graphicspath{{figs/}}
+
+% --- Citation-key map (verified against docs/references.bib) ---
+% memos=F1_li2025memos  memgpt=P14_packer2023memgpt  memoryr1=F6_yan2025memoryr1
+% memaction=F7_zhang2025memoryasaction  lmcache=F5_liu2025lmcache  mplus=F2_wang2025mplus
+% sleeptime=F3_lin2025sleeptime  lightmem=F4_fang2025lightmem  raggym=F20_xiong2025raggym
+% parrot=S2_liu2020parrot  decima=S5_mao2019decima  coldrl=S4_coldrl2025  h2o=S1_zhang2023h2o
+% locomo=P51_maharana2024locomo  longmemeval=P52_wu2025longmemeval
+% memoryagentbench=F46_hu2025memoryagentbench
+
+\title{\textbf{STOA: A Learned Control Plane for Tiered Agent Memory}\\
+\large Where, How, and When to Remember, under a Budget}
+\author{STOA Project\\ Semyung University\\ \texttt{suanlee@semyung.ac.kr}}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+LLM agents increasingly depend on external memory, but the single decision that governs it---for each
+memory item, in what \emph{representation} (plaintext, vector, graph, latent/KV, parameter), on which
+\emph{storage tier} (GPU, CPU, disk, remote), and \emph{when} to (re)materialize it (online vs.\
+sleep-time)---is today split across three communities that each optimize one axis and fix the others.
+Memory-OS work migrates representations by heuristic; RL memory managers edit content over a single
+representation; KV-cache tiering places bytes to cut miss-rate, ignoring task utility. We argue these
+axes are \emph{coupled} and form one \textbf{budget-constrained scheduling problem} that is learnable. We
+present \textbf{STOA}, a learned control plane that decides representation $\times$ tier $\times$ timing
+jointly, per item, under latency/cost/token budgets, as a single budget-constrained MDP exposing one
+serve-time \textbf{$(L,C,B)$} knob. STOA factors the policy over a GNN of the memory graph and
+warm-starts it by imitating a Belady oracle. On a trace-calibrated tiering simulator and the LoCoMo
+benchmark we show early evidence---and a clarifying negative result that pinpoints, and then resolves, the
+need for a \emph{sequential, occupancy-aware} formulation---then lay out an agenda for a unified,
+budget-constrained, safety-aware memory runtime.
+\end{abstract}
+
+\input{sections/01_introduction}
+\input{sections/02_motivation}
+\input{sections/03_formulation}
+\input{sections/04_architecture}
+\input{sections/05_evidence}
+\input{sections/06_openproblems}
+\input{sections/07_related}
+\input{sections/08_conclusion}
+
+\bibliographystyle{plain}
+\bibliography{../docs/references}
+
+\end{document}

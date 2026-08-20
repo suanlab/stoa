@@ -1,0 +1,288 @@
+{
+  "config": {
+    "pool_questions": 1986,
+    "seed": 0,
+    "test": "two-sided Fisher exact; power by simulation"
+  },
+  "runs": {
+    "leak-free (3 dialogues x 10 questions)": {
+      "artifact": "eval_locomo_leakfree.json",
+      "n_per_arm": 30,
+      "rows": [
+        {
+          "budget_frac": 0.1,
+          "high": "stoa",
+          "low": "random",
+          "hits_high": 2,
+          "hits_low": 1,
+          "n": 30,
+          "fisher_p": 1.0
+        },
+        {
+          "budget_frac": 0.1,
+          "high": "retrieval",
+          "low": "stoa",
+          "hits_high": 11,
+          "hits_low": 2,
+          "n": 30,
+          "fisher_p": 0.0102
+        },
+        {
+          "budget_frac": 0.1,
+          "high": "stoa",
+          "low": "centrality",
+          "hits_high": 2,
+          "hits_low": 0,
+          "n": 30,
+          "fisher_p": 0.4915
+        },
+        {
+          "budget_frac": 0.25,
+          "high": "stoa",
+          "low": "random",
+          "hits_high": 4,
+          "hits_low": 2,
+          "n": 30,
+          "fisher_p": 0.6707
+        },
+        {
+          "budget_frac": 0.25,
+          "high": "retrieval",
+          "low": "stoa",
+          "hits_high": 12,
+          "hits_low": 4,
+          "n": 30,
+          "fisher_p": 0.0391
+        },
+        {
+          "budget_frac": 0.25,
+          "high": "stoa",
+          "low": "centrality",
+          "hits_high": 4,
+          "hits_low": 2,
+          "n": 30,
+          "fisher_p": 0.6707
+        },
+        {
+          "budget_frac": 0.5,
+          "high": "stoa",
+          "low": "random",
+          "hits_high": 7,
+          "hits_low": 4,
+          "n": 30,
+          "fisher_p": 0.5062
+        },
+        {
+          "budget_frac": 0.5,
+          "high": "retrieval",
+          "low": "stoa",
+          "hits_high": 11,
+          "hits_low": 7,
+          "n": 30,
+          "fisher_p": 0.3985
+        },
+        {
+          "budget_frac": 0.5,
+          "high": "stoa",
+          "low": "centrality",
+          "hits_high": 7,
+          "hits_low": 3,
+          "n": 30,
+          "fisher_p": 0.299
+        }
+      ],
+      "bonferroni_threshold": 0.00556,
+      "n_surviving_correction": 0
+    },
+    "companion (2 dialogues x 8 questions)": {
+      "artifact": "eval_locomo_baselines.json",
+      "n_per_arm": 16,
+      "rows": [
+        {
+          "budget_frac": 0.1,
+          "high": "stoa",
+          "low": "random",
+          "hits_high": 5,
+          "hits_low": 0,
+          "n": 16,
+          "fisher_p": 0.0434
+        },
+        {
+          "budget_frac": 0.1,
+          "high": "retrieval",
+          "low": "stoa",
+          "hits_high": 4,
+          "hits_low": 5,
+          "n": 16,
+          "fisher_p": 1.0
+        },
+        {
+          "budget_frac": 0.1,
+          "high": "stoa",
+          "low": "centrality",
+          "hits_high": 5,
+          "hits_low": 1,
+          "n": 16,
+          "fisher_p": 0.1719
+        },
+        {
+          "budget_frac": 0.25,
+          "high": "stoa",
+          "low": "random",
+          "hits_high": 7,
+          "hits_low": 0,
+          "n": 16,
+          "fisher_p": 0.0068
+        },
+        {
+          "budget_frac": 0.25,
+          "high": "retrieval",
+          "low": "stoa",
+          "hits_high": 5,
+          "hits_low": 7,
+          "n": 16,
+          "fisher_p": 0.716
+        },
+        {
+          "budget_frac": 0.25,
+          "high": "stoa",
+          "low": "centrality",
+          "hits_high": 7,
+          "hits_low": 2,
+          "n": 16,
+          "fisher_p": 0.1134
+        },
+        {
+          "budget_frac": 0.5,
+          "high": "stoa",
+          "low": "random",
+          "hits_high": 7,
+          "hits_low": 2,
+          "n": 16,
+          "fisher_p": 0.1134
+        },
+        {
+          "budget_frac": 0.5,
+          "high": "retrieval",
+          "low": "stoa",
+          "hits_high": 6,
+          "hits_low": 7,
+          "n": 16,
+          "fisher_p": 1.0
+        },
+        {
+          "budget_frac": 0.5,
+          "high": "stoa",
+          "low": "centrality",
+          "hits_high": 7,
+          "hits_low": 3,
+          "n": 16,
+          "fisher_p": 0.2524
+        }
+      ],
+      "bonferroni_threshold": 0.00556,
+      "n_surviving_correction": 0
+    }
+  },
+  "power": [
+    {
+      "budget_frac": 0.1,
+      "high": "stoa",
+      "low": "random",
+      "rate_high": 0.0667,
+      "rate_low": 0.0333,
+      "n_per_arm_for_80pct_power": 710
+    },
+    {
+      "budget_frac": 0.1,
+      "high": "retrieval",
+      "low": "stoa",
+      "rate_high": 0.3667,
+      "rate_low": 0.0667,
+      "n_per_arm_for_80pct_power": 33
+    },
+    {
+      "budget_frac": 0.1,
+      "high": "stoa",
+      "low": "centrality",
+      "rate_high": 0.0667,
+      "rate_low": 0.0,
+      "n_per_arm_for_80pct_power": 119
+    },
+    {
+      "budget_frac": 0.25,
+      "high": "stoa",
+      "low": "random",
+      "rate_high": 0.1333,
+      "rate_low": 0.0667,
+      "n_per_arm_for_80pct_power": 347
+    },
+    {
+      "budget_frac": 0.25,
+      "high": "retrieval",
+      "low": "stoa",
+      "rate_high": 0.4,
+      "rate_low": 0.1333,
+      "n_per_arm_for_80pct_power": 48
+    },
+    {
+      "budget_frac": 0.25,
+      "high": "stoa",
+      "low": "centrality",
+      "rate_high": 0.1333,
+      "rate_low": 0.0667,
+      "n_per_arm_for_80pct_power": 347
+    },
+    {
+      "budget_frac": 0.5,
+      "high": "stoa",
+      "low": "random",
+      "rate_high": 0.2333,
+      "rate_low": 0.1333,
+      "n_per_arm_for_80pct_power": 246
+    },
+    {
+      "budget_frac": 0.5,
+      "high": "retrieval",
+      "low": "stoa",
+      "rate_high": 0.3667,
+      "rate_low": 0.2333,
+      "n_per_arm_for_80pct_power": 196
+    },
+    {
+      "budget_frac": 0.5,
+      "high": "stoa",
+      "low": "centrality",
+      "rate_high": 0.2333,
+      "rate_low": 0.1,
+      "n_per_arm_for_80pct_power": 135
+    }
+  ],
+  "reversal": [
+    {
+      "budget_frac": 0.1,
+      "rate_stoa": 0.0667,
+      "rate_retrieval": 0.3667,
+      "p_reversal": 0.0069
+    },
+    {
+      "budget_frac": 0.25,
+      "rate_stoa": 0.1333,
+      "rate_retrieval": 0.4,
+      "p_reversal": 0.0275
+    },
+    {
+      "budget_frac": 0.5,
+      "rate_stoa": 0.2333,
+      "rate_retrieval": 0.3667,
+      "p_reversal": 0.2041
+    }
+  ],
+  "summary": {
+    "min_n_needed": 33,
+    "max_n_needed": 710,
+    "n_scored": 30,
+    "pool": 1986,
+    "shortfall_factor": 1.1
+  }
+}

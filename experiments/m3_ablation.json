@@ -1,0 +1,146 @@
+{
+  "config": {
+    "n_items": 64,
+    "horizon": 8000,
+    "zipf_s": 1.1,
+    "seed": 0
+  },
+  "tier_axis_online": {
+    "0.05": {
+      "belady": {
+        "policy": "belady",
+        "total_latency_ms": 27317.2,
+        "hits": 3566,
+        "misses": 4434,
+        "hit_rate": 0.4457
+      },
+      "lru": {
+        "policy": "lru",
+        "total_latency_ms": 36260.8,
+        "hits": 2024,
+        "misses": 5976,
+        "hit_rate": 0.253
+      },
+      "h2o": {
+        "policy": "h2o",
+        "total_latency_ms": 28935.4,
+        "hits": 3287,
+        "misses": 4713,
+        "hit_rate": 0.4109
+      },
+      "static": {
+        "policy": "static",
+        "total_latency_ms": 47443.2,
+        "hits": 96,
+        "misses": 7904,
+        "hit_rate": 0.012
+      }
+    },
+    "0.10": {
+      "belady": {
+        "policy": "belady",
+        "total_latency_ms": 19493.0,
+        "hits": 4915,
+        "misses": 3085,
+        "hit_rate": 0.6144
+      },
+      "lru": {
+        "policy": "lru",
+        "total_latency_ms": 28865.8,
+        "hits": 3299,
+        "misses": 4701,
+        "hit_rate": 0.4124
+      },
+      "h2o": {
+        "policy": "h2o",
+        "total_latency_ms": 22166.8,
+        "hits": 4454,
+        "misses": 3546,
+        "hit_rate": 0.5567
+      },
+      "static": {
+        "policy": "static",
+        "total_latency_ms": 27357.8,
+        "hits": 3559,
+        "misses": 4441,
+        "hit_rate": 0.4449
+      }
+    },
+    "0.20": {
+      "belady": {
+        "policy": "belady",
+        "total_latency_ms": 12881.0,
+        "hits": 6055,
+        "misses": 1945,
+        "hit_rate": 0.7569
+      },
+      "lru": {
+        "policy": "lru",
+        "total_latency_ms": 20983.6,
+        "hits": 4658,
+        "misses": 3342,
+        "hit_rate": 0.5823
+      },
+      "h2o": {
+        "policy": "h2o",
+        "total_latency_ms": 15926.0,
+        "hits": 5530,
+        "misses": 2470,
+        "hit_rate": 0.6913
+      },
+      "static": {
+        "policy": "static",
+        "total_latency_ms": 24011.2,
+        "hits": 4136,
+        "misses": 3864,
+        "hit_rate": 0.517
+      }
+    }
+  },
+  "repr_joint_axis_static": {
+    "config": {
+      "n_items": 64,
+      "horizon": 8000,
+      "zipf_s": 1.1,
+      "seed": 0
+    },
+    "n_items": 64,
+    "horizon": 8000,
+    "total_accesses": 8000,
+    "oracle_upper_bound": {
+      "name": "oracle_upper_bound",
+      "total_cost": 160.32000000000002,
+      "tier_hist": {
+        "gpu": 64
+      },
+      "repr_hist": {
+        "latent": 64
+      }
+    },
+    "greedy_belady": {
+      "name": "greedy_belady",
+      "total_cost": 1283.6400000000006,
+      "tier_hist": {
+        "gpu": 7,
+        "cpu": 20,
+        "remote_rdma": 37
+      },
+      "repr_hist": {
+        "latent": 27,
+        "parameter": 37
+      }
+    },
+    "naive": {
+      "name": "naive",
+      "total_cost": 4800.0,
+      "tier_hist": {
+        "cpu": 64
+      },
+      "repr_hist": {
+        "plaintext": 64
+      }
+    },
+    "greedy_gap_pct": 700.674,
+    "greedy_savings_vs_naive_pct": 73.257
+  }
+}

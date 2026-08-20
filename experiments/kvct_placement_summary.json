@@ -1,0 +1,59 @@
+{
+  "config": {
+    "note": "corrected protocol: one workload, one split instant, conversation-disjoint"
+  },
+  "runs": [
+    {
+      "convs": 40,
+      "eval_blocks": 89517,
+      "headroom_pct": 94.2,
+      "results": [
+        {
+          "features": "block",
+          "auc": 0.27,
+          "cls": -5.2,
+          "regr": -129.3
+        },
+        {
+          "features": "block+session",
+          "auc": 0.555,
+          "cls": -3.0,
+          "regr": -4.4
+        },
+        {
+          "features": "block+session+think",
+          "auc": 0.79,
+          "cls": 66.2,
+          "regr": 87.6
+        }
+      ]
+    },
+    {
+      "convs": 70,
+      "eval_blocks": 170004,
+      "headroom_pct": 92.2,
+      "results": [
+        {
+          "features": "block",
+          "auc": 0.819,
+          "cls": 63.0,
+          "regr": 51.5
+        },
+        {
+          "features": "block+session",
+          "auc": 0.831,
+          "cls": 36.1,
+          "regr": 61.0
+        },
+        {
+          "features": "block+session+think",
+          "auc": 0.945,
+          "cls": 86.6,
+          "regr": 74.5
+        }
+      ]
+    }
+  ],
+  "stable_claim": "With think-time features a learned policy captures the majority of placement headroom (+66% to +88%) across both runs.",
+  "unstable": "block-only AUC (0.27 vs 0.82) and which belief construction wins vary with the conversation sample; report as variance."
+}

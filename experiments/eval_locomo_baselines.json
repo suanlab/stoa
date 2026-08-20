@@ -1,0 +1,41 @@
+{
+  "config": {
+    "samples": 2,
+    "max_questions": 8,
+    "metric": "substring",
+    "model": "gpt-4o-mini"
+  },
+  "budget_fractions": [
+    0.1,
+    0.25,
+    0.5
+  ],
+  "results": {
+    "stoa": [
+      0.3125,
+      0.4375,
+      0.4375
+    ],
+    "random": [
+      0.0,
+      0.0,
+      0.125
+    ],
+    "centrality": [
+      0.0625,
+      0.125,
+      0.1875
+    ],
+    "retrieval": [
+      0.25,
+      0.3125,
+      0.375
+    ]
+  },
+  "regimes": {
+    "stoa": "global",
+    "random": "global",
+    "centrality": "global",
+    "retrieval": "per-query (query-aware)"
+  }
+}

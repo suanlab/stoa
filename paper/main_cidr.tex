@@ -1,0 +1,87 @@
+% ===========================================================================================
+% PORTING TO PVLDB (target venue). Only this preamble is class-dependent: all eight section
+% files under sections/ are plain LaTeX and use no acmart-specific commands, so the switch is:
+%   1. Download the PVLDB template from vldb.org's formatting-guidelines page (the class file
+%      is not fetchable programmatically; the page rejects automated requests).
+%   2. Replace the \documentclass line below with the PVLDB one.
+%   3. Drop \settopmatter (acmart-only) and adjust the topmatter block (\subtitle/\affiliation/
+%      \email/\keywords) to whatever the PVLDB class names them.
+%   4. Set \bibliographystyle to the one the template ships.
+% Nothing under sections/ needs to change. Verify: 12 pages excluding references.
+% ===========================================================================================
+% STOA @ CIDR 2027.
+% Class: the OFFICIAL cidr-2027.cls from the CfP (a rebadged acmart; sigconf = the required
+%   "double-column ACM sigconf style"). `nonacm` drops the ACM reference-format block.
+% CfP constraints (verified 2026-07-17 at cidrdb.org/cidr2027/cfp.html):
+%   deadline 2026-08-04 | 6 pages INCLUDING references and appendix | SINGLE-BLIND (names required)
+%   submit via CMT: https://cmt3.research.microsoft.com/CIDR2027
+% Build: pdflatex main && bibtex main && pdflatex main && pdflatex main   (TeX Live; figs/ must exist)
+% A minimal `article` fallback is kept in main_simple.tex.
+\documentclass[sigconf,nonacm,10pt]{cidr-2027}
+
+\let\Bbbk\relax        % avoid clash: acmart's newtxmath already defines \Bbbk
+\usepackage{amssymb}   % for \checkmark in Table 1
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage{cleveref}
+\graphicspath{{figs/}}
+\settopmatter{printacmref=false}
+\setlength{\footskip}{12pt}
+
+% --- Citation-key map (verified against docs/references.bib) ---
+% memos=F1_li2025memos  memgpt=P14_packer2023memgpt  memoryr1=F6_yan2025memoryr1
+% memaction=F7_zhang2025memoryasaction  lmcache=F5_liu2025lmcache  mplus=F2_wang2025mplus
+% sleeptime=F3_lin2025sleeptime  lightmem=F4_fang2025lightmem  raggym=F20_xiong2025raggym
+% parrot=S2_liu2020parrot  decima=S5_mao2019decima  coldrl=S4_coldrl2025  h2o=S1_zhang2023h2o
+% locomo=P51_maharana2024locomo  longmemeval=P52_wu2025longmemeval  memoryagentbench=F46_hu2025memoryagentbench
+
+\begin{document}
+
+\title{Ranking Is Not Placement: What Production KV Traces Say About Learned Memory Tiering}
+\subtitle{A budget-constrained formulation, a decoupling result, and the protocol that found it}
+
+\author{STOA Project}
+\affiliation{%
+  \institution{Semyung University}
+  \city{Jecheon}
+  \country{Republic of Korea}}
+\email{suanlee@semyung.ac.kr}
+
+\begin{abstract}
+LLM agents increasingly depend on external memory, and the decision that governs it---for each memory
+item, in what \emph{representation}, on which \emph{storage tier}, and \emph{when} to (re)materialize
+it---is today split across three communities that each optimize one axis and fix the others. We argue
+these axes are \emph{coupled} and give a single budget-constrained MDP over
+representation~$\times$~tier~$\times$~timing with one serve-time $(L,C,B)$ knob. We then ask the
+empirical question the framing invites: is the decision learnable? On two production KV-trace sources we
+find a decoupling rather than an answer in either direction. Reuse is predictable and becomes more so
+with data---ranking whether a block will be reused reaches AUC 0.93 at full trace length---but the
+placement benefit that buys never exceeds about two points of an 82--87\% gap to a hindsight oracle. Two
+controls locate the reason: rank-normalizing beliefs barely moves the outcome, so ordering is the
+operative mechanism, while substituting true future counts recovers 95\% of the gap, so the placement
+machinery is not the bottleneck. Purely reactive tiering, forecasting nothing, reaches 75--92\% of Belady
+on one trace and 40--76\% on the other. We report the protocol this took as a first-class result: ten measurement
+defects, six of them reference-frame mismatches and three extrapolations from a single value of a
+parameter fixed for convenience. One of those reversed a headline claim from $+88\%$ to $-48\%$ when
+swept, and randomizing the sample it was drawn from --- a control costing minutes --- showed a 95\%
+interval of $\pm126$ points, an order of magnitude wider than the effect. It had never been a
+measurement.
+\end{abstract}
+
+\keywords{LLM agents, agent memory, memory tiering, learned scheduling, budget-constrained MDP}
+
+\maketitle
+
+\input{sections/01_introduction}
+\input{sections/02_motivation}
+\input{sections/03_formulation}
+\input{sections/04_architecture}
+\input{sections/05_evidence}
+\input{sections/06_openproblems}
+\input{sections/07_related}
+\input{sections/08_conclusion}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{../docs/references}
+
+\end{document}

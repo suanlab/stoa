@@ -1,0 +1,80 @@
+{
+  "trace": "mooncake_toolagent",
+  "requests": 2000,
+  "rows": [
+    {
+      "perturbation": "baseline",
+      "promote_mult": 1.0,
+      "latency_mult": 1.0,
+      "token_mult": 1.0,
+      "prefix_greedy": 16893.71,
+      "oracle": 3312.45,
+      "headroom_pct": 80.39
+    },
+    {
+      "perturbation": "promotion 100x",
+      "promote_mult": 100.0,
+      "latency_mult": 1.0,
+      "token_mult": 1.0,
+      "prefix_greedy": 17221.32,
+      "oracle": 4240.78,
+      "headroom_pct": 75.37
+    },
+    {
+      "perturbation": "promotion 1000x",
+      "promote_mult": 1000.0,
+      "latency_mult": 1.0,
+      "token_mult": 1.0,
+      "prefix_greedy": 20047.99,
+      "oracle": 6902.31,
+      "headroom_pct": 65.57
+    },
+    {
+      "perturbation": "latency 10x",
+      "promote_mult": 1.0,
+      "latency_mult": 10.0,
+      "token_mult": 1.0,
+      "prefix_greedy": 131695.36,
+      "oracle": 32091.22,
+      "headroom_pct": 75.63
+    },
+    {
+      "perturbation": "latency 0.1x",
+      "promote_mult": 1.0,
+      "latency_mult": 0.1,
+      "token_mult": 1.0,
+      "prefix_greedy": 5413.54,
+      "oracle": 434.58,
+      "headroom_pct": 91.97
+    },
+    {
+      "perturbation": "tokens 10x",
+      "promote_mult": 1.0,
+      "latency_mult": 1.0,
+      "token_mult": 10.0,
+      "prefix_greedy": 52936.9,
+      "oracle": 3312.45,
+      "headroom_pct": 93.74
+    },
+    {
+      "perturbation": "tokens 0.1x",
+      "promote_mult": 1.0,
+      "latency_mult": 1.0,
+      "token_mult": 0.1,
+      "prefix_greedy": 13204.55,
+      "oracle": 3258.66,
+      "headroom_pct": 75.32
+    },
+    {
+      "perturbation": "promotion 100x + tokens 10x",
+      "promote_mult": 100.0,
+      "latency_mult": 1.0,
+      "token_mult": 10.0,
+      "prefix_greedy": 57637.21,
+      "oracle": 9299.76,
+      "headroom_pct": 83.86
+    }
+  ],
+  "headroom_min": 65.57,
+  "headroom_max": 93.74
+}

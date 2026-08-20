@@ -1,0 +1,758 @@
+% ============================================================
+% References: AI Agent를 위한 Memory · DB · Index (2020–2026)
+% 동반 문서: survey_agent_memory_db_index.md, T1_research_proposal.md
+% 작성일: 2026-07-15
+%
+% 검증 원칙: 모든 항목은 arXiv/ACL/DBLP/공식 프로시딩과 대조 확인됨.
+% [재확인] = 2026 극최신(arXiv 2602–2607), 정식 인용 전 ID 독립 재확인 권장.
+% [검증필요] = 스니펫만 확인, 원문 미대조.
+% bibkey 접두어 P## = 기반(2020–2025), F## = 프론티어(2025–2026),
+%                   S## = T1 제안서 추가 ML-for-systems 근거.
+% ============================================================
+
+% ---------- A. RAG · 신경망 검색 기반 ----------
+@article{P1_lewis2020rag,
+  title  = {Retrieval-Augmented Generation for Knowledge-Intensive {NLP} Tasks},
+  author = {Lewis, Patrick and others},
+  year   = {2020}, journal = {NeurIPS}, eprint = {2005.11401}, archivePrefix = {arXiv}}
+
+@article{P2_guu2020realm,
+  title  = {{REALM}: Retrieval-Augmented Language Model Pre-Training},
+  author = {Guu, Kelvin and Lee, Kenton and Tung, Zora and Pasupat, Panupong and Chang, Ming-Wei},
+  year   = {2020}, journal = {ICML}, eprint = {2002.08909}, archivePrefix = {arXiv}}
+
+@article{P3_karpukhin2020dpr,
+  title  = {Dense Passage Retrieval for Open-Domain Question Answering},
+  author = {Karpukhin, Vladimir and others},
+  year   = {2020}, journal = {EMNLP}, eprint = {2004.04906}, archivePrefix = {arXiv}}
+
+@article{P4_izacard2021fid,
+  title  = {Leveraging Passage Retrieval with Generative Models for Open Domain QA},
+  author = {Izacard, Gautier and Grave, Edouard},
+  year   = {2021}, journal = {EACL}, eprint = {2007.01282}, archivePrefix = {arXiv}}
+
+@article{P5_borgeaud2022retro,
+  title  = {Improving Language Models by Retrieving from Trillions of Tokens},
+  author = {Borgeaud, Sebastian and others},
+  year   = {2022}, journal = {ICML}, eprint = {2112.04426}, archivePrefix = {arXiv}}
+
+@article{P6_izacard2022atlas,
+  title  = {Atlas: Few-shot Learning with Retrieval Augmented Language Models},
+  author = {Izacard, Gautier and others},
+  year   = {2022}, journal = {arXiv (JMLR 2023)}, eprint = {2208.03299}, archivePrefix = {arXiv}}
+
+@article{P7_izacard2022contriever,
+  title  = {Unsupervised Dense Information Retrieval with Contrastive Learning},
+  author = {Izacard, Gautier and others},
+  year   = {2022}, journal = {TMLR}, eprint = {2112.09118}, archivePrefix = {arXiv}}
+
+@article{P8_khattab2020colbert,
+  title  = {{ColBERT}: Efficient and Effective Passage Search via Contextualized Late Interaction over {BERT}},
+  author = {Khattab, Omar and Zaharia, Matei},
+  year   = {2020}, journal = {SIGIR}, eprint = {2004.12832}, archivePrefix = {arXiv}}
+
+@article{P9_ram2023icralm,
+  title  = {In-Context Retrieval-Augmented Language Models},
+  author = {Ram, Ori and others},
+  year   = {2023}, journal = {TACL}, eprint = {2302.00083}, archivePrefix = {arXiv}}
+
+@article{P10_gao2023hyde,
+  title  = {Precise Zero-Shot Dense Retrieval without Relevance Labels},
+  author = {Gao, Luyu and Ma, Xueguang and Lin, Jimmy and Callan, Jamie},
+  year   = {2023}, journal = {ACL}, eprint = {2212.10496}, archivePrefix = {arXiv}}
+
+@article{P11_jiang2023flare,
+  title  = {Active Retrieval Augmented Generation},
+  author = {Jiang, Zhengbao and others},
+  year   = {2023}, journal = {EMNLP}, eprint = {2305.06983}, archivePrefix = {arXiv}}
+
+@article{P12_asai2023selfrag,
+  title  = {Self-{RAG}: Learning to Retrieve, Generate, and Critique through Self-Reflection},
+  author = {Asai, Akari and Wu, Zeqiu and Wang, Yizhong and Sil, Avirup and Hajishirzi, Hannaneh},
+  year   = {2023}, journal = {ICLR 2024}, eprint = {2310.11511}, archivePrefix = {arXiv}}
+
+@article{P13_yan2024crag,
+  title  = {Corrective Retrieval Augmented Generation},
+  author = {Yan, Shi-Qi and others},
+  year   = {2024}, journal = {arXiv}, eprint = {2401.15884}, archivePrefix = {arXiv}}
+
+% ---------- B. Agent 메모리 아키텍처 ----------
+@article{P14_packer2023memgpt,
+  title  = {{MemGPT}: Towards {LLMs} as Operating Systems},
+  author = {Packer, Charles and Fang, Vivian and Patil, Shishir G. and Lin, Kevin and Wooders, Sarah and Gonzalez, Joseph E.},
+  year   = {2023}, journal = {arXiv}, eprint = {2310.08560}, archivePrefix = {arXiv}}
+
+@article{P15_park2023genagents,
+  title  = {Generative Agents: Interactive Simulacra of Human Behavior},
+  author = {Park, Joon Sung and others},
+  year   = {2023}, journal = {UIST}, eprint = {2304.03442}, archivePrefix = {arXiv}}
+
+@article{P16_shinn2023reflexion,
+  title  = {Reflexion: Language Agents with Verbal Reinforcement Learning},
+  author = {Shinn, Noah and others},
+  year   = {2023}, journal = {NeurIPS}, eprint = {2303.11366}, archivePrefix = {arXiv}}
+
+@article{P17_wang2023voyager,
+  title  = {Voyager: An Open-Ended Embodied Agent with Large Language Models},
+  author = {Wang, Guanzhi and others},
+  year   = {2023}, journal = {arXiv}, eprint = {2305.16291}, archivePrefix = {arXiv}}
+
+@article{P18_zhong2024memorybank,
+  title  = {{MemoryBank}: Enhancing Large Language Models with Long-Term Memory},
+  author = {Zhong, Wanjun and others},
+  year   = {2024}, journal = {AAAI}, eprint = {2305.10250}, archivePrefix = {arXiv}}
+
+@article{P19_wang2023longmem,
+  title  = {Augmenting Language Models with Long-Term Memory},
+  author = {Wang, Weizhi and others},
+  year   = {2023}, journal = {NeurIPS}, eprint = {2306.07174}, archivePrefix = {arXiv},
+  note   = {arXiv ID 재확인 권장}}
+
+@article{P20_wang2024memoryllm,
+  title  = {{MemoryLLM}: Towards Self-Updatable Large Language Models},
+  author = {Wang, Yu and others},
+  year   = {2024}, journal = {ICML}, eprint = {2402.04624}, archivePrefix = {arXiv}}
+
+@article{P21_das2024larimar,
+  title  = {Larimar: Large Language Models with Episodic Memory Control},
+  author = {Das, Payel and others},
+  year   = {2024}, journal = {ICML}, eprint = {2403.11901}, archivePrefix = {arXiv}}
+
+@article{P22_yang2024memory3,
+  title  = {Memory3: Language Modeling with Explicit Memory},
+  author = {Yang, Hongkang and Lin, Zehao and others},
+  year   = {2024}, journal = {arXiv}, eprint = {2407.01178}, archivePrefix = {arXiv}}
+
+@article{P23_xu2025amem,
+  title  = {{A-MEM}: Agentic Memory for {LLM} Agents},
+  author = {Xu, Wujiang and others},
+  year   = {2025}, journal = {NeurIPS}, eprint = {2502.12110}, archivePrefix = {arXiv}}
+
+@article{P24_chhikara2025mem0,
+  title  = {{Mem0}: Building Production-Ready AI Agents with Scalable Long-Term Memory},
+  author = {Chhikara, Prateek and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2504.19413}, archivePrefix = {arXiv}}
+
+@article{P25_sumers2024coala,
+  title  = {Cognitive Architectures for Language Agents},
+  author = {Sumers, Theodore R. and Yao, Shunyu and Narasimhan, Karthik and Griffiths, Thomas L.},
+  year   = {2024}, journal = {TMLR}, eprint = {2309.02427}, archivePrefix = {arXiv}}
+
+% ---------- C. 그래프 · 구조화 · 계층 메모리 ----------
+@article{P26_edge2024graphrag,
+  title  = {From Local to Global: A Graph {RAG} Approach to Query-Focused Summarization},
+  author = {Edge, Darren and others},
+  year   = {2024}, journal = {arXiv (Microsoft)}, eprint = {2404.16130}, archivePrefix = {arXiv}}
+
+@article{P27_gutierrez2024hipporag,
+  title  = {{HippoRAG}: Neurobiologically Inspired Long-Term Memory for Large Language Models},
+  author = {Guti{\'e}rrez, Bernal Jim{\'e}nez and others},
+  year   = {2024}, journal = {NeurIPS}, eprint = {2405.14831}, archivePrefix = {arXiv}}
+
+@article{P28_gutierrez2025hipporag2,
+  title  = {From {RAG} to Memory: Non-Parametric Continual Learning for Large Language Models},
+  author = {Guti{\'e}rrez, Bernal Jim{\'e}nez and others},
+  year   = {2025}, journal = {ICML}, eprint = {2502.14802}, archivePrefix = {arXiv}}
+
+@article{P29_guo2024lightrag,
+  title  = {{LightRAG}: Simple and Fast Retrieval-Augmented Generation},
+  author = {Guo, Zirui and others},
+  year   = {2024}, journal = {arXiv}, eprint = {2410.05779}, archivePrefix = {arXiv}}
+
+@article{P30_rasmussen2025zep,
+  title  = {Zep: A Temporal Knowledge Graph Architecture for Agent Memory},
+  author = {Rasmussen, Preston and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2501.13956}, archivePrefix = {arXiv}}
+
+@article{P31_he2024gretriever,
+  title  = {{G-Retriever}: Retrieval-Augmented Generation for Textual Graph Understanding and QA},
+  author = {He, Xiaoxin and others},
+  year   = {2024}, journal = {NeurIPS}, eprint = {2402.07630}, archivePrefix = {arXiv}}
+
+@article{P32_sun2024tog,
+  title  = {Think-on-Graph: Deep and Responsible Reasoning of {LLM} with Knowledge Graph},
+  author = {Sun, Jiashuo and others},
+  year   = {2024}, journal = {ICLR}, eprint = {2307.07697}, archivePrefix = {arXiv}}
+
+@article{P33_jiang2023structgpt,
+  title  = {{StructGPT}: A General Framework for Large Language Model to Reason over Structured Data},
+  author = {Jiang, Jinhao and others},
+  year   = {2023}, journal = {EMNLP}, eprint = {2305.09645}, archivePrefix = {arXiv}}
+
+@article{P34_sarthi2024raptor,
+  title  = {{RAPTOR}: Recursive Abstractive Processing for Tree-Organized Retrieval},
+  author = {Sarthi, Parth and others},
+  year   = {2024}, journal = {ICLR}, eprint = {2401.18059}, archivePrefix = {arXiv},
+  note   = {arXiv ID 재확인 권장}}
+
+@article{P35_lee2024readagent,
+  title  = {A Human-Inspired Reading Agent with Gist Memory of Very Long Contexts},
+  author = {Lee, Kuang-Huei and others},
+  year   = {2024}, journal = {ICML}, eprint = {2402.09727}, archivePrefix = {arXiv}}
+
+@article{P36_li2024graphreader,
+  title  = {{GraphReader}: Building Graph-based Agent to Enhance Long-Context Abilities of {LLMs}},
+  author = {Li, Shilong and others},
+  year   = {2024}, journal = {EMNLP Findings}, eprint = {2406.14550}, archivePrefix = {arXiv}}
+
+% ---------- D. 벡터 DB · ANN 인덱싱 ----------
+@article{P37_jegou2011pq,
+  title  = {Product Quantization for Nearest Neighbor Search},
+  author = {J{\'e}gou, Herv{\'e} and Douze, Matthijs and Schmid, Cordelia},
+  year   = {2011}, journal = {IEEE TPAMI}, volume = {33}, number = {1}, pages = {117--128}}
+
+@article{P38_malkov2020hnsw,
+  title  = {Efficient and Robust Approximate Nearest Neighbor Search Using Hierarchical Navigable Small World Graphs},
+  author = {Malkov, Yu A. and Yashunin, Dmitry A.},
+  year   = {2020}, journal = {IEEE TPAMI}, volume = {42}, number = {4}, eprint = {1603.09320}, archivePrefix = {arXiv}}
+
+@article{P39_johnson2017faiss,
+  title  = {Billion-scale Similarity Search with {GPUs}},
+  author = {Johnson, Jeff and Douze, Matthijs and J{\'e}gou, Herv{\'e}},
+  year   = {2017}, journal = {arXiv (IEEE Trans. Big Data)}, eprint = {1702.08734}, archivePrefix = {arXiv}}
+
+@inproceedings{P40_subramanya2019diskann,
+  title     = {{DiskANN}: Fast Accurate Billion-point Nearest Neighbor Search on a Single Node},
+  author    = {Subramanya, Suhas Jayaram and others},
+  year      = {2019}, booktitle = {NeurIPS}}
+
+@article{P41_guo2020scann,
+  title  = {Accelerating Large-Scale Inference with Anisotropic Vector Quantization},
+  author = {Guo, Ruiqi and others},
+  year   = {2020}, journal = {ICML}, eprint = {1908.10396}, archivePrefix = {arXiv}}
+
+@article{P42_chen2021spann,
+  title  = {{SPANN}: Highly-efficient Billion-scale Approximate Nearest Neighbor Search},
+  author = {Chen, Qi and others},
+  year   = {2021}, journal = {NeurIPS}, eprint = {2111.08566}, archivePrefix = {arXiv}}
+
+@article{P43_ootomo2024cagra,
+  title  = {{CAGRA}: Highly Parallel Graph Construction and ANN Search for GPUs},
+  author = {Ootomo, Hiroyuki and others},
+  year   = {2024}, journal = {ICDE}, eprint = {2308.15136}, archivePrefix = {arXiv}}
+
+@inproceedings{P44_gollapudi2023filtereddiskann,
+  title     = {Filtered-{DiskANN}: Graph Algorithms for Approximate Nearest Neighbor Search with Filters},
+  author    = {Gollapudi, Siddharth and others},
+  year      = {2023}, booktitle = {WWW}, doi = {10.1145/3543507.3583552}}
+
+@article{P45_xu2023spfresh,
+  title  = {{SPFresh}: Incremental In-Place Update for Billion-Scale Vector Search},
+  author = {Xu, Yuming and others},
+  year   = {2023}, journal = {SOSP}, eprint = {2410.14452}, archivePrefix = {arXiv}}
+
+@article{P46_wei2020analyticdbv,
+  title  = {{AnalyticDB-V}: A Hybrid Analytical Engine Towards Query Fusion for Structured and Unstructured Data},
+  author = {Wei, Chuangxian and others},
+  year   = {2020}, journal = {PVLDB}, volume = {13}, number = {12}, pages = {3152--3165}}
+
+@inproceedings{P47_wang2021milvus,
+  title     = {Milvus: A Purpose-Built Vector Data Management System},
+  author    = {Wang, Jianguo and others},
+  year      = {2021}, booktitle = {SIGMOD}}
+
+@article{P48_guo2022manu,
+  title  = {Manu: A Cloud Native Vector Database Management System},
+  author = {Guo, Rentong and others},
+  year   = {2022}, journal = {PVLDB}, volume = {15}, number = {12}, eprint = {2206.13843}, archivePrefix = {arXiv}}
+
+% ---------- E. 벤치마크 · 지표 ----------
+@article{P49_petroni2021kilt,
+  title  = {{KILT}: a Benchmark for Knowledge Intensive Language Tasks},
+  author = {Petroni, Fabio and others},
+  year   = {2021}, journal = {NAACL-HLT}, eprint = {2009.02252}, archivePrefix = {arXiv}}
+
+@article{P50_thakur2021beir,
+  title  = {{BEIR}: A Heterogeneous Benchmark for Zero-shot Evaluation of Information Retrieval Models},
+  author = {Thakur, Nandan and others},
+  year   = {2021}, journal = {NeurIPS Datasets and Benchmarks}, eprint = {2104.08663}, archivePrefix = {arXiv}}
+
+@article{P51_maharana2024locomo,
+  title  = {Evaluating Very Long-Term Conversational Memory of {LLM} Agents},
+  author = {Maharana, Adyasha and others},
+  year   = {2024}, journal = {ACL}, eprint = {2402.17753}, archivePrefix = {arXiv},
+  note   = {arXiv ID 재확인 권장}}
+
+@article{P52_wu2025longmemeval,
+  title  = {{LongMemEval}: Benchmarking Chat Assistants on Long-Term Interactive Memory},
+  author = {Wu, Di and others},
+  year   = {2025}, journal = {ICLR}, eprint = {2410.10813}, archivePrefix = {arXiv}}
+
+@article{P53_hsieh2024ruler,
+  title  = {{RULER}: What's the Real Context Size of Your Long-Context Language Models?},
+  author = {Hsieh, Cheng-Ping and others},
+  year   = {2024}, journal = {COLM}, eprint = {2404.06654}, archivePrefix = {arXiv}}
+
+@article{P54_bai2023longbench,
+  title  = {{LongBench}: A Bilingual, Multitask Benchmark for Long Context Understanding},
+  author = {Bai, Yushi and others},
+  year   = {2023}, journal = {ACL 2024}, eprint = {2308.14508}, archivePrefix = {arXiv}}
+
+@article{P55_muennighoff2023mteb,
+  title  = {{MTEB}: Massive Text Embedding Benchmark},
+  author = {Muennighoff, Niklas and others},
+  year   = {2023}, journal = {EACL}, eprint = {2210.07316}, archivePrefix = {arXiv}}
+
+@article{P56_aumuller2020annbench,
+  title  = {{ANN-Benchmarks}: A Benchmarking Tool for Approximate Nearest Neighbor Algorithms},
+  author = {Aum{\"u}ller, Martin and Bernhardsson, Erik and Faithfull, Alexander},
+  year   = {2020}, journal = {Information Systems}, volume = {87}, eprint = {1807.05614}, archivePrefix = {arXiv}}
+
+@article{P57_liu2023agentbench,
+  title  = {{AgentBench}: Evaluating {LLMs} as Agents},
+  author = {Liu, Xiao and others},
+  year   = {2023}, journal = {ICLR 2024}, eprint = {2308.03688}, archivePrefix = {arXiv}}
+
+@article{P58_yang2018hotpotqa,
+  title  = {{HotpotQA}: A Dataset for Diverse, Explainable Multi-hop Question Answering},
+  author = {Yang, Zhilin and others},
+  year   = {2018}, journal = {EMNLP}, eprint = {1809.09600}, archivePrefix = {arXiv}}
+
+% ---------- F. 서베이 (기반) ----------
+@article{P59_zhang2024memorysurvey,
+  title  = {A Survey on the Memory Mechanism of Large Language Model based Agents},
+  author = {Zhang, Zeyu and others},
+  year   = {2024}, journal = {arXiv}, eprint = {2404.13501}, archivePrefix = {arXiv}}
+
+@article{P60_gao2023ragsurvey,
+  title  = {Retrieval-Augmented Generation for Large Language Models: A Survey},
+  author = {Gao, Yunfan and others},
+  year   = {2023}, journal = {arXiv}, eprint = {2312.10997}, archivePrefix = {arXiv}}
+
+@article{P61_xi2023agentsurvey,
+  title  = {The Rise and Potential of Large Language Model Based Agents: A Survey},
+  author = {Xi, Zhiheng and others},
+  year   = {2023}, journal = {arXiv}, eprint = {2309.07864}, archivePrefix = {arXiv}}
+
+@article{P62_pan2024vdbmssurvey,
+  title  = {Survey of Vector Database Management Systems},
+  author = {Pan, James Jie and Wang, Jianguo and Li, Guoliang},
+  year   = {2024}, journal = {The VLDB Journal}, volume = {33}, doi = {10.1007/s00778-024-00864-x}}
+
+@article{P63_wang2021graphannsurvey,
+  title  = {A Comprehensive Survey and Experimental Comparison of Graph-Based Approximate Nearest Neighbor Search},
+  author = {Wang, Mengzhao and others},
+  year   = {2021}, journal = {PVLDB}, volume = {14}, number = {11}, eprint = {2101.12631}, archivePrefix = {arXiv}}
+
+@article{P64_han2023vdbsurvey,
+  title  = {A Comprehensive Survey on Vector Database: Storage and Retrieval Technique, Challenge},
+  author = {Han, Yikun and Liu, Chunjiang and Wang, Pengfei},
+  year   = {2023}, journal = {arXiv}, eprint = {2310.11703}, archivePrefix = {arXiv}}
+
+% ============================================================
+% 프론티어 (2025–2026), F##
+% ============================================================
+
+% ---- 스트림 1: 메모리 = 시스템/OS ----
+@article{F1_li2025memos,
+  title  = {{MemOS}: A Memory {OS} for AI System},
+  author = {Li, Zhiyu and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2507.03724}, archivePrefix = {arXiv}}
+
+@article{F2_wang2025mplus,
+  title  = {{M+}: Extending {MemoryLLM} with Scalable Long-Term Memory},
+  author = {Wang, Yu and Krotov, Dmitry and Hu, Yuanzhe and others},
+  year   = {2025}, journal = {ICML}, eprint = {2502.00592}, archivePrefix = {arXiv}}
+
+@article{F3_lin2025sleeptime,
+  title  = {Sleep-time Compute: Beyond Inference Scaling at Test-time},
+  author = {Lin, Kevin and Snell, Charlie and Wang, Yu and Packer, Charles and Wooders, Sarah and Stoica, Ion and Gonzalez, Joseph E.},
+  year   = {2025}, journal = {arXiv}, eprint = {2504.13171}, archivePrefix = {arXiv}}
+
+@article{F4_fang2025lightmem,
+  title  = {{LightMem}: Lightweight and Efficient Memory-Augmented Generation},
+  author = {Fang, Jizhan and others},
+  year   = {2025}, journal = {arXiv (ICLR 2026)}, eprint = {2510.18866}, archivePrefix = {arXiv}}
+
+@article{F5_liu2025lmcache,
+  title  = {{LMCache}: An Efficient {KV} Cache Layer for Enterprise-Scale {LLM} Inference},
+  author = {Cheng, Yihua and Liu, Yuhan and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2510.09665}, archivePrefix = {arXiv}}
+
+% ---- 스트림 2: RL 메모리 관리 ----
+@article{F6_yan2025memoryr1,
+  title  = {{Memory-R1}: Enhancing {LLM} Agents to Manage and Utilize Memories via Reinforcement Learning},
+  author = {Yan, Sikuan and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2508.19828}, archivePrefix = {arXiv}}
+
+@article{F7_zhang2025memoryasaction,
+  title  = {Memory as Action: Autonomous Context Curation for Long-Horizon Agentic Tasks},
+  author = {Zhang, Yuxiang and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2510.12635}, archivePrefix = {arXiv}}
+
+@article{F8_sun2025contextfolding,
+  title  = {Scaling Long-Horizon {LLM} Agent via Context-Folding},
+  author = {Sun, Weiwei and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2510.11967}, archivePrefix = {arXiv}}
+
+% ---- 스트림 3: test-time 지속학습 & 자기진화 ----
+@article{F11_suzgun2025dynamiccheatsheet,
+  title  = {Dynamic Cheatsheet: Test-Time Learning with Adaptive Memory},
+  author = {Suzgun, Mirac and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2504.07952}, archivePrefix = {arXiv}}
+
+@article{F12_ho2025arcmemo,
+  title  = {{ArcMemo}: Abstract Reasoning Composition with Lifelong {LLM} Memory},
+  author = {Ho, Matthew and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2509.04439}, archivePrefix = {arXiv}}
+
+@article{F13_zhang2025darwingodel,
+  title  = {Darwin G{\"o}del Machine: Open-Ended Evolution of Self-Improving Agents},
+  author = {Zhang, Jenny and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2505.22954}, archivePrefix = {arXiv}}
+
+@article{F14_wu2025evolver,
+  title  = {{EvolveR}: Self-Evolving {LLM} Agents through an Experience-Driven Lifecycle},
+  author = {Wu, Rong and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2510.16079}, archivePrefix = {arXiv}}
+
+@article{F15_zhai2025agentevolver,
+  title  = {{AgentEvolver}: Towards Efficient Self-Evolving Agent System},
+  author = {Zhai, Yunpeng and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2511.10395}, archivePrefix = {arXiv}}
+
+@article{F16_gao2025selfevolvingsurvey,
+  title  = {A Survey of Self-Evolving Agents: What, When, How, and Where to Evolve},
+  author = {Gao, Huan-ang and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2507.21046}, archivePrefix = {arXiv}}
+
+% ---- 스트림 4: RL 학습 검색 & Deep Research ----
+@article{F17_jin2025searchr1,
+  title  = {{Search-R1}: Training {LLMs} to Reason and Leverage Search Engines with Reinforcement Learning},
+  author = {Jin, Bowen and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2503.09516}, archivePrefix = {arXiv}}
+
+@article{F18_song2025r1searcher,
+  title  = {{R1-Searcher}: Incentivizing the Search Capability in {LLMs} via Reinforcement Learning},
+  author = {Song, Huatong and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2503.05592}, archivePrefix = {arXiv}}
+
+@article{F19_chen2025research,
+  title  = {{ReSearch}: Learning to Reason with Search for {LLMs} via Reinforcement Learning},
+  author = {Chen, Mingyang and others},
+  year   = {2025}, journal = {NeurIPS}, eprint = {2503.19470}, archivePrefix = {arXiv}}
+
+@article{F20_xiong2025raggym,
+  title  = {{RAG-Gym}: Optimizing Reasoning and Search Agents with Process Supervision},
+  author = {Xiong, Guangzhi and Jin, Qiao and Wang, Xiao and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2502.13957}, archivePrefix = {arXiv}}
+
+@article{F21_sun2025zerosearch,
+  title  = {{ZeroSearch}: Incentivize the Search Capability of {LLMs} without Searching},
+  author = {Sun, Hao and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2505.04588}, archivePrefix = {arXiv}}
+
+@article{F22_zheng2025deepresearcher,
+  title  = {{DeepResearcher}: Scaling Deep Research via Reinforcement Learning in Real-world Environments},
+  author = {Zheng, Yuxiang and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2504.03160}, archivePrefix = {arXiv}}
+
+@article{F23_gao2025asearcher,
+  title  = {Beyond Ten Turns: Unlocking Long-Horizon Agentic Search with Large-Scale Asynchronous {RL}},
+  author = {Gao, Jiaxuan and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2508.07976}, archivePrefix = {arXiv}}
+
+@article{F24_qiao2025webresearcher,
+  title  = {{WebResearcher}: Unleashing Unbounded Reasoning Capability in Long-Horizon Agents},
+  author = {Qiao, Shuofei and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2509.13309}, archivePrefix = {arXiv}}
+
+@article{F25_wei2025alignrag,
+  title  = {Retrieval is Not Enough: Enhancing {RAG} Reasoning through Test-Time Critique and Optimization},
+  author = {Wei, Jiatao and others},
+  year   = {2025}, journal = {NeurIPS}, eprint = {2504.14858}, archivePrefix = {arXiv}}
+
+@article{F26_singh2025agenticrag,
+  title  = {Agentic Retrieval-Augmented Generation: A Survey on Agentic {RAG}},
+  author = {Singh, Aditi and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2501.09136}, archivePrefix = {arXiv}}
+
+@article{F27_huang2025deepresearchsurvey,
+  title  = {Deep Research Agents: A Systematic Examination and Roadmap},
+  author = {Huang, Yuxuan and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2506.18096}, archivePrefix = {arXiv}}
+
+@article{F28_li2025rldeepresearchsurvey,
+  title  = {Reinforcement Learning Foundations for Deep Research Systems: A Survey},
+  author = {Li, Wenjun and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2509.06733}, archivePrefix = {arXiv}}
+
+% ---- 스트림 5: 인덱스·저장 HW 공동설계 & LLM 융합 ----
+@article{F29_kim2025vectorliterag,
+  title  = {{VectorLiteRAG}: Latency-Aware and Fine-Grained Resource Partitioning for Efficient {RAG}},
+  author = {Kim, Junkyum and Mahajan, Dhruv},
+  year   = {2025}, journal = {arXiv}, eprint = {2504.08930}, archivePrefix = {arXiv}}
+
+@article{F30_hu2025hedrarag,
+  title  = {{HedraRAG}: Coordinating {LLM} Generation and Database Retrieval in Heterogeneous {RAG} Serving},
+  author = {Hu, Zhengding and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2507.09138}, archivePrefix = {arXiv}}
+
+@article{F31_liu2025dhnsw,
+  title  = {Efficient Vector Search on Disaggregated Memory with d-{HNSW}},
+  author = {Liu, Yi and Fang, Rui and Qian, Xuehai},
+  year   = {2025}, journal = {HotStorage (SIGMETRICS 2026)}, eprint = {2505.11783}, archivePrefix = {arXiv}}
+
+@article{F32_zhang2026gorio,
+  title  = {{GORIO}: {GPU}-Centered Remote {I/O} for Graph {ANNS} over {NVMe-oF}},
+  author = {Zhang, and others},
+  year   = {2026}, journal = {arXiv}, eprint = {2607.04415}, archivePrefix = {arXiv},
+  note   = {[재확인] 2026 극최신}}
+
+@article{F33_flashanns2026,
+  title  = {{FlashANNS}: {GPU}-Driven Asynchronous {I/O} Pipelining for Billion-Scale Similarity Search},
+  author = {{FlashANNS authors}},
+  year   = {2026}, journal = {SIGMOD (PACMMOD)}, eprint = {2507.10070}, archivePrefix = {arXiv}}
+
+@article{F34_chen2025orchann,
+  title  = {{OrchANN}: Hierarchical Orchestration for Skewed Out-of-Core Vector Search},
+  author = {Chen, and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2512.22838}, archivePrefix = {arXiv},
+  note   = {[재확인] 2026 극최신}}
+
+@article{F35_zhi2025cotra,
+  title  = {Towards Efficient and Scalable Distributed Vector Search with {RDMA}},
+  author = {Zhi, Xiangyu and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2507.06653}, archivePrefix = {arXiv}}
+
+@article{F36_lai2026ubis,
+  title  = {Updatable Balanced Index for Stable Streaming Similarity Search over Large-Scale Fresh Vectors},
+  author = {Lai, and Huang, and Wang,},
+  year   = {2026}, journal = {arXiv}, eprint = {2602.00563}, archivePrefix = {arXiv},
+  note   = {[재확인] 2026 극최신}}
+
+@article{F37_dgai2025,
+  title  = {{DGAI}: Decoupled On-Disk Graph-Based {ANN} Index for Efficient Updates and Queries},
+  author = {{DGAI authors}},
+  year   = {2025}, journal = {arXiv}, eprint = {2510.25401}, archivePrefix = {arXiv},
+  note   = {[검증필요] 스니펫만 확인}}
+
+@article{F38_xi2025vecflow,
+  title  = {{VecFlow}: A High-Performance Vector Data Management System for Filtered-Search on {GPUs}},
+  author = {Xi, Jason Mohoney and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2506.00812}, archivePrefix = {arXiv}}
+
+@article{F39_song2026favor,
+  title  = {{FAVOR}: Efficient Filter-Agnostic Vector {ANNS} Based on Selectivity-Aware Exclusion Distances},
+  author = {Song, and others},
+  year   = {2026}, journal = {arXiv}, eprint = {2605.07770}, archivePrefix = {arXiv},
+  note   = {[재확인] 2026 극최신}}
+
+@article{F40_yang2026mvhnsw,
+  title  = {A Unified and Efficient Approach for Multi-Vector Similarity Search},
+  author = {Yang, and others},
+  year   = {2026}, journal = {arXiv}, eprint = {2604.02815}, archivePrefix = {arXiv},
+  note   = {[재확인] 2026 극최신}}
+
+@article{F41_yang2026colbertsar,
+  title  = {{ColBERTSaR}: Sparsified {ColBERT} Index via Product Quantization},
+  author = {Yang, and others},
+  year   = {2026}, journal = {arXiv}, eprint = {2606.05568}, archivePrefix = {arXiv},
+  note   = {[재확인] 2026 극최신}}
+
+@article{F42_zhang2026mfli,
+  title  = {Rethinking {ANN}-based Retrieval: Multifaceted Learnable Index},
+  author = {Zhang, and others},
+  year   = {2026}, journal = {arXiv}, eprint = {2602.16124}, archivePrefix = {arXiv},
+  note   = {[재확인] 2026 극최신}}
+
+@article{F43_simhadri2024bigann,
+  title  = {Results of the Big {ANN}: {NeurIPS'23} Competition},
+  author = {Simhadri, Harsha Vardhan and others},
+  year   = {2024}, journal = {arXiv}, eprint = {2409.17424}, archivePrefix = {arXiv}}
+
+@article{F44_zhou2026agentnativememory,
+  title  = {Are We Ready For An Agent-Native Memory System?},
+  author = {Zhou, and others},
+  year   = {2026}, journal = {arXiv}, eprint = {2606.24775}, archivePrefix = {arXiv},
+  note   = {[재확인] 2026 극최신}}
+
+% ---- 스트림 6: 평가·안전·생애주기 ----
+@article{F45_zheng2025lifelongagentbench,
+  title  = {{LifelongAgentBench}: Evaluating {LLM} Agents as Lifelong Learners},
+  author = {Zheng, Junhao and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2505.11942}, archivePrefix = {arXiv}}
+
+@article{F46_hu2025memoryagentbench,
+  title  = {Evaluating Memory in {LLM} Agents via Incremental Multi-Turn Interactions},
+  author = {Hu, Yuanzhe and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2507.05257}, archivePrefix = {arXiv}}
+
+@article{F47_tan2025membench,
+  title  = {{MemBench}: Towards More Comprehensive Evaluation on the Memory of {LLM}-based Agents},
+  author = {Tan, Haoran and others},
+  year   = {2025}, journal = {ACL Findings}, eprint = {2506.21605}, archivePrefix = {arXiv}}
+
+@article{F48_zhang2026memorycd,
+  title  = {{MemoryCD}: Benchmarking Long-Context User Memory of {LLM} Agents for Lifelong Cross-Domain Personalization},
+  author = {Zhang, and others},
+  year   = {2026}, journal = {arXiv}, eprint = {2603.25973}, archivePrefix = {arXiv},
+  note   = {[재확인] 2026 극최신}}
+
+@article{F49_dong2025minja,
+  title  = {A Practical Memory Injection Attack against {LLM} Agents ({MINJA})},
+  author = {Dong, Shen and others},
+  year   = {2025}, journal = {arXiv}, eprint = {2503.03704}, archivePrefix = {arXiv}}
+
+@article{F50_dash2026mpbench,
+  title  = {From Untrusted Input to Trusted Memory: A Systematic Study of Memory Poisoning Attacks in {LLM} Agents},
+  author = {Dash, and others},
+  year   = {2026}, journal = {arXiv}, eprint = {2606.04329}, archivePrefix = {arXiv},
+  note   = {[재확인] 2026 극최신}}
+
+@article{F51_lin2026memsecuritysurvey,
+  title  = {A Survey on Long-Term Memory Security in {LLM} Agents: Attacks, Defenses, and Governance},
+  author = {Lin, and others},
+  year   = {2026}, journal = {arXiv}, eprint = {2604.16548}, archivePrefix = {arXiv},
+  note   = {[재확인] 2026 극최신}}
+
+@article{F52_wang2026agenticunlearning,
+  title  = {Agentic Unlearning: When {LLM} Agent Meets Machine Unlearning},
+  author = {Wang, and others},
+  year   = {2026}, journal = {arXiv}, eprint = {2602.17692}, archivePrefix = {arXiv},
+  note   = {[재확인] 2026 극최신}}
+
+@article{F53_yu2026selfevolvingforget,
+  title  = {Do Self-Evolving Agents Forget? Capability Degradation and Preservation in Lifelong {LLM} Agent Adaptation},
+  author = {Yu, and others},
+  year   = {2026}, journal = {arXiv}, eprint = {2605.09315}, archivePrefix = {arXiv},
+  note   = {[재확인] 2026 극최신}}
+
+@article{F54_luo2026storagetoexperience,
+  title  = {From Storage to Experience: A Survey on the Evolution of {LLM} Agent Memory Mechanisms},
+  author = {Luo, and others},
+  year   = {2026}, journal = {ACL Findings}, eprint = {2605.06716}, archivePrefix = {arXiv},
+  note   = {[재확인] 2026 극최신}}
+
+% ============================================================
+% S##: T1 제안서 추가 ML-for-systems 근거
+% ============================================================
+@article{S1_zhang2023h2o,
+  title  = {{H2O}: Heavy-Hitter Oracle for Efficient Generative Inference of Large Language Models},
+  author = {Zhang, Zhenyu and others},
+  year   = {2023}, journal = {NeurIPS}, eprint = {2306.14048}, archivePrefix = {arXiv}}
+
+@article{S2_liu2020parrot,
+  title  = {An Imitation Learning Approach for Cache Replacement},
+  author = {Liu, Evan Zheran and Hashemi, Milad and Swersky, Kevin and Ranganathan, Parthasarathy and Ahn, Junwhan},
+  year   = {2020}, journal = {ICML}, eprint = {2006.16239}, archivePrefix = {arXiv}}
+
+@article{S3_attentiongate2024,
+  title  = {In-context {KV}-Cache Eviction for {LLMs} via Attention-Gate},
+  author = {{Attention-Gate authors}},
+  year   = {2024}, journal = {arXiv}, eprint = {2410.12876}, archivePrefix = {arXiv}}
+
+@article{S4_coldrl2025,
+  title  = {Cold-{RL}: Learning Cache Eviction with Offline Reinforcement Learning for {NGINX}},
+  author = {{Cold-RL authors}},
+  year   = {2025}, journal = {arXiv}, eprint = {2508.12485}, archivePrefix = {arXiv}}
+
+@article{S5_mao2019decima,
+  title  = {Learning Scheduling Algorithms for Data Processing Clusters},
+  author = {Mao, Hongzi and Schwarzkopf, Malte and Venkatakrishnan, Shaileshh Bojja and Meng, Zili and Alizadeh, Mohammad},
+  year   = {2019}, journal = {SIGCOMM}, eprint = {1810.01963}, archivePrefix = {arXiv}}
+
+% ---- [검증필요] 정식 인용 전 재확인 ----
+% Adaptive-RAG (Jeong et al., NAACL 2024) — arXiv:2403.14403 [verification needed]
+% Mem-alpha — arXiv:2509.25911 [verification needed]
+
+@inproceedings{qin2024mooncake,
+  title={Mooncake: Trading More Storage for Less Computation --- A KVCache-centric Architecture for Serving LLM Chatbot},
+  author={Qin, Ruoyu and Li, Zheming and He, Weiran and Zhang, Mingxing and Wu, Yongwei and Zheng, Weimin and Xu, Xinran},
+  booktitle={USENIX Conference on File and Storage Technologies (FAST)},
+  year={2025},
+  note={arXiv:2407.00079; traces at github.com/kvcache-ai/Mooncake}
+}
+
+% --- Learned / adaptive caching line (added 2026-08-13 after review; verified) ---
+@inproceedings{S6_song2020lrb,
+  title={Learning Relaxed Belady for Content Distribution Network Caching},
+  author={Song, Zhenyu and Berger, Daniel S. and Li, Kai and Lloyd, Wyatt},
+  booktitle={17th USENIX Symposium on Networked Systems Design and Implementation (NSDI)},
+  pages={529--544},
+  year={2020},
+  note={Verified: USENIX NSDI'20 proceedings. Feature vector is the sequence of deltas
+        between an object's past request times -- the same family as our think-time features.}
+}
+
+@inproceedings{S7_megiddo2003arc,
+  title={{ARC}: A Self-Tuning, Low Overhead Replacement Cache},
+  author={Megiddo, Nimrod and Modha, Dharmendra S.},
+  booktitle={2nd USENIX Conference on File and Storage Technologies (FAST)},
+  year={2003},
+  note={Verified: USENIX FAST'03. Adaptively balances recency against frequency; the
+        recency-vs-frequency inversion we observe across sources is its founding motivation.}
+}
+
+% --- Learned / adaptive cache replacement (verified 2026-08-14 against DBLP, IEEE Xplore,
+% --- USENIX and the authors' camera-ready PDFs). Two titles in our working notes were WRONG:
+% --- neither the Hawkeye nor the Mockingjay paper carries its policy name in the title.
+% --- USENIX assigns no DOIs; the stable URL is the authoritative identifier for those.
+
+@inproceedings{S8_vietri2018lecar,
+  author    = {Giuseppe Vietri and Liana V. Rodriguez and Wendy A. Martinez and
+               Steven Lyons and Jason Liu and Raju Rangaswami and Ming Zhao and
+               Giri Narasimhan},
+  title     = {Driving Cache Replacement with {ML}-based {LeCaR}},
+  booktitle = {10th {USENIX} Workshop on Hot Topics in Storage and File Systems
+               ({HotStorage} 18)},
+  year      = {2018},
+  month     = jul,
+  address   = {Boston, MA},
+  publisher = {{USENIX} Association},
+  url       = {https://www.usenix.org/conference/hotstorage18/presentation/vietri}
+  % page range deliberately omitted: the USENIX proceedings are unpaginated and the
+  % "3-3" seen in some indexes is an article-sequence artifact, not a page range.
+}
+
+@inproceedings{S9_rodriguez2021cacheus,
+  author    = {Liana V. Rodriguez and Farzana Beente Yusuf and Steven Lyons and
+               Eysler Paz and Raju Rangaswami and Jason Liu and Ming Zhao and
+               Giri Narasimhan},
+  title     = {Learning Cache Replacement with {CACHEUS}},
+  booktitle = {19th {USENIX} Conference on File and Storage Technologies ({FAST} 21)},
+  pages     = {341--354},
+  year      = {2021},
+  month     = feb,
+  publisher = {{USENIX} Association},
+  url       = {https://www.usenix.org/conference/fast21/presentation/rodriguez}
+}
+
+@inproceedings{S10_jain2016hawkeye,
+  author    = {Akanksha Jain and Calvin Lin},
+  title     = {Back to the Future: Leveraging {Belady's} Algorithm for Improved
+               Cache Replacement},
+  booktitle = {2016 {ACM/IEEE} 43rd Annual International Symposium on Computer
+               Architecture ({ISCA})},
+  pages     = {78--89},
+  year      = {2016},
+  publisher = {{IEEE}},
+  doi       = {10.1109/ISCA.2016.17}
+  % The policy is named Hawkeye in the text; the title does not contain the name.
+}
+
+@inproceedings{S11_shah2022mockingjay,
+  author    = {Ishan Shah and Akanksha Jain and Calvin Lin},
+  title     = {Effective Mimicry of {Belady's} {MIN} Policy},
+  booktitle = {2022 {IEEE} International Symposium on High-Performance Computer
+               Architecture ({HPCA})},
+  pages     = {558--572},
+  year      = {2022},
+  publisher = {{IEEE}},
+  doi       = {10.1109/HPCA53966.2022.00048}
+  % The policy is named Mockingjay in the text; the title does not contain the name.
+}
+
+@inproceedings{S12_wong2024baleen,
+  author    = {Daniel Lin-Kit Wong and Hao Wu and Carson Molder and Sathya Gunasekar and
+               Jimmy Lu and Snehal Khandkar and Abhinav Sharma and Daniel S. Berger and
+               Nathan Beckmann and Gregory R. Ganger},
+  title     = {Baleen: {ML} Admission and Prefetching for Flash Caches},
+  booktitle = {22nd {USENIX} Conference on File and Storage Technologies ({FAST} 24)},
+  pages     = {347--371},
+  year      = {2024},
+  month     = feb,
+  address   = {Santa Clara, CA},
+  publisher = {{USENIX} Association},
+  url       = {https://www.usenix.org/conference/fast24/presentation/wong}
+}

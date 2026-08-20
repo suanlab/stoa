@@ -1,0 +1,43 @@
+{
+  "source": "kv-cache-tester",
+  "note": "Reactive performance on agent traces is dominated by whether the hot tier holds the working set (~2.5k blocks touched per request), not by the workload being 'unreactive'. At 2% it is poor; at 5% LRU is near-optimal.",
+  "rows": [
+    {
+      "convs": 4,
+      "cache_frac": 0.02,
+      "belady": 0.513,
+      "lru": 0.04,
+      "h2o": 0.131,
+      "static": 0.037,
+      "best_reactive_over_belady": 0.255
+    },
+    {
+      "convs": 4,
+      "cache_frac": 0.05,
+      "belady": 0.924,
+      "lru": 0.869,
+      "h2o": 0.234,
+      "static": 0.18,
+      "best_reactive_over_belady": 0.941
+    },
+    {
+      "convs": 8,
+      "cache_frac": 0.02,
+      "belady": 0.737,
+      "lru": 0.244,
+      "h2o": 0.138,
+      "static": 0.086,
+      "best_reactive_over_belady": 0.331
+    },
+    {
+      "convs": 8,
+      "cache_frac": 0.05,
+      "belady": 0.935,
+      "lru": 0.884,
+      "h2o": 0.228,
+      "static": 0.173,
+      "best_reactive_over_belady": 0.945
+    }
+  ],
+  "secondary_finding": "LRU >> H2O/LFU on agent traces (0.884 vs 0.228), the reverse of Mooncake where frequency wins. Agent loops re-send a contiguous recent prefix, so recency is the right signal there."
+}

@@ -1,0 +1,65 @@
+\section{Problem Formulation}
+\label{sec:formulation}
+
+\subsection{The per-item decision}
+An agent accumulates memory items $\mathcal{M}=\{m_1,\dots,m_N\}$---facts, dialogue turns, tool results,
+summaries. For each item a memory system must answer three questions that are today decided separately:
+\emph{representation} $\rho\in\{\textsf{plaintext},\textsf{vector},\textsf{graph},\textsf{latent},
+\textsf{parameter}\}$, the semantic form (trading fidelity, serving-token cost, write cost);
+\emph{tier} $\tau\in\{\textsf{GPU},\textsf{CPU},\textsf{disk},\textsf{remote}\}$, the physical location
+(trading read latency and capacity); and \emph{timing} $t\in\{\textsf{online},\textsf{sleep},\textsf{noop}\}$,
+\emph{when} the placement is (re)materialized.
+
+The central claim is that these axes are \textbf{coupled}. Promoting an item to $\textsf{latent}$ or
+$\textsf{parameter}$ is an expensive offline write but then cheap and fast to serve; leaving it as
+$\textsf{plaintext}$ on $\textsf{disk}$ is cheap to write but slow to read and token-heavy. The optimal
+representation depends on the tier and on reuse; the optimal tier depends on the representation's size
+and serving cost. No axis can be optimized in isolation.
+
+\subsection{A budget-constrained MDP}
+We cast the orchestrator as a budget-constrained MDP solved by a learned policy $\pi_\theta$.
+
+\paragraph{State.} For each candidate item $m_i$ the state $s_t^{(i)}$ concatenates: (a)~\emph{semantic}
+features---embedding, recency, access frequency, a provenance/version tag, a predicted next-access time
+(a Belady-style forecast); (b)~\emph{systems} features---current representation and tier, item size, and
+per-tier occupancy/pressure; (c)~\emph{budget} features---residual $L$, $C$, $B$; and (d)~\emph{query}
+context. Items are the nodes of a \emph{memory graph} (edges: co-access, entity links) perceived jointly.
+
+\paragraph{Action.} Each item is assigned one action $a=(\rho,\tau,t)$. The raw space has
+$|\rho|\!\cdot\!|\tau|\!\cdot\!|t|=5\!\cdot\!4\!\cdot\!3=60$ combinations, but some are illegal and are
+\textbf{masked}: a $\textsf{parameter}$ promotion is sleep-only (never inline $\textsf{online}$), and
+$\textsf{latent}$/KV memory is meaningful only on $\textsf{GPU}$/$\textsf{CPU}$. Masking removes
+$4+6=10$ combinations, leaving a fixed legal set of $|\mathcal{A}|=50$ per item. Legality is defined
+once and is load-bearing: both the action enumeration and the policy's output distribution are defined
+over exactly these 50 actions.
+
+\paragraph{Transition.} Executing $a$ realizes a cost tuple $(\text{lat},\text{cost},\text{tok},
+\text{fresh})$ from a transition model calibrated on tiering traces. Timing sets the economics: a
+$\textsf{sleep}$ action amortizes the one-off promotion cost off the serving path; a $\textsf{noop}$
+serves the item from its current form at no write cost.
+
+\paragraph{Objective.} We maximize expected task utility subject to serve-time budgets:
+\begin{equation}
+\max_{\theta}\ \mathbb{E}\!\Big[\textstyle\sum_t U(a_t)\Big]
+\ \ \text{s.t.}\ \ \text{Latency}\le L,\ \text{Cost}\le C,\ \text{Tokens}\le B ,
+\end{equation}
+where $U$ is a downstream reward (QA accuracy, or a step-level process reward) realized only when the
+item is \emph{used} to answer a query---many steps after placement. We relax the constraints with learned
+duals:
+\begin{equation}
+r_t = U - \lambda_L\,\text{lat} - \lambda_C\,\text{cost} - \lambda_B\,\text{tok} + \beta\,\text{fresh}.
+\end{equation}
+The operator sets $(L,C,B)$ at serving time and the policy adapts, so a \emph{single control knob} moves
+the system along its accuracy--latency--cost frontier---the key operational difference from a statically
+configured memory system, and the property we probe as RQ3.
+
+\subsection{A factored policy over the memory graph}
+A joint head over 50 actions per item, across many items, is combinatorial. We factor the policy over a
+shared trunk, $\pi_\theta(a\mid s)\propto \pi_{\text{rep}}(\rho)\,\pi_{\text{tier}}(\tau)\,
+\pi_{\text{time}}(t)$, and evaluate it \textbf{only over the 50 legal joint actions}: the three factor
+logits are summed for each legal $a$ and softmaxed over that set. This keeps the policy factored (three
+small heads) while making the induced distribution \emph{masking-exact}---it never places probability on
+an illegal combination. The trunk is a graph network over the memory graph
+(\Cref{sec:arch}), so co-accessed items inform one another's placement rather than being decided
+independently. Whether this policy class can actually be \emph{fit} to useful accuracy is an empirical
+question, not a property of the formulation; \Cref{sec:evidence} answers it.

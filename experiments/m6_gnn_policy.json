@@ -1,0 +1,88 @@
+{
+  "config": {
+    "items": 64,
+    "horizon": 6000,
+    "zipf": 1.1,
+    "epochs": 300,
+    "train_seeds": [
+      100,
+      101,
+      102
+    ],
+    "test_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "device": "cpu"
+  },
+  "train_acc": 0.9323,
+  "held_out_imitation_acc": 0.8688,
+  "held_out_bc_cost": 804.096,
+  "held_out_target_cost": 904.404,
+  "held_out_gap_closed_pct": 103.77,
+  "per_seed": [
+    {
+      "imitation_acc": 0.875,
+      "bc_cost": 709.46,
+      "target_cost": 808.56,
+      "naive_cost": 3600.0,
+      "gap_closed_pct": 103.55,
+      "tier_hist": {
+        "cpu": 23,
+        "remote_rdma": 29,
+        "gpu": 12
+      }
+    },
+    {
+      "imitation_acc": 0.875,
+      "bc_cost": 863.52,
+      "target_cost": 959.76,
+      "naive_cost": 3600.0,
+      "gap_closed_pct": 103.65,
+      "tier_hist": {
+        "remote_rdma": 34,
+        "cpu": 22,
+        "gpu": 8
+      }
+    },
+    {
+      "imitation_acc": 0.9062,
+      "bc_cost": 732.1,
+      "target_cost": 790.72,
+      "naive_cost": 3600.0,
+      "gap_closed_pct": 102.09,
+      "tier_hist": {
+        "cpu": 20,
+        "remote_rdma": 32,
+        "gpu": 12
+      }
+    },
+    {
+      "imitation_acc": 0.7969,
+      "bc_cost": 858.66,
+      "target_cost": 1036.86,
+      "naive_cost": 3600.0,
+      "gap_closed_pct": 106.95,
+      "tier_hist": {
+        "remote_rdma": 32,
+        "gpu": 7,
+        "cpu": 25
+      }
+    },
+    {
+      "imitation_acc": 0.8906,
+      "bc_cost": 856.74,
+      "target_cost": 926.12,
+      "naive_cost": 3600.0,
+      "gap_closed_pct": 102.59,
+      "tier_hist": {
+        "cpu": 22,
+        "remote_rdma": 34,
+        "gpu": 8
+      }
+    }
+  ]
+}

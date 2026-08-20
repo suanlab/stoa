@@ -1,0 +1,51 @@
+\section{The STOA Control Plane}
+\label{sec:arch}
+
+STOA is a \emph{control plane}: it sits above a MemOS-style store, an LMCache-style tiering layer, and an
+M+-style latent path, and decides how each memory item is placed without replacing those substrates
+(\Cref{fig:arch}). A step of the loop takes the current set of candidate items and their systems
+telemetry, emits one action per item, and issues the corresponding store/tier calls; the offline branch
+additionally drains a consolidation queue during idle windows.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{fig_architecture.pdf}
+  \caption{The STOA control plane. A GNN perceives the memory graph; a factored, masking-exact policy and
+  a budget-conditioned critic emit one action per item; online and sleep-time branches execute against the
+  underlying store, tiers, and latent path. Task-utility reward flows back through credit assignment.}
+  \label{fig:arch}
+\end{figure}
+
+\paragraph{Perception.}
+A graph network encodes the memory store as a graph whose nodes are items and whose edges are co-access
+and entity links, together with per-tier occupancy telemetry, into a per-item embedding. Acting on the
+whole batch through a graph network---rather than scoring items independently---lets co-accessed items
+inform one another's placement and avoids per-item combinatorics, following Decima's use of a GNN for
+scheduling~\cite{S5_mao2019decima}.
+
+\paragraph{Policy.}
+A factored actor emits the three decisions $(\rho,\tau,t)$ per item through separate representation, tier,
+and timing heads, combined and softmaxed over exactly the 50 legal joint actions so masking is exact
+(\Cref{sec:formulation}). A constrained critic---a value head---estimates the value of a placement under
+the current budget $(L,C,B)$ and serves as the baseline for policy-gradient updates. A separate
+admission/consolidation head selects which items enter the sleep-time queue for offline promotion.
+
+\paragraph{Execution.}
+Online actions are executed inline on the serving path as MemCube migrate/fuse operations and LMCache
+put/get calls. Offline (sleep-time) actions run during idle windows: promoting plaintext to latent or
+parameter forms, or summarizing a cluster of turns into a graph, amortized off the serving
+path~\cite{F4_fang2025lightmem,F3_lin2025sleeptime}.
+
+\paragraph{Credit assignment.}
+The hard part is that a placement's payoff arrives many steps later---at query time---and memory edits
+fracture the trajectory prefix, so naive policy gradients are high-variance and biased. STOA combines
+three ingredients: (a)~\textbf{Belady-oracle imitation}~\cite{S2_liu2020parrot} to warm-start the policy
+from hindsight-optimal placements computed offline from full future access traces; (b)~\textbf{process
+supervision} with a learned critic that assigns dense, step-level rewards to migration and consolidation
+actions~\cite{F20_xiong2025raggym}; and (c)~\textbf{segment-level advantages} over the trajectory segments
+induced by memory edits~\cite{F7_zhang2025memoryasaction}. Training proceeds offline-RL first---safe on
+logged traces, in the style of production cache-eviction RL~\cite{S4_coldrl2025}---and then guarded online.
+\textbf{None of this machinery is evaluated in this paper.} \Cref{sec:evidence} measures the decision
+the architecture would make --- whether a better belief about which items will be reused buys a better
+placement --- and finds that it does not. We therefore report the formulation and the measurement, and
+leave the policy itself as a design that our own evidence does not currently motivate building.

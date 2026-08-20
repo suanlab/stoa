@@ -1,0 +1,77 @@
+{
+  "source": "kv-cache-tester",
+  "rows": [
+    {
+      "convs": 20,
+      "cache_frac": 0.01,
+      "belady": 0.6059,
+      "lru": 0.2112,
+      "h2o": 0.1085,
+      "static": 0.0391,
+      "best_reactive_over_belady": 0.3486
+    },
+    {
+      "convs": 20,
+      "cache_frac": 0.02,
+      "belady": 0.8102,
+      "lru": 0.5944,
+      "h2o": 0.1651,
+      "static": 0.074,
+      "best_reactive_over_belady": 0.7337
+    },
+    {
+      "convs": 20,
+      "cache_frac": 0.05,
+      "belady": 0.942,
+      "lru": 0.9031,
+      "h2o": 0.2714,
+      "static": 0.1337,
+      "best_reactive_over_belady": 0.9587
+    },
+    {
+      "convs": 20,
+      "cache_frac": 0.1,
+      "belady": 0.9584,
+      "lru": 0.9519,
+      "h2o": 0.391,
+      "static": 0.2192,
+      "best_reactive_over_belady": 0.9932
+    },
+    {
+      "convs": 40,
+      "cache_frac": 0.01,
+      "belady": 0.5472,
+      "lru": 0.3008,
+      "h2o": 0.0914,
+      "static": 0.0328,
+      "best_reactive_over_belady": 0.5497
+    },
+    {
+      "convs": 40,
+      "cache_frac": 0.02,
+      "belady": 0.7032,
+      "lru": 0.5153,
+      "h2o": 0.1117,
+      "static": 0.0469,
+      "best_reactive_over_belady": 0.7328
+    },
+    {
+      "convs": 40,
+      "cache_frac": 0.05,
+      "belady": 0.8803,
+      "lru": 0.7317,
+      "h2o": 0.2687,
+      "static": 0.1491,
+      "best_reactive_over_belady": 0.8313
+    },
+    {
+      "convs": 40,
+      "cache_frac": 0.1,
+      "belady": 0.9532,
+      "lru": 0.9292,
+      "h2o": 0.3949,
+      "static": 0.2438,
+      "best_reactive_over_belady": 0.9748
+    }
+  ]
+}

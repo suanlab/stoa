@@ -1,0 +1,50 @@
+{
+  "config": {
+    "n_items": 64,
+    "horizon": 1000,
+    "zipf_s": 1.1,
+    "seed": 0
+  },
+  "n_items": 64,
+  "horizon": 1000,
+  "total_accesses": 1000,
+  "oracle_upper_bound": {
+    "name": "oracle_upper_bound",
+    "total_cost": 20.300000000000015,
+    "tier_hist": {
+      "gpu": 60,
+      "remote_rdma": 4
+    },
+    "repr_hist": {
+      "latent": 60,
+      "plaintext": 4
+    }
+  },
+  "greedy_belady": {
+    "name": "greedy_belady",
+    "total_cost": 151.1999999999999,
+    "tier_hist": {
+      "gpu": 7,
+      "cpu": 21,
+      "remote_rdma": 32,
+      "disk": 4
+    },
+    "repr_hist": {
+      "latent": 28,
+      "parameter": 32,
+      "plaintext": 4
+    }
+  },
+  "naive": {
+    "name": "naive",
+    "total_cost": 599.9999999999995,
+    "tier_hist": {
+      "cpu": 64
+    },
+    "repr_hist": {
+      "plaintext": 64
+    }
+  },
+  "greedy_gap_pct": 644.828,
+  "greedy_savings_vs_naive_pct": 74.8
+}

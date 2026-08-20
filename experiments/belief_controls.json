@@ -1,0 +1,85 @@
+{
+  "config": {
+    "requests": "full",
+    "seed": 0,
+    "note": "magnitude control = native scale minus common scale, same ordering; ceiling control = clairvoyance restricted to blocks a causal policy can see"
+  },
+  "summary": {
+    "magnitude_min_points": 31.49,
+    "magnitude_max_points": 208.49
+  },
+  "results": [
+    {
+      "trace": "conversation",
+      "rung": "linear",
+      "native_of_full_gap": 4.01,
+      "native_of_attainable": 75.02,
+      "common_scale_of_full_gap": -1.01,
+      "common_scale_of_attainable": -18.79,
+      "magnitude_contribution": 93.81
+    },
+    {
+      "trace": "conversation",
+      "rung": "count",
+      "native_of_full_gap": -2.1,
+      "native_of_attainable": -39.22,
+      "common_scale_of_full_gap": -3.78,
+      "common_scale_of_attainable": -70.71,
+      "magnitude_contribution": 31.49
+    },
+    {
+      "trace": "conversation",
+      "rung": "random",
+      "native_of_full_gap": -4.34,
+      "native_of_attainable": -81.07,
+      "common_scale_of_full_gap": -11.14,
+      "common_scale_of_attainable": -208.19,
+      "magnitude_contribution": 127.12
+    },
+    {
+      "trace": "conversation",
+      "rung": "ceiling",
+      "native_of_full_gap": 5.35,
+      "native_of_attainable": 100.0,
+      "common_scale_of_full_gap": 5.35,
+      "common_scale_of_attainable": 100.0,
+      "magnitude_contribution": 0.0
+    },
+    {
+      "trace": "toolagent",
+      "rung": "linear",
+      "native_of_full_gap": 3.49,
+      "native_of_attainable": 84.82,
+      "common_scale_of_full_gap": -1.32,
+      "common_scale_of_attainable": -32.14,
+      "magnitude_contribution": 116.96
+    },
+    {
+      "trace": "toolagent",
+      "rung": "count",
+      "native_of_full_gap": -1.04,
+      "native_of_attainable": -25.2,
+      "common_scale_of_full_gap": -2.43,
+      "common_scale_of_attainable": -59.09,
+      "magnitude_contribution": 33.88
+    },
+    {
+      "trace": "toolagent",
+      "rung": "random",
+      "native_of_full_gap": -25.95,
+      "native_of_attainable": -630.17,
+      "common_scale_of_full_gap": -34.54,
+      "common_scale_of_attainable": -838.65,
+      "magnitude_contribution": 208.49
+    },
+    {
+      "trace": "toolagent",
+      "rung": "ceiling",
+      "native_of_full_gap": 4.12,
+      "native_of_attainable": 100.0,
+      "common_scale_of_full_gap": 4.12,
+      "common_scale_of_attainable": 100.0,
+      "magnitude_contribution": 0.0
+    }
+  ]
+}

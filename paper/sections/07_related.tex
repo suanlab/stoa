@@ -1,0 +1,72 @@
+\section{Related Work}
+\label{sec:related}
+
+We organize prior work by the three axes STOA unifies; \Cref{tab:positioning} summarizes which axis each
+line decides and by what means.
+
+\paragraph{Representation and memory-OS.}
+MemOS~\cite{F1_li2025memos} and MemGPT~\cite{P14_packer2023memgpt} treat memory as an operating-system
+problem, exposing abstractions (MemCube, virtual context) and primitives to migrate items between
+plaintext, activation, and parameter forms; M+~\cite{F2_wang2025mplus} adds a co-trained latent memory.
+These provide the \emph{mechanism} to change representation and tier but decide \emph{when} by heuristic;
+STOA supplies the learned scheduler they lack.
+
+\paragraph{Content and RL-based management.}
+Memory-R1~\cite{F6_yan2025memoryr1} and Memory-as-Action~\cite{F7_zhang2025memoryasaction} learn, with
+RL, \emph{what} to add, update, or delete and how to edit context, and the latter handles the
+trajectory-fracturing that edits cause. But they operate over a single fixed representation and never
+choose a physical tier or schedule offline consolidation---orthogonal to, and composable with, STOA.
+
+\paragraph{Systems tiering and ML-for-systems.}
+LMCache~\cite{F5_liu2025lmcache} tiers KV-cache bytes to cut miss-rate; H2O~\cite{S1_zhang2023h2o} evicts
+by attention score. The learnability of such decisions is established: PARROT~\cite{S2_liu2020parrot}
+imitates a Belady oracle for cache replacement, Cold-RL~\cite{S4_coldrl2025} does eviction with offline
+RL in production, and Decima~\cite{S5_mao2019decima} schedules clusters with a GNN policy. STOA inherits
+these techniques but changes the objective from miss-rate to downstream \emph{task utility}, and the
+action from a single axis to the joint representation\,$\times$\,tier\,$\times$\,timing decision.
+
+\paragraph{Offline consolidation.}
+Sleep-time compute~\cite{F3_lin2025sleeptime} and LightMem~\cite{F4_fang2025lightmem} show the value of
+precomputing and consolidating memory offline, but treat it as a global mode rather than a per-item,
+budget-aware timing decision---the third axis STOA learns.
+
+\paragraph{Learned and adaptive caching.}
+Two lines bear directly on our results and we position against them explicitly, because our findings
+reproduce rather than extend them. \textbf{LRB}~\cite{S6_song2020lrb} learns a relaxed-Belady objective
+for CDN caching from a feature vector built out of the deltas between an object's past request
+times --- the same family as the think-time features we tried here. Timing as a cache-scheduler input is
+therefore established practice, not a new interface insight, and our (negative) placement result should
+be read as a report that this family does not transfer to KV-block \emph{placement} under our cost model,
+not as a novel signal. \textbf{ARC}~\cite{S7_megiddo2003arc} adaptively balances recency against
+frequency precisely because neither dominates across workloads; the recency-versus-frequency inversion we
+measure between our two sources (\Cref{sec:reaction}) is that observation restated on KV blocks, and an
+adaptive policy of the ARC family is the baseline a deployment should reach for rather than either pure
+rule.
+
+The rest of the learned-cache literature divides by what it learns \emph{from} and what it decides, and
+the division explains why our result is not a contradiction of it.
+LeCaR~\cite{S8_vietri2018lecar} and CACHEUS~\cite{S9_rodriguez2021cacheus} learn no per-item model at all:
+they run experts (LRU/LFU, and in CACHEUS scan- and churn-resistant variants) and update expert weights
+from regret observed on a ghost list. That is the same evidence channel ARC uses, and
+\Cref{sec:reaction} measures how thin it is here --- 3.5--7.3\% of misses carry any signal --- so the
+family inherits the limitation rather than escaping it. We ran both to check, rather than leaving it as a
+prediction, and both land in the same few-point band as ARC. LeCaR is nonetheless the best single policy
+at the tightest tier on both traces, which is the one place the regret formulation visibly pays.
+Hawkeye~\cite{S10_jain2016hawkeye} and Mockingjay~\cite{S11_shah2022mockingjay} are the closest
+antecedents to what we attempted: both supervise a predictor with Belady replayed over history, Hawkeye
+as a binary cache-friendly/averse label and Mockingjay as a multiclass reuse-distance estimate. They
+operate at CPU last-level-cache granularity, where a program counter identifies a reuse pattern; a KV
+block hash carries no analogous instruction identity, which is the structural reason their signal does
+not simply port. Baleen~\cite{S12_wong2024baleen} is the one that decides admission and prefetching
+rather than eviction, and the one that optimizes a downstream system cost (disk-head time) instead of
+miss rate --- the closest precedent for the multi-objective reward of \Cref{sec:formulation}, and the
+direction we think is right even though we do not evaluate it here.
+
+Of these we evaluate LRB, LeCaR and CACHEUS (\Cref{sec:reaction}) --- and the prediction above is what we
+measured: both expert policies land in the same few-point band as ARC rather than above it. Hawkeye,
+Mockingjay and Baleen are positioned but not run.
+
+In short, each line optimizes one axis and freezes the others, and none decides representation, tier,
+\emph{and} timing jointly under a shared budget (\Cref{tab:positioning}). Our contribution is not a better
+policy but a measurement: on production KV traces, ranking quality improves substantially while the
+placement benefit it buys does not, and we report the protocol needed to see that.

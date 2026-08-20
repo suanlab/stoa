@@ -1,0 +1,27 @@
+{
+  "config": {
+    "requests": 1200
+  },
+  "results": [
+    {
+      "eval": "conversation",
+      "train": "toolagent",
+      "auc_block": 0.4983,
+      "auc_session": 0.4806,
+      "headroom_block_pct": -0.14,
+      "headroom_session_pct": -0.27,
+      "prefix_greedy": 22178.64,
+      "oracle": 4443.92
+    },
+    {
+      "eval": "toolagent",
+      "train": "conversation",
+      "auc_block": 0.4423,
+      "auc_session": 0.5315,
+      "headroom_block_pct": -0.13,
+      "headroom_session_pct": -36.48,
+      "prefix_greedy": 10661.03,
+      "oracle": 1906.55
+    }
+  ]
+}

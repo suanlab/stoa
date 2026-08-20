@@ -1,0 +1,31 @@
+{
+  "config": {
+    "train_convs": 25,
+    "eval_convs": 40,
+    "source": "kv-cache-tester"
+  },
+  "prefix_greedy": 29094.55,
+  "oracle": 4237.44,
+  "headroom_pct": 85.44,
+  "results": [
+    {
+      "features": "block",
+      "auc": 0.862,
+      "classifier_headroom_pct": -29.44,
+      "regression_headroom_pct": -175.56
+    },
+    {
+      "features": "block+session",
+      "auc": 0.9757,
+      "classifier_headroom_pct": -29.15,
+      "regression_headroom_pct": -42.75
+    },
+    {
+      "features": "block+session+think",
+      "auc": 0.9885,
+      "classifier_headroom_pct": -16.52,
+      "regression_headroom_pct": -20.76
+    }
+  ],
+  "INVALID": "Feature/placement split mismatch (features split the eval-only event stream, placement split the pooled stream). Numbers are meaningless. See scripts/train_kvct_placement.py guard."
+}

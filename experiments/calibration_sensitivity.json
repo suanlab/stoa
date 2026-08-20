@@ -1,0 +1,321 @@
+{
+  "config": {
+    "requests": 4000,
+    "block_tokens": 256,
+    "note": "derived from declared model/device profiles, NOT measured"
+  },
+  "summary": {
+    "headroom_min": 64.22,
+    "headroom_max": 87.76,
+    "handwritten_headroom": 81.12,
+    "n_models": 3,
+    "n_devices": 5,
+    "non_monotonic": [
+      "llama3-8b-like/slow-fabric",
+      "llama3-8b-like/narrow-host",
+      "llama3-70b-like/slow-fabric",
+      "llama3-70b-like/narrow-host",
+      "mha-wide/slow-fabric",
+      "mha-wide/narrow-host"
+    ]
+  },
+  "rows": [
+    {
+      "model": "hand-written",
+      "device": null,
+      "ratios": {
+        "gpu": 1.0,
+        "cpu": 10.0,
+        "disk": 60.0,
+        "remote_rdma": 30.0
+      },
+      "headroom_pct": 81.12,
+      "monotonic": true
+    },
+    {
+      "model": "llama3-8b-like",
+      "device": "balanced",
+      "kv_bytes_per_token": 131072,
+      "read_ms": {
+        "gpu": 0.0168,
+        "cpu": 1.3522,
+        "disk": 5.6924,
+        "remote_rdma": 1.7277
+      },
+      "ratios": {
+        "gpu": 1.0,
+        "cpu": 80.6,
+        "disk": 339.29,
+        "remote_rdma": 102.98
+      },
+      "headroom_pct": 85.86,
+      "monotonic": true
+    },
+    {
+      "model": "llama3-8b-like",
+      "device": "slow-fabric",
+      "kv_bytes_per_token": 131072,
+      "read_ms": {
+        "gpu": 0.0168,
+        "cpu": 1.3522,
+        "disk": 5.6924,
+        "remote_rdma": 11.6848
+      },
+      "ratios": {
+        "gpu": 1.0,
+        "cpu": 80.6,
+        "disk": 339.29,
+        "remote_rdma": 696.47
+      },
+      "headroom_pct": 75.79,
+      "monotonic": false
+    },
+    {
+      "model": "llama3-8b-like",
+      "device": "fast-storage",
+      "kv_bytes_per_token": 131072,
+      "read_ms": {
+        "gpu": 0.0168,
+        "cpu": 1.3522,
+        "disk": 2.4167,
+        "remote_rdma": 1.7277
+      },
+      "ratios": {
+        "gpu": 1.0,
+        "cpu": 80.6,
+        "disk": 144.05,
+        "remote_rdma": 102.98
+      },
+      "headroom_pct": 79.08,
+      "monotonic": true
+    },
+    {
+      "model": "llama3-8b-like",
+      "device": "narrow-host",
+      "kv_bytes_per_token": 131072,
+      "read_ms": {
+        "gpu": 0.0168,
+        "cpu": 4.2043,
+        "disk": 5.6924,
+        "remote_rdma": 1.7277
+      },
+      "ratios": {
+        "gpu": 1.0,
+        "cpu": 250.6,
+        "disk": 339.29,
+        "remote_rdma": 102.98
+      },
+      "headroom_pct": 80.66,
+      "monotonic": false
+    },
+    {
+      "model": "llama3-8b-like",
+      "device": "flat",
+      "kv_bytes_per_token": 131072,
+      "read_ms": {
+        "gpu": 0.1678,
+        "cpu": 0.3355,
+        "disk": 0.6711,
+        "remote_rdma": 0.4194
+      },
+      "ratios": {
+        "gpu": 1.0,
+        "cpu": 2.0,
+        "disk": 4.0,
+        "remote_rdma": 2.5
+      },
+      "headroom_pct": 87.76,
+      "monotonic": true
+    },
+    {
+      "model": "llama3-70b-like",
+      "device": "balanced",
+      "kv_bytes_per_token": 327680,
+      "read_ms": {
+        "gpu": 0.0419,
+        "cpu": 3.3654,
+        "disk": 14.081,
+        "remote_rdma": 4.2443
+      },
+      "ratios": {
+        "gpu": 1.0,
+        "cpu": 80.24,
+        "disk": 335.72,
+        "remote_rdma": 101.19
+      },
+      "headroom_pct": 82.16,
+      "monotonic": true
+    },
+    {
+      "model": "llama3-70b-like",
+      "device": "slow-fabric",
+      "kv_bytes_per_token": 327680,
+      "read_ms": {
+        "gpu": 0.0419,
+        "cpu": 3.3654,
+        "disk": 14.081,
+        "remote_rdma": 28.462
+      },
+      "ratios": {
+        "gpu": 1.0,
+        "cpu": 80.24,
+        "disk": 335.72,
+        "remote_rdma": 678.59
+      },
+      "headroom_pct": 69.16,
+      "monotonic": false
+    },
+    {
+      "model": "llama3-70b-like",
+      "device": "fast-storage",
+      "kv_bytes_per_token": 327680,
+      "read_ms": {
+        "gpu": 0.0419,
+        "cpu": 3.3654,
+        "disk": 6.0119,
+        "remote_rdma": 4.2443
+      },
+      "ratios": {
+        "gpu": 1.0,
+        "cpu": 80.24,
+        "disk": 143.33,
+        "remote_rdma": 101.19
+      },
+      "headroom_pct": 68.89,
+      "monotonic": true
+    },
+    {
+      "model": "llama3-70b-like",
+      "device": "narrow-host",
+      "kv_bytes_per_token": 327680,
+      "read_ms": {
+        "gpu": 0.0419,
+        "cpu": 10.4958,
+        "disk": 14.081,
+        "remote_rdma": 4.2443
+      },
+      "ratios": {
+        "gpu": 1.0,
+        "cpu": 250.24,
+        "disk": 335.72,
+        "remote_rdma": 101.19
+      },
+      "headroom_pct": 75.63,
+      "monotonic": false
+    },
+    {
+      "model": "llama3-70b-like",
+      "device": "flat",
+      "kv_bytes_per_token": 327680,
+      "read_ms": {
+        "gpu": 0.4194,
+        "cpu": 0.8389,
+        "disk": 1.6777,
+        "remote_rdma": 1.0486
+      },
+      "ratios": {
+        "gpu": 1.0,
+        "cpu": 2.0,
+        "disk": 4.0,
+        "remote_rdma": 2.5
+      },
+      "headroom_pct": 78.38,
+      "monotonic": true
+    },
+    {
+      "model": "mha-wide",
+      "device": "balanced",
+      "kv_bytes_per_token": 524288,
+      "read_ms": {
+        "gpu": 0.0671,
+        "cpu": 5.3787,
+        "disk": 22.4696,
+        "remote_rdma": 6.7609
+      },
+      "ratios": {
+        "gpu": 1.0,
+        "cpu": 80.15,
+        "disk": 334.82,
+        "remote_rdma": 100.75
+      },
+      "headroom_pct": 80.81,
+      "monotonic": true
+    },
+    {
+      "model": "mha-wide",
+      "device": "slow-fabric",
+      "kv_bytes_per_token": 524288,
+      "read_ms": {
+        "gpu": 0.0671,
+        "cpu": 5.3787,
+        "disk": 22.4696,
+        "remote_rdma": 45.2392
+      },
+      "ratios": {
+        "gpu": 1.0,
+        "cpu": 80.15,
+        "disk": 334.82,
+        "remote_rdma": 674.12
+      },
+      "headroom_pct": 66.79,
+      "monotonic": false
+    },
+    {
+      "model": "mha-wide",
+      "device": "fast-storage",
+      "kv_bytes_per_token": 524288,
+      "read_ms": {
+        "gpu": 0.0671,
+        "cpu": 5.3787,
+        "disk": 9.607,
+        "remote_rdma": 6.7609
+      },
+      "ratios": {
+        "gpu": 1.0,
+        "cpu": 80.15,
+        "disk": 143.16,
+        "remote_rdma": 100.75
+      },
+      "headroom_pct": 64.22,
+      "monotonic": true
+    },
+    {
+      "model": "mha-wide",
+      "device": "narrow-host",
+      "kv_bytes_per_token": 524288,
+      "read_ms": {
+        "gpu": 0.0671,
+        "cpu": 16.7872,
+        "disk": 22.4696,
+        "remote_rdma": 6.7609
+      },
+      "ratios": {
+        "gpu": 1.0,
+        "cpu": 250.15,
+        "disk": 334.82,
+        "remote_rdma": 100.75
+      },
+      "headroom_pct": 73.69,
+      "monotonic": false
+    },
+    {
+      "model": "mha-wide",
+      "device": "flat",
+      "kv_bytes_per_token": 524288,
+      "read_ms": {
+        "gpu": 0.6711,
+        "cpu": 1.3422,
+        "disk": 2.6844,
+        "remote_rdma": 1.6777
+      },
+      "ratios": {
+        "gpu": 1.0,
+        "cpu": 2.0,
+        "disk": 4.0,
+        "remote_rdma": 2.5
+      },
+      "headroom_pct": 72.22,
+      "monotonic": true
+    }
+  ]
+}

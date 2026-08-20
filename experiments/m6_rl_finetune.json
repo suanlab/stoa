@@ -1,0 +1,44 @@
+{
+  "config": {
+    "items": 64,
+    "horizon": 6000,
+    "epochs": 200,
+    "steps": 400,
+    "betas": [
+      1.0,
+      2.0,
+      4.0
+    ],
+    "device": "cpu"
+  },
+  "results": [
+    {
+      "policy": "BC",
+      "mean_cost": 867.63,
+      "overflow_bytes": 45711.2,
+      "feasible": 2
+    },
+    {
+      "policy": "RL_beta_1.0",
+      "mean_cost": 604.67,
+      "overflow_bytes": 776697.6,
+      "feasible": 0,
+      "final_reward": -0.0051
+    },
+    {
+      "policy": "RL_beta_2.0",
+      "mean_cost": 724.32,
+      "overflow_bytes": 341706.6,
+      "feasible": 0,
+      "final_reward": -0.0054
+    },
+    {
+      "policy": "RL_beta_4.0",
+      "mean_cost": 835.15,
+      "overflow_bytes": 152509.9,
+      "feasible": 1,
+      "final_reward": -0.0051
+    }
+  ],
+  "note": "BC already ~ greedy Belady; RL fine-tune trades cost for feasibility, no clean dominance on the static placeholder-cost formulation. See research_plan.md."
+}

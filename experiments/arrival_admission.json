@@ -1,0 +1,73 @@
+{
+  "config": {
+    "requests": "full",
+    "protocol": "blocks placed at first appearance from request-level context; temporal split in arrival order; beliefs quantile-matched to a common magnitude scale",
+    "why": "the split-instant protocol leaves 97% of the hindsight gap unreachable; this targets that 97%"
+  },
+  "results": [
+    {
+      "trace": "conversation",
+      "arm": "arrival-learned",
+      "auc": 0.5737,
+      "captured_pct": 82.82,
+      "captured_of_attainable_pct": 91.64,
+      "n_arrivals_scored": 91358
+    },
+    {
+      "trace": "conversation",
+      "arm": "arrival-fcfs",
+      "auc": 0.5,
+      "captured_pct": 84.25,
+      "captured_of_attainable_pct": 93.22,
+      "n_arrivals_scored": 91358
+    },
+    {
+      "trace": "conversation",
+      "arm": "arrival-shuffled",
+      "auc": 0.5,
+      "captured_pct": 82.64,
+      "captured_of_attainable_pct": 91.44,
+      "n_arrivals_scored": 91358
+    },
+    {
+      "trace": "conversation",
+      "arm": "arrival-ceiling",
+      "auc": 1.0,
+      "captured_pct": 90.38,
+      "captured_of_attainable_pct": 100.0,
+      "n_arrivals_scored": 91358
+    },
+    {
+      "trace": "toolagent",
+      "arm": "arrival-learned",
+      "auc": 0.6346,
+      "captured_pct": 46.99,
+      "captured_of_attainable_pct": 88.93,
+      "n_arrivals_scored": 91649
+    },
+    {
+      "trace": "toolagent",
+      "arm": "arrival-fcfs",
+      "auc": 0.5,
+      "captured_pct": 47.32,
+      "captured_of_attainable_pct": 89.55,
+      "n_arrivals_scored": 91649
+    },
+    {
+      "trace": "toolagent",
+      "arm": "arrival-shuffled",
+      "auc": 0.5,
+      "captured_pct": 45.76,
+      "captured_of_attainable_pct": 86.6,
+      "n_arrivals_scored": 91649
+    },
+    {
+      "trace": "toolagent",
+      "arm": "arrival-ceiling",
+      "auc": 1.0,
+      "captured_pct": 52.84,
+      "captured_of_attainable_pct": 100.0,
+      "n_arrivals_scored": 91649
+    }
+  ]
+}

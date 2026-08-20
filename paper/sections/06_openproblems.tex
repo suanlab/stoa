@@ -1,0 +1,48 @@
+\section{Open Problems}
+\label{sec:open}
+
+Our result closes one question and sharpens several others.
+
+\paragraph{What can a scheduler do that ordering cannot?}
+\Cref{sec:arrival} shows that first-come-first-served admission captures 90--93\% of the reachable
+benefit and that a learned ranker adds nothing on top, while shuffling the arrival order costs under
+three points. So on these workloads the recoverable benefit is not in per-item prediction and barely in
+per-item ordering; it is in \emph{when} the decision is taken. What remains unclaimed --- the 7--10\%
+FCFS leaves, and the 47\% of the hindsight gap still out of reach on toolagent --- has to come from
+something the per-item formulation does not express: admission under contention, coordinated eviction
+across concurrently-live sessions, or migration timed against idle windows. Identifying which of these
+carries the gap, and building an evaluation that can see it, is the substantive next step, and it is a
+scheduling question rather than a modelling one.
+
+\paragraph{Calibration, and what a mis-specified cost model hides.}
+Our tables are placeholders, and we saw concretely how misleading that is: under them the per-item optimal
+action is identical for every reused block, which collapses a three-axis decision into a one-dimensional
+sort and makes every policy look alike. Fitting the tables to a real vLLM+LMCache deployment --- the only
+GPU-gated step in this work --- is a precondition for any claim about the representation and timing axes,
+which our traces do not exercise at all.
+
+\paragraph{Aggregate working set, not per-request footprint.}
+Reactive sufficiency is governed by how much of the \emph{concurrently live} working set a tier holds, not
+by one request's block count: holding tier size fixed in absolute blocks and raising the number of pooled
+conversations still degrades the ratio. Characterizing that surface --- tier size against concurrency,
+across sources --- would give an operator a sizing rule, which is the most directly actionable thing this
+line of work could produce.
+
+\paragraph{Composing placement with retrieval.}
+\Cref{sec:placement-vs-retrieval} indicates the two are orthogonal in kind: placement sets latency and
+cost, retrieval sets which facts reach the model. The open problem is the composition --- a retriever
+running over a tiered store whose hot set a scheduler maintains, where a retrieval miss on a cold tier
+costs latency rather than accuracy. Neither literature evaluates that joint object, and our own LoCoMo
+measurement is far too small ($n=30$) to speak to it.
+
+\paragraph{Sampling as a first-class experimental variable.}
+Three of our ten defects were extrapolations from a single value of a parameter fixed for convenience, and
+the most damaging reversed a headline claim's sign. For trace-driven work we would now require of
+ourselves, and suggest for the area: randomized rather than prefix sampling, several disjoint draws with
+intervals, and a reported sweep over every quantity the design fixes --- trace length, pool size, tier
+size, split fraction --- before any claim that depends on one of them.
+
+\paragraph{Safety and governance.}
+A memory written by tools and other agents is an attack surface, and provenance must survive consolidation
+so a fact can be traced, invalidated, or unlearned. A budget-constrained scheduler is a natural
+enforcement point; doing that without giving back the frontier is unexplored.

@@ -1,0 +1,538 @@
+\section{What Placement Has To Get Right}
+\label{sec:evidence}
+
+\Cref{sec:formulation} frames placement as a learnable budget-constrained MDP. This section reports what
+we found when we tried to learn it on production KV traces, and it is organized around a defect rather
+than a result, because the defect came first and everything else follows from it: the protocol these
+studies use --- ours for three revisions --- makes 97\% of the achievable benefit unreachable, so a
+policy measured inside it looks flat however well it ranks (\Cref{sec:reachable}). Moving the decision to
+each block's arrival recovers the benefit, and shows that the recoverable part is captured by
+\emph{deciding early} rather than by \emph{deciding well} (\Cref{sec:arrival}). We then report what a
+better ranker buys once the metric is repaired (\Cref{sec:capacity}), where reaction stands
+(\Cref{sec:reaction}), and --- at length, because it is the most transferable part --- the protocol,
+including the three claims we retracted along the way (\Cref{sec:protocol}).
+
+\subsection{Sources and references}
+\label{sec:sources}
+We use \textbf{Mooncake}~\cite{qin2024mooncake}, replayed production traces from a general LLM serving
+stack (23{,}608 and 12{,}031 requests), and \textbf{kv-cache-tester}, anonymized agentic coding
+conversations (200 of 739 fetched). Each request lists the hash ids of the KV blocks it touches, so a
+repeated hash is a genuine reuse. Both sources record wall-clock request timestamps. Block ids in
+kv-cache-tester are conversation-scoped, so we namespace them before pooling; not doing so invents
+cross-conversation reuse.
+
+Three references bound every policy, all billed on the true future: a \textbf{hindsight oracle} that ranks
+and places knowing future access counts; a \textbf{frequency heuristic} that assumes the future looks like
+the observed prefix; and a \textbf{naive} all-plaintext baseline. ``Headroom'' is
+$(\text{cost}_{\text{heur}} - \text{cost}_{\text{oracle}})/\text{cost}_{\text{heur}}$; ``captured'' is the
+fraction of that interval a learned policy recovers.
+
+\subsection{The protocol decides what is reachable}
+\label{sec:reachable}
+Placement studies of this kind fix a \emph{split instant}: observe the trace up to some point, build
+features from that prefix, place every block, and bill the result against what the future turns out to
+contain. It is the natural protocol, it is what we ran for three revisions of this paper, and it has a
+structural defect that no aggregate computed inside it can reveal.
+
+The defect is general, not particular to our setup. Whenever a workload admits new items after the split
+--- which is to say, whenever it is not a closed working set --- a split-time policy has no opinion about
+those items while the hindsight oracle it is scored against ranks them freely. The reported ``fraction of
+headroom captured'' then divides by a quantity that is partly unreachable, and the unreachable share
+grows with the arrival rate. Any study reporting that fraction without bounding it is reporting a number
+whose denominator it has not characterized.
+
+Feature construction can only describe a block that has been seen. On these traces
+\textbf{45.2\% and 46.1\% of blocks have no pre-split access at all}, and a policy therefore has no
+opinion about them --- but the hindsight oracle it is scored against ranks them anyway, using knowledge
+of a future in which they exist. Those blocks carry \textbf{96.9\% and 97.6\%} of the oracle's total
+advantage. The denominator of every ``captured headroom'' number we reported was, in other words,
+almost entirely unreachable by construction:
+
+\begin{center}\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+& conversation & toolagent \\
+\midrule
+blocks with no pre-split access & 45.2\% & 46.1\% \\
+full hindsight gap & 160{,}200 & 162{,}602 \\
+\textbf{attainable gap} (clairvoyance on visible blocks) & \textbf{4{,}996} & \textbf{3{,}900} \\
+share of the gap a causal policy cannot reach & \textbf{96.9\%} & \textbf{97.6\%} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\noindent A policy confined to 3\% of the prize will look flat no matter how well it ranks, and that is
+what our earlier ``decoupling'' result measured. We retract it (\Cref{sec:protocol}).
+
+\paragraph{The diagnostic is one line.} Compute the oracle's advantage twice --- once with clairvoyance
+over every item, once restricted to the items the policy could have had an opinion about --- and take the
+ratio. If it is far from one, the protocol is the finding. It costs a single extra placement pass, it
+needs no new data, and running it on the first day would have saved this paper three revisions. We ship
+it as \texttt{attainable\_ceiling} in the artifact and recommend it as a standard reporting requirement
+for placement and admission studies: \emph{state the reachable share alongside any captured fraction}.
+
+\subsection{Deciding on arrival, not at a split}
+\label{sec:arrival}
+The 97\% lives in blocks that do not exist yet when a split-time policy decides. The fix is not a better
+model but an earlier decision: place each block \emph{when it first appears}, from context available at
+that instant --- the shared-prefix session's age, request rate and recency, the block's position within
+its request, the request's length. No feature reads the future; the model is fitted on the first half of
+arrivals in arrival order and places the second half.
+
+\begin{center}\small
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+trace & arm & AUC & of full gap & of attainable \\
+\midrule
+conversation & arrival-learned  & 0.574 & 82.8\% & 91.6\% \\
+             & \textbf{arrival-FCFS} & 0.500 & \textbf{84.2\%} & \textbf{93.2\%} \\
+             & arrival-shuffled & 0.500 & 82.6\% & 91.4\% \\
+             & ceiling          & 1.000 & 90.4\% & 100.0\% \\
+\midrule
+toolagent    & arrival-learned  & 0.635 & 47.0\% & 88.9\% \\
+             & \textbf{arrival-FCFS} & 0.500 & \textbf{47.3\%} & \textbf{89.5\%} \\
+             & arrival-shuffled & 0.500 & 45.8\% & 86.6\% \\
+             & ceiling          & 1.000 & 52.8\% & 100.0\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\noindent Three readings, in order of how much they change the design question.
+
+\emph{Timing recovers the benefit.} The reachable share rises from 3.1\% to \textbf{90.4\%} on
+conversation and 2.4\% to \textbf{52.8\%} on toolagent --- $29\times$ and $22\times$. The headroom was
+never absent; the protocol could not reach it.
+
+\emph{Deciding at all captures almost all of it; deciding well adds nothing.} First-come-first-served
+admission with a fixed action reaches 93.2\% and 89.5\% of the ceiling. The learned arm, at AUC 0.574
+and 0.635, reaches 91.6\% and 88.9\% --- \emph{slightly worse}. We are not claiming the learned arm is
+harmed by learning; at these AUCs the ranking is close enough to noise that spreading beliefs across the
+per-item cost function's thresholds costs more than the ordering wins.
+
+\emph{Even the ordering barely matters.} Shuffling the arrival order costs 1.8 and 3.0 points. What is
+left --- the overwhelming majority --- is attributable to nothing more than making the decision at the
+moment the block appears.
+
+The design implication is the one the earlier framing could not reach: on these workloads, build an
+\textbf{admission point}, not a predictor. That is also where the caching literature has been pointing.
+Baleen~\cite{S12_wong2024baleen} is the one system among those we survey that decides admission rather
+than eviction, and it optimizes a downstream system cost rather than miss rate.
+
+\subsection{What a better ranker buys, once the metric is fixed}
+\label{sec:capacity}
+The capacity ladder of our earlier draft asked whether a stronger model converts into a better placement.
+Under the corrected metric --- ties broken by tier speed rather than enum order, and every belief
+quantile-matched onto one magnitude multiset so that only the ordering varies --- the answer is that
+ranking quality moves the outcome monotonically and never enough to help:
+
+\begin{center}\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+rung & AUC (conv / tool) & \% of attainable (conv) & (tool) \\
+\midrule
+constant        & 0.50 / 0.50 & $-154.6$ & $-825.7$ \\
+random          & 0.49 / 0.50 & $-208.2$ & $-838.6$ \\
+$\log$(count)   & 0.64 / 0.71 & $-70.9$  & $-75.8$ \\
+logistic        & 0.81 / 0.93 & $-18.8$  & $-32.1$ \\
+GBDT            & 0.80 / 0.91 & $-23.9$  & $-33.0$ \\
+MLP             & 0.82 / 0.93 & $-8.5$   & $-19.3$ \\
+\midrule
+ceiling         & 1.00        & $100$    & $100$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\noindent The damage falls monotonically as AUC rises ($-154 \to -71 \to -19 \to -8.5$), so ranking
+quality does convert --- into less harm. Every arm is nonetheless below the frequency baseline, because
+forcing an imperfect ranking onto the oracle's magnitude multiset assigns large beliefs to blocks that
+will not be reused.
+
+\paragraph{The magnitude convention decides the sign, and we measured by how much.}
+We report the table above under a stated convention because it does not survive an unstated one. Running
+each rung twice --- once on the scale its own scores naturally produce, once quantile-matched onto a
+common multiset, \emph{with the ordering identical in both} --- gives:
+
+\begin{center}\small
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+trace & rung & native scale & common scale & difference \\
+\midrule
+conversation & logistic & $+75.0$ & $-18.8$ & 93.8 \\
+             & $\log$(count) & $-39.2$ & $-70.7$ & 31.5 \\
+             & random   & $-81.1$ & $-208.2$ & 127.1 \\
+\midrule
+toolagent    & logistic & $+84.8$ & $-32.1$ & 117.0 \\
+             & $\log$(count) & $-25.2$ & $-59.1$ & 33.9 \\
+             & random   & $-630.2$ & $-838.6$ & 208.5 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent{\footnotesize Percent of the attainable ceiling. The two columns differ only in the magnitudes
+attached to an identical ranking.}
+
+\medskip
+\noindent The same policy, with the same ordering, scores $+84.8\%$ or $-32.1\%$ depending on a choice
+of scale. The gap runs from \textbf{31.5 to 208.5 points} --- an order of magnitude larger than any
+effect this paper or its predecessors reported. An earlier draft asserted that this control ``changes
+the captured headroom by about two points''; that number was never computed, and it is wrong by two
+orders of magnitude.
+
+We therefore claim neither column. What we do claim is the comparison \emph{within} a column, which is
+well defined: on the common scale, ranking quality converts monotonically into less harm. And we claim
+the methodological point, which we think is the more useful one: \textbf{``fraction of headroom
+captured'' is not a quantity until the magnitude convention is stated}, and no version of this paper,
+nor any placement study we are aware of, states it.
+
+
+\input{sections/table2_regimes}
+
+\subsection{A measurement that was never a measurement}
+\label{sec:sampling}
+We also attempted the obvious follow-up --- fit a richer per-block model on the agentic source and place
+with it --- and first obtained what looked like a strong positive: $+66$ to $+88\%$ of the headroom
+captured, reproducing across what we took to be two samples. It was not a result, and the way it failed is
+worth more than the number would have been.
+
+The two samples were \emph{sorted prefixes} of the conversation corpus, so the smaller was contained in
+the larger; and file index correlates strongly with conversation shape (mean requests per conversation
+falls from 140 to 37 between files 1--20 and 71--150). Extending the same prefix to 100 and 150
+conversations drove the captured headroom to $-9\%$ and $-48\%$ --- a sign reversal. Re-drawing the
+samples \emph{at random} rather than as prefixes then showed why: four random draws at 40
+conversations land between $-234$ and $+66$ points, and at 20 conversations between $-1207$ and $+78$
+(\Cref{tab:kvct}). The spread dwarfs the effect by an order of magnitude. We quote the observed range
+rather than a confidence interval on purpose: with four draws a parametric interval rests on a normality
+assumption these data cannot support, and \emph{captured} is a ratio whose denominator varies per draw.
+An earlier revision of this paper reported $\pm126$ here, computed with the normal quantile against a
+standard deviation estimated from four points; the correct $t(3)$ half-width is $\pm205$. That error is
+the eleventh entry in \Cref{sec:protocol}'s catalogue and it was ours. Under a correct sampling protocol there was never a
+measurement here to report.
+
+We keep this in the paper for two reasons. It is the control that our own protocol
+(\Cref{sec:protocol}) lacked, and running it costs minutes; and it bounds what the rest of our numbers
+are worth, since every other result in this section is also a single draw of a parameter we chose.
+
+\input{sections/table3_kvct}
+
+\subsection{Where reaction stands}
+\label{sec:reaction}
+If forecasting does not pay, the alternative is to react. On the full Mooncake traces, reactive tiering
+reaches 75--99\% of Belady's hit rate on the toolagent trace and 40--94\% on open-ended conversation
+using LRU, LFU or a fill-once cache alone; admitting the adaptive and learned policies below widens the
+per-operating-point envelope only to 76--99\% and 42--94\% (\Cref{fig:reactive}).
+
+The interesting question is not the envelope --- that is an oracle over policies, not something anyone
+deploys --- but whether any \emph{single} policy attains it, and whether the adaptive designs built for
+exactly this situation beat plain rules. We therefore run the family: \textbf{ARC}~\cite{S7_megiddo2003arc},
+which shifts a recency/frequency split on ghost hits; \textbf{LeCaR}~\cite{S8_vietri2018lecar} and
+\textbf{CACHEUS}~\cite{S9_rodriguez2021cacheus}, which replace ARC's arithmetic update with regret-based
+multiplicative weights over two experts; and the learned \textbf{LRB}, which is reported separately below because its
+numbers carry an implementation band the others do not.
+
+\begin{center}\small
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+trace & tier & best pure & ARC & LeCaR & CACHEUS \\
+\midrule
+conversation & 2\%  & 39.8 & 29.4 & \textbf{42.3} & 35.9 \\
+             & 5\%  & 53.3 & \textbf{57.9} & 56.8 & 53.5 \\
+             & 10\% & 76.0 & \textbf{77.5} & 77.2 & 75.3 \\
+             & 20\% & \textbf{94.1} & 87.4 & 93.9 & 88.8 \\
+\midrule
+toolagent    & 2\%  & 74.9 & 70.7 & \textbf{75.8} & 73.9 \\
+             & 5\%  & 81.3 & \textbf{83.6} & 83.0 & 82.9 \\
+             & 10\% & 91.9 & 92.3 & \textbf{92.9} & 91.8 \\
+             & 20\% & 99.3 & 96.3 & \textbf{99.3} & 97.6 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent{\footnotesize Percent of Belady's hit rate. ``Best pure'' is the better of LRU, LFU and a
+fill-once cache at that operating point.}
+
+\medskip
+\noindent Across eight operating points and four designs, \textbf{the best adaptive or learned policy
+beats the best pure rule by at most 4.6 points of Belady}, and at two points by nothing at all. Which
+design wins also moves: LeCaR at the tightest tier on both traces, ARC in the middle, plain LRU at the
+loosest. That is the substantive finding --- not that these policies fail, but that on KV-block workloads
+the whole adaptive-replacement family collapses into a band a few points wide, well short of the oracle
+at the small tiers where the decision actually matters.
+
+The diagnostics say why, and the reason is specific to KV workloads. Every policy in this family adapts
+on a \emph{ghost hit} --- a miss on a block it recently evicted --- whether it updates a split (ARC) or
+an expert weight (LeCaR, CACHEUS). But 76--78\% of blocks in these traces are never reused at all, so
+most evictions are correct and produce no signal. Measured, ARC receives an adaptation signal on
+\textbf{3.5--7.3\% of misses}; the regret-based policies read the same channel, which is why they land
+in the same band rather than above it. What signal it does get is not merely sparse but, at
+the smallest tier, directionally wrong: at a 2\% tier ARC drives $p$ to 90\% recency on both traces, while
+the rule that actually wins there is frequency. A workload whose blocks are mostly singletons starves the
+very mechanism adaptive replacement runs on.
+
+\paragraph{And the learned cache policy loses to both --- but only as a range.} The strongest
+counter-argument to this paper is LRB~\cite{S6_song2020lrb}, which learns a relaxed-Belady objective from
+a far richer feature set than our four trace-local statistics and won on production CDN traces. We
+reimplement it: GBDT regression on log time-to-next-request over inter-access deltas and exponentially
+decayed counters, sampled eviction, online retraining from a sliding memory window, right-censored
+labels.
+
+Our first version of it measured something else entirely. The training buffer was capped by truncating to
+its tail; labelled rows arrive one at a time as blocks are re-accessed while censored rows arrive in one
+contiguous burst per checkpoint, so from the third retrain onward every training label was identical, the
+regressor returned a constant, and eviction degenerated to a uniform draw over the sampled candidates.
+A random-replacement control reproduces that column to within 1.5 points at all eight operating points.
+We report the repaired numbers and, because two defensible repairs disagree, we report them as a band:
+
+\begin{center}\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+trace & tier & LRB (repaired) & ARC & below ARC? \\
+\midrule
+conversation & 2\%  & 27.6--29.2 & 29.4 & yes \\
+             & 5\%  & 30.9--32.2 & 57.9 & yes \\
+             & 10\% & 45.0--45.9 & 77.5 & yes \\
+             & 20\% & 75.8--76.5 & 87.4 & yes \\
+\midrule
+toolagent    & 2\%  & 68.8--69.0 & 70.7 & yes \\
+             & 5\%  & 71.1--71.4 & 83.6 & yes \\
+             & 10\% & 80.9--83.0 & 92.3 & yes \\
+             & 20\% & 94.6--94.9 & 96.2 & yes \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent{\footnotesize Percent of Belady. The band spans two repairs of the truncation bug: subsampling
+all accumulated rows, and dropping rows older than the memory window first. We adopt the second, which is
+what a ``sliding memory window'' means.}
+
+\medskip
+\noindent \textbf{The band understates the uncertainty.} An independent reimplementation of the same
+repair, produced during review of this paper, reports $\approx$63\% at conversation/10\% where ours gives
+45.9\%. We cannot reconcile a 17-point difference without that code. So the honest reading is that our
+LRB \emph{point} estimates are not citable to better than about twenty points --- wider than several
+differences this paper's earlier drafts drew conclusions from. What survives that band is the ordering:
+\textbf{LRB is below ARC at all eight operating points under every repair we or the reviewer produced,
+including the 63\% reading.} That is the claim we make; the numbers are context for it.
+
+The mechanism appears to be the one that limits ARC, seen from the other side. LRB learns from labels the
+trace supplies when a sampled block is requested again; a block that never returns yields a
+\emph{right-censored} row, which says only ``not within the window'' and nothing about when. At the
+default window \textbf{77--83\% of LRB's training rows are censored}, and 86--89\% at a shorter one. A
+population dominated by singletons starves the ghost-hit channel that adaptive replacement runs on and
+the regression target that learned replacement runs on, for the same underlying reason.
+
+Three caveats bound this. It is our reimplementation of the published mechanism, not the authors'
+artifact. KV blocks are uniform-size, so byte miss ratio collapses to object miss ratio and LRB loses one
+of its structural advantages over LRU. And the hyperparameter sweep we ran to check that the result was
+not a tuning artifact was run on the \emph{broken} implementation, so it tested the robustness of random
+eviction; we have not repeated it.
+
+
+The eviction signal also inverts by source. On the agent traces LRU reaches 0.88--0.95 of Belady at a 5\%
+tier while LFU stays near 0.23--0.27; on Mooncake the ordering reverses below the working-set knee. An
+eviction policy tuned on one source is a poor default for the other --- and, as both the ARC and the LRB
+result show, reaching for a more sophisticated policy does not by itself resolve the choice.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{fig_reactive.pdf}
+  \caption{Reactive tiering as a fraction of Belady's hit rate, full Mooncake traces. Bars are a
+  per-operating-point best-of-five envelope, an oracle over policies rather than a policy. Diamonds are
+  ARC, which meets the envelope at 5\% and 10\% but falls short at both extremes; crosses are the
+  LRB-style learned policy, which is below ARC everywhere.}
+  \label{fig:reactive}
+\end{figure}
+
+\subsection{Placement is not retrieval}
+\label{sec:placement-vs-retrieval}
+A tiering scheduler decides what to keep hot; a retriever decides what enters the prompt. Our first
+attempt to measure the difference on LoCoMo~\cite{P51_maharana2024locomo} resolved nothing: two runs
+ranked the arms oppositely, and across nine comparisons in each, not one survived correction for
+multiplicity. A power analysis said why --- separating the query-agnostic arms needed 246--710 scored
+questions per arm and we had 30 --- and also said the reversal was not small-sample noise but came from
+the two runs drawing \emph{different dialogues}, which is \Cref{sec:sampling}'s failure in a different
+corpus.
+
+We therefore re-ran it at the size the analysis asked for: all ten released dialogues, 30 held-out
+questions each, \textbf{300 scored questions per arm}, LLM-judged. Because every arm answers the same
+questions the comparison is paired, so we test it with McNemar on the discordant pairs rather than
+Fisher on independent samples, and report a per-dialogue sign test alongside so a result cannot rest on
+one dialogue.
+
+\begin{center}\small
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+budget & demand & random & centrality & retrieval \\
+\midrule
+10\% & 12.0 & 6.7 & 1.7 & \textbf{51.7} \\
+25\% & 16.7 & 11.3 & 6.3 & \textbf{52.7} \\
+50\% & 29.3 & 25.3 & 16.3 & \textbf{55.3} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent{\footnotesize QA accuracy (\%), 300 questions per cell. The first three arms are
+query-agnostic placement; retrieval sees the question and is therefore better informed by construction.}
+
+\medskip
+\noindent \textbf{Six of the nine comparisons now survive Bonferroni correction}, where none did before.
+That is three distinct claims, each replicated at three nested budgets over the same 300 questions, not
+six independent findings --- and Bonferroni is the right correction precisely because those tests are
+dependent, since it controls the family-wise error rate under arbitrary dependence. Holm on the same
+nine $p$-values rejects the same six.
+
+\emph{Retrieval dominates placement, decisively.} It leads at every budget, by a factor of four at the
+tightest one, with $p < 10^{-15}$ and the same direction in \textbf{10 of 10 dialogues} (sign test
+$p = 0.002$). What was previously argued from scoping is now measured: a query-aware retriever and a
+query-agnostic placement policy are not competing for the same job, and a placement signal evaluated as
+if it were a retrieval signal will always look bad.
+
+\emph{The placement signal is nonetheless real within its own regime.} Ranking turns by evidence demand
+beats embedding centrality --- the fair same-regime baseline --- at every budget ($p \le
+1.2\times10^{-4}$). At the dialogue level it leads in 8, 10 and 9 dialogues of 10 (sign test $p = 0.008$,
+$0.002$, $0.022$); two of those three do not clear the corrected threshold on their own, so the
+question-level test is doing the work here. Query-agnostic placement is not noise; it is simply solving a different and
+strictly harder problem than retrieval, with no access to the query.
+
+\emph{One comparison is still unresolved, and we say by how much.} Demand versus random selection points
+the right way at all three budgets but reaches only $p = 0.029$, $0.068$ and $0.256$, and at the
+dialogue level says nothing at all (5--2, 6--2 and 7--3 dialogues; sign test $p = 0.45$, $0.29$, $0.34$).
+At the observed discordance rates, 80\% power would need \textbf{758, 1078 and 2589 questions per arm}
+at the corrected threshold we judge significance against --- 486, 667 and 1593 if one sizes at an
+uncorrected $0.05$, which is the mistake an earlier revision of this paper made. Against the 300 we ran,
+the shortfall is between $2.5\times$ and $8.6\times$. We report this as open with its sample size
+attached rather than as a null, and note that a required $n$ estimated from the same data whose null it
+describes is itself a noisy quantity: across seeds it moves by roughly 10\%.
+
+The reading we take from this is scoping, now with evidence behind it: placement governs latency and
+cost, retrieval governs which facts reach the model, and the two compose rather than compete.
+
+
+\subsection{The representation axis, and what it says about our own formulation}
+\label{sec:representation}
+\Cref{sec:formulation} decides representation jointly with tier because the two are argued to be
+coupled: a compressed item is cheap to serve but may cost accuracy, so the right form depends on the
+budget. Every experiment above holds representation at plaintext, which means that argument --- the
+reason the joint decision exists --- had never been tested. We test it here, on LoCoMo, with the same
+fact ids, questions and gold answers under three representations that differ only in text and token
+cost: the turn verbatim, an LLM summary, and an aggressive key--value extract. All three are
+\emph{textual}; the vector, graph, latent and parameter forms of \Cref{sec:formulation} are not
+instantiated anywhere in this work, so what follows probes the axis rather than exercising it. Budgets are a fraction of
+the \emph{plaintext} total for all three, so a compressed form is not quietly handed a larger allowance.
+
+\begin{center}\small
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+budget & plaintext & summary & extract \\
+\midrule
+5\%  & 5.0  & \textbf{11.0} & 5.0  \\
+10\% & 10.0 & \textbf{15.0} & 7.0  \\
+25\% & 19.0 & \textbf{26.0} & 21.0 \\
+50\% & 32.0 & \textbf{38.0} & 22.0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent{\footnotesize QA accuracy (\%), 100 questions per cell, LLM-judged. Mean compression ratio:
+summary $0.58\times$, extract $0.19\times$.}
+
+\medskip
+\noindent Two things are visible and one is not. The trade-off the formulation posits is \emph{visible}:
+compress far enough and utility appears to collapse, with the $0.19\times$ extract ten points behind
+plaintext at the loosest budget --- though that gap, like everything else here, clears no significance
+threshold. But the optimum \emph{does not move}. Summary leads at all four budgets, with the
+discordant pairs favouring it every time (6--0, 5--0, 11--4, 19--13). If that holds, representation on
+this workload need not be re-decided per operating point --- a weaker coupling than we assumed when we
+wrote \Cref{sec:formulation}.
+
+What is not visible is significance. \textbf{None of the eight comparisons survives correction} (best
+raw $p = 0.031$ against a 0.00625 threshold); at the observed discordance rates, resolving
+summary-versus-plaintext needs 188--1138 questions per cell at the corrected threshold (129--718 at an
+uncorrected $0.05$) against the 100 we ran. By the rule we impose
+on ourselves in \Cref{sec:protocol}, this is a direction with a sample size attached, not a result. We
+report it because it is the first time the axis has been exercised at all, and because the direction
+points against our own framing rather than for it.
+
+
+\subsection{What the measurement required}
+\label{sec:protocol}
+Every positive result we obtained before the final protocol was an artifact. We report the mechanisms
+because they generalize, and because the last three were found only by adversarial review rather than by
+our own checks.
+
+\paragraph{Reference-frame mismatches (six).} Two quantities that must share a frame --- the same split
+instant, ordering, tie rule, or question set --- were silently defined on different ones: a demand signal
+computed from the questions being scored; policy features derived from whole-trace access counts; an
+oracle that inherited the heuristic's ordering and so showed zero headroom; a train/test split taken over
+access-event indices rather than time, which on real traces falls past the end of the trace; a ranking
+metric that broke ties by label, inflating a raw count feature from AUC 0.51 to 0.94; and features built
+at one split instant while costs were billed at another.
+
+\paragraph{Retracted claims (three).} Each survived our own checks and was found later --- the last two
+by adversarial review, after the catalogue below had already been written. \textbf{(i)} A headline
+``+66--88\% of headroom captured on agentic traces'' that reversed sign at a larger sample and that
+randomized draws showed had never been measurable (\Cref{sec:sampling}). \textbf{(ii)} A
+\emph{decoupling} claim --- prediction improves while placement does not --- that was an artifact of
+normalizing against an oracle ranking blocks a causal policy cannot see (\Cref{sec:reachable});
+normalized against what is attainable, ranking quality converts monotonically. \textbf{(iii)} A reported
+LRB column that measured \emph{random eviction}: the training buffer was truncated to its tail, censored
+rows arrive in one contiguous burst per checkpoint, and from the third retrain onward every training
+label was identical, so the regressor returned a constant and eviction degenerated to a uniform draw.
+Two independent repairs of that bug disagree by 19 points, so we withhold the column rather than publish
+either.
+
+The common shape is worth naming: in all three the \emph{aggregate looked reasonable}. A flat captured
+fraction, a plausible interval, a learned policy landing below ARC --- each is what the hypothesis
+predicted, and none of our checks compared the quantity against what it was arithmetically able to be.
+
+\paragraph{Free-parameter extrapolations (three).} Each was a curve read from one point, in a parameter
+fixed for convenience. A reactive claim taken at a single cache size reversed under a sweep. A headroom
+taken at 6\% of the trace moved six points by full length (81.0\% to 87.2\%), and the placement
+benefit read off it peaked mid-sweep rather than at the longest trace. And a learned-placement result taken at 40 and
+70 conversations --- \emph{nested prefixes} of a corpus whose per-conversation statistics vary threefold
+along the file index --- reversed sign at 150, from $+88\%$ to $-48\%$, and took a headline claim with it.
+
+\paragraph{Believing a report over an observation (one).} An edit script targeted a heading an earlier
+revision had removed, matched nothing, and printed success anyway.
+
+\paragraph{The controls.} Assert that the oracle beats the heuristic it is compared against; keep a
+no-learning baseline of the same functional form as the learned one; check that no single feature
+outperforms the fitted model; before concluding that a signal is unlearnable, vary model capacity while
+holding the protocol fixed, so ``the model was too weak'' is excluded rather than assumed
+(\Cref{sec:capacity}); compare reference frames explicitly rather than trusting that two code paths
+agree; verify an edit landed rather than that it reported success; sweep every parameter chosen for convenience
+before stating a result that depends on it --- the one we lacked; and, before reporting any null, compute
+the sample size that would have resolved it, because ``we could not tell'' and ``there is nothing there''
+are different claims and only the first is ours to make. The harness ships with all of these wired in,
+and a checker that re-derives every number in this paper from its artifact and fails if the two have
+drifted --- which caught four rounding drifts and one claim that had quietly mixed two hyperparameter
+settings.
+
+\subsection{Limitations}
+\label{sec:limits}
+No real vLLM+LMCache deployment was measured, so any cost-expressed quantity should be read as a range.
+We tightened what that range means. Our first sensitivity analysis scaled every tier latency by a common
+factor, which moves the absolute scale and leaves the \emph{ratios} between tiers untouched --- and the
+ratios are what a placement policy responds to, so it never tested the parameter that mattered. We
+therefore derive the table instead: KV bytes per block follow exactly from a model's attention shape
+($2 \times \text{layers} \times \text{kv\_heads} \times \text{head\_dim} \times \text{dtype}$ per
+token), and per-tier latency is that divided by a declared device-class bandwidth plus a fixed overhead.
+Sweeping three attention shapes against five device classes puts headroom at \textbf{64--88\%}, which
+contains the 81\% our hand-written table gives --- the conclusion survives, but two things about the
+table do not. Its GPU:CPU latency ratio is 1:10 where the derivation gives 1:80 to 1:250, an order of
+magnitude in the ratio the policy is most sensitive to; and \textbf{6 of the 15 device classes reorder
+the hierarchy} so that latency order and capacity order disagree, which our fixed per-tier capacity table
+cannot express at all. Calibrating against a live deployment remains the open gate; this is the honest
+intermediate, not a substitute. The
+\emph{timing} axis of \Cref{sec:formulation} is not exercised at all, and the \emph{representation} axis
+only as the underpowered pilot of \Cref{sec:representation}; neither is touched by the KV traces. Both
+sources are KV-block hash streams from transformer prefix caching, so they are independent in provenance
+but not in mechanism; with one exemplar per putative regime we cannot separate workload character from
+vendor, date, or block size (256 vs.\ 64 tokens). Sampling is not randomized and no confidence interval is
+reported for the placement results, though the two remaining free parameters --- trace length and split
+instant --- are now swept rather than fixed. Of the learned and adaptive cache literature we evaluate
+ARC~\cite{S7_megiddo2003arc}, LeCaR~\cite{S8_vietri2018lecar}, CACHEUS~\cite{S9_rodriguez2021cacheus} and
+a reimplementation of LRB~\cite{S6_song2020lrb}; Hawkeye, Mockingjay and Baleen are positioned in
+\Cref{sec:related} but not run, the first two because a KV block hash carries no analogue of the program
+counter their predictors are indexed by. Our LRB is the
+published mechanism rebuilt from the paper, not the authors' artifact --- as are our LeCaR and CACHEUS, whose
+CR-LFU expert we approximate by LFU --- and the uniform block size of both sources removes one of LRB's
+advantages over LRU, so the underperformance we report should be read as a statement about this workload
+rather than about these designs.

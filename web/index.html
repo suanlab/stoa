@@ -1,0 +1,416 @@
+<title>STOA · Agent Memory · DB · Index — 연구 지형도 (2020–2026)</title>
+<style>
+  :root {
+    --bg: #f4f6f8; --panel: #ffffff; --panel-2: #eef1f5; --ink: #14181d; --ink-2: #465063;
+    --line: #d9dfe7; --line-2: #c6ced9;
+    --teal: #0e9c90; --teal-ink: #0b7a70;
+    --mem: #7a52e0; --db: #3160c8; --idx: #c67d0a;
+    --mem-bg: #efeafc; --db-bg: #e6edfb; --idx-bg: #f8efdd;
+    --shadow: 0 1px 2px rgba(20,30,50,.06), 0 8px 24px rgba(20,30,50,.06);
+    --mono: ui-monospace, "SF Mono", "SFMono-Regular", "JetBrains Mono", "Menlo", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1117; --panel: #151b23; --panel-2: #1c242e; --ink: #e6ebf2; --ink-2: #9aa7b8;
+      --line: #263040; --line-2: #33415a;
+      --teal: #2fd4c4; --teal-ink: #58e0d2;
+      --mem: #a78bfa; --db: #6f9bf5; --idx: #e6a943;
+      --mem-bg: #201a35; --db-bg: #17223c; --idx-bg: #2e2411;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f4f6f8; --panel: #ffffff; --panel-2: #eef1f5; --ink: #14181d; --ink-2: #465063;
+    --line: #d9dfe7; --line-2: #c6ced9; --teal: #0e9c90; --teal-ink: #0b7a70;
+    --mem: #7a52e0; --db: #3160c8; --idx: #c67d0a;
+    --mem-bg: #efeafc; --db-bg: #e6edfb; --idx-bg: #f8efdd;
+    --shadow: 0 1px 2px rgba(20,30,50,.06), 0 8px 24px rgba(20,30,50,.06);
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1117; --panel: #151b23; --panel-2: #1c242e; --ink: #e6ebf2; --ink-2: #9aa7b8;
+    --line: #263040; --line-2: #33415a; --teal: #2fd4c4; --teal-ink: #58e0d2;
+    --mem: #a78bfa; --db: #6f9bf5; --idx: #e6a943;
+    --mem-bg: #201a35; --db-bg: #17223c; --idx-bg: #2e2411;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans);
+    line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+  section { padding: 56px 0; border-top: 1px solid var(--line); }
+  section:first-of-type { border-top: none; }
+
+  .eyebrow { font-family: var(--mono); font-size: 11.5px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--teal-ink); margin: 0 0 10px; font-weight: 600; }
+  h1 { font-size: clamp(30px, 5vw, 50px); line-height: 1.05; letter-spacing: -.02em;
+    margin: 0 0 16px; text-wrap: balance; font-weight: 750; }
+  h2 { font-size: clamp(21px, 3vw, 28px); letter-spacing: -.015em; margin: 0 0 6px;
+    text-wrap: balance; font-weight: 700; }
+  .sub { color: var(--ink-2); max-width: 62ch; margin: 0 0 4px; }
+  h3 { margin: 0; font-size: 15px; font-weight: 650; }
+  p { margin: 10px 0; }
+  a { color: var(--teal-ink); }
+
+  /* Hero */
+  .hero { padding-top: 68px; padding-bottom: 40px; }
+  .hero .mono-line { font-family: var(--mono); font-size: 12.5px; color: var(--ink-2);
+    letter-spacing: .02em; margin-bottom: 22px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .tag { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11px;
+    font-family: var(--mono); border: 1px solid var(--line-2); color: var(--ink-2); }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 34px; }
+  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px 16px; box-shadow: var(--shadow); }
+  .stat .n { font-size: 30px; font-weight: 760; letter-spacing: -.02em; font-variant-numeric: tabular-nums;
+    display: block; line-height: 1; }
+  .stat .l { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: .1em;
+    color: var(--ink-2); margin-top: 8px; display: block; }
+  .stat .bar { height: 3px; border-radius: 2px; margin-top: 14px; background: var(--teal); opacity: .85; }
+
+  /* Axis legend */
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin: 4px 0 26px;
+    font-family: var(--mono); font-size: 12px; }
+  .legend .k { display: inline-flex; align-items: center; gap: 7px; color: var(--ink-2); }
+  .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; flex: none; }
+  .d-mem { background: var(--mem); } .d-db { background: var(--db); } .d-idx { background: var(--idx); }
+
+  /* Paradigm shifts — a true typed sequence, numbering earns its place */
+  .shifts { display: grid; gap: 12px; margin-top: 26px; }
+  .shift { display: grid; grid-template-columns: 46px 1fr auto; gap: 16px; align-items: center;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px;
+    box-shadow: var(--shadow); }
+  .shift .idx-n { font-family: var(--mono); font-size: 13px; color: var(--teal-ink); font-weight: 600;
+    border-right: 1px solid var(--line); padding-right: 14px; }
+  .shift .from-to { font-size: 15px; }
+  .shift .from-to b { font-weight: 680; }
+  .shift .arrow { color: var(--teal); font-weight: 700; }
+  .shift .tension { display: block; color: var(--ink-2); font-size: 13px; margin-top: 3px; }
+  .shift .refs { font-family: var(--mono); font-size: 11px; color: var(--ink-2); white-space: nowrap; }
+
+  /* Taxonomy tree */
+  .tree { font-family: var(--mono); font-size: 13px; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 14px; padding: 22px 22px 24px; box-shadow: var(--shadow); overflow-x: auto; margin-top: 22px; }
+  .tree ul { list-style: none; margin: 0; padding-left: 18px; border-left: 1px solid var(--line-2); }
+  .tree > ul { border-left: none; padding-left: 0; }
+  .tree li { margin: 4px 0; position: relative; padding-left: 14px; }
+  .tree li::before { content: ""; position: absolute; left: 0; top: 11px; width: 10px; height: 1px;
+    background: var(--line-2); }
+  .tree > ul > li { padding-left: 0; } .tree > ul > li::before { display: none; }
+  .node { font-weight: 650; color: var(--ink); font-family: var(--sans); font-size: 14px; }
+  .branch { color: var(--teal-ink); font-weight: 600; }
+  .leaf { color: var(--ink-2); }
+  .cite { color: var(--ink); opacity: .82; }
+  .pill { display: inline-block; font-size: 10px; padding: 1px 7px; border-radius: 999px; margin-left: 6px;
+    vertical-align: middle; font-weight: 600; }
+  .p-mem { background: var(--mem-bg); color: var(--mem); }
+  .p-db { background: var(--db-bg); color: var(--db); }
+  .p-idx { background: var(--idx-bg); color: var(--idx); }
+
+  /* Timeline */
+  .timeline { display: grid; gap: 0; margin-top: 22px; }
+  .yr { display: grid; grid-template-columns: 92px 1fr; gap: 20px; padding: 16px 0; border-top: 1px solid var(--line); }
+  .yr:first-child { border-top: none; }
+  .yr .y { font-family: var(--mono); font-weight: 700; font-size: 19px; color: var(--teal-ink);
+    font-variant-numeric: tabular-nums; }
+  .yr .y small { display: block; font-size: 10.5px; color: var(--ink-2); font-weight: 500; letter-spacing: .06em;
+    text-transform: uppercase; margin-top: 4px; }
+  .yr.pivot .y { color: var(--idx); }
+  .yr .desc { font-size: 14px; }
+  .yr .desc b { font-weight: 680; }
+  .yr .works { font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); margin-top: 5px; }
+
+  /* Priority matrix */
+  .matrix { width: 100%; border-collapse: collapse; margin-top: 22px; font-size: 13.5px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+    box-shadow: var(--shadow); }
+  .matrix-scroll { overflow-x: auto; }
+  .matrix th, .matrix td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--line);
+    white-space: nowrap; }
+  .matrix thead th { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: .09em;
+    color: var(--ink-2); font-weight: 600; background: var(--panel-2); }
+  .matrix tbody tr:last-child td { border-bottom: none; }
+  .matrix tbody tr:hover { background: var(--panel-2); }
+  .matrix .t-id { font-family: var(--mono); font-weight: 700; color: var(--teal-ink); }
+  .matrix .t-name { white-space: normal; font-weight: 600; min-width: 220px; }
+  .axisdots { display: inline-flex; gap: 5px; }
+  .axisdots .dot { opacity: .18; }
+  .axisdots .on.d-mem { opacity: 1; } .axisdots .on.d-db { opacity: 1; } .axisdots .on.d-idx { opacity: 1; }
+  .lvl { font-family: var(--mono); font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; }
+  .lvl.hi { color: var(--idx); background: var(--idx-bg); }
+  .lvl.mid { color: var(--ink-2); background: var(--panel-2); }
+  .lvl.low { color: var(--teal-ink); background: var(--panel-2); }
+  .flag { font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--teal); }
+
+  /* T1 spotlight */
+  .spot { background: linear-gradient(180deg, var(--panel), var(--panel-2)); border: 1px solid var(--line-2);
+    border-radius: 16px; padding: 26px 26px 28px; box-shadow: var(--shadow); margin-top: 22px; }
+  .spot .kicker { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--teal-ink); font-weight: 600; }
+  .spot h3 { font-size: 20px; margin: 8px 0 6px; letter-spacing: -.01em; }
+  .flow { display: flex; gap: 8px; flex-wrap: wrap; margin: 18px 0 6px; font-family: var(--mono); font-size: 12px; }
+  .flow .box { border: 1px solid var(--line-2); border-radius: 9px; padding: 8px 11px; background: var(--panel);
+    display: flex; flex-direction: column; gap: 3px; }
+  .flow .box small { color: var(--ink-2); font-size: 10px; }
+  .flow .sep { align-self: center; color: var(--teal); font-weight: 700; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 18px; }
+  .grid2 h4 { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .09em;
+    color: var(--ink-2); margin: 0 0 8px; }
+  .grid2 ul { margin: 0; padding-left: 18px; font-size: 13px; }
+  .grid2 li { margin: 5px 0; }
+
+  footer { border-top: 1px solid var(--line); padding: 34px 0 60px; color: var(--ink-2); font-size: 12.5px; }
+  footer .mono { font-family: var(--mono); font-size: 11.5px; }
+  .files { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+  .files span { font-family: var(--mono); font-size: 11px; padding: 4px 10px; border: 1px solid var(--line-2);
+    border-radius: 7px; }
+
+  @media (max-width: 760px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .shift { grid-template-columns: 34px 1fr; } .shift .refs { display: none; }
+    .grid2 { grid-template-columns: 1fr; }
+    .yr { grid-template-columns: 64px 1fr; gap: 14px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .stat, .shift, .yr { transition: transform .15s ease; }
+    .shift:hover { transform: translateX(2px); }
+  }
+</style>
+
+<div class="wrap">
+
+  <section class="hero">
+    <div class="eyebrow">Systematic Review · 체계적 문헌 조사</div>
+    <h1>AI Agent를 위한 Memory · DB · Index</h1>
+    <div class="mono-line">
+      <span class="tag">2020 — 2026</span>
+      <span class="tag">114 works verified</span>
+      <span class="tag">arXiv · ACL · DBLP · VLDB · SOSP</span>
+    </div>
+    <p class="sub">LLM 에이전트의 외부 <b>메모리</b> — 이를 저장·조직하는 <b>데이터베이스</b> — 이를 검색하는 <b>인덱스</b>.
+      네 개의 독립 연구 흐름이 하나의 <b>학습형·예산제약·안전보장 런타임</b>으로 수렴하는 지형을 정리한다.</p>
+    <div class="stats">
+      <div class="stat"><span class="n">114</span><span class="l">검증 논문·시스템</span><div class="bar"></div></div>
+      <div class="stat"><span class="n">6</span><span class="l">패러다임 전환</span><div class="bar" style="background:var(--mem)"></div></div>
+      <div class="stat"><span class="n">10</span><span class="l">미래 유망 주제</span><div class="bar" style="background:var(--db)"></div></div>
+      <div class="stat"><span class="n">7</span><span class="l">기간(년)</span><div class="bar" style="background:var(--idx)"></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Convergence</div>
+    <h2>핵심 패러다임 전환 (2025 – 2026)</h2>
+    <p class="sub">불과 1년 사이 세 축이 질적으로 재편되었다. 각 전환은 미해결 <b>긴장(tension)</b>을 남겼고,
+      이것이 곧 미래 연구 주제의 씨앗이다.</p>
+    <div class="shifts">
+      <div class="shift"><div class="idx-n">01</div>
+        <div class="from-to"><b>검색 기법</b> <span class="arrow">→</span> <b>메모리 OS</b>
+          <span class="tension">남은 긴장 · 평문↔활성화↔파라미터 3계층 마이그레이션 스케줄러 부재</span></div>
+        <div class="refs">MemOS · M+ · LMCache</div></div>
+      <div class="shift"><div class="idx-n">02</div>
+        <div class="from-to"><b>휴리스틱</b> <span class="arrow">→</span> <b>RL 메모리 관리</b>
+          <span class="tension">남은 긴장 · 메모리 쓰기·검색 단계에 대한 신용 할당(credit assignment)</span></div>
+        <div class="refs">Memory-R1 · Memory-as-Action</div></div>
+      <div class="shift"><div class="idx-n">03</div>
+        <div class="from-to"><b>고정 검색</b> <span class="arrow">→</span> <b>RL deep-research</b>
+          <span class="tension">남은 긴장 · 장기지평(100+ 툴콜) 재현성·프로세스 보상</span></div>
+        <div class="refs">Search-R1 · DeepResearcher</div></div>
+      <div class="shift"><div class="idx-n">04</div>
+        <div class="from-to"><b>단일노드 인덱스</b> <span class="arrow">→</span> <b>HW 공동설계·서빙 융합</b>
+          <span class="tension">남은 긴장 · 적응적·버스트 에이전트 워크로드용 인덱스 부재</span></div>
+        <div class="refs">d-HNSW · VecFlow · HedraRAG</div></div>
+      <div class="shift"><div class="idx-n">05</div>
+        <div class="from-to"><b>회상 정확도</b> <span class="arrow">→</span> <b>생애주기 안전</b>
+          <span class="tension">남은 긴장 · 쓰기채널 오염 방어·파라미터+메모리 양방향 언러닝</span></div>
+        <div class="refs">MINJA · MPBench · SBU</div></div>
+      <div class="shift"><div class="idx-n">06</div>
+        <div class="from-to"><b>정적 지식</b> <span class="arrow">→</span> <b>자기진화·경험</b>
+          <span class="tension">남은 긴장 · 자기진화 ↔ 파국적 망각(catastrophic forgetting)의 조화</span></div>
+        <div class="refs">Darwin Gödel · EvolveR</div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Taxonomy</div>
+    <h2>분류 체계</h2>
+    <p class="sub">축은 <b>무엇을 기억(WHAT)</b> → <b>어떻게 저장(HOW represent)</b> → <b>어떻게 검색(HOW retrieve)</b>의
+      수직 스택. 각 리프의 색은 그것이 관통하는 축을 표시한다.</p>
+    <div class="legend">
+      <span class="k"><span class="dot d-mem"></span> Memory · 무엇을 기억</span>
+      <span class="k"><span class="dot d-db"></span> DB · 저장·조직</span>
+      <span class="k"><span class="dot d-idx"></span> Index · 검색·인덱스</span>
+    </div>
+    <div class="tree">
+      <ul>
+        <li><span class="node">1 · 메모리의 기능적 유형 <span class="pill p-mem">Memory</span></span>
+          <ul>
+            <li><span class="branch">작업/단기</span> — <span class="cite">MemGPT · LongMem · ReadAgent · Context-Folding</span></li>
+            <li><span class="branch">에피소드</span> — <span class="cite">Generative Agents · Reflexion · MemoryBank · Larimar</span></li>
+            <li><span class="branch">의미</span> — <span class="cite">RAG · REALM · RETRO · MemoryLLM · Memory³ · M+</span></li>
+            <li><span class="branch">절차/경험</span> — <span class="cite">Voyager · ArcMemo · EvolveR</span></li>
+          </ul>
+        </li>
+        <li><span class="node">2 · 메모리의 저장 표현 <span class="pill p-db">DB</span></span>
+          <ul>
+            <li><span class="branch">파라메트릭</span> — <span class="cite">REALM · MemoryLLM · Larimar · Memory³</span></li>
+            <li><span class="branch">평문 / 벡터</span> — <span class="cite">RAG · In-Context RALM · DPR · Contriever · ColBERT</span></li>
+            <li><span class="branch">그래프 / KG</span> — <span class="cite">GraphRAG · HippoRAG · LightRAG · G-Retriever · A-MEM</span></li>
+            <li><span class="branch">계층 / 트리 · 시간</span> — <span class="cite">RAPTOR · ReadAgent · Zep</span></li>
+            <li><span class="branch">잠재(KV) · 다계층 OS</span> — <span class="cite">M+ · LMCache · MemOS</span></li>
+          </ul>
+        </li>
+        <li><span class="node">3 · 검색·인덱스 메커니즘 <span class="pill p-idx">Index</span></span>
+          <ul>
+            <li><span class="branch">검색 전략</span> — <span class="cite">Self-RAG · FLARE · CRAG · AlignRAG · Search-R1 · DeepResearcher</span></li>
+            <li><span class="branch">ANN 알고리즘</span> — <span class="cite">PQ · HNSW · DiskANN · CAGRA · ScaNN · SPANN · MV-HNSW</span></li>
+            <li><span class="branch">필터 / 스트리밍 / HW</span> — <span class="cite">Filtered-DiskANN · VecFlow · SPFresh · d-HNSW · GORIO · FlashANNS</span></li>
+            <li><span class="branch">벡터 DB / 서빙 융합</span> — <span class="cite">Milvus · Manu · VectorLiteRAG · HedraRAG · MFLI</span></li>
+          </ul>
+        </li>
+        <li><span class="node">4 · 메모리 관리 연산 <span class="pill p-mem">Memory</span> <span class="pill p-db">DB</span></span>
+          <ul>
+            <li><span class="branch">쓰기·반영·편집·망각</span> — <span class="cite">Mem0 · Memory-R1 · Sleep-time · LightMem · Agentic Unlearning</span></li>
+          </ul>
+        </li>
+        <li><span class="node">5 · 평가·안전 <span class="pill p-mem">Memory</span> <span class="pill p-db">DB</span> <span class="pill p-idx">Index</span></span>
+          <ul>
+            <li><span class="branch">장기 메모리·평생</span> — <span class="cite">LoCoMo · LongMemEval · MemoryAgentBench · LifelongAgentBench</span></li>
+            <li><span class="branch">검색·인덱스·보안</span> — <span class="cite">BEIR · MTEB · ANN-Benchmarks · Big ANN · MINJA · MPBench</span></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Evolution</div>
+    <h2>시간적 발전 흐름</h2>
+    <div class="timeline">
+      <div class="yr"><div class="y">2020<small>검색 = 메모리</small></div>
+        <div class="desc"><b>비파라메트릭 메모리</b> 개념 확립 + 벡터 DB 산업화 시작.
+          <div class="works">RAG · REALM · DPR · ColBERT · ScaNN · AnalyticDB-V · (기반 HNSW·FAISS·DiskANN)</div></div></div>
+      <div class="yr"><div class="y">2021<small>표준화</small></div>
+        <div class="desc">검색-리더 확장 · 전용 벡터 DBMS · 검색 평가 표준.
+          <div class="works">FiD · Contriever · Milvus · SPANN · KILT · BEIR</div></div></div>
+      <div class="yr"><div class="y">2022<small>초대규모</small></div>
+        <div class="desc">조 단위 토큰 DB · 검색기-리더 공동 사전학습.
+          <div class="works">RETRO · Atlas · Manu</div></div></div>
+      <div class="yr pivot"><div class="y">2023<small>★ 전환점</small></div>
+        <div class="desc"><b>Agent Memory의 부상</b> — 인지·OS 메모리 아키텍처 등장.
+          <div class="works">MemGPT · Generative Agents · Reflexion · Voyager · Self-RAG · FLARE · Filtered-DiskANN</div></div></div>
+      <div class="yr"><div class="y">2024<small>구조화</small></div>
+        <div class="desc">그래프·트리·파라메트릭으로 표현 다양화 · 장기메모리 벤치 등장.
+          <div class="works">GraphRAG · HippoRAG · RAPTOR · MemoryLLM · Larimar · LoCoMo · LongMemEval · RULER</div></div></div>
+      <div class="yr"><div class="y">2025<small>재편</small></div>
+        <div class="desc"><b>메모리 OS · RL 관리 · RL deep-research · HW 공동설계</b>로 재편.
+          <div class="works">MemOS · Mem0 · Memory-R1 · Search-R1 · DeepResearcher · VecFlow · LMCache · MINJA</div></div></div>
+      <div class="yr"><div class="y">2026<small>성숙</small></div>
+        <div class="desc"><b>안전 생애주기 · 인덱스 프론티어 · 개인화</b>로 성숙.
+          <div class="works">MPBench · SBU · GORIO · MV-HNSW · MFLI · Agent-Native Memory · MemoryCD</div></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Future Directions</div>
+    <h2>미래 유망 연구 주제 — 우선순위 매트릭스</h2>
+    <p class="sub">프론티어 긴장에서 도출한 10개 주제. 축 색점은 관통하는 계층을, 시의성·진입장벽은 착수 판단을 돕는다.</p>
+    <div class="legend">
+      <span class="k"><span class="dot d-mem"></span> Memory</span>
+      <span class="k"><span class="dot d-db"></span> DB</span>
+      <span class="k"><span class="dot d-idx"></span> Index</span>
+    </div>
+    <div class="matrix-scroll">
+    <table class="matrix">
+      <thead><tr><th>ID</th><th>주제</th><th>축</th><th>시의성</th><th>난이도</th><th>진입장벽</th></tr></thead>
+      <tbody>
+        <tr><td class="t-id">T1</td><td class="t-name">학습형 메모리-계층 스케줄러</td>
+          <td><span class="axisdots"><span class="dot d-mem on"></span><span class="dot d-db on"></span><span class="dot d-idx on"></span></span></td>
+          <td><span class="lvl hi">매우높음</span></td><td><span class="lvl mid">높음</span></td><td><span class="lvl mid">높음</span></td></tr>
+        <tr><td class="t-id">T2</td><td class="t-name">메모리·검색 신용 할당</td>
+          <td><span class="axisdots"><span class="dot d-mem on"></span><span class="dot d-db"></span><span class="dot d-idx on"></span></span></td>
+          <td><span class="lvl hi">매우높음</span></td><td><span class="lvl mid">높음</span></td><td><span class="lvl mid">중</span></td></tr>
+        <tr><td class="t-id">T3</td><td class="t-name">메모리 생애주기 보안·거버넌스</td>
+          <td><span class="axisdots"><span class="dot d-mem on"></span><span class="dot d-db on"></span><span class="dot d-idx"></span></span></td>
+          <td><span class="lvl hi">매우높음</span></td><td><span class="lvl mid">중</span></td><td><span class="lvl low">낮음 ★</span></td></tr>
+        <tr><td class="t-id">T4</td><td class="t-name">워크로드-정합 아키텍처 자동설계</td>
+          <td><span class="axisdots"><span class="dot d-mem on"></span><span class="dot d-db on"></span><span class="dot d-idx on"></span></span></td>
+          <td><span class="lvl mid">높음</span></td><td><span class="lvl mid">중</span></td><td><span class="lvl mid">중</span></td></tr>
+        <tr><td class="t-id">T5</td><td class="t-name">통합 홀리스틱 벤치마크</td>
+          <td><span class="axisdots"><span class="dot d-mem on"></span><span class="dot d-db on"></span><span class="dot d-idx on"></span></span></td>
+          <td><span class="lvl mid">높음</span></td><td><span class="lvl mid">중</span></td><td><span class="lvl low">낮음 ★</span></td></tr>
+        <tr><td class="t-id">T6</td><td class="t-name">추론정책-인식 인덱스 공동설계</td>
+          <td><span class="axisdots"><span class="dot d-mem on"></span><span class="dot d-db"></span><span class="dot d-idx on"></span></span></td>
+          <td><span class="lvl mid">높음</span></td><td><span class="lvl mid">높음</span></td><td><span class="lvl mid">높음</span></td></tr>
+        <tr><td class="t-id">T7</td><td class="t-name">에이전트-쓰기 인식 스트리밍 인덱스</td>
+          <td><span class="axisdots"><span class="dot d-mem on"></span><span class="dot d-db on"></span><span class="dot d-idx"></span></span></td>
+          <td><span class="lvl mid">중~높음</span></td><td><span class="lvl mid">중~높음</span></td><td><span class="lvl mid">중</span></td></tr>
+        <tr><td class="t-id">T8</td><td class="t-name">잠재 메모리 해석성·언러닝</td>
+          <td><span class="axisdots"><span class="dot d-mem on"></span><span class="dot d-db"></span><span class="dot d-idx"></span></span></td>
+          <td><span class="lvl mid">중</span></td><td><span class="lvl mid">높음</span></td><td><span class="lvl mid">중</span></td></tr>
+        <tr><td class="t-id">T9</td><td class="t-name">수면기 통합 이론·정책</td>
+          <td><span class="axisdots"><span class="dot d-mem on"></span><span class="dot d-db on"></span><span class="dot d-idx"></span></span></td>
+          <td><span class="lvl mid">중</span></td><td><span class="lvl mid">중~높음</span></td><td><span class="lvl mid">중</span></td></tr>
+        <tr><td class="t-id">T10</td><td class="t-name">진화↔망각 조화 / 공유메모리 거버넌스</td>
+          <td><span class="axisdots"><span class="dot d-mem on"></span><span class="dot d-db"></span><span class="dot d-idx"></span></span></td>
+          <td><span class="lvl mid">중</span></td><td><span class="lvl mid">높음</span></td><td><span class="lvl mid">높음</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="sub" style="margin-top:16px"><b>빠른 착수 추천 ★</b> — T3·T5 (진입장벽 낮고 규제·분야 수요 확실).
+      <b>야심 장기</b> — T1·T2 (세 축을 관통하는 근본 문제, 임팩트 최대).</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">Deep Dive · T1</div>
+    <h2>학습형 메모리-계층 오케스트레이터 (LMTO)</h2>
+    <div class="spot">
+      <span class="kicker">Problem · 세 커뮤니티가 하나의 결정을 분할해 푼다</span>
+      <h3>각 메모리 항목의 <em>표현 × 계층 × 갱신시점</em>을 예산 하에 동시 결정하는 학습형 제어 평면</h3>
+      <p class="sub">MemOS(어떤 표현) · Memory-R1(어떤 내용) · LMCache(어디에 물리적으로)가 각기 한 축만 최적화한다.
+        축은 결합되어 있다 — 잠재/파라미터로 승격은 비싼 오프라인 행위지만 이후 서빙이 싸다. 이는 <b>예산제약 스케줄링 문제</b>이며 학습 가능하다.</p>
+      <div class="flow">
+        <div class="box"><b>표현</b><small>평문·벡터·그래프·잠재·파라미터</small></div>
+        <span class="sep">×</span>
+        <div class="box"><b>계층</b><small>GPU · CPU · 디스크 · 원격-RDMA</small></div>
+        <span class="sep">×</span>
+        <div class="box"><b>갱신시점</b><small>온라인 · 오프라인 수면기</small></div>
+        <span class="sep">→</span>
+        <div class="box" style="border-color:var(--teal)"><b>max 태스크 효용</b><small>s.t. 지연·비용·토큰 ≤ 예산</small></div>
+      </div>
+      <div class="grid2">
+        <div>
+          <h4>핵심 방법</h4>
+          <ul>
+            <li>메모리 그래프 위 <b>GNN 지각</b> + 분해 정책 π<sub>rep</sub>·π<sub>tier</sub>·π<sub>time</sub></li>
+            <li>라그랑주 완화 → 서빙 시 (L,C,B) <b>단일 제어 노브</b></li>
+            <li>신용 할당: <b>Belady 모방(PARROT)</b> 웜스타트 + <b>프로세스 감독(RAG-Gym)</b> + 세그먼트 advantage(DCPO)</li>
+            <li>오프라인-RL(Cold-RL식) → 가드된 온라인 GRPO</li>
+          </ul>
+        </div>
+        <div>
+          <h4>평가 · 근거</h4>
+          <ul>
+            <li>베이스라인: 정적 MemOS · H2O/LRU 축출 · Memory-R1 · <b>Belady 오라클 상한</b></li>
+            <li>지표: 정확도 × 지연 × $/토큰 × 신선도 <b>파레토 hypervolume</b></li>
+            <li>벤치: LongMemEval · LoCoMo · MemoryAgentBench · Big ANN</li>
+            <li>근거: MemOS · Memory-R1 · LMCache · M+ · Sleep-time · Decima</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div>본 지형도는 5개 하위 도메인 병렬 문헌 검색 + 4개 프론티어 스트림 재조사로 작성되었으며, 모든 인용은
+      arXiv · ACL Anthology · DBLP · 공식 프로시딩과 대조 검증되었다. <b>허위 인용 없음.</b></div>
+    <div class="mono" style="margin-top:8px">검증 계층 · 2020–2025 신뢰도 높음 · 2026 극최신(arXiv 2602–2607)은 정식 인용 전 ID 재확인 권장 · DGAI(2510.25401) 검증 필요.</div>
+    <div class="files">
+      <span>docs/survey.md</span>
+      <span>docs/stoa_design.md</span>
+      <span>references.bib</span>
+      <span>web/index.html</span>
+    </div>
+    <div class="mono" style="margin-top:14px; color:var(--ink-2)">작성일 2026-07-15 · Systematic Review</div>
+  </footer>
+
+</div>

@@ -1,0 +1,335 @@
+{
+  "config": {
+    "dialogues": 10,
+    "questions_per_dialogue": 30,
+    "n_scored_per_arm": 300,
+    "seed": 0,
+    "metric": "LLM-judge",
+    "model": "gpt-4o-mini",
+    "test": "paired: McNemar exact (question-level), sign test (dialogue-level)",
+    "power_alpha": "corrected (Bonferroni) and uncorrected 0.05, both stored"
+  },
+  "budget_fractions": [
+    0.1,
+    0.25,
+    0.5
+  ],
+  "accuracy": {
+    "stoa": [
+      0.12,
+      0.1667,
+      0.2933
+    ],
+    "random": [
+      0.0667,
+      0.1133,
+      0.2533
+    ],
+    "centrality": [
+      0.0167,
+      0.0633,
+      0.1633
+    ],
+    "retrieval": [
+      0.5167,
+      0.5267,
+      0.5533
+    ]
+  },
+  "per_dialogue_accuracy": {
+    "stoa": [
+      [
+        0.1,
+        0.0333,
+        0.2667,
+        0.1,
+        0.1333,
+        0.1667,
+        0.0667,
+        0.2333,
+        0.0,
+        0.1
+      ],
+      [
+        0.2,
+        0.1,
+        0.2667,
+        0.1333,
+        0.2,
+        0.1333,
+        0.0667,
+        0.2667,
+        0.1333,
+        0.1667
+      ],
+      [
+        0.3667,
+        0.2333,
+        0.4667,
+        0.1667,
+        0.4,
+        0.3,
+        0.2,
+        0.3667,
+        0.2333,
+        0.2
+      ]
+    ],
+    "random": [
+      [
+        0.0,
+        0.0333,
+        0.0,
+        0.1,
+        0.0,
+        0.1,
+        0.1333,
+        0.1,
+        0.1,
+        0.1
+      ],
+      [
+        0.1333,
+        0.0667,
+        0.1667,
+        0.1,
+        0.0,
+        0.1667,
+        0.1,
+        0.1,
+        0.1333,
+        0.1667
+      ],
+      [
+        0.3,
+        0.2,
+        0.4,
+        0.3,
+        0.1333,
+        0.2,
+        0.1667,
+        0.2333,
+        0.3333,
+        0.2667
+      ]
+    ],
+    "centrality": [
+      [
+        0.0,
+        0.0333,
+        0.0,
+        0.0333,
+        0.0,
+        0.0667,
+        0.0,
+        0.0,
+        0.0,
+        0.0333
+      ],
+      [
+        0.1,
+        0.0667,
+        0.0667,
+        0.0667,
+        0.1333,
+        0.0667,
+        0.0,
+        0.0333,
+        0.0,
+        0.1
+      ],
+      [
+        0.1333,
+        0.1,
+        0.2667,
+        0.2,
+        0.1667,
+        0.2667,
+        0.0667,
+        0.1,
+        0.1667,
+        0.1667
+      ]
+    ],
+    "retrieval": [
+      [
+        0.4667,
+        0.3667,
+        0.8,
+        0.4333,
+        0.5333,
+        0.6,
+        0.5667,
+        0.4667,
+        0.4667,
+        0.4667
+      ],
+      [
+        0.5,
+        0.3333,
+        0.7333,
+        0.5,
+        0.5333,
+        0.7,
+        0.5,
+        0.4333,
+        0.5333,
+        0.5
+      ],
+      [
+        0.5667,
+        0.4667,
+        0.6667,
+        0.4667,
+        0.5667,
+        0.7,
+        0.4667,
+        0.5333,
+        0.6,
+        0.5
+      ]
+    ]
+  },
+  "contrasts": [
+    {
+      "budget_frac": 0.1,
+      "high": "stoa",
+      "low": "random",
+      "acc_high": 0.12,
+      "acc_low": 0.0667,
+      "discordant_high": 32,
+      "discordant_low": 16,
+      "n_questions": 300,
+      "mcnemar_p": 0.0293,
+      "sign_test_p": 0.4531,
+      "dialogues_favouring_high": 5,
+      "dialogues_favouring_low": 2,
+      "n_for_80pct_power_corrected": 758,
+      "n_for_80pct_power_alpha05": 486
+    },
+    {
+      "budget_frac": 0.1,
+      "high": "retrieval",
+      "low": "stoa",
+      "acc_high": 0.5167,
+      "acc_low": 0.12,
+      "discordant_high": 124,
+      "discordant_low": 5,
+      "n_questions": 300,
+      "mcnemar_p": 0.0,
+      "sign_test_p": 0.002,
+      "dialogues_favouring_high": 10,
+      "dialogues_favouring_low": 0
+    },
+    {
+      "budget_frac": 0.1,
+      "high": "stoa",
+      "low": "centrality",
+      "acc_high": 0.12,
+      "acc_low": 0.0167,
+      "discordant_high": 35,
+      "discordant_low": 4,
+      "n_questions": 300,
+      "mcnemar_p": 0.0,
+      "sign_test_p": 0.0078,
+      "dialogues_favouring_high": 8,
+      "dialogues_favouring_low": 0
+    },
+    {
+      "budget_frac": 0.25,
+      "high": "stoa",
+      "low": "random",
+      "acc_high": 0.1667,
+      "acc_low": 0.1133,
+      "discordant_high": 42,
+      "discordant_low": 26,
+      "n_questions": 300,
+      "mcnemar_p": 0.06812,
+      "sign_test_p": 0.2891,
+      "dialogues_favouring_high": 6,
+      "dialogues_favouring_low": 2,
+      "n_for_80pct_power_corrected": 1078,
+      "n_for_80pct_power_alpha05": 667
+    },
+    {
+      "budget_frac": 0.25,
+      "high": "retrieval",
+      "low": "stoa",
+      "acc_high": 0.5267,
+      "acc_low": 0.1667,
+      "discordant_high": 113,
+      "discordant_low": 5,
+      "n_questions": 300,
+      "mcnemar_p": 0.0,
+      "sign_test_p": 0.002,
+      "dialogues_favouring_high": 10,
+      "dialogues_favouring_low": 0
+    },
+    {
+      "budget_frac": 0.25,
+      "high": "stoa",
+      "low": "centrality",
+      "acc_high": 0.1667,
+      "acc_low": 0.0633,
+      "discordant_high": 47,
+      "discordant_low": 16,
+      "n_questions": 300,
+      "mcnemar_p": 0.00012,
+      "sign_test_p": 0.002,
+      "dialogues_favouring_high": 10,
+      "dialogues_favouring_low": 0
+    },
+    {
+      "budget_frac": 0.5,
+      "high": "stoa",
+      "low": "random",
+      "acc_high": 0.2933,
+      "acc_low": 0.2533,
+      "discordant_high": 53,
+      "discordant_low": 41,
+      "n_questions": 300,
+      "mcnemar_p": 0.25644,
+      "sign_test_p": 0.3438,
+      "dialogues_favouring_high": 7,
+      "dialogues_favouring_low": 3,
+      "n_for_80pct_power_corrected": 2589,
+      "n_for_80pct_power_alpha05": 1593
+    },
+    {
+      "budget_frac": 0.5,
+      "high": "retrieval",
+      "low": "stoa",
+      "acc_high": 0.5533,
+      "acc_low": 0.2933,
+      "discordant_high": 89,
+      "discordant_low": 11,
+      "n_questions": 300,
+      "mcnemar_p": 0.0,
+      "sign_test_p": 0.002,
+      "dialogues_favouring_high": 10,
+      "dialogues_favouring_low": 0
+    },
+    {
+      "budget_frac": 0.5,
+      "high": "stoa",
+      "low": "centrality",
+      "acc_high": 0.2933,
+      "acc_low": 0.1633,
+      "discordant_high": 68,
+      "discordant_low": 29,
+      "n_questions": 300,
+      "mcnemar_p": 9e-05,
+      "sign_test_p": 0.0215,
+      "dialogues_favouring_high": 9,
+      "dialogues_favouring_low": 1
+    }
+  ],
+  "bonferroni_threshold": 0.00556,
+  "n_surviving_correction": 6,
+  "regimes": {
+    "stoa": "global",
+    "random": "global",
+    "centrality": "global",
+    "retrieval": "per-query (query-aware)"
+  }
+}

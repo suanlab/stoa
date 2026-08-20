@@ -1,0 +1,105 @@
+{
+  "config": {
+    "requests": "full",
+    "seed": 0,
+    "protocol": "cross-trace; prefix features; identical split, placement and billing"
+  },
+  "results": [
+    {
+      "eval": "conversation",
+      "train": "toolagent",
+      "rung": "constant",
+      "auc_cross_trace": 0.5,
+      "captured_pct": -10.29,
+      "auc_in_trace": null
+    },
+    {
+      "eval": "conversation",
+      "train": "toolagent",
+      "rung": "count",
+      "auc_cross_trace": 0.6394,
+      "captured_pct": -3.47,
+      "auc_in_trace": null
+    },
+    {
+      "eval": "conversation",
+      "train": "toolagent",
+      "rung": "linear",
+      "auc_cross_trace": 0.8116,
+      "captured_pct": 2.31,
+      "auc_in_trace": 0.8145
+    },
+    {
+      "eval": "conversation",
+      "train": "toolagent",
+      "rung": "gbdt",
+      "auc_cross_trace": 0.8039,
+      "captured_pct": 2.28,
+      "auc_in_trace": 0.9342
+    },
+    {
+      "eval": "conversation",
+      "train": "toolagent",
+      "rung": "mlp",
+      "auc_cross_trace": 0.8196,
+      "captured_pct": 2.28,
+      "auc_in_trace": 0.8524
+    },
+    {
+      "eval": "conversation",
+      "train": "\u2014",
+      "rung": "oracle",
+      "auc_cross_trace": 1.0,
+      "captured_pct": 100.0,
+      "auc_in_trace": 1.0
+    },
+    {
+      "eval": "toolagent",
+      "train": "conversation",
+      "rung": "constant",
+      "auc_cross_trace": 0.5,
+      "captured_pct": -24.3,
+      "auc_in_trace": null
+    },
+    {
+      "eval": "toolagent",
+      "train": "conversation",
+      "rung": "count",
+      "auc_cross_trace": 0.7088,
+      "captured_pct": -2.25,
+      "auc_in_trace": null
+    },
+    {
+      "eval": "toolagent",
+      "train": "conversation",
+      "rung": "linear",
+      "auc_cross_trace": 0.9255,
+      "captured_pct": 2.1,
+      "auc_in_trace": 0.9285
+    },
+    {
+      "eval": "toolagent",
+      "train": "conversation",
+      "rung": "gbdt",
+      "auc_cross_trace": 0.9116,
+      "captured_pct": 1.93,
+      "auc_in_trace": 0.9665
+    },
+    {
+      "eval": "toolagent",
+      "train": "conversation",
+      "rung": "mlp",
+      "auc_cross_trace": 0.9309,
+      "captured_pct": 2.12,
+      "auc_in_trace": 0.9464
+    },
+    {
+      "eval": "toolagent",
+      "train": "\u2014",
+      "rung": "oracle",
+      "auc_cross_trace": 1.0,
+      "captured_pct": 100.0,
+      "auc_in_trace": 1.0
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+% STOA @ PVLDB (Workload Characterization / EA&B track).
+% Template: the official VLDB-Template bundle (github.com/vldbproceedings/VLDB-Template),
+%   which pins acmart.cls v2.19 and layers pvldb.sty on top. Both are vendored here so the
+%   build does not depend on the local TeX install's acmart version.
+% CfP constraints (verified 2026-08-12, vldb.org/2027/submission-guidelines.html):
+%   deadline 1st of each month 5PM PT, abstract mandatory by the 25th of the prior month
+%   12 pages EXCLUDING references | EA&B papers must link a reproducibility package
+% Build: pdflatex main && bibtex main && pdflatex main && pdflatex main
+% The previous CIDR-formatted version is preserved as main_cidr.tex.
+\documentclass[sigconf, nonacm]{acmart}
+%%% do not modify the following VLDB block %%
+%%% VLDB block start %%%
+\usepackage{pvldb}
+%%% VLDB block end %%%
+\renewcommand\vldbdoi{XX.XX/XXX.XX}
+\renewcommand\vldbpages{XXX-XXX}
+\renewcommand\vldbavailabilityurl{https://github.com/ANONYMIZED/stoa}
+
+\let\Bbbk\relax        % avoid clash: acmart's newtxmath already defines \Bbbk
+\usepackage{amssymb}   % for \checkmark in Table 1
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage{cleveref}
+\graphicspath{{figs/}}
+\setlength{\footskip}{12pt}
+
+% --- Citation-key map (verified against docs/references.bib) ---
+% memos=F1_li2025memos  memgpt=P14_packer2023memgpt  memoryr1=F6_yan2025memoryr1
+% memaction=F7_zhang2025memoryasaction  lmcache=F5_liu2025lmcache  mplus=F2_wang2025mplus
+% sleeptime=F3_lin2025sleeptime  lightmem=F4_fang2025lightmem  raggym=F20_xiong2025raggym
+% parrot=S2_liu2020parrot  decima=S5_mao2019decima  coldrl=S4_coldrl2025  h2o=S1_zhang2023h2o
+% locomo=P51_maharana2024locomo  longmemeval=P52_wu2025longmemeval  memoryagentbench=F46_hu2025memoryagentbench
+
+\begin{document}
+
+\title{Ranking Is Not Placement: What Production KV Traces Say About Learned Memory Tiering}
+\subtitle{A budget-constrained formulation, a decoupling result, and the protocol that found it}
+
+\author{STOA Project}
+\affiliation{%
+  \institution{Semyung University}
+  \city{Jecheon}
+  \country{Republic of Korea}}
+\email{suanlee@semyung.ac.kr}
+
+\begin{abstract}
+LLM agents increasingly depend on external memory, and the decision that governs it---for each memory
+item, in what \emph{representation}, on which \emph{storage tier}, and \emph{when} to (re)materialize
+it---is today split across three communities that each optimize one axis and fix the others. We argue
+these axes are \emph{coupled} and give a single budget-constrained MDP over
+representation~$\times$~tier~$\times$~timing with one serve-time $(L,C,B)$ knob. We then ask the
+empirical question the framing invites: is the decision learnable? On two production KV-trace sources we
+find a decoupling rather than an answer in either direction. Reuse is predictable, and more so the longer a
+block has been observed---ranking whether a block will be reused reaches AUC 0.93 at full trace
+length---but across a length sweep in which both traces are run to exhaustion, the placement benefit that buys stays inside
+$[+0.8\%, +2.9\%]$ of an 81--87\% gap to a hindsight oracle and does not trend with ranking quality. Three
+controls locate the reason: rank-normalizing beliefs barely moves the outcome, so ordering is the
+operative mechanism; substituting true future counts recovers 95\% of the gap, so the placement
+machinery is not the bottleneck; and a capacity ladder from a linear model through boosted trees to a
+neural network lands within 0.4 points of itself on placement despite a 13-point spread in their AUC, so
+neither is the hypothesis class. Tiering rules that forecast nothing at all --- LRU, LFU, a fill-once cache --- reach 75--99\% of Belady
+on one trace and 40--94\% on the other, and the whole adaptive-replacement family --- ARC, LeCaR, CACHEUS
+and a reimplementation of LRB --- beats the best plain rule by at most 4.6 points of Belady across eight
+operating points, and at two of them by nothing. They share one failure mode: 76--78\% of blocks are
+never reused, which leaves the adaptive policies a signal on 3.5--7.3\% of misses and right-censors
+77--83\% of the learned one's training rows. On LoCoMo, re-run at the size a power analysis asked for --- ten dialogues, 300 scored questions per
+arm, paired tests --- query-aware retrieval beats query-agnostic placement by a factor of four at a tight
+budget in 10 of 10 dialogues, while the placement signal still beats embedding centrality within its own
+regime: the two compose rather than compete. Exercising the representation axis for the first time
+points \emph{against} our own framing --- one representation leads at every budget instead of crossing,
+though at $n{=}100$ per cell that is a direction, not yet a result. We report the protocol this took as a first-class result: ten measurement
+defects, six of them reference-frame mismatches and three extrapolations from a single value of a
+parameter fixed for convenience. One of those reversed a headline claim from $+88\%$ to $-48\%$ when
+swept, and randomizing the sample it was drawn from --- a control costing minutes --- put four draws
+between $-234$ and $+66$ points, a spread an order of magnitude wider than the effect. It had never been
+a measurement.
+\end{abstract}
+
+\keywords{LLM agents, agent memory, memory tiering, learned scheduling, budget-constrained MDP}
+
+\maketitle
+
+%%% VLDB block start %%%
+\vldbtopmatter
+%%% VLDB block end %%%
+
+\input{sections/01_introduction}
+\input{sections/02_motivation}
+\input{sections/03_formulation}
+\input{sections/04_architecture}
+\input{sections/05_evidence}
+\input{sections/06_openproblems}
+\input{sections/07_related}
+\input{sections/08_conclusion}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{../docs/references}
+
+\end{document}
