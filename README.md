@@ -78,5 +78,9 @@ thing from this repository, take the habit of asking what a number's denominator
 
 ## Licence
 
-See `LICENSE`. Third-party data is not redistributed here — see `data/README.md` for each source and
-its terms.
+**Not yet chosen.** A repository with no licence is "all rights reserved" by default, which would stop a
+reproducibility committee from running it, so this must be set before the artifact link is published.
+Apache-2.0 is the natural default here: it is what the Mooncake project we interoperate with uses, and it
+carries an explicit patent grant that MIT does not.
+
+Third-party data is not redistributed — see `data/README.md` for each source and its terms.
