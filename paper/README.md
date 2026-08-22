@@ -1,11 +1,14 @@
 # STOA paper source
 
-**Current framing (2026-08-13):** *Ranking Is Not Placement: What Production KV Traces Say About Learned
-Memory Tiering.* The paper gives the budget-constrained formulation, then reports what production traces
-say about learning it — a decoupling result (ranking quality improves; the placement benefit it buys does
-not) plus the measurement protocol that separated the two. Not a learned-policy win, and deliberately so:
-the earlier headline claim was retracted (see `../docs/claims_dependency.md` §I). Full experimental record
-in `../docs/research_plan.md`.
+**Current framing (2026-08-19):** *Decide on Arrival: Placement Timing Beats Placement Prediction on
+Production KV Traces.* The paper gives the budget-constrained formulation, then reports what production
+traces say about it: split-instant evaluation makes 97% of the achievable benefit unreachable, moving the
+decision to each block's arrival recovers it, and what captures the recovered benefit is deciding early
+rather than deciding well.
+
+**Three claims were retracted on the way here**, including the previous framing ("Ranking Is Not
+Placement"), which was an artifact of normalizing against an oracle a causal policy cannot reach. See
+`../docs/claims_dependency.md` §I, §T and §U. Full experimental record in `../docs/research_plan.md`.
 
 ## Build (verified: 11 pages, 0 undefined citations/references, no `??` in the PDF)
 
@@ -46,8 +49,8 @@ Verified from the official PVLDB Vol. 20 submission guidelines (2026-08-12):
 | Item | Value |
 |---|---|
 | Deadline | **1st of each month, 5 PM PT**; abstract mandatory by the **25th of the prior month** |
-| Next cycle | abstract **2026-08-25**, paper **2026-09-01** |
-| Page limit | **12 pages excluding references** (this draft is 11) |
+| Next cycle | abstract **2026-09-25**, paper **2026-10-01** (we are deliberately not targeting 09-01; see `../docs/claims_dependency.md` §AB) |
+| Page limit | **12 pages excluding references** (this draft is 10.5) |
 | EA&B requirement | all experimental data and software public; **reproducibility package linked at submission**; evaluated by the PVLDB Reproducibility Committee |
 
 Category fit: the research track's *Workload Characterization* papers cover "real-world workload
@@ -58,7 +61,7 @@ Reproducibility package: `../REPRODUCIBILITY.md` (claim → command → artifact
 
 ## Length
 
-**11 pp** against a 12-page limit, so space is now the binding constraint. Remaining work is
+**10.5 pp** against a 12-page limit, so space is now the binding constraint. Remaining work is
 measurement, not writing: the representation pilot (§5.7) needs 129–718 questions per cell against the
 100 run, the LoCoMo demand-vs-random contrast needs 486–667 against 300, and the timing axis has not
 been exercised at all. A calibration pass against a live vLLM+LMCache deployment is still the open gate
