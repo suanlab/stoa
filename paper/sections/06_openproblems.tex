@@ -4,11 +4,12 @@
 Our result closes one question and sharpens several others.
 
 \paragraph{What can a scheduler do that ordering cannot?}
-\Cref{sec:arrival} shows that first-come-first-served admission captures 90--93\% of the reachable
-benefit and that a learned ranker adds nothing on top, while shuffling the arrival order costs under
-three points. So on these workloads the recoverable benefit is not in per-item prediction and barely in
-per-item ordering; it is in \emph{when} the decision is taken. What remains unclaimed --- the 7--10\%
-FCFS leaves, and the 47\% of the hindsight gap still out of reach on toolagent --- has to come from
+\Cref{sec:arrival} shows that first-come-first-served admission captures 87.4\% of the reachable benefit
+on conversation but only 50.2\% on toolagent, and that a learned ranker adds nothing on top of it on
+either. So the recoverable benefit is not in per-item prediction. It is partly in \emph{when} the
+decision is taken and partly --- on toolagent, worth 14 points --- in the order arrivals are admitted in,
+which we do not currently model. What remains unclaimed on toolagent is large: half the reachable
+benefit, and 81\% of the hindsight gap that arrival timing does not expose at all. Both have to come from
 something the per-item formulation does not express: admission under contention, coordinated eviction
 across concurrently-live sessions, or migration timed against idle windows. Identifying which of these
 carries the gap, and building an evaluation that can see it, is the substantive next step, and it is a

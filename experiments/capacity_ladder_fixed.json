@@ -10,8 +10,8 @@
       "train": "toolagent",
       "rung": "constant",
       "auc_cross_trace": 0.5,
-      "captured_pct": -8.27,
-      "captured_of_attainable_pct": -154.55,
+      "captured_pct": -2.47,
+      "captured_of_attainable_pct": -46.08,
       "auc_in_trace": null
     },
     {
@@ -28,8 +28,8 @@
       "train": "toolagent",
       "rung": "count",
       "auc_cross_trace": 0.6394,
-      "captured_pct": -3.79,
-      "captured_of_attainable_pct": -70.91,
+      "captured_pct": -3.78,
+      "captured_of_attainable_pct": -70.71,
       "auc_in_trace": null
     },
     {
@@ -47,7 +47,7 @@
       "rung": "gbdt",
       "auc_cross_trace": 0.8039,
       "captured_pct": -1.28,
-      "captured_of_attainable_pct": -23.92,
+      "captured_of_attainable_pct": -23.88,
       "auc_in_trace": 0.9342
     },
     {
@@ -82,8 +82,8 @@
       "train": "conversation",
       "rung": "constant",
       "auc_cross_trace": 0.5,
-      "captured_pct": -34.0,
-      "captured_of_attainable_pct": -825.66,
+      "captured_pct": -2.5,
+      "captured_of_attainable_pct": -60.64,
       "auc_in_trace": null
     },
     {
@@ -100,8 +100,8 @@
       "train": "conversation",
       "rung": "count",
       "auc_cross_trace": 0.7088,
-      "captured_pct": -3.12,
-      "captured_of_attainable_pct": -75.76,
+      "captured_pct": -2.43,
+      "captured_of_attainable_pct": -59.09,
       "auc_in_trace": null
     },
     {
@@ -118,8 +118,8 @@
       "train": "conversation",
       "rung": "gbdt",
       "auc_cross_trace": 0.9116,
-      "captured_pct": -1.36,
-      "captured_of_attainable_pct": -32.96,
+      "captured_pct": -1.35,
+      "captured_of_attainable_pct": -32.81,
       "auc_in_trace": 0.9665
     },
     {

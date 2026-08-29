@@ -988,3 +988,56 @@ studied generally: **split-instant evaluation understates placement on any workl
 after the split, and the diagnostic is one extra placement pass** (`attainable_ceiling`). Our retractions
 now appear as evidence for how invisible the failure is, not as the contribution itself. The subtitle
 changed from "the protocol that took three retractions to reach" to a statement of the finding.
+
+## AC. THE RE-VERIFICATION PASS FOUND THE PAPER CARRYING PRE-FIX NUMBERS (2026-08-29)
+
+§AB set a decision rule: run one complete re-verification pass; submit to the next cycle only if it
+surfaces nothing. It surfaced something on the first check, and the finding is uncomfortable in a
+specific way — the *code* was correct and the *paper* was not.
+
+§W fixed the tie-break in all three placement routines on 08-18. Three artifacts the paper cites were
+generated **before** that: `arrival_admission.json` and `capacity_ladder_fixed.json` (08-17) and
+`calibration_sensitivity.json` (08-14). Two of those routines are **denominators**. Regenerating them
+moved the headline table substantially.
+
+### AC.1 What moved
+
+| quantity | paper carried | regenerated |
+|---|---|---|
+| conversation reachable share | 90.4% | **83.5%** |
+| toolagent reachable share | 52.8% | **19.0%** |
+| conversation FCFS (of attainable) | 93.2% | **87.4%** |
+| toolagent FCFS (of attainable) | 89.5% | **50.2%** |
+| ladder `constant` (conv / tool) | −154.6 / −825.7 | **−46.1 / −60.6** |
+| ladder `log(count)` (tool) | −75.8 | **−59.1** |
+
+### AC.2 Two claims falsified, two survive
+
+- **Survives** — *timing recovers the benefit*: 3.1% → 83.5% and 2.4% → 19.0%, i.e. 27× and 8×. The
+  toolagent factor was reported as 22×; it is 8×.
+- **Survives** — *learning on top adds nothing*: FCFS beats the learned arm on both traces
+  (87.4 vs 84.5, 50.2 vs 47.2). This is the only claim that has survived every correction to the metric.
+- **FALSIFIED** — *"FCFS captures ~90% of what is reachable"*. On toolagent it captures **50.2%**.
+- **FALSIFIED** — *"shuffling the arrival order costs under three points"*. It costs 3.3 on conversation
+  and **14.1 on toolagent**. First-come-first-served is doing real work there, and the paper explicitly
+  said it was not. The design implication narrows from "deciding at all is enough" to "decide early, and
+  do not assume the order is incidental."
+- Also narrowed: the ladder's monotonicity now holds on **toolagent only**; on conversation the constant
+  belief (−46.1) beats log(count) (−70.7) despite carrying no information.
+
+### AC.3 What the checker did and did not do
+
+The checker **caught it**: three ladder rows reported MISS and the monotonicity assertion fired, exit 1.
+That is the tool working.
+
+But it caught it only because the artifacts were regenerated. Nothing in the pipeline noticed that an
+artifact was **older than the code that produces it** — the checker compares artifacts to the paper, not
+artifacts to the code that made them. A staleness guard belongs in it: refuse to pass when any artifact
+predates the module it depends on. Without that, "the code is fixed" and "the paper is fixed" remain two
+different states, and this project has now been in the gap between them twice (§W, and here).
+
+### AC.4 The rule applies to itself
+
+By §AB's rule the pass surfaced something, so the paper does not go to the next cycle. `calibration_
+sensitivity.json` is still regenerating; when it lands, the pass restarts from the top. Sixteen defects,
+and the seventeenth was the belief that fixing code fixes results.

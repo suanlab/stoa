@@ -58,13 +58,14 @@ however well it ranks, which is precisely what our earlier ``ranking does not co
 result measured. We retract it.
 
 Moving the decision to each block's \emph{arrival} --- placing it the moment it first appears, from the
-session context available at that instant --- raises the reachable share from 3\% to \textbf{90\%} on one
-trace and 2\% to \textbf{53\%} on the other. What captures it is not prediction. First-come-first-served
-admission with a fixed action reaches \textbf{93\% and 90\%} of the ceiling; a learned arrival-time
-ranker at AUC 0.574 and 0.635 reaches 91.6\% and 88.9\%, slightly \emph{less}; and shuffling the arrival
-order costs under three points. Almost all of the recoverable benefit is in the timing of the decision,
-not in its content. The design implication is concrete and was invisible under the old framing: build an
-\textbf{admission point}, not a predictor.
+session context available at that instant --- raises the reachable share from 3\% to \textbf{83.5\%} on
+one trace and 2\% to \textbf{19.0\%} on the other. What captures it is not prediction:
+first-come-first-served admission with a fixed action reaches 87.4\% and 50.2\% of the ceiling, while a
+learned arrival-time ranker at AUC 0.574 and 0.635 reaches 84.5\% and 47.2\% --- less, on both. But the
+arrival \emph{order} is not free: shuffling it costs 3.3 points on one trace and \textbf{14.1} on the
+other. So the design implication is narrower than ``deciding at all is enough'': build an
+\textbf{admission point} rather than a predictor, and do not assume the order it admits in is
+incidental.
 
 Reaction is competitive for a related reason. Tiering rules that forecast nothing at all --- LRU, LFU and
 a fill-once cache --- reach 75--99\% of Belady's hit rate on one Mooncake trace and 40--94\% on the other,
@@ -89,9 +90,10 @@ arithmetically able to be what it claimed.
   \item \textbf{(C2)} A timing result on production traces. The split-instant protocol these studies use
   makes 97\% of a hindsight oracle's advantage unreachable, because 45--46\% of blocks do not exist yet
   when it decides (\Cref{sec:reachable}). Deciding at each block's \emph{arrival} raises the reachable
-  share from 3\% to 90\% and 2\% to 53\%; there, first-come-first-served admission captures 93\% and 90\%
-  of what is reachable and a learned ranker captures slightly less (\Cref{sec:arrival}). Once the metric
-  is repaired, ranking quality converts monotonically but never enough to help
+  share from 3\% to 83.5\% and 2\% to 19.0\%; there, first-come-first-served admission captures 87.4\%
+  and 50.2\% of what is reachable and a learned ranker captures less than FCFS on both, while the arrival
+  order is worth 14 points on one trace (\Cref{sec:arrival}). Once the metric is repaired, ranking quality
+  converts monotonically on one trace and not the other, and never enough to help
   (\Cref{sec:capacity}).
   \item \textbf{(C3)} Measurements of reactive tiering on both sources against the adaptive-replacement
   family (ARC, LeCaR, CACHEUS) and a reimplemented LRB --- the best of them beating the best plain rule by

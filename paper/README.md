@@ -10,7 +10,7 @@ rather than deciding well.
 Placement"), which was an artifact of normalizing against an oracle a causal policy cannot reach. See
 `../docs/claims_dependency.md` §I, §T and §U. Full experimental record in `../docs/research_plan.md`.
 
-## Build (verified: 11 pages, 0 undefined citations/references, no `??` in the PDF)
+## Build (verified: 12 pages, 0 undefined citations/references, no `??` in the PDF)
 
 Uses the **official VLDB template** (github.com/vldbproceedings/VLDB-Template), vendored here so the build
 does not depend on the local TeX installation's acmart version:
@@ -50,7 +50,7 @@ Three template requirements are easy to break and produce a silently wrong front
 
    Run that from a shell with no GitHub credentials, or in a logged-out browser. Checking it while
    authenticated tests your access, not the reviewer's — which is the exact failure mode
-   `../docs/claims_dependency.md` catalogues sixteen times over.
+   `../docs/claims_dependency.md` catalogues seventeen times over.
 3. **`\vldbtopmatter` immediately after `\maketitle`.** `pvldb.sty` has no `AtBeginDocument` hook, so
    omitting this drops the PVLDB Reference Format and Artifact Availability blocks with no error. Check
    for them in the rendered page 1, not in the log.
@@ -68,7 +68,7 @@ Verified from the official PVLDB Vol. 20 submission guidelines (2026-08-12):
 |---|---|
 | Deadline | **1st of each month, 5 PM PT**; abstract mandatory by the **25th of the prior month** |
 | Next cycle | abstract **2026-09-25**, paper **2026-10-01** (we are deliberately not targeting 09-01; see `../docs/claims_dependency.md` §AB) |
-| Page limit | **12 pages excluding references** (this draft is 10.5) |
+| Page limit | **12 pages excluding references** (this draft is 12.0 — at the limit) |
 | EA&B requirement | all experimental data and software public; **reproducibility package linked at submission**; evaluated by the PVLDB Reproducibility Committee |
 
 Category fit: the research track's *Workload Characterization* papers cover "real-world workload
@@ -79,17 +79,19 @@ Reproducibility package: `../REPRODUCIBILITY.md` (claim → command → artifact
 
 ## Length
 
-**10.5 pp** against a 12-page limit, so space is now the binding constraint. Remaining work is
-measurement, not writing: the representation pilot (§5.7) needs 129–718 questions per cell against the
-100 run, the LoCoMo demand-vs-random contrast needs 486–667 against 300, and the timing axis has not
-been exercised at all. A calibration pass against a live vLLM+LMCache deployment is still the open gate
-(`docs/claims_dependency.md` §B, §P).
+**12.0 pp** against a 12-page limit: the draft is *at* the limit, so any addition now requires a
+deletion. Remaining work is measurement, not writing: the representation pilot (§5.7) needs 129–718
+questions per cell against the 100 run, and the LoCoMo demand-vs-random contrast needs 758 / 1078 /
+2589 questions (one per budget, at the Bonferroni-corrected alpha the paper actually judges at)
+against the 300 run — an earlier revision of this file said "486–667", which dropped the third budget
+and sized against an uncorrected alpha. A calibration pass against a live vLLM+LMCache deployment is
+still the open gate (`docs/claims_dependency.md` §B, §P).
 
 ## Figures
 
 Generated into `figs/` from `experiments/*.json` by `../scripts/make_figures.py`. Two are used —
-`fig_reactive.pdf` (reactive envelope, ARC and LRB) and `fig_capacity_ladder.pdf` (the decoupling across
-model class). The rest are available for a longer version, notably `fig_locomo_baselines.pdf` (leak-free
+`fig_reactive.pdf` (reactive envelope, ARC and LRB) and `fig_capacity_ladder.pdf` (ranking quality
+against captured benefit across model class). The rest are available for a longer version, notably `fig_locomo_baselines.pdf` (leak-free
 LoCoMo: per-query retrieval dominates any query-agnostic placement).
 
 `fig_reactive` prefers **`reactive_real_full_lrb.json`** (the `--lrb` run) and falls back to
@@ -101,7 +103,7 @@ paper reads — an earlier revision had two such files diverge silently.
 
 | Section | State |
 |---|---|
-| Abstract, §1–§8 | complete prose, aligned to the decoupling framing |
+| Abstract, §1–§8 | complete prose, aligned to the arrival-timing framing |
 | Table 1 (positioning) | complete |
 | §5.2 length sweep | both traces run to exhaustion |
 | §5.3 capacity ladder | linear / GBDT / MLP / oracle, full traces |

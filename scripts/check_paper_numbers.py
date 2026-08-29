@@ -35,7 +35,12 @@ failures: list[str] = []
 checked = 0
 
 
+_LOADED: list[str] = []
+
+
 def load(name):
+    """Read an artifact, recording the name so the staleness map can be audited against it."""
+    _LOADED.append(name)
     p = EXP / name
     return json.loads(p.read_text()) if p.exists() else None
 
@@ -270,10 +275,17 @@ if d:
         row = (f"${c['captured_of_attainable_pct']:.1f}$ & "
                f"${t['captured_of_attainable_pct']:.1f}$")
         claim(f"ladder row: {rung}", row, row, "captured_of_attainable_pct")
-    ordered = [by[("conversation", r)]["captured_of_attainable_pct"]
-               for r in ("constant", "count", "linear", "mlp") if ("conversation", r) in by]
-    assert ordered == sorted(ordered), (
-        "the ladder is no longer monotone in AUC; the paper's claim depends on it")
+    # The paper claims monotonicity on toolagent ONLY, and says so explicitly. Asserting it
+    # on both traces is what an earlier revision did, from numbers predating the baseline
+    # tie-break fix.
+    tool = [by[("toolagent", r)]["captured_of_attainable_pct"]
+            for r in ("constant", "count", "linear", "mlp") if ("toolagent", r) in by]
+    assert tool == sorted(tool), (
+        f"toolagent ladder is no longer monotone in AUC: {tool}; the paper claims it is")
+    conv = [by[("conversation", r)]["captured_of_attainable_pct"]
+            for r in ("constant", "count", "linear", "mlp") if ("conversation", r) in by]
+    assert conv != sorted(conv), (
+        f"conversation ladder became monotone: {conv}; the paper says it is not, so update it")
 
 # --- belief magnitude control ------------------------------------------------------
 d = load("belief_controls.json")
@@ -290,6 +302,47 @@ if d:
           f"{s2['magnitude_min_points']:.1f} to {s2['magnitude_max_points']:.1f} points",
           f"{s2['magnitude_min_points']:.1f}-{s2['magnitude_max_points']:.1f}", "summary")
 
+
+# --- staleness guard ---------------------------------------------------------------
+# An artifact older than the code that produces it is not evidence about the current code.
+# This is not hypothetical: three artifacts the paper cited were generated before a
+# tie-break fix landed in two of the DENOMINATOR routines, and regenerating them moved the
+# headline table by up to 39 points. Nothing caught it, because every check compared
+# artifacts to the paper and none compared artifacts to their own dependencies.
+SRC = ROOT / "src" / "stoa"
+DEPENDS_ON = {
+    # artifact -> modules whose behaviour it encodes
+    "arrival_admission.json": ("sequential.py", "mooncake.py"),
+    "capacity_ladder_fixed.json": ("sequential.py", "gbdt.py", "mooncake.py"),
+    "calibration_sensitivity.json": ("sequential.py", "calibration.py", "simulator.py"),
+    "belief_controls.json": ("sequential.py",),
+    "reactive_real_full_lrb.json": ("eval/online.py", "experts.py", "lrb.py"),
+    "lrb_retraction.json": ("lrb.py",),
+    "eval_locomo_powered.json": ("eval/memqa.py", "stats.py"),
+    "representation_axis.json": ("eval/representation.py", "stats.py"),
+    "locomo_power.json": ("stats.py",),
+    "sampling_study.json": ("kvct.py",),
+}
+# The guard's own failure mode: add an artifact, forget to declare its dependencies, and it
+# is exempt from staleness checking forever without anything saying so.
+undeclared = [n for n in _LOADED if n not in DEPENDS_ON and (EXP / n).exists()]
+if undeclared:
+    failures.append(
+        "artifacts read but absent from DEPENDS_ON, so never staleness-checked: "
+        + ", ".join(sorted(set(undeclared)))
+        + ". Declare the modules each depends on.")
+
+for art, mods in DEPENDS_ON.items():
+    ap = EXP / art
+    if not ap.exists():
+        continue
+    a_mtime = ap.stat().st_mtime
+    for m in mods:
+        mp = SRC / m
+        if mp.exists() and mp.stat().st_mtime > a_mtime:
+            failures.append(
+                f"STALE ARTIFACT: {art} predates src/stoa/{m}. Regenerate it before trusting "
+                "any number it feeds; the code was fixed and the result was not.")
 
 # --- coverage guards, LAST so `checked` is final -----------------------------------
 # Sitting mid-file, this counted only the checks declared above it and passed while
@@ -311,7 +364,10 @@ if checked < MIN_CHECKS:
                     "paper is correct. Raise this floor whenever you add claims, and lower "
                     "it only when you delete them deliberately.")
 
-print(f"\n{checked - len(failures)}/{checked} claims located in the paper source.")
+# "located" was wrong: this is checks PASSED, not claims found. The earlier wording let a
+# run with three failures read as a coverage shortfall, which is a different and milder thing.
+print(f"\n{checked - len(failures)}/{checked} checks passed "
+      f"({len(failures)} failing).")
 if failures:
     print("\nFAILED:")
     for f in failures:

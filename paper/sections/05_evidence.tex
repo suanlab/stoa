@@ -85,35 +85,44 @@ arrivals in arrival order and places the second half.
 \toprule
 trace & arm & AUC & of full gap & of attainable \\
 \midrule
-conversation & arrival-learned  & 0.574 & 82.8\% & 91.6\% \\
-             & \textbf{arrival-FCFS} & 0.500 & \textbf{84.2\%} & \textbf{93.2\%} \\
-             & arrival-shuffled & 0.500 & 82.6\% & 91.4\% \\
-             & ceiling          & 1.000 & 90.4\% & 100.0\% \\
+conversation & arrival-learned  & 0.574 & 70.5\% & 84.5\% \\
+             & \textbf{arrival-FCFS} & 0.500 & \textbf{73.0\%} & \textbf{87.4\%} \\
+             & arrival-shuffled & 0.500 & 70.2\% & 84.1\% \\
+             & ceiling          & 1.000 & 83.5\% & 100.0\% \\
 \midrule
-toolagent    & arrival-learned  & 0.635 & 47.0\% & 88.9\% \\
-             & \textbf{arrival-FCFS} & 0.500 & \textbf{47.3\%} & \textbf{89.5\%} \\
-             & arrival-shuffled & 0.500 & 45.8\% & 86.6\% \\
-             & ceiling          & 1.000 & 52.8\% & 100.0\% \\
+toolagent    & arrival-learned  & 0.635 & 9.0\% & 47.2\% \\
+             & \textbf{arrival-FCFS} & 0.500 & \textbf{9.6\%} & \textbf{50.2\%} \\
+             & arrival-shuffled & 0.500 & 6.9\% & 36.1\% \\
+             & ceiling          & 1.000 & 19.0\% & 100.0\% \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \medskip
-\noindent Three readings, in order of how much they change the design question.
+\noindent Three readings survive and one does not.
 
-\emph{Timing recovers the benefit.} The reachable share rises from 3.1\% to \textbf{90.4\%} on
-conversation and 2.4\% to \textbf{52.8\%} on toolagent --- $29\times$ and $22\times$. The headroom was
-never absent; the protocol could not reach it.
+\emph{Timing recovers much of the benefit.} The reachable share rises from 3.1\% to \textbf{83.5\%} on
+conversation and 2.4\% to \textbf{19.0\%} on toolagent --- $27\times$ and $8\times$. The headroom was not
+absent; the protocol could not reach it. The two traces differ by a factor of four in how much arrival
+timing exposes, which we cannot explain from two exemplars.
 
-\emph{Deciding at all captures almost all of it; deciding well adds nothing.} First-come-first-served
-admission with a fixed action reaches 93.2\% and 89.5\% of the ceiling. The learned arm, at AUC 0.574
-and 0.635, reaches 91.6\% and 88.9\% --- \emph{slightly worse}. We are not claiming the learned arm is
-harmed by learning; at these AUCs the ranking is close enough to noise that spreading beliefs across the
-per-item cost function's thresholds costs more than the ordering wins.
+\emph{Deciding at all captures most of it on one trace and half on the other.}
+First-come-first-served admission with a fixed action reaches \textbf{87.4\%} of the ceiling on
+conversation but only \textbf{50.2\%} on toolagent. An earlier draft of this paper reported 93\% and
+90\% and concluded that ``deciding at all'' was sufficient; those numbers were computed before a
+tie-breaking defect in the baseline routines was fixed, and the toolagent figure did not survive the
+correction (\Cref{sec:protocol}).
 
-\emph{Even the ordering barely matters.} Shuffling the arrival order costs 1.8 and 3.0 points. What is
-left --- the overwhelming majority --- is attributable to nothing more than making the decision at the
-moment the block appears.
+\emph{Learning on top adds nothing.} The learned arm, at AUC 0.574 and 0.635, reaches 84.5\% and 47.2\%
+--- below FCFS on both traces. This is the one claim that has survived every correction to the metric.
+
+\emph{But the arrival \textbf{order} is not free, and we previously said it was.} Shuffling the order in
+which arrivals are placed costs 3.3 points on conversation and \textbf{14.1 points} on toolagent. An
+earlier draft reported ``under three points'' on both and concluded that almost all of the benefit was
+in \emph{when} the decision is taken rather than in any ordering. On toolagent that is false:
+first-come-first-served is doing real work there, and a deployment cannot treat arrival order as
+incidental. We retract the claim.
+
 
 The design implication is the one the earlier framing could not reach: on these workloads, build an
 \textbf{admission point}, not a predictor. That is also where the caching literature has been pointing.
@@ -132,11 +141,11 @@ ranking quality moves the outcome monotonically and never enough to help:
 \toprule
 rung & AUC (conv / tool) & \% of attainable (conv) & (tool) \\
 \midrule
-constant        & 0.50 / 0.50 & $-154.6$ & $-825.7$ \\
+constant        & 0.50 / 0.50 & $-46.1$  & $-60.6$ \\
 random          & 0.49 / 0.50 & $-208.2$ & $-838.6$ \\
-$\log$(count)   & 0.64 / 0.71 & $-70.9$  & $-75.8$ \\
+$\log$(count)   & 0.64 / 0.71 & $-70.7$  & $-59.1$ \\
 logistic        & 0.81 / 0.93 & $-18.8$  & $-32.1$ \\
-GBDT            & 0.80 / 0.91 & $-23.9$  & $-33.0$ \\
+GBDT            & 0.80 / 0.91 & $-23.9$  & $-32.8$ \\
 MLP             & 0.82 / 0.93 & $-8.5$   & $-19.3$ \\
 \midrule
 ceiling         & 1.00        & $100$    & $100$ \\
@@ -145,10 +154,13 @@ ceiling         & 1.00        & $100$    & $100$ \\
 \end{center}
 
 \medskip
-\noindent The damage falls monotonically as AUC rises ($-154 \to -71 \to -19 \to -8.5$), so ranking
-quality does convert --- into less harm. Every arm is nonetheless below the frequency baseline, because
-forcing an imperfect ranking onto the oracle's magnitude multiset assigns large beliefs to blocks that
-will not be reused.
+\noindent On toolagent the damage falls monotonically as AUC rises ($-60.6 \to -59.1 \to -32.1 \to
+-19.3$), so ranking quality does convert --- into less harm. On conversation it does not: the constant
+belief ($-46.1$) beats $\log$(count) ($-70.7$) despite carrying no information. An earlier draft claimed
+monotonicity on both traces from numbers computed before the baseline tie-break was fixed; with the fix
+it holds on one trace only, and we no longer claim it in general. Every arm is nonetheless below the
+frequency baseline, because forcing an imperfect ranking onto the oracle's magnitude multiset assigns
+large beliefs to blocks that will not be reused.
 
 \paragraph{The magnitude convention decides the sign, and we measured by how much.}
 We report the table above under a stated convention because it does not survive an unstated one. Running
