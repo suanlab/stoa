@@ -30,9 +30,27 @@ python3 ../scripts/make_figures.py                     # regenerate figs/ from e
 Three template requirements are easy to break and produce a silently wrong front page:
 
 1. `\documentclass[sigconf, nonacm]{acmart}` followed by `\usepackage{pvldb}` inside the VLDB block.
-2. `\vldbdoi` / `\vldbpages` / `\vldbavailabilityurl` set via `\renewcommand` (the availability URL is
-   the **EA&B reproducibility-package link** and must point at the real repository before submission —
-   it currently reads `ANONYMIZED`).
+2. `\vldbdoi` / `\vldbpages` / `\vldbavailabilityurl` set via `\renewcommand`. The availability URL is
+   the **EA&B reproducibility-package link** and it currently reads `ANONYMIZED`. Two things must happen
+   before submission, in this order:
+
+   **(a) The artifact repository is PRIVATE.** Flip it, then put the URL in `\vldbavailabilityurl`:
+
+   ```bash
+   gh repo edit <owner>/stoa --visibility public --accept-visibility-change-consequences
+   ```
+
+   **(b) Verify the link the way a reviewer will see it, not the way the tool reports it.** A successful
+   `gh repo edit` is a report; a URL that opens is an observation. EA&B states the requirement as "there
+   are no excuses", and a private URL renders as a 404 to the committee.
+
+   ```bash
+   curl -sSo /dev/null -w '%{http_code}\n' https://github.com/<owner>/stoa   # must be 200, not 404
+   ```
+
+   Run that from a shell with no GitHub credentials, or in a logged-out browser. Checking it while
+   authenticated tests your access, not the reviewer's — which is the exact failure mode
+   `../docs/claims_dependency.md` catalogues sixteen times over.
 3. **`\vldbtopmatter` immediately after `\maketitle`.** `pvldb.sty` has no `AtBeginDocument` hook, so
    omitting this drops the PVLDB Reference Format and Artifact Availability blocks with no error. Check
    for them in the rendered page 1, not in the log.

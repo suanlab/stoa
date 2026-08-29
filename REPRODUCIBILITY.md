@@ -86,6 +86,19 @@ process-order-dependent global feeds a number. `scripts/run_capacity_ladder.py` 
 `run_representation_axis.py --judge` roughly 2,400, plus embeddings. At gpt-4o-mini list pricing that is
 about **$3–5** and **$1** respectively. Everything else in this artifact is CPU-only and free.
 
+## 3c. Before submitting: the artifact link
+
+The repository is **private** while the paper is in revision. EA&B requires the reproducibility package
+to be reachable at submission ("there are no excuses"), so before the abstract deadline:
+
+1. `gh repo edit <owner>/stoa --visibility public --accept-visibility-change-consequences`
+2. Put that URL in `\vldbavailabilityurl` in `paper/main.tex` and rebuild.
+3. **Open the URL with no GitHub session** — `curl -sSo /dev/null -w '%{http_code}' <url>` must print
+   `200`. Checking while logged in tests your access, not a reviewer's.
+
+Step 3 is not paranoia. Every defect in `docs/claims_dependency.md` shares one shape: a report was
+believed where an observation was available.
+
 ## 4. Claim → command → artifact
 
 | Paper claim | Command | Artifact |
