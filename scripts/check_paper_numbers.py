@@ -344,6 +344,31 @@ for art, mods in DEPENDS_ON.items():
                 f"STALE ARTIFACT: {art} predates src/stoa/{m}. Regenerate it before trusting "
                 "any number it feeds; the code was fixed and the result was not.")
 
+# Figures are artifacts too, one level down: make_figures.py reads experiments/*.json and
+# writes paper/figs/*.pdf. The paper embeds the PDF, not the JSON, so a figure older than the
+# data it plots ships a picture of a number the text no longer makes -- and nothing said so.
+# The build that caught this had figures fifteen days older than the artifacts they drew from.
+FIG_SOURCES = {
+    "fig_reactive.pdf": ("reactive_real_full_lrb.json", "reactive_real_full.json"),
+    "fig_capacity_ladder.pdf": ("capacity_ladder_fixed.json", "capacity_ladder.json"),
+    "fig_locomo_baselines.pdf": ("eval_locomo_leakfree.json",),
+    "fig_learnability.pdf": ("mooncake_length_sweep.json",),
+    "fig_sequential.pdf": ("mooncake_length_sweep.json",),
+}
+FIGS = ROOT / "paper" / "figs"
+for fig, arts in FIG_SOURCES.items():
+    fp = FIGS / fig
+    if not fp.exists():
+        continue
+    for art in arts:
+        ap = EXP / art
+        if ap.exists() and ap.stat().st_mtime > fp.stat().st_mtime:
+            failures.append(
+                f"STALE FIGURE: paper/figs/{fig} predates experiments/{art}. "
+                "Run scripts/make_figures.py; the paper embeds the PDF, not the JSON, so the "
+                "text can be corrected while the plot still shows the retracted number.")
+            break
+
 # --- coverage guards, LAST so `checked` is final -----------------------------------
 # Sitting mid-file, this counted only the checks declared above it and passed while
 # a third of the paper went unchecked.

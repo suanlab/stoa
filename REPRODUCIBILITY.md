@@ -142,7 +142,7 @@ believed where an observation was available.
 | Working-set threshold on kvct (35% at a 1% tier → 99% at 10%) | `simulate_fast` sweep over `cache_frac`, 20 & 40 conversations | `experiments/reactive_kvct_sweep.json` |
 | LoCoMo: retrieval dominates placement | `python3 scripts/run_locomo_baselines.py` (needs `OPENAI_API_KEY`) | `experiments/eval_locomo_leakfree.json` |
 | **Capacity ladder** (superseded by `capacity_ladder_fixed.json` — kept for the diff): linear / GBDT / MLP agree on placement to within 0.4 pts despite a 29-pt AUC spread | `python3 scripts/run_capacity_ladder.py` | `experiments/capacity_ladder.json` |
-| **Cost model derived from hardware, swept over 3 attention shapes × 5 device classes: headroom 64–88%, hand-written table 81%, 6/15 hierarchies non-monotonic** | `python3 scripts/run_calibration_sensitivity.py` | `experiments/calibration_sensitivity.json` |
+| **Cost model derived from hardware, swept over 3 attention shapes × 5 device classes: headroom 67–90%, hand-written table 80%, 6/15 hierarchies non-monotonic** | `python3 scripts/run_calibration_sensitivity.py` | `experiments/calibration_sensitivity.json` |
 | LeCaR + CACHEUS on both full traces | `python3 scripts/run_reactive_real.py --lrb` | `experiments/reactive_real_full_lrb.json` |
 | **LoCoMo at adequate scale**: 10 dialogues, 300 questions/arm, paired McNemar + per-dialogue sign test | `python3 scripts/run_locomo_powered.py --judge` (needs `OPENAI_API_KEY`, ~2.5 h) | `experiments/eval_locomo_powered.json` |
 | **Representation axis measured** (plaintext / summary / extract at equal token budget) | `python3 scripts/run_representation_axis.py --judge` | `experiments/representation_axis.json` |
@@ -168,7 +168,7 @@ believed where an observation was available.
 
 ## 6. Controls wired into the harness
 
-**Seventeen defects** during this work produced plausible-but-wrong numbers; `docs/claims_dependency.md`
+**Eighteen defects** during this work produced plausible-but-wrong numbers; `docs/claims_dependency.md`
 catalogues each with the symptom it presented. The checks that catch them live in the code and the tests,
 not just in prose:
 
@@ -188,6 +188,7 @@ not just in prose:
 | A constant belief must not outrank a learned one | `sequential.quantile_match` mid-rank ties, `run_belief_controls.py` — this control caught its own harness |
 | A learner whose labels have no variance must fail loudly, not silently randomize | `lrb.py` raises on zero label variance (§V) |
 | Artifacts must not outlive the code that produced them | `check_paper_numbers.py::DEPENDS_ON`, plus a guard asserting every artifact read is declared there |
+| **Figures** must not outlive the artifacts they plot | `check_paper_numbers.py::FIG_SOURCES` — the paper embeds the PDF, not the JSON, so corrected text can ship beside an uncorrected plot (§AD) |
 
 `pytest -q` runs all **173** tests, including the leakage guards and the fast/reference equivalence
 check, in about 2 min 45 s.

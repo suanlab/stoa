@@ -483,12 +483,20 @@ by adversarial review, after the catalogue below had already been written. \text
 randomized draws showed had never been measurable (\Cref{sec:sampling}). \textbf{(ii)} A
 \emph{decoupling} claim --- prediction improves while placement does not --- that was an artifact of
 normalizing against an oracle ranking blocks a causal policy cannot see (\Cref{sec:reachable});
-normalized against what is attainable, ranking quality converts monotonically. \textbf{(iii)} A reported
+normalized against what is attainable, ranking quality converts monotonically on conversation and
+non-monotonically on toolagent, so the repaired metric does not simply invert the retracted one. \textbf{(iii)} A reported
 LRB column that measured \emph{random eviction}: the training buffer was truncated to its tail, censored
 rows arrive in one contiguous burst per checkpoint, and from the third retrain onward every training
 label was identical, so the regressor returned a constant and eviction degenerated to a uniform draw.
-Two independent repairs of that bug disagree by 19 points, so we withhold the column rather than publish
-either.
+Two independent repairs of that bug disagree by 19 points. We report the repaired column in
+\Cref{sec:reaction} as a band rather than a point estimate, and state the conclusion only at the
+coarseness the band supports.
+
+Two further sub-claims were falsified in a later re-verification pass, after the paper had been
+rewritten around the arrival result: that first-come-first-served admission captures roughly 90\% of
+what is attainable (it captures 50.2\% on toolagent) and that the arrival \emph{order} is worth under
+three points (14.1 on toolagent). Both had been stated from artifacts generated before a tie-break
+fix to the routines that produce the denominator.
 
 The common shape is worth naming: in all three the \emph{aggregate looked reasonable}. A flat captured
 fraction, a plausible interval, a learned policy landing below ARC --- each is what the hypothesis
@@ -503,6 +511,16 @@ along the file index --- reversed sign at 150, from $+88\%$ to $-48\%$, and took
 
 \paragraph{Believing a report over an observation (one).} An edit script targeted a heading an earlier
 revision had removed, matched nothing, and printed success anyway.
+
+\paragraph{Derived products outliving their sources (two).} A result is not one file but a chain:
+source $\rightarrow$ artifact $\rightarrow$ figure $\rightarrow$ paper. Fixing a link does not refresh
+what follows it, and nothing in our pipeline compared adjacent links. Three artifacts the paper cited
+were generated \emph{before} a fix to the code that produced them --- two of them denominators --- which
+is how the two falsified sub-claims above reached a draft. After adding a freshness check on that first
+edge and observing it pass, we found the plotted figures were fifteen days older than the artifacts they
+draw: the text carried the corrected ladder while the figure still showed the retracted one, because the
+paper embeds the PDF and a number-checker cannot see inside it. A freshness check on one edge reads like
+a freshness check on the chain; it is not, and a guard that has only ever passed has not been tested.
 
 \paragraph{The controls.} Assert that the oracle beats the heuristic it is compared against; keep a
 no-learning baseline of the same functional form as the learned one; check that no single feature
@@ -526,8 +544,8 @@ ratios are what a placement policy responds to, so it never tested the parameter
 therefore derive the table instead: KV bytes per block follow exactly from a model's attention shape
 ($2 \times \text{layers} \times \text{kv\_heads} \times \text{head\_dim} \times \text{dtype}$ per
 token), and per-tier latency is that divided by a declared device-class bandwidth plus a fixed overhead.
-Sweeping three attention shapes against five device classes puts headroom at \textbf{64--88\%}, which
-contains the 81\% our hand-written table gives --- the conclusion survives, but two things about the
+Sweeping three attention shapes against five device classes puts headroom at \textbf{67--90\%}, which
+contains the 80\% our hand-written table gives --- the conclusion survives, but two things about the
 table do not. Its GPU:CPU latency ratio is 1:10 where the derivation gives 1:80 to 1:250, an order of
 magnitude in the ratio the policy is most sensitive to; and \textbf{6 of the 15 device classes reorder
 the hierarchy} so that latency order and capacity order disagree, which our fixed per-tier capacity table

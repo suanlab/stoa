@@ -78,9 +78,12 @@ We report how much measurement discipline this took, because it is the part most
 because it is not a flattering story. Three claims were retracted, the last two only under adversarial
 review \emph{after} the error catalogue below had been written: a headline that randomized sampling
 showed had never been measurable, the decoupling result above, and an LRB column that turned out to
-measure random eviction because a training buffer was truncated to its tail. In every case the aggregate
-looked reasonable, which is the point --- none of our checks asked whether a reported quantity was
-arithmetically able to be what it claimed.
+measure random eviction because a training buffer was truncated to its tail. Two further sub-claims of
+the present framing were falsified later still, by a re-verification pass run after this paper was
+rewritten: three of the artifacts it cited predated a fix to the code that produced them. In every case
+the aggregate looked reasonable, which is the point --- none of our checks asked whether a reported
+quantity was arithmetically able to be what it claimed, and none asked whether a stored result was
+older than the program that wrote it.
 
 \paragraph{Contributions.}
 \begin{itemize}
@@ -110,10 +113,11 @@ arithmetically able to be what it claimed.
   instantiate --- pointing \emph{against} our own framing: one representation leads at every budget
   rather than crossing. Reported as a direction with the sample size that would settle it, since none of
   the eight comparisons survives correction (\Cref{sec:representation}).
-  \item \textbf{(C6)} A reusable evaluation protocol: ten measurement defects that each manufactured a
-  plausible result here, grouped by mechanism, and the cheap controls that catch them --- including the
-  rule that a null is reportable only alongside the sample size that would have resolved it
-  (\Cref{sec:protocol}).
+  \item \textbf{(C6)} A reusable evaluation protocol: fifteen measurement defects that each manufactured
+  a plausible result here, grouped into five mechanisms, and the cheap controls that catch them ---
+  including the rule that a null is reportable only alongside the sample size that would have resolved
+  it, and the rule that every edge of the source $\rightarrow$ artifact $\rightarrow$ figure
+  $\rightarrow$ paper chain needs its own freshness check (\Cref{sec:protocol}).
 \end{itemize}
 
 We position STOA against prior work along the three axes it unifies in \Cref{tab:positioning}; no prior

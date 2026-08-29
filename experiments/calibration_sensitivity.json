@@ -1,13 +1,16 @@
 {
   "config": {
-    "requests": 4000,
+    "requests": 0,
     "block_tokens": 256,
     "note": "derived from declared model/device profiles, NOT measured"
   },
   "summary": {
-    "headroom_min": 64.22,
-    "headroom_max": 87.76,
-    "handwritten_headroom": 81.12,
+    "headroom_min": 66.69,
+    "headroom_max": 89.7,
+    "captured_min": 1.83,
+    "captured_max": 4.77,
+    "handwritten_captured": 3.61,
+    "handwritten_headroom": 79.76,
     "n_models": 3,
     "n_devices": 5,
     "non_monotonic": [
@@ -29,7 +32,8 @@
         "disk": 60.0,
         "remote_rdma": 30.0
       },
-      "headroom_pct": 81.12,
+      "headroom_pct": 79.76,
+      "captured_pct": 3.61,
       "monotonic": true
     },
     {
@@ -48,7 +52,8 @@
         "disk": 339.29,
         "remote_rdma": 102.98
       },
-      "headroom_pct": 85.86,
+      "headroom_pct": 83.16,
+      "captured_pct": 2.85,
       "monotonic": true
     },
     {
@@ -67,7 +72,8 @@
         "disk": 339.29,
         "remote_rdma": 696.47
       },
-      "headroom_pct": 75.79,
+      "headroom_pct": 84.47,
+      "captured_pct": 3.48,
       "monotonic": false
     },
     {
@@ -86,7 +92,8 @@
         "disk": 144.05,
         "remote_rdma": 102.98
       },
-      "headroom_pct": 79.08,
+      "headroom_pct": 83.16,
+      "captured_pct": 2.85,
       "monotonic": true
     },
     {
@@ -105,7 +112,8 @@
         "disk": 339.29,
         "remote_rdma": 102.98
       },
-      "headroom_pct": 80.66,
+      "headroom_pct": 83.17,
+      "captured_pct": 3.9,
       "monotonic": false
     },
     {
@@ -124,7 +132,8 @@
         "disk": 4.0,
         "remote_rdma": 2.5
       },
-      "headroom_pct": 87.76,
+      "headroom_pct": 89.7,
+      "captured_pct": 1.83,
       "monotonic": true
     },
     {
@@ -143,7 +152,8 @@
         "disk": 335.72,
         "remote_rdma": 101.19
       },
-      "headroom_pct": 82.16,
+      "headroom_pct": 72.37,
+      "captured_pct": 4.01,
       "monotonic": true
     },
     {
@@ -162,7 +172,8 @@
         "disk": 335.72,
         "remote_rdma": 678.59
       },
-      "headroom_pct": 69.16,
+      "headroom_pct": 79.97,
+      "captured_pct": 4.21,
       "monotonic": false
     },
     {
@@ -181,7 +192,8 @@
         "disk": 143.33,
         "remote_rdma": 101.19
       },
-      "headroom_pct": 68.89,
+      "headroom_pct": 72.37,
+      "captured_pct": 4.01,
       "monotonic": true
     },
     {
@@ -200,7 +212,8 @@
         "disk": 335.72,
         "remote_rdma": 101.19
       },
-      "headroom_pct": 75.63,
+      "headroom_pct": 77.11,
+      "captured_pct": 3.66,
       "monotonic": false
     },
     {
@@ -219,7 +232,8 @@
         "disk": 4.0,
         "remote_rdma": 2.5
       },
-      "headroom_pct": 78.38,
+      "headroom_pct": 80.03,
+      "captured_pct": 2.11,
       "monotonic": true
     },
     {
@@ -238,7 +252,8 @@
         "disk": 334.82,
         "remote_rdma": 100.75
       },
-      "headroom_pct": 80.81,
+      "headroom_pct": 66.69,
+      "captured_pct": 4.77,
       "monotonic": true
     },
     {
@@ -257,7 +272,8 @@
         "disk": 334.82,
         "remote_rdma": 674.12
       },
-      "headroom_pct": 66.79,
+      "headroom_pct": 78.33,
+      "captured_pct": 4.49,
       "monotonic": false
     },
     {
@@ -276,7 +292,8 @@
         "disk": 143.16,
         "remote_rdma": 100.75
       },
-      "headroom_pct": 64.22,
+      "headroom_pct": 66.69,
+      "captured_pct": 4.77,
       "monotonic": true
     },
     {
@@ -295,7 +312,8 @@
         "disk": 334.82,
         "remote_rdma": 100.75
       },
-      "headroom_pct": 73.69,
+      "headroom_pct": 74.52,
+      "captured_pct": 3.55,
       "monotonic": false
     },
     {
@@ -314,7 +332,8 @@
         "disk": 4.0,
         "remote_rdma": 2.5
       },
-      "headroom_pct": 72.22,
+      "headroom_pct": 72.92,
+      "captured_pct": 2.36,
       "monotonic": true
     }
   ]

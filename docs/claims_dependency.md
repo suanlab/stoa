@@ -1041,3 +1041,27 @@ different states, and this project has now been in the gap between them twice (�
 By §AB's rule the pass surfaced something, so the paper does not go to the next cycle. `calibration_
 sensitivity.json` is still regenerating; when it lands, the pass restarts from the top. Sixteen defects,
 and the seventeenth was the belief that fixing code fixes results.
+
+## §AD — figures are artifacts too, and nothing checked them
+
+The re-verification pass of §AC ended clean: 173 tests, 66/66 checks, every artifact newer than the
+code that produced it. The paper built at 12 pages with no undefined references. That was wrong.
+
+`paper/figs/fig_reactive.pdf` and `fig_capacity_ladder.pdf` were **fifteen days older** than the
+artifacts they plot. The paper embeds the PDF, not the JSON. So §5.3's text carried the corrected
+ladder while Figure 2 still drew the pre-fix one, and the checker — which compares artifacts to the
+*paper source* — cannot see inside a PDF. Regenerating both changed both.
+
+The staleness guard of §AC was built one level too high. It asked "is this artifact older than the
+code that produced it?" and stopped. It did not ask the same question of the next link in the chain,
+where the artifact is itself a source. The chain is:
+
+    src/*.py  ->  experiments/*.json  ->  paper/figs/*.pdf  ->  main.pdf
+
+§AC guarded the first arrow. `FIG_SOURCES` in `check_paper_numbers.py` now guards the second, and it
+was verified by `touch`-ing an artifact and confirming the guard fires — not by observing that it
+passed.
+
+**The generalization**: a freshness check on one edge of a derivation chain reads as a freshness check
+on the chain. It is not. Every arrow needs its own, and a guard that has only ever passed has not been
+tested. This is the eighteenth defect whose only symptom was a plausible-looking output.
