@@ -168,7 +168,7 @@ believed where an observation was available.
 
 ## 6. Controls wired into the harness
 
-**Eighteen defects** during this work produced plausible-but-wrong numbers; `docs/claims_dependency.md`
+**Nineteen defects** during this work produced plausible-but-wrong numbers; `docs/claims_dependency.md`
 catalogues each with the symptom it presented. The checks that catch them live in the code and the tests,
 not just in prose:
 

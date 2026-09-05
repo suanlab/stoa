@@ -466,8 +466,9 @@ points against our own framing rather than for it.
 \subsection{What the measurement required}
 \label{sec:protocol}
 Every positive result we obtained before the final protocol was an artifact. We report the mechanisms
-because they generalize, and because the last three were found only by adversarial review rather than by
-our own checks.
+because they generalize, and because the later ones were found only after the earlier catalogue had been
+written --- two by adversarial review, and three by re-verification passes run over a paper that had
+already passed every check it defined for itself.
 
 \paragraph{Reference-frame mismatches (six).} Two quantities that must share a frame --- the same split
 instant, ordering, tie rule, or question set --- were silently defined on different ones: a demand signal
@@ -488,9 +489,11 @@ non-monotonically on toolagent, so the repaired metric does not simply invert th
 LRB column that measured \emph{random eviction}: the training buffer was truncated to its tail, censored
 rows arrive in one contiguous burst per checkpoint, and from the third retrain onward every training
 label was identical, so the regressor returned a constant and eviction degenerated to a uniform draw.
-Two independent repairs of that bug disagree by 19 points. We report the repaired column in
-\Cref{sec:reaction} as a band rather than a point estimate, and state the conclusion only at the
-coarseness the band supports.
+Two defensible repairs of that bug disagree by up to 2.1 points, and an independent reimplementation
+produced during review differs from ours by 17 (\Cref{sec:reaction}). We therefore report the column as
+a band and state the conclusion --- LRB below ARC at all eight operating points --- only at the
+coarseness that band supports. An earlier draft of this paragraph compressed the two figures into a
+single ``19 points'' attributed to the repairs, which is neither quantity.
 
 Two further sub-claims were falsified in a later re-verification pass, after the paper had been
 rewritten around the arrival result: that first-come-first-served admission captures roughly 90\% of
@@ -521,6 +524,14 @@ edge and observing it pass, we found the plotted figures were fifteen days older
 draw: the text carried the corrected ladder while the figure still showed the retracted one, because the
 paper embeds the PDF and a number-checker cannot see inside it. A freshness check on one edge reads like
 a freshness check on the chain; it is not, and a guard that has only ever passed has not been tested.
+
+\paragraph{Summaries of checked tables, unchecked (one).} Our checker re-derives every number in this
+paper from its artifact. It verified all eight rows of the LRB band above and passed, while a sentence
+elsewhere in the paper described that same band as ``two repairs disagreeing by 19 points'' --- the
+repairs disagree by 2.1, and 17 is the gap to an independent reimplementation. Every element of the
+table was right and the summary of it was false. Row-level verification certifies a table, not the
+prose that aggregates it; widths, spans, maxima and ``at most'' claims need their own assertions,
+derived from the same artifact.
 
 \paragraph{The controls.} Assert that the oracle beats the heuristic it is compared against; keep a
 no-learning baseline of the same functional form as the learned one; check that no single feature

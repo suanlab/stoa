@@ -1065,3 +1065,39 @@ passed.
 **The generalization**: a freshness check on one edge of a derivation chain reads as a freshness check
 on the chain. It is not. Every arrow needs its own, and a guard that has only ever passed has not been
 tested. This is the eighteenth defect whose only symptom was a plausible-looking output.
+
+## §AE — the checker verified a table and not the sentence about it
+
+The pass of §AD ended clean and was committed. Re-running it a week later, the standard three steps
+(173 tests, 66/66 checks, a 12-page build with no undefined references) passed again. Two things were
+wrong anyway, and neither was in the checker's reach.
+
+**1. The repository's front page carried the falsified numbers.** `README.md` — the first file anyone
+opens on GitHub — still said the reachable share rises to *90%* and *53%* and that FCFS captures *93%*
+and *90%*. Those are the pre-§AC values; the true ones are 83.5 / 19.0 and 87.4 / 50.2. §AC corrected
+`paper/README.md` and `REPRODUCIBILITY.md` and never touched the root README, because the sweep that
+found the stale prose was written by listing the files I remembered editing.
+
+**2. §5.8 stated a number no check covered.** It said *"two independent repairs of that bug disagree by
+19 points."* The artifact says the two repairs disagree by at most **2.1** points; the **17**-point
+figure is the gap to an independent reimplementation, which is a different quantity. §5.5 states both
+correctly. §5.8 compressed them into one number that is neither.
+
+The checker verified all eight rows of the LRB band table and passed. It had no check on a *sentence
+about* those rows. The row-level checks cannot catch this: every individual number in the table was
+right, and the summary claim was still false.
+
+I preserved that sentence verbatim while editing the paragraph around it in §AD, which is the specific
+failure worth naming — **an edit that leaves a number untouched is not a verification of it.** The
+number arrived in the draft before the checker had an assertion for it, and editing near it created a
+false impression of having reviewed it.
+
+Both are now checked: `widest disagreement between the two repairs` (2.1) and `independent
+reimplementation gap` (17) are derived from `lrb_retraction.json` and asserted against the paper text.
+The first version of the second check matched the `/10%` inside "conversation/10%" and reported a
+53-point gap — a reminder that a check written carelessly fails loudly, which is the good case.
+
+**The generalization**: a checker that verifies every element of a table certifies the table, not the
+prose that summarizes it. Aggregate statements — widths, spans, maxima, "at most", "by a factor of" ---
+need their own assertions, derived from the same artifact. This is the nineteenth defect whose only
+symptom was a plausible number.

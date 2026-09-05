@@ -260,6 +260,20 @@ if d:
         claim(f"{r['trace']} {r['cache_frac']:.0%} LRB band", row, row, "lrb repairs")
     assert all(x["below_arc_under_all_repairs"] for x in d["rows"]), (
         "LRB is no longer below ARC everywhere; the paper's only surviving LRB claim is void")
+    # The band's WIDTH and the reimplementation gap are two different quantities, and a draft
+    # compressed them into one wrong number that every row-level check above still passed.
+    widest = max(100 * abs(r["lrb_repair_all_history"] - r["lrb_repair_sliding_window"])
+                 for r in d["rows"])
+    claim("widest disagreement between the two repairs", f"{widest:.1f} points",
+          "2.1 points", "lrb_repair_* spread")
+    note = d.get("independent_reimplementation", "")
+    # Targeted, not greedy: an earlier version matched the "/10%" of "conversation/10%"
+    # and reported a 53-point gap. The two readings are the reviewer's and ours.
+    m = re.search(r"~?(\d+(?:\.\d+)?)% at .*? where ours gives (\d+(?:\.\d+)?)%", note)
+    if m:
+        gap = abs(float(m.group(1)) - float(m.group(2)))
+        claim("independent reimplementation gap", f"{gap:.0f}-point difference",
+              "17-point difference", "independent_reimplementation")
 
 # --- capacity ladder on the corrected metric ---------------------------------------
 d = load("capacity_ladder_fixed.json")
@@ -343,6 +357,36 @@ for art, mods in DEPENDS_ON.items():
             failures.append(
                 f"STALE ARTIFACT: {art} predates src/stoa/{m}. Regenerate it before trusting "
                 "any number it feeds; the code was fixed and the result was not.")
+
+# The released prose -- README.md, paper/README.md, REPRODUCIBILITY.md -- restates the paper's
+# headline numbers, and nothing checked it. Twice now a correction landed in the .tex and not in
+# the markdown, most recently leaving the repository's front page advertising the two numbers a
+# re-verification pass had just falsified. These are the quantities a reader meets first.
+PROSE_FILES = ("README.md", "paper/README.md", "REPRODUCIBILITY.md")
+_arr = load("arrival_admission.json")
+if _arr:
+    _by = {(r["trace"], r["arm"]): r for r in _arr["results"]}
+    HEADLINE = {}
+    for _t in ("conversation", "toolagent"):
+        # The reachable share IS the ceiling arm's captured_pct: what a clairvoyant policy
+        # restricted to blocks it could have seen actually captures.
+        HEADLINE[f"reachable share, {_t}"] = f"{_by[(_t, 'arrival-ceiling')]['captured_pct']:.1f}"
+        HEADLINE[f"FCFS of attainable, {_t}"] = (
+            f"{_by[(_t, 'arrival-fcfs')]['captured_of_attainable_pct']:.1f}")
+    for fname in PROSE_FILES:
+        fp = ROOT / fname
+        if not fp.exists():
+            continue
+        text = fp.read_text()
+        # Only files that actually restate the arrival result are held to it.
+        if "reachable share" not in text:
+            continue
+        for label, val in HEADLINE.items():
+            if val not in text:
+                failures.append(
+                    f"{fname} restates the arrival result but does not contain {val} "
+                    f"({label}). Released prose drifts from the paper silently; it is the "
+                    "first thing a reader sees and nothing else checks it.")
 
 # Figures are artifacts too, one level down: make_figures.py reads experiments/*.json and
 # writes paper/figs/*.pdf. The paper embeds the PDF, not the JSON, so a figure older than the

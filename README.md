@@ -11,9 +11,12 @@ The paper asks what a KV-block placement policy has to get right, and answers th
   policy measured inside that protocol looks flat however well it ranks. The diagnostic is one extra
   placement pass (`stoa.sequential.attainable_ceiling`); we recommend reporting the reachable share
   alongside any "fraction of headroom captured".
-- **Moving the decision to each block's arrival recovers the benefit** — reachable share 3% → 90% on
-  one trace, 2% → 53% on the other. There, first-come-first-served admission captures 93% and 90% of
-  what is reachable, and a learned arrival-time ranker captures slightly *less*.
+- **Moving the decision to each block's arrival recovers the benefit** — reachable share 3% → **83.5%**
+  on one trace, 2% → **19.0%** on the other, a factor of 27 and 8. There, first-come-first-served
+  admission with a fixed action captures **87.4%** and **50.2%** of what is reachable, and a learned
+  arrival-time ranker captures *less* on both. But the arrival **order** is not free: shuffling it costs
+  3.3 points on one trace and **14.1** on the other. So the implication is narrower than "deciding at
+  all is enough" — build an admission point, and do not assume the order it admits in is incidental.
 - **Reaction is competitive.** Rules that forecast nothing reach 75–99% / 40–94% of Belady, and the
   adaptive family (ARC, LeCaR, CACHEUS) beats the best of them by at most 4.6 points.
 
@@ -60,18 +63,22 @@ The cost is that our GBDT is not `HistGradientBoostingRegressor`, and we say so 
 
 ## Read this before trusting a number
 
-`docs/claims_dependency.md` records **fifteen defects whose only symptom was a plausible number**, and
-three claims we retracted — two of them found by adversarial review *after* the error catalogue in the
-paper had already been written. Every one produced a reasonable-looking aggregate. None was caught by a
-check that did not compare a reported quantity against what it was arithmetically able to be.
+`docs/claims_dependency.md` records **nineteen defects whose only symptom was a plausible number**, five
+claims we retracted, and two further sub-claims falsified after the paper had been rewritten around the
+surviving result. Two of the retractions were found by adversarial review *after* the error catalogue in
+the paper had been written; the two falsifications were found by a re-verification pass that noticed
+three cited artifacts predated a fix to the code that produced them. Every one produced a
+reasonable-looking aggregate. None was caught by a check that did not compare a reported quantity
+against what it was arithmetically able to be — or against the timestamp of the program that wrote it.
 
 That document is not an apology; it is the part of this work most likely to transfer. If you take one
 thing from this repository, take the habit of asking what a number's denominator could have been.
 
 ## Status
 
-- The LRB column is reported as a **band, not a point**: two defensible repairs of the same bug differ,
-  and an independent reimplementation differs from both by 17 points. What survives is the ordering.
+- The LRB column is reported as a **band, not a point**: two defensible repairs of the same bug differ
+  by up to 2.1 points, and an independent reimplementation differs from ours by 17. What survives is the
+  ordering — LRB below ARC at all eight operating points under every repair.
 - The timing axis of the formulation is not exercised at all; the representation axis only as an
   underpowered pilot.
 - No live vLLM+LMCache deployment was measured. Cost tables are derived from stated hardware
