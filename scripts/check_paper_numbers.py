@@ -388,6 +388,43 @@ if _arr:
                     f"({label}). Released prose drifts from the paper silently; it is the "
                     "first thing a reader sees and nothing else checks it.")
 
+# The lab notebook legitimately records superseded measurements -- rewriting them would destroy
+# the record. But an unmarked one reads as current: §V.2 stated "shuffling the arrival order
+# costs 1.8 / 3.0 points, so FCFS ordering contributes little" long after §AC measured 14.1 and
+# falsified it. History is fine; unlabelled history is not.
+SUPERSEDED_VALUES = {
+    "90.4%": "reachable share, conversation (now 83.5%)",
+    "52.8%": "reachable share, toolagent (now 19.0%)",
+    "89.5%": "FCFS of attainable, toolagent (now 50.2%)",
+    "93.2%": "FCFS of attainable, conversation (now 87.4%)",
+    "-825.7%": "ladder constant, toolagent (now -60.6%)",
+    "\u2212825.7%": "ladder constant, toolagent (now -60.6%)",
+}
+# "paper carried | regenerated" is an explicit before/after column header -- the value is
+# labelled superseded, just in different words. Accepting it is not a weakening.
+MARKERS = ("SUPERSEDED", "RETRACTED", "FALSIFIED", "do not cite", "paper carried")
+NOTEBOOK = ROOT / "docs" / "claims_dependency.md"
+if NOTEBOOK.exists():
+    lines = NOTEBOOK.read_text().splitlines()
+    # A value is "marked" if a banner appears in the same section, i.e. after the nearest
+    # preceding heading and before the value.
+    for i, line in enumerate(lines):
+        for val, what in SUPERSEDED_VALUES.items():
+            if val not in line:
+                continue
+            start = 0
+            for j in range(i, -1, -1):
+                if lines[j].startswith("#"):
+                    start = j
+                    break
+            # Case-insensitive: prose says "the claim AC falsified", headers say "SUPERSEDED".
+            section = "\n".join(lines[start:i] + [line]).lower()
+            if not any(m.lower() in section for m in MARKERS):
+                failures.append(
+                    f"docs/claims_dependency.md:{i+1} states the superseded value {val} "
+                    f"({what}) in a section carrying no SUPERSEDED/RETRACTED marker. "
+                    "Add a banner rather than editing the record.")
+
 # Figures are artifacts too, one level down: make_figures.py reads experiments/*.json and
 # writes paper/figs/*.pdf. The paper embeds the PDF, not the JSON, so a figure older than the
 # data it plots ships a picture of a number the text no longer makes -- and nothing said so.

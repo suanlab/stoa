@@ -809,6 +809,10 @@ All four metric defects from §T/§U are fixed in `src/stoa/sequential.py`, pinn
 
 ### V.1 The capacity ladder under the fixed metric: monotone in AUC, and all of it negative
 
+> **SUPERSEDED by §AC (2026-08-26).** The artifact behind this table predated the tie-break fix of §W
+> reaching all three placement routines. `constant` is −46.1 / −60.6, not −154.5 / −825.7, and
+> monotonicity in AUC holds on toolagent only. The numbers below are left as recorded; do not cite them.
+
 `experiments/capacity_ladder_fixed.json`, full traces:
 
 | rung | AUC | % of attainable (conversation) | % of attainable (toolagent) |
@@ -832,6 +836,12 @@ which magnitude scale to place beliefs on — that no version of this paper ever
 flips sign under an unstated convention is not yet a measurement. We report both and claim neither.
 
 ### V.2 The arrival experiment: the headroom is real, and prediction is not what captures it
+
+> **SUPERSEDED by §AC (2026-08-26).** Same cause: the artifact predated the §W fix to the routines that
+> produce the *denominator*. Current values are reachable share **83.5% / 19.0%** (27× and 8×, not 29×
+> and 22×), FCFS at **87.4% / 50.2%** of the ceiling, and shuffling the arrival order costs **3.3 /
+> 14.1** points — not 1.8 / 3.0. The second bullet below ("FCFS ordering contributes little") is
+> **falsified on toolagent**: arrival order is worth 14 points there. Left as recorded; do not cite.
 
 `scripts/run_arrival_admission.py`, `experiments/arrival_admission.json`, full traces. Blocks are placed
 at **first appearance** from request-level context (session age/rate/recency, position in request,
@@ -1101,3 +1111,38 @@ The first version of the second check matched the `/10%` inside "conversation/10
 prose that summarizes it. Aggregate statements — widths, spans, maxima, "at most", "by a factor of" ---
 need their own assertions, derived from the same artifact. This is the nineteenth defect whose only
 symptom was a plausible number.
+
+## §AF — the notebook stated falsified claims in the present tense
+
+Pass 4. The standard three steps passed again (173 tests, 68/68 checks, 12 pages, no undefined
+references). This time the coverage sweep was written **mechanically** rather than from memory — the
+specific failure of §AE — by enumerating every tracked file containing any of the paper's headline
+quantities and classifying each as checked, guarded, or neither. Three files came back unguarded:
+`docs/claims_dependency.md`, `docs/research_plan.md`, and the preserved superseded draft
+`paper/main_decoupling_retracted.tex`. The last two are legitimately historical. The notebook was not.
+
+§V.1 and §V.2 — this document — stated the pre-§AC values **in the present tense with no forward
+pointer**: "Deciding on arrival attains 90.4% / 52.8% — 29x and 22x more", and
+
+> "Shuffling the arrival order costs 1.8 / 3.0 points, so FCFS ordering contributes little; almost all
+> of the benefit is in **when** the decision is made, not in what it decides."
+
+That is precisely the claim §AC falsified: 14.1 points on toolagent. A reader landing on §V.2 — 150
+lines before the correction — reads a falsified conclusion as a finding.
+
+A lab notebook must record superseded measurements; editing them out destroys the record's value, which
+is the whole reason this file exists. So the fix is a banner, not a rewrite: §V.1 and §V.2 now carry
+**SUPERSEDED by §AC** headers giving the current values, with the original text left intact beneath.
+
+`check_paper_numbers.py` now enforces it. Any occurrence of a known-superseded headline value in this
+file must appear in a section carrying a SUPERSEDED / RETRACTED / FALSIFIED / "do not cite" marker, or
+under an explicit "paper carried | regenerated" before-and-after column. Verified by deleting the §V.2
+banner and confirming eight findings, after a first attempt at that verification failed to remove the
+whole banner and wrongly appeared to show the guard was dead — **a guard test that leaves part of the
+guard's input in place tests nothing**, the same shape as §AE's "an edit that leaves a number untouched
+is not a verification of it."
+
+**The generalization**: correcting a claim in the document that makes it does not correct the documents
+that recorded it. Each surface needs either an update or a marker, and which one depends on whether the
+surface is an assertion or a record. This is the twentieth defect whose only symptom was a plausible
+number.

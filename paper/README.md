@@ -1,14 +1,19 @@
 # STOA paper source
 
-**Current framing (2026-08-19):** *Decide on Arrival: Placement Timing Beats Placement Prediction on
+**Current framing (2026-09-05):** *Decide on Arrival: Placement Timing Beats Placement Prediction on
 Production KV Traces.* The paper gives the budget-constrained formulation, then reports what production
 traces say about it: split-instant evaluation makes 97% of the achievable benefit unreachable, moving the
 decision to each block's arrival recovers it, and what captures the recovered benefit is deciding early
-rather than deciding well.
+rather than deciding well — though not order-independently, which an earlier draft got wrong.
 
-**Three claims were retracted on the way here**, including the previous framing ("Ranking Is Not
-Placement"), which was an artifact of normalizing against an oracle a causal policy cannot reach. See
-`../docs/claims_dependency.md` §I, §T and §U. Full experimental record in `../docs/research_plan.md`.
+**Five claims were retracted on the way here** and two further sub-claims falsified, including the
+previous framing ("Ranking Is Not Placement"), which was an artifact of normalizing against an oracle a
+causal policy cannot reach. See `../docs/claims_dependency.md` §I, §T, §U (the retractions), §AC (the
+two falsifications), and §AD–§AF (the guards added so each class fails loudly next time).
+
+The experimental record is `../docs/claims_dependency.md` — the lab notebook, one section per finding,
+in the order they were found. `../docs/research_plan.md` is the **pre-registration**, written 2026-07-15
+before any of these experiments ran; read it for what we intended to measure, not for what we found.
 
 ## Build (verified: 12 pages, 0 undefined citations/references, no `??` in the PDF)
 
@@ -50,7 +55,7 @@ Three template requirements are easy to break and produce a silently wrong front
 
    Run that from a shell with no GitHub credentials, or in a logged-out browser. Checking it while
    authenticated tests your access, not the reviewer's — which is the exact failure mode
-   `../docs/claims_dependency.md` catalogues nineteen times over.
+   `../docs/claims_dependency.md` catalogues twenty times over.
 3. **`\vldbtopmatter` immediately after `\maketitle`.** `pvldb.sty` has no `AtBeginDocument` hook, so
    omitting this drops the PVLDB Reference Format and Artifact Availability blocks with no error. Check
    for them in the rendered page 1, not in the log.
