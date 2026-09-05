@@ -538,6 +538,14 @@ table was right and the summary of it was false. Row-level verification certifie
 prose that aggregates it; widths, spans, maxima and ``at most'' claims need their own assertions,
 derived from the same artifact.
 
+\paragraph{Unverified interventions read as evidence (one).} Three times we concluded something from an
+intervention that never took effect: a banner deleted only in part, a paragraph edited around a wrong
+number, a mutation whose target string was absent and which therefore reported ``no test caught this''
+--- indistinguishable from a real coverage gap. A negative result from an intervention you did not
+confirm landed is not a result. Our harnesses now assert the change applied before reading the outcome,
+and the guards are themselves tested in both directions: four had lived in a script where a refactor
+could have deleted any one silently.
+
 \paragraph{The controls.} Assert that the oracle beats the heuristic it is compared against; keep a
 no-learning baseline of the same functional form as the learned one; check that no single feature
 outperforms the fitted model; before concluding that a signal is unlearnable, vary model capacity while

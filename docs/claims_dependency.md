@@ -1146,3 +1146,66 @@ is not a verification of it."
 that recorded it. Each surface needs either an update or a marker, and which one depends on whether the
 surface is an assertion or a record. This is the twentieth defect whose only symptom was a plausible
 number.
+
+## §AG — four guards, no tests
+
+Pass 5. The standard three steps passed again. The finding this time was one I had **already made
+and deferred**: in §AE I ran `grep -rl DEPENDS_ON tests/`, recorded "NO TEST references either
+guard", and moved on to the more interesting defect in the same pass. Two passes later there were
+four guards, all of them living inline in `scripts/check_paper_numbers.py`, and none of them tested.
+
+A refactor could have deleted any one and every subsequent pass would still have reported clean —
+which is exactly the failure the guards were written to prevent, applied to the guards themselves.
+The staleness guard exists because a stored result can silently stop matching the code. A guard
+with no test can silently stop existing.
+
+The repair, in order:
+
+1. Extracted all four into `src/stoa/verify.py` as pure functions taking paths and mappings rather
+   than reading script globals: `stale_artifacts`, `undeclared_artifacts`, `stale_figures`,
+   `prose_drift`, `unmarked_superseded`. `check_paper_numbers.py` now calls them, so there is one
+   implementation, not two that can drift — the §W defect, avoided rather than repeated.
+2. Added `stale_paper_pdf`, closing the last edge of the chain. A correction in the `.tex` is not a
+   correction until the PDF is rebuilt, and the PDF is what a reviewer reads. It happened to be
+   fresh; that is luck, not a check.
+3. `tests/test_verify.py`, 24 tests, each guard exercised in **both** directions — fires on the
+   violation, silent on a clean tree. Four tests encode specifics that a plausible reimplementation
+   would get wrong: a marker in the *previous* section must not silence the next one (the §AF
+   defect verbatim), a marker *after* the value must not silence it (what the notebook already
+   had), a file that does not restate a result must not be forced to quote it, and a missing
+   artifact is a different failure from a stale one.
+4. Mutation-tested all six: disabled each guard in turn and confirmed a test fails.
+
+Two of those mutations **did not apply** — the string I was replacing was not in the file — and the
+first harness reported them as "no test caught it", which reads identically to a real coverage gap
+and would have sent me to write tests that already existed. The harness now verifies the mutation
+landed before drawing any conclusion from the result.
+
+That is the third time in five passes: a banner half-removed in §AF, a number edited around in §AE,
+a mutation that never applied here. **A negative result from an intervention you did not confirm
+took effect is not evidence.** It is the same error as trusting a report over an observation (§5.8),
+committed while checking for that error.
+
+This is the twenty-first defect. It is also the first found by asking not "is the paper right?" but
+"is the thing that checks the paper checked?"
+
+### AG.1 The page-limit check measured the wrong quantity
+
+Found in the same pass, and worse than it looks. PVLDB's limit is **12 pages excluding references**.
+For five re-verification passes the check was `pdfinfo main.pdf | awk '/^Pages/'` compared against 12
+— the page count of the *file*. That agreed with the constraint only while the references happened to
+fit on the body's last page. When §AG's additions pushed the bibliography onto its own page, the check
+reported 13 and read as a violation while the paper was still compliant: body ends on page 12.
+
+It fails in both directions. A paper whose body ran to thirteen pages with short references would have
+passed. The quantity checked was never the quantity constrained; it merely correlated.
+
+`stoa.verify.body_pages` now returns the page the bibliography starts on, and `page_limit_violation`
+compares *that* against the limit. It raises rather than returning a sentinel when `pdftotext` is
+missing or no `REFERENCES` heading is found, because a page-limit check that cannot run must not be
+indistinguishable from one that passed — the same rule the checker already applied to itself via
+`MIN_CHECKS`.
+
+Current state: body ends on page 12 with roughly three lines to spare, references run to page 13. Any
+addition now requires a deletion, and `paper/README.md` says so in terms of the body rather than the
+file.

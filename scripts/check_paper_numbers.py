@@ -24,6 +24,11 @@ ROOT = Path(__file__).resolve().parent.parent
 EXP = ROOT / "experiments"
 import re
 
+_SRC = ROOT / "src"
+if str(_SRC) not in sys.path:
+    sys.path.insert(0, str(_SRC))
+from stoa import verify  # noqa: E402
+
 _RAW = " ".join(p.read_text() for p in
                 [ROOT / "paper" / "main.tex", *sorted((ROOT / "paper" / "sections").glob("*.tex"))])
 # Collapse runs of whitespace. LaTeX table columns are padded for readability in the source,
@@ -339,24 +344,8 @@ DEPENDS_ON = {
 }
 # The guard's own failure mode: add an artifact, forget to declare its dependencies, and it
 # is exempt from staleness checking forever without anything saying so.
-undeclared = [n for n in _LOADED if n not in DEPENDS_ON and (EXP / n).exists()]
-if undeclared:
-    failures.append(
-        "artifacts read but absent from DEPENDS_ON, so never staleness-checked: "
-        + ", ".join(sorted(set(undeclared)))
-        + ". Declare the modules each depends on.")
-
-for art, mods in DEPENDS_ON.items():
-    ap = EXP / art
-    if not ap.exists():
-        continue
-    a_mtime = ap.stat().st_mtime
-    for m in mods:
-        mp = SRC / m
-        if mp.exists() and mp.stat().st_mtime > a_mtime:
-            failures.append(
-                f"STALE ARTIFACT: {art} predates src/stoa/{m}. Regenerate it before trusting "
-                "any number it feeds; the code was fixed and the result was not.")
+failures += verify.undeclared_artifacts(_LOADED, DEPENDS_ON, EXP)
+failures += verify.stale_artifacts(DEPENDS_ON, EXP, SRC)
 
 # The released prose -- README.md, paper/README.md, REPRODUCIBILITY.md -- restates the paper's
 # headline numbers, and nothing checked it. Twice now a correction landed in the .tex and not in
@@ -373,20 +362,7 @@ if _arr:
         HEADLINE[f"reachable share, {_t}"] = f"{_by[(_t, 'arrival-ceiling')]['captured_pct']:.1f}"
         HEADLINE[f"FCFS of attainable, {_t}"] = (
             f"{_by[(_t, 'arrival-fcfs')]['captured_of_attainable_pct']:.1f}")
-    for fname in PROSE_FILES:
-        fp = ROOT / fname
-        if not fp.exists():
-            continue
-        text = fp.read_text()
-        # Only files that actually restate the arrival result are held to it.
-        if "reachable share" not in text:
-            continue
-        for label, val in HEADLINE.items():
-            if val not in text:
-                failures.append(
-                    f"{fname} restates the arrival result but does not contain {val} "
-                    f"({label}). Released prose drifts from the paper silently; it is the "
-                    "first thing a reader sees and nothing else checks it.")
+    failures += verify.prose_drift(PROSE_FILES, HEADLINE, ROOT, trigger="reachable share")
 
 # The lab notebook legitimately records superseded measurements -- rewriting them would destroy
 # the record. But an unmarked one reads as current: §V.2 stated "shuffling the arrival order
@@ -402,28 +378,10 @@ SUPERSEDED_VALUES = {
 }
 # "paper carried | regenerated" is an explicit before/after column header -- the value is
 # labelled superseded, just in different words. Accepting it is not a weakening.
-MARKERS = ("SUPERSEDED", "RETRACTED", "FALSIFIED", "do not cite", "paper carried")
 NOTEBOOK = ROOT / "docs" / "claims_dependency.md"
 if NOTEBOOK.exists():
-    lines = NOTEBOOK.read_text().splitlines()
-    # A value is "marked" if a banner appears in the same section, i.e. after the nearest
-    # preceding heading and before the value.
-    for i, line in enumerate(lines):
-        for val, what in SUPERSEDED_VALUES.items():
-            if val not in line:
-                continue
-            start = 0
-            for j in range(i, -1, -1):
-                if lines[j].startswith("#"):
-                    start = j
-                    break
-            # Case-insensitive: prose says "the claim AC falsified", headers say "SUPERSEDED".
-            section = "\n".join(lines[start:i] + [line]).lower()
-            if not any(m.lower() in section for m in MARKERS):
-                failures.append(
-                    f"docs/claims_dependency.md:{i+1} states the superseded value {val} "
-                    f"({what}) in a section carrying no SUPERSEDED/RETRACTED marker. "
-                    "Add a banner rather than editing the record.")
+    failures += verify.unmarked_superseded(
+        NOTEBOOK.read_text(), SUPERSEDED_VALUES, label="docs/claims_dependency.md")
 
 # Figures are artifacts too, one level down: make_figures.py reads experiments/*.json and
 # writes paper/figs/*.pdf. The paper embeds the PDF, not the JSON, so a figure older than the
@@ -437,18 +395,18 @@ FIG_SOURCES = {
     "fig_sequential.pdf": ("mooncake_length_sweep.json",),
 }
 FIGS = ROOT / "paper" / "figs"
-for fig, arts in FIG_SOURCES.items():
-    fp = FIGS / fig
-    if not fp.exists():
-        continue
-    for art in arts:
-        ap = EXP / art
-        if ap.exists() and ap.stat().st_mtime > fp.stat().st_mtime:
-            failures.append(
-                f"STALE FIGURE: paper/figs/{fig} predates experiments/{art}. "
-                "Run scripts/make_figures.py; the paper embeds the PDF, not the JSON, so the "
-                "text can be corrected while the plot still shows the retracted number.")
-            break
+failures += verify.stale_figures(FIG_SOURCES, FIGS, EXP)
+
+# The last edge of the chain: a correction in the .tex is not a correction until the PDF is
+# rebuilt, and the PDF is what a reviewer reads.
+_paper = ROOT / "paper"
+# The constrained quantity is the BODY's page count, not the file's. Measuring the file
+# agreed with the truth only while the references happened to fit on the body's last page.
+failures += verify.page_limit_violation(_paper / "main.pdf", limit=12)
+failures += verify.stale_paper_pdf(
+    _paper / "main.pdf",
+    [_paper / "main.tex", *sorted((_paper / "sections").glob("*.tex")),
+     *[FIGS / f for f in FIG_SOURCES], ROOT / "docs" / "references.bib"])
 
 # --- coverage guards, LAST so `checked` is final -----------------------------------
 # Sitting mid-file, this counted only the checks declared above it and passed while
