@@ -27,6 +27,7 @@ from typing import Iterable, Mapping, Sequence
 
 __all__ = [
     "PAPER_MARKERS",
+    "module_digest",
     "body_pages",
     "page_limit_violation",
     "stale_artifacts",
@@ -52,24 +53,55 @@ def _mtime(p: Path) -> float:
     return p.stat().st_mtime
 
 
-def stale_artifacts(depends_on: Mapping[str, Sequence[str]], exp: Path, src: Path) -> list[str]:
+def module_digest(path: Path) -> str:
+    """SHA-256 of a source file, as the thing an artifact actually depends on."""
+    import hashlib
+
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def stale_artifacts(depends_on: Mapping[str, Sequence[str]], exp: Path, src: Path,
+                    manifest: Mapping[str, Mapping[str, str]] | None = None) -> list[str]:
     """Artifacts older than a module whose behaviour they encode.
 
     The defect: three artifacts the paper cited predated a tie-break fix to the routines that
     produced them, two of them denominators. The checker compared artifacts to the *paper* and
     never to the *source*, so fixing the code did not fix -- or flag -- the stored results.
+
+    mtime is a *proxy* for "changed", not the thing itself. It fires falsely on `touch`, on a
+    `git checkout`, on restoring a file from a backup -- all of which happened here during
+    mutation testing -- and it can miss a write that preserves the timestamp. A false positive
+    is not benign: this guard's advice costs a 35-minute regeneration, and a guard that cries
+    wolf is a guard that gets waved past, which is how a real staleness would slip through.
+
+    So `manifest` records, per artifact, the digest each module had when that artifact was
+    generated. When the mtime check fires, a matching digest means the timestamp lied and the
+    artifact is fine. A *differing* digest is real staleness and is reported with the digests
+    named. Without a manifest the check falls back to mtime alone and says so, because a
+    provenance check that silently degrades is worse than one that reports what it can see.
     """
     out = []
     for art, mods in depends_on.items():
         ap = exp / art
         if not ap.exists():
             continue
+        recorded = (manifest or {}).get(art, {})
         for mod in mods:
             mp = src / mod
-            if mp.exists() and _mtime(mp) > _mtime(ap):
+            if not (mp.exists() and _mtime(mp) > _mtime(ap)):
+                continue
+            if mod in recorded:
+                if recorded[mod] == module_digest(mp):
+                    continue  # mtime moved, content did not
                 out.append(
-                    f"STALE ARTIFACT: {art} predates {mp}. Regenerate it before trusting any "
-                    "number it feeds; the code was fixed and the result was not.")
+                    f"STALE ARTIFACT: {art} was generated from {mod} at "
+                    f"{recorded[mod][:12]}, which is now {module_digest(mp)[:12]}. Regenerate "
+                    "it before trusting any number it feeds.")
+            else:
+                out.append(
+                    f"STALE ARTIFACT: {art} predates {mp} and has no recorded provenance for "
+                    f"{mod}, so this rests on mtime alone. Regenerate it, or record its "
+                    "provenance with scripts/record_provenance.py if the timestamp is lying.")
     return out
 
 

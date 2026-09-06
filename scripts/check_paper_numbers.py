@@ -345,7 +345,13 @@ DEPENDS_ON = {
 # The guard's own failure mode: add an artifact, forget to declare its dependencies, and it
 # is exempt from staleness checking forever without anything saying so.
 failures += verify.undeclared_artifacts(_LOADED, DEPENDS_ON, EXP)
-failures += verify.stale_artifacts(DEPENDS_ON, EXP, SRC)
+# mtime alone gave a false positive during pass 7's mutation testing: restoring a file from
+# backup moves the timestamp without changing a byte. The manifest records what each artifact
+# was actually generated from, so a moved timestamp with a matching digest is silent and a
+# differing digest is reported with both digests named.
+_PROV = EXP / ".provenance.json"
+_manifest = json.loads(_PROV.read_text()) if _PROV.exists() else None
+failures += verify.stale_artifacts(DEPENDS_ON, EXP, SRC, manifest=_manifest)
 
 # The released prose -- README.md, paper/README.md, REPRODUCIBILITY.md -- restates the paper's
 # headline numbers, and nothing checked it. Twice now a correction landed in the .tex and not in

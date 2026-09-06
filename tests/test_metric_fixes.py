@@ -116,14 +116,13 @@ def test_the_two_baseline_routines_agree():
     assert a == pytest.approx(b, rel=1e-6), f"baselines disagree: {a} vs {b}"
 
 
-def test_all_three_placement_routines_use_the_same_tie_rule():
-    """`place_with_beliefs`, `prefix_greedy_cost` and `_oracle_cost` each choose among
-    equal-cost actions. A block with no future accesses makes every action cost the same, so
-    the choice is pure tie-breaking -- and the numerator and denominator of every reported
-    fraction come from different routines. If they disagree, the fraction is meaningless.
+def test_oracle_agrees_across_the_two_routines_that_compute_it():
+    """A clairvoyant belief through `place_with_beliefs` must equal the oracle `reference_costs`
+    computes by the `_oracle_cost` path. Numerator and denominator come from different routines;
+    if they disagree the fraction is meaningless.
 
-    The check: a clairvoyant belief run through `place_with_beliefs` must equal the oracle
-    that `reference_costs` computes by the other path."""
+    This covers two of the three routines. It was once named for all three and covered two --
+    see `test_every_placement_routine_breaks_ties_by_tier_speed` below, and §AI."""
     from stoa.sequential import reference_costs
     wl = _wl()
     st = max(1, wl.time_split(0.5))
@@ -133,3 +132,44 @@ def test_all_three_placement_routines_use_the_same_tie_rule():
     via_reference = reference_costs(wl)["oracle_future"]
     assert via_beliefs == pytest.approx(via_reference, rel=1e-6), (
         f"oracle disagrees across routines: {via_beliefs} vs {via_reference}")
+
+
+def test_all_three_placement_routines_share_one_tie_rule_in_source():
+    """§W is the defect where the tie-break fix landed in one placement routine of three, so
+    the numerator and denominator of every reported fraction were computed under different
+    rules. Its only symptom was two artifacts disagreeing.
+
+    This is a *structural* test, and deliberately so. Two of the three routines have
+    behaviourally observable tie rules and are pinned by the tests above: reverting either
+    moves a number. The third, `_oracle_cost`, does not -- in the oracle, belief equals truth,
+    so tied actions carry equal true cost and the choice among them changes only which tier
+    fills. Across nine workload configurations (n_items 400-1500, horizon 1200-2000, zipf
+    0.6-1.6, three seeds) reverting its rule to enum order left the oracle identical to six
+    decimals. A behavioural pin for it therefore does not exist to be written; asserting the
+    three routines agree at the source is what actually prevents §W recurring.
+
+    See §AI: a test named for this invariant existed and compared two of the three."""
+    import re
+    from pathlib import Path
+
+    src = Path(__import__("stoa.sequential", fromlist=["x"]).__file__).read_text()
+    bodies = {}
+    for name in ("_oracle_cost", "place_with_beliefs", "prefix_greedy_cost"):
+        m = re.search(rf"^def {name}\(.*?(?=^def |\Z)", src, re.S | re.M)
+        assert m, f"{name} not found in sequential.py; this test is stale, not passing"
+        bodies[name] = m.group(0)
+
+    # Each must consult read latency when choosing among equal-cost actions, by one of the two
+    # spellings the module uses (a per-call `read_latency`, or a precomputed `tier_lat` tensor).
+    for name, body in bodies.items():
+        assert ("read_latency(" in body) or ("tier_lat" in body), (
+            f"{name} chooses among tied actions without consulting tier speed. This is §W: "
+            "the fix must be in all three routines or the fractions mix two rules.")
+
+    # And none may fall back to positional choice among the tied set.
+    for name, body in bodies.items():
+        assert not re.search(r"=\s*tied\[0\]", body), (
+            f"{name} breaks ties by enum order (`tied[0]`), which parks zero-belief blocks on "
+            "whichever tier the enum lists first. §W.")
+
+

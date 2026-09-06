@@ -547,7 +547,9 @@ number, a mutation whose target string was absent and which therefore reported `
 --- indistinguishable from a real coverage gap. A negative result from an intervention you did not
 confirm landed is not a result. Our harnesses now assert the change applied before reading the outcome,
 and the guards are themselves tested in both directions: four had lived in a script where a refactor
-could have deleted any one silently.
+could have deleted any one silently. A test's \emph{name} is a claim about coverage that nothing
+checks --- ours named for the three-routine tie invariant compared two of them --- and the only way to
+learn what a test pins is to break the thing and watch it fail.
 
 \paragraph{The controls.} Assert that the oracle beats the heuristic it is compared against; keep a
 no-learning baseline of the same functional form as the learned one; check that no single feature

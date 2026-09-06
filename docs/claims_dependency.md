@@ -1254,3 +1254,79 @@ values are present, not that the wrong ones are gone. Retractions need absence a
 need a notion of where a citation of a dead number is legitimate. This is the twenty-second defect
 whose only symptom was a plausible number — and the second found by interrogating the checker rather
 than the paper.
+
+## §AI — a test named for an invariant that covered two thirds of it
+
+Pass 7. Standard three steps clean (206 tests, 68/68, body 12 pages). Every guard added in passes
+1–6 protects a *derived* product: an artifact against its code, a figure against its artifact, prose
+and the paper against the current values. None of them protects the code itself. If a fixed defect
+regresses, the artifact regenerates wrong, the paper matches it, and every guard stays green.
+
+So this pass mutated the fixes that produced the paper's numbers. Reverting each of §W's three
+placement routines to enum-order tie-breaking:
+
+| routine | role | tests failing on revert |
+|---|---|---|
+| `place_with_beliefs` | numerator | 3 |
+| `prefix_greedy_cost` | denominator | 1 |
+| `_oracle_cost` | the oracle | **0** |
+
+A test named `test_all_three_placement_routines_use_the_same_tie_rule` existed. It compared
+`place_with_beliefs` against `reference_costs`, which is two routines. The name asserted coverage
+the body did not have, and grepping for the invariant — which I did in an earlier pass — finds the
+name.
+
+### AI.1 The severity was smaller than the finding first looked, and saying so matters
+
+My first reading was "the routine every reported fraction is divided by is unprotected." That
+overstates it. Chasing a behavioural test for `_oracle_cost` produced nine workload configurations
+(n_items 400–1500, horizon 1200–2000, zipf 0.6–1.6, three seeds) in which reverting its tie rule
+left the oracle **identical to six decimal places** — and this after confirming the tie path is
+heavily exercised there (339 of 400 steps have between two and nine tied actions).
+
+The reason is structural: in the oracle, belief *is* truth, so tied actions carry equal true cost
+and the choice among them changes only which tier fills. In `place_with_beliefs` a tie in belief can
+hide a difference in truth, which is why the same rule moves 36% there. The §W fix to `_oracle_cost`
+was a consistency repair with no numeric consequence on any workload I could construct.
+
+So a behavioural pin for that routine does not appear to exist to be written. The pin that does is
+**structural**: assert at the source level that all three routines consult tier speed and that none
+falls back to `tied[0]`. That is also the closer match to the defect, which was never "the oracle
+computes a wrong number" but "the fix landed in one routine of three." Verified by reverting each of
+the three in turn: 1, 4 and 2 tests fail respectively.
+
+The undiscriminating behavioural test I wrote first — asserting the oracle is never beaten by a
+policy it references — passed under the mutation and was deleted rather than kept. A test that
+cannot fail for the reason it was written is worse than no test: it occupies the name.
+
+**The generalization**: a test's name is a claim about coverage, and it is checked by nobody. The
+only way to know what a test pins is to break the thing and watch it fail. Six of seven passes have
+now turned on some version of that, and this is the twenty-third defect whose only symptom was a
+plausible number.
+
+### AI.2 The staleness guard cried wolf, and that is not a harmless failure
+
+Running pass 7's own mutation tests tripped the guard from §AC: three artifacts were reported stale
+against `sequential.py` and `lrb.py`. `git diff` showed both modules byte-identical to HEAD. Only the
+mtimes had moved — restoring each file from a backup after every mutation.
+
+mtime is a *proxy* for "changed", not the thing itself. It fires falsely on `touch`, on a
+`git checkout`, on a restore; it can miss a write that preserves the timestamp. And a false positive
+here is not benign: the guard's instruction is to regenerate, which for `reactive_real_full_lrb.json`
+costs thirty-five minutes. A guard that cries wolf is a guard that gets waved past — the precise
+mechanism by which a real staleness would reach a submission.
+
+`experiments/.provenance.json` now records, per artifact, the SHA-256 each dependency module had when
+that artifact was generated. When the mtime check fires, a matching digest means the timestamp lied
+and nothing is said; a differing digest is reported with both digests named. Absent provenance still
+reports, and says it rests on mtime alone — a check that silently degrades is worse than one that
+states what it can see.
+
+`scripts/record_provenance.py` writes the manifest and **refuses to run while any module an artifact
+depends on has uncommitted changes**, because recording provenance from modified sources stamps
+artifacts as current against code they were not generated from. That refusal is the whole safety
+property: the manifest must never become a way to silence a real complaint. It is a separate command
+for the same reason — a checker that could update its own provenance would have no provenance.
+
+Verified end to end: `touch src/stoa/lrb.py` produces zero findings; appending one comment line
+produces two, naming the artifacts and both digests.

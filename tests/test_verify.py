@@ -290,3 +290,44 @@ def test_retraction_in_a_different_paragraph_does_not_license_a_bare_quote():
 def test_unknown_scope_is_rejected_rather_than_defaulted():
     with pytest.raises(ValueError, match="scope must be"):
         verify.unmarked_superseded("x", PAPER_VALS, scope="whole-file")
+
+
+# --- provenance: mtime is a proxy for "changed", the digest is the thing --------------------
+
+def test_moved_timestamp_with_unchanged_content_is_silent(tmp_path):
+    """`touch`, `git checkout` and restore-from-backup all move an mtime without changing a
+    byte. A guard that cries wolf on those gets waved past, which is how a real staleness
+    slips through."""
+    exp, src = tmp_path / "experiments", tmp_path / "src"
+    _write(exp / "a.json", age=OLD)
+    m = _write(src / "mod.py", "SOURCE\n", age=NOW)
+    manifest = {"a.json": {"mod.py": verify.module_digest(m)}}
+    assert verify.stale_artifacts({"a.json": ("mod.py",)}, exp, src, manifest=manifest) == []
+
+
+def test_changed_content_is_reported_with_both_digests(tmp_path):
+    exp, src = tmp_path / "experiments", tmp_path / "src"
+    _write(exp / "a.json", age=OLD)
+    m = _write(src / "mod.py", "ORIGINAL\n", age=OLD)
+    manifest = {"a.json": {"mod.py": verify.module_digest(m)}}
+    _write(src / "mod.py", "EDITED\n", age=NOW)
+    out = verify.stale_artifacts({"a.json": ("mod.py",)}, exp, src, manifest=manifest)
+    assert len(out) == 1 and "was generated from" in out[0]
+
+
+def test_absent_provenance_still_reports_and_says_it_rests_on_mtime(tmp_path):
+    """A provenance check that silently degrades is worse than one that reports what it sees."""
+    exp, src = tmp_path / "experiments", tmp_path / "src"
+    _write(exp / "a.json", age=OLD)
+    _write(src / "mod.py", age=NOW)
+    out = verify.stale_artifacts({"a.json": ("mod.py",)}, exp, src, manifest={})
+    assert len(out) == 1 and "mtime alone" in out[0]
+
+
+def test_manifest_for_a_different_artifact_does_not_vouch_for_this_one(tmp_path):
+    exp, src = tmp_path / "experiments", tmp_path / "src"
+    _write(exp / "a.json", age=OLD)
+    m = _write(src / "mod.py", age=NOW)
+    manifest = {"other.json": {"mod.py": verify.module_digest(m)}}
+    out = verify.stale_artifacts({"a.json": ("mod.py",)}, exp, src, manifest=manifest)
+    assert len(out) == 1 and "mtime alone" in out[0]
