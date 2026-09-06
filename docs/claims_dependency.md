@@ -1330,3 +1330,63 @@ for the same reason — a checker that could update its own provenance would hav
 
 Verified end to end: `touch src/stoa/lrb.py` produces zero findings; appending one comment line
 produces two, naming the artifacts and both digests.
+
+## §AJ — three of six catalogued fixes had no test, and all three were LRB
+
+Pass 8. Standard three steps clean (211 tests, 68/68, body 12 pages). Pass 7 mutation-tested one
+defect's fixes; this pass extended the method to every consequential repair the catalogue claims is
+pinned.
+
+| fix | the defect it repairs | tests failing on revert |
+|---|---|---|
+| `quantile_match` mid-rank ties | a constant belief outranked a learned one | 1 |
+| `attainable_ceiling` restricted to scored blocks | the normalization behind two retractions | 1 |
+| `stats` alpha with no default | the 758 / 1078 / 2589 correction | 1 |
+| §Z sliding window reads `min(train_t)` | the window was a no-op | **0** |
+| LRB dedicated `train_rng` | training perturbing eviction sampling | **0** |
+| LRB refusal on zero label variance | **the retracted column** | **0** |
+
+The third is the worst of them. That refusal is the check whose absence let a column measuring
+*random eviction* into a submitted draft; removing it now breaks nothing.
+
+And as in §AI, a test carrying the invariant's name existed:
+`test_the_training_buffer_is_actually_bounded_in_age`. Its docstring names the mechanism exactly --
+"the uniform subsample reorders it" -- and its body passes `max_train_rows=10**9`, which **disables
+the subsample**. It tests the age bound in the one configuration where the bug cannot occur.
+
+### AJ.1 What the behavioural pin for §Z cost, and why it is structural
+
+Two of the three got ordinary behavioural tests: the zero-variance refusal is now reproduced on a
+hand-built zero-reuse trace, and the RNG separation is asserted at the source.
+
+§Z resisted. Every obvious assertion was tried and measured rather than assumed:
+
+- **buffer size at fit time** — identical under both guards across five configurations, always
+  exactly the row cap, because the cap binds before the window does;
+- **a windowed run against an unwindowed one** — differs under *both* guards, since the reverted
+  version still fires once before the first subsample;
+- **hit count** — differs, but only at one of three configurations (25500 vs 25422, ~0.3%).
+
+So the effect is real, small, and not cleanly separable. A golden hit count at that one
+configuration would pin it and would also break on any legitimate change to sampling or features —
+at which point it would be silenced rather than investigated. The pin is structural: assert the
+guard reads `min(train_t)`. That is the defect itself, and it is durable.
+
+The size-based test I wrote first passed under the mutation and was **deleted**, not kept beside the
+working one — same rule as §AI. A test that cannot fail for its stated reason occupies the name.
+
+### AJ.2 A measurement error inside this pass
+
+Looking for a zero-reuse workload I ran `getattr(a, 'item_id', a)` over the access list. Accesses are
+`(timestamp, item)` tuples with no `item_id`, so the fallback returned the whole tuple — unique by
+construction, since the timestamp increments. The probe reported "reuse: 0" for a trace with 1429
+repeats, and I believed it long enough to build a test fixture on it.
+
+The generator never reaches zero reuse anyway (birthday collisions leave 10-200 repeats even at
+200k items over 2.5k accesses), so the fixture is now a hand-built `Workload` with each block
+accessed exactly once. But the shape of the error is the project's own subject: **a probe that
+silently measures the wrong quantity returns a clean-looking answer**, and the fallback in `getattr`
+is precisely a check that degrades silently rather than failing. §AG.1 was the same error against a
+page count; this was against a reuse count, three passes later.
+
+This is the twenty-fourth defect whose only symptom was a plausible number.

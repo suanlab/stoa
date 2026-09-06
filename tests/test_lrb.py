@@ -112,3 +112,85 @@ def test_the_training_buffer_is_actually_bounded_in_age():
     later = seen_rows[len(seen_rows) // 2:]
     assert max(later) <= 3 * min(later), (
         f"buffer still growing without bound across retrains: {seen_rows}")
+
+
+def test_the_age_bound_reads_the_minimum_not_the_first_element():
+    """§Z: the window guard read `train_t[0]`, which is the oldest row only while the buffer is
+    sorted -- and the uniform subsample reorders it, so after the first subsample the filter
+    silently stopped firing. Its only symptom was numbers indistinguishable from having no
+    window.
+
+    This is a *structural* pin, and the reason is worth recording rather than hiding. The
+    behavioural effect is real but small and not cleanly separable: at the one configuration
+    where it shows (memory_window=4000, max_train_rows=1500, seed 3) reverting the guard moves
+    hits from 25500 to 25422, about 0.3%. Two adjacent configurations show no difference at
+    all, because the row cap binds before the window does and the buffer is exactly `cap` rows
+    at every fit either way. The obvious behavioural assertions were tried and each failed to
+    discriminate:
+
+      * buffer size at fit time -- identical (always the cap) under both guards, five configs;
+      * windowed run vs an unwindowed one -- differs under *both*, since the reverted guard
+        still fires once before the first subsample.
+
+    A golden hit count at the one discriminating configuration would pin it, but would also
+    break on any legitimate change to sampling or features, and would then be silenced rather
+    than investigated. Asserting what the guard reads is durable and is the defect itself.
+    """
+    import inspect
+    import re
+
+    src = inspect.getsource(simulate_lrb)
+    guards = re.findall(r"if train_t and (\S+) < cutoff_t:", src)
+    assert guards, "the age-bound guard is gone entirely, not merely weakened"
+    for g in guards:
+        assert g == "min(train_t)", (
+            f"the window guard reads {g}, not min(train_t). The subsample reorders the buffer, "
+            "so a first-element guard stops firing after the first subsample and the window "
+            "becomes a no-op -- which produced numbers identical to having no window at all.")
+
+
+def test_constant_training_labels_are_refused_rather_than_fitted():
+    """A constant target turns the regressor into a no-op and eviction into a uniform draw.
+    That is not hypothetical: it is the defect behind the retracted LRB column, where 11 of 13
+    fits had `distinct_y == 1`. The policy must refuse to fit rather than emit a number that
+    looks like a learned result.
+
+    The condition is reproduced rather than mocked. In a trace with **no reuse at all**, every
+    training row is closed out by censoring rather than by a re-access, so every label is the
+    same censoring constant -- which is exactly the population the retraction was measured on
+    (76-78% of KV blocks are never reused).
+
+    The trace is built by hand rather than sampled: `generate_workload` never quite reaches
+    zero reuse (birthday collisions leave 10-200 repeats even at 200k items over 2.5k
+    accesses), and a handful of labelled rows is enough to give the batch variance and let the
+    guard pass for the wrong reason.
+    """
+    from stoa.traces import AccessTrace, ItemState, Workload
+
+    n = 3000
+    items = [ItemState(item_id=f"u{i}", size_bytes=4096) for i in range(n)]
+    accesses = [(t, f"u{t}") for t in range(n)]                    # each block seen exactly once
+    traces = {f"u{i}": AccessTrace(item_id=f"u{i}", access_steps=[i]) for i in range(n)}
+    wl = Workload(items=items, accesses=accesses, traces=traces)
+    seen = [item for _, item in wl.accesses]
+    assert len(set(seen)) == len(seen), "fixture must have zero reuse for labels to be constant"
+
+    with pytest.raises(RuntimeError, match="labels are constant"):
+        simulate_lrb(wl, 200, train_interval=1000, memory_window=500, max_train_rows=10 ** 9)
+
+
+def test_training_subsample_does_not_draw_from_the_eviction_rng():
+    """Structural, and deliberately so. The subsample uses a dedicated `random.Random`, so that
+    changing how much the model trains cannot perturb which candidates eviction samples. Were
+    it to share `rng`, every training-side change would silently move the eviction sequence and
+    two runs differing only in `max_train_rows` would not be comparable."""
+    import inspect
+    import re
+
+    src = inspect.getsource(simulate_lrb)
+    assert re.search(r"train_rng\s*=\s*random\.Random\(", src), (
+        "the training subsample no longer has a dedicated RNG; sharing the eviction RNG makes "
+        "training-side changes move eviction decisions")
+    m = re.search(r"keep\s*=\s*(\w+)\.sample\(", src)
+    assert m and m.group(1) == "train_rng", (
+        f"the subsample draws from {m.group(1) if m else '?'}, not train_rng")
