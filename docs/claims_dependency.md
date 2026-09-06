@@ -1390,3 +1390,92 @@ is precisely a check that degrades silently rather than failing. §AG.1 was the 
 page count; this was against a reuse count, three passes later.
 
 This is the twenty-fourth defect whose only symptom was a plausible number.
+
+## §AK — a live paper claim sourced from an artifact the repository had already retired
+
+Pass 9. Standard three steps clean (214 tests, 68/68, body 12 pages). Eight passes had probed the
+paper, the released prose, the notebook, the figures, the guards, the checker's semantics and the
+tests. None had asked the question the target venue actually asks: **can a committee member
+reproduce this?** So this pass walked `REPRODUCIBILITY.md` as an outsider — every command, every
+path, every entry point.
+
+Seventeen of seventeen scripts exist. Seventeen of eighteen artifacts exist. The eighteenth is
+`experiments/lrb_sweep.json`, which was moved to `experiments/superseded/` — correctly, because it
+was produced by the **broken** LRB — while its row in the claim table stayed.
+
+Three things were wrong at once:
+
+1. The row points at a path that does not exist, so a committee member following it fails at step
+   one.
+2. The row asserts "LRB spans 55–66% of Belady across its hyperparameter grid", which the paper no
+   longer claims.
+3. **The paper still cites that artifact's censoring numbers**, and those *are* a live claim: §5.5's
+   entire mechanism explanation rests on "at the default window **77–83%** of LRB's training rows are
+   censored, and 86–89% at a shorter one."
+
+The third is the finding. Those figures came from the run whose training buffer was truncated to its
+tail — the run that produced the retracted column. Censoring fraction is not obviously independent of
+that bug: it counts what share of *rows in the buffer* are right-censored, and the truncation decided
+which rows were in the buffer.
+
+Re-running `run_lrb_sweep.py` against the repaired implementation gives, so far:
+
+| trace / window | superseded (broken) | repaired |
+|---|---|---|
+| conversation, 10k | 86.5% | 87.5% |
+| conversation, 50k (default) | **77.7%** | **85.5%** |
+
+Nearly eight points at the default window, and outside the range the paper states. The full sweep
+(six configurations x two traces, ~2.5 h) is still running; §AK.1 will record the corrected ranges
+and the paper text will follow them.
+
+**None of this was checked.** The censoring numbers appear in no assertion in
+`check_paper_numbers.py`, so all 68 checks passed while a live claim rested on a retired artifact.
+
+### AK.1 Why every earlier stale-prose sweep missed it
+
+Passes 3, 4 and 6 each swept the released prose. All three searched for retracted *vocabulary* or
+superseded *values*. A dangling path contains neither: it has no wrong number in it, because it has
+no number at all. The row read perfectly.
+
+Two guards now cover this shape:
+
+- `verify.dangling_paths` — any `experiments/…`, `scripts/…` or `docs/…` path a released document
+  names must exist. Verified on the real defect, and on the exact variant that produced it: a file
+  present in `experiments/superseded/` does **not** vouch for the top-level path.
+- `verify.broken_entry_points` — the four `python3 -c "from X import Y"` data-acquisition commands
+  the package offers must actually import. Nothing imported them, so a rename would have made the
+  documents quietly false and the first command a reader runs would be the one that breaks. All four
+  currently resolve; both Mooncake trace URLs return HTTP 200.
+
+**The generalization**: a reproduction package can be internally consistent and still be unusable. Every
+number can match its artifact while a row points at a file that is not there. Checking that the
+document is *right* is not the same as checking that following it *works*.
+
+### AK.2 The corrected censoring ranges, and what they cost
+
+The sweep completed against the repaired implementation (twelve configurations, two traces, ~2.5 h).
+Every band moved, and both bands the paper quotes moved **outside** the range it states:
+
+| window | paper | superseded (broken) | repaired |
+|---|---|---|---|
+| default (50k) | 77–83% | 77.3–82.5% | **82.9–87.8%** |
+| short (10k) | 86–89% | 86.5–89.4% | **87.5–90.9%** |
+| long (200k) | — | 48.8–76.4% | 56.6–79.7% |
+
+The paper was quoting the retired artifact *accurately*. That is the uncomfortable part: nothing was
+mis-transcribed, no number was stale relative to the file it came from, and the citation was
+faithful. The file was simply produced by an implementation the paper elsewhere retracts.
+
+§5.5 now reads 83–88% and 88–91%, and `check_paper_numbers.py` asserts both from
+`experiments/lrb_sweep.json` — the first assertion these numbers have ever had. `lrb_sweep.json` is
+declared in `DEPENDS_ON` against `lrb.py` and `eval/online.py`, and its provenance recorded, so a
+future repair to LRB will flag it rather than leave it quietly behind again.
+
+The direction is worth stating because it strengthens the paper's own argument rather than weakening
+it: the repaired LRB sees *more* censoring, not less, so the mechanism §5.5 proposes — a population
+of singletons starving the regression target — is more pronounced under the correct implementation
+than under the broken one. Getting it right did not cost the claim; it sharpened it.
+
+Retiring the "55–66% of Belady" row was also right, and the repaired grid shows why: it now spans
+**41.9–86.4%**, a forty-five-point band. No point estimate in that range is citable.

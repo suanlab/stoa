@@ -137,7 +137,7 @@ believed where an observation was available.
 | **Belief controls**: a constant score must not beat a learned one (it did, until `quantile_match` was given mid-rank tie handling) | `python3 scripts/run_belief_controls.py` | `experiments/belief_controls.json` |
 | **Capacity ladder, repaired metric** (supersedes `capacity_ladder.json`: all three placement routines now break ties by tier speed, not enum order) | `python3 scripts/run_capacity_ladder.py --fixed` | `experiments/capacity_ladder_fixed.json` |
 | **Length attribution** (separates train length from eval length; AUC rises 38 points with the model held fixed) | `python3 scripts/train_session_features.py --train-requests N --requests M` | `experiments/mooncake_attribution_sweep.json` |
-| LRB spans 55–66% of Belady across its hyperparameter grid; 78–87% of its training rows censored | `python3 scripts/run_lrb_sweep.py` (~25 min) | `experiments/lrb_sweep.json` |
+| **Censoring sweep**: 83–88% of LRB's training rows are right-censored at the default window, 88–91% at a shorter one, across 12 configurations on both traces. (The earlier row claimed "LRB spans 55–66% of Belady across its grid" from the **broken** implementation; the repaired grid spans 41.9–86.4%, so no point estimate there is citable and the claim is retired. That artifact is kept at `experiments/superseded/lrb_sweep.json`.) | `python3 scripts/run_lrb_sweep.py` (~2.5 h) | `experiments/lrb_sweep.json` |
 | **Split-instant sensitivity**: linear ≈ GBDT to within 0.2 pts at all 20 configurations; captured in [+0.2%, +3.6%]; oracle gap 81→92% | `python3 scripts/run_split_sensitivity.py` | `experiments/split_sensitivity.json` |
 | Working-set threshold on kvct (35% at a 1% tier → 99% at 10%) | `simulate_fast` sweep over `cache_frac`, 20 & 40 conversations | `experiments/reactive_kvct_sweep.json` |
 | LoCoMo: retrieval dominates placement | `python3 scripts/run_locomo_baselines.py` (needs `OPENAI_API_KEY`) | `experiments/eval_locomo_leakfree.json` |
@@ -168,7 +168,7 @@ believed where an observation was available.
 
 ## 6. Controls wired into the harness
 
-**Twenty-four defects** during this work produced plausible-but-wrong numbers; `docs/claims_dependency.md`
+**Twenty-five defects** during this work produced plausible-but-wrong numbers; `docs/claims_dependency.md`
 catalogues each with the symptom it presented. The checks that catch them live in the code and the tests,
 not just in prose:
 

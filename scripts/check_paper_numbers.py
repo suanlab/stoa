@@ -255,6 +255,23 @@ for needle, why in RETRACTED:
         failures.append(f"retracted claim {needle!r} reappeared ({why})")
 
 # --- LRB reported as a band ---------------------------------------------------------
+# §5.5's mechanism explanation rests on these, and until §AK nothing asserted them -- so the
+# paper quoted an artifact that had been moved to superseded/ for being produced by the broken
+# implementation. The figures were right for that artifact and wrong for the current one.
+d = load("lrb_sweep.json")
+if d:
+    print("\nLRB censoring sweep (experiments/lrb_sweep.json)")
+    def _band(w):
+        v = [r["censored_frac"] * 100 for tr in d["traces"].values() for r in tr["rows"]
+             if r["memory_window"] == w]
+        return min(v), max(v)
+    lo, hi = _band(50_000)
+    claim("censored share, default window", f"{lo:.0f}--{hi:.0f}\\%", "83--88\\%",
+          "censored_frac @ 50k")
+    lo, hi = _band(10_000)
+    claim("censored share, short window", f"{lo:.0f}--{hi:.0f}\\%", "88--91\\%",
+          "censored_frac @ 10k")
+
 d = load("lrb_retraction.json")
 if d:
     print("\nLRB band (experiments/lrb_retraction.json)")
@@ -340,6 +357,7 @@ DEPENDS_ON = {
     "eval_locomo_powered.json": ("eval/memqa.py", "stats.py"),
     "representation_axis.json": ("eval/representation.py", "stats.py"),
     "locomo_power.json": ("stats.py",),
+    "lrb_sweep.json": ("lrb.py", "eval/online.py"),
     "sampling_study.json": ("kvct.py",),
 }
 # The guard's own failure mode: add an artifact, forget to declare its dependencies, and it
@@ -404,6 +422,14 @@ for _tex in [ROOT / "paper" / "main.tex", *sorted((ROOT / "paper" / "sections").
     failures += verify.unmarked_superseded(
         _tex.read_text(), SUPERSEDED_IN_PAPER,
         label=str(_tex.relative_to(ROOT)), markers=verify.PAPER_MARKERS, scope="paragraph")
+
+# A dangling path carries no wrong number, so every earlier stale-prose sweep missed it.
+for _doc in ("REPRODUCIBILITY.md", "README.md", "paper/README.md", "data/README.md"):
+    _p = ROOT / _doc
+    if _p.exists():
+        _t = _p.read_text()
+        failures += verify.dangling_paths(_t, ROOT, _doc)
+        failures += verify.broken_entry_points(_t, _doc)
 
 NOTEBOOK = ROOT / "docs" / "claims_dependency.md"
 if NOTEBOOK.exists():

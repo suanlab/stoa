@@ -63,7 +63,7 @@ The cost is that our GBDT is not `HistGradientBoostingRegressor`, and we say so 
 
 ## Read this before trusting a number
 
-`docs/claims_dependency.md` records **twenty-four defects whose only symptom was a plausible number**, five
+`docs/claims_dependency.md` records **twenty-five defects whose only symptom was a plausible number**, five
 claims we retracted, and two further sub-claims falsified after the paper had been rewritten around the
 surviving result. Two of the retractions were found by adversarial review *after* the error catalogue in
 the paper had been written; the two falsifications were found by a re-verification pass that noticed

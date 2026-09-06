@@ -27,6 +27,8 @@ from typing import Iterable, Mapping, Sequence
 
 __all__ = [
     "PAPER_MARKERS",
+    "broken_entry_points",
+    "dangling_paths",
     "module_digest",
     "body_pages",
     "page_limit_violation",
@@ -282,3 +284,60 @@ def page_limit_violation(pdf: Path, limit: int = 12) -> list[str]:
         return [f"OVER PAGE LIMIT: the body occupies {n} pages against a {limit}-page limit "
                 "excluding references. Cut before submitting."]
     return []
+
+
+def dangling_paths(text: str, root: Path, label: str,
+                   patterns: Sequence[str] = (r"experiments/[\w.]+\.json",
+                                              r"scripts/[\w.]+\.py",
+                                              r"docs/[\w.]+\.md")) -> list[str]:
+    """Repository paths a document names that do not exist.
+
+    `REPRODUCIBILITY.md` is a claim -> command -> artifact table, and its whole value to a
+    committee is that following a row works. It listed `experiments/lrb_sweep.json` for three
+    passes after that artifact was moved to `experiments/superseded/` -- so the row pointed at
+    nothing, and asserted a claim the paper had already dropped.
+
+    Earlier sweeps for stale prose searched for retracted *vocabulary* and found neither, because
+    a dangling path contains no wrong number: it contains no number at all.
+    """
+    import re
+
+    out = []
+    for pat in patterns:
+        for m in sorted(set(re.findall(pat, text))):
+            if not (root / m).exists():
+                out.append(
+                    f"{label} names {m}, which does not exist. A reproduction package whose "
+                    "rows point at missing files fails at the first step a committee takes.")
+    return out
+
+
+def broken_entry_points(text: str, label: str) -> list[str]:
+    """`python3 -c "from X import Y"` commands a document promises that no longer import.
+
+    The reproduction package offers four of these for data acquisition. A rename makes the
+    document quietly false: nothing imports them, so nothing fails, and the first thing a
+    committee member runs is the thing that breaks. Same class as a dangling path -- the
+    document names something that does not exist -- but a grep for missing *files* will not
+    find it, because what is missing is a symbol.
+    """
+    import importlib
+    import re
+
+    out = []
+    seen = set()
+    for mod, names in re.findall(r'from ([\w.]+) import ([\w, ]+)', text):
+        for name in (n.strip() for n in names.split(",")):
+            if not name or (mod, name) in seen:
+                continue
+            seen.add((mod, name))
+            try:
+                m = importlib.import_module(mod)
+            except Exception as exc:                     # noqa: BLE001 - report, never raise
+                out.append(f"{label} promises `from {mod} import {name}` but {mod} does not "
+                           f"import: {type(exc).__name__}: {exc}")
+                continue
+            if not hasattr(m, name):
+                out.append(f"{label} promises `from {mod} import {name}` but {mod} has no "
+                           f"attribute {name!r}. A reader runs this before anything else.")
+    return out
