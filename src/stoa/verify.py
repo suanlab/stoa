@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Iterable, Mapping, Sequence
 
 __all__ = [
+    "PAPER_MARKERS",
     "body_pages",
     "page_limit_violation",
     "stale_artifacts",
@@ -40,6 +41,11 @@ __all__ = [
 # "paper carried | regenerated" is an explicit before/after column header -- the value is
 # labelled superseded, just in different words. Accepting it is not a weakening.
 SUPERSESSION_MARKERS = ("SUPERSEDED", "RETRACTED", "FALSIFIED", "do not cite", "paper carried")
+
+# The paper cites superseded numbers legitimately, but only where it is retracting them. These
+# are the phrases it uses to do that; anything else quoting a retracted figure is a leak.
+PAPER_MARKERS = ("retract", "earlier draft", "previously said", "superseded", "falsified",
+                 "we withhold", "no longer", "was false", "is neither", "wrong")
 
 
 def _mtime(p: Path) -> float:
@@ -149,7 +155,8 @@ def prose_drift(files: Iterable[str], headline: Mapping[str, str], root: Path,
 
 
 def unmarked_superseded(text: str, values: Mapping[str, str], label: str = "notebook",
-                        markers: Sequence[str] = SUPERSESSION_MARKERS) -> list[str]:
+                        markers: Sequence[str] = SUPERSESSION_MARKERS,
+                        scope: str = "section") -> list[str]:
     """Superseded values stated in a record without a supersession marker.
 
     A lab notebook must keep superseded measurements; editing them out destroys the record,
@@ -157,9 +164,19 @@ def unmarked_superseded(text: str, values: Mapping[str, str], label: str = "note
     rather than a rewrite. A value counts as marked when a marker appears anywhere in its
     section -- from the nearest preceding heading through the line itself.
 
+    `scope` sets how far the marker may sit from the value. ``"section"`` searches from the
+    nearest preceding markdown heading -- right for a notebook, where a banner heads the whole
+    superseded section. ``"paragraph"`` searches only the blank-line-delimited block the value
+    sits in, which is what the paper needs: it cites superseded numbers legitimately, but only
+    in the sentence that retracts them, and a retraction two sections away is not a label.
+
     The defect: the notebook stated a falsified conclusion in the present tense a hundred and
-    fifty lines above its own retraction of it.
+    fifty lines above its own retraction of it. And the checker, being a *presence* test --
+    "does the correct value appear anywhere?" -- passed all 68 numeric checks with the two
+    falsified values sitting in the abstract, because the correct ones appeared in section 5.
     """
+    if scope not in ("section", "paragraph"):
+        raise ValueError(f"scope must be 'section' or 'paragraph', not {scope!r}")
     out = []
     lines = text.splitlines()
     for i, line in enumerate(lines):
@@ -168,11 +185,22 @@ def unmarked_superseded(text: str, values: Mapping[str, str], label: str = "note
                 continue
             start = 0
             for j in range(i, -1, -1):
-                if lines[j].startswith("#"):
+                if lines[j].startswith("#") if scope == "section" else not lines[j].strip():
                     start = j
                     break
+            # Section scope requires the marker to PRECEDE the value: a banner heads the
+            # superseded material, and one further down the file is the §AF defect. Within a
+            # single paragraph order carries no such meaning -- the paper's retractions read
+            # "described that same band as X --- the repairs disagree by Y" -- so the whole
+            # paragraph counts.
+            end = i + 1
+            if scope == "paragraph":
+                for j in range(i + 1, len(lines)):
+                    if not lines[j].strip():
+                        break
+                    end = j + 1
             # Case-insensitive: prose says "the claim AC falsified", headers say "SUPERSEDED".
-            section = "\n".join(lines[start:i] + [line]).lower()
+            section = "\n".join(lines[start:end]).lower()
             if not any(m.lower() in section for m in markers):
                 out.append(
                     f"{label}:{i + 1} states the superseded value {val} ({what}) in a section "

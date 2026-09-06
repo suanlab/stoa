@@ -1209,3 +1209,48 @@ indistinguishable from one that passed — the same rule the checker already app
 Current state: body ends on page 12 with roughly three lines to spare, references run to page 13. Any
 addition now requires a deletion, and `paper/README.md` says so in terms of the body rather than the
 file.
+
+## §AH — the checker was a presence test, never an absence test
+
+Pass 6. Standard three steps clean again (200 tests, 68/68, body 12 pages). The probe this time was
+aimed at the checker's *semantics* rather than its coverage: not "which files does it read?" but
+"what does passing actually mean?"
+
+`claim()` asserts that a value derived from an artifact **appears** in the paper source. It never
+asserts that a contradicting value is **absent**. Those are different properties, and only the first
+was ever tested.
+
+The demonstration is one edit. I replaced the abstract's reachable shares with **90%** and **53%** —
+the two values §AC falsified — leaving §5 untouched. All 68 numeric checks passed. The only failure
+was the PDF-freshness guard added in §AG, and that fired because the file's mtime moved, not because
+of anything it said.
+
+So for six passes a retracted number could have sat in the abstract indefinitely, provided the
+correct number appeared somewhere in §5. That is not a hypothetical: §AC found the paper carrying
+90.4 / 52.8 while the artifacts said otherwise, and this is the mechanism by which such a value can
+persist through a correction that touches only the section it was checked in.
+
+The fix reuses `unmarked_superseded` on a second surface, with one addition. The paper cites
+superseded figures legitimately — but only in the sentence that retracts them — so the marker scope
+is the **paragraph**, not the section, and a new `scope` parameter selects between them. The two
+differ in more than width:
+
+- **section** scope requires the marker to *precede* the value. A banner heads superseded material,
+  and one further down the file is exactly the §AF defect.
+- **paragraph** scope accepts a marker anywhere in the paragraph, because within a single paragraph
+  order carries no such meaning: the paper's retractions read "described that same band as *X* ---
+  the repairs disagree by *Y*".
+
+Getting that second rule wrong produced the pass's one honest scare. The guard flagged §5.8's own
+description of the "19 points" error, because the phrase marking it false sat one line *after* the
+quoted figure. The tempting repair was to widen the marker vocabulary until the complaint went away
+— which would have been weakening a guard to make it pass, the worst available move. The actual
+repair was to fix the scope semantics, and then to re-run the abstract injection to confirm the
+widened guard still catches a real leak. It does.
+
+**The generalization**: "every number in the paper is checked against its artifact" describes a
+presence test, and reads as a consistency guarantee. A checker of that shape certifies that the right
+values are present, not that the wrong ones are gone. Retractions need absence assertions, and they
+need a notion of where a citation of a dead number is legitimate. This is the twenty-second defect
+whose only symptom was a plausible number — and the second found by interrogating the checker rather
+than the paper.

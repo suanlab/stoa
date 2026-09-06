@@ -242,3 +242,51 @@ def test_body_pages_raises_when_no_bibliography_heading(tmp_path, monkeypatch):
     monkeypatch.setattr("subprocess.run", fake)
     with pytest.raises(RuntimeError, match="no 'REFERENCES' heading"):
         verify.body_pages(pdf)
+
+
+# --- absence, not just presence: superseded values leaking into the paper ----------------
+
+PAPER_VALS = {"90.4": "reachable share, conversation (now 83.5)"}
+
+
+def test_superseded_value_in_a_retracting_paragraph_is_allowed():
+    """The paper cites retracted figures legitimately -- in the sentence that retracts them."""
+    text = "An earlier draft reported 90.4\\% here; we retract it.\n"
+    assert verify.unmarked_superseded(
+        text, PAPER_VALS, markers=verify.PAPER_MARKERS, scope="paragraph") == []
+
+
+def test_superseded_value_in_a_bare_paragraph_is_flagged():
+    text = "The reachable share rises to 90.4\\% on one trace.\n"
+    out = verify.unmarked_superseded(
+        text, PAPER_VALS, markers=verify.PAPER_MARKERS, scope="paragraph")
+    assert len(out) == 1
+
+
+def test_paragraph_scope_accepts_a_marker_after_the_value():
+    """Within one paragraph order carries no meaning: the paper's retractions read
+    'described that same band as X --- the repairs disagree by Y'."""
+    text = "It described the band as 90.4\\% ---\nthe summary of it was false.\n"
+    assert verify.unmarked_superseded(
+        text, PAPER_VALS, markers=verify.PAPER_MARKERS, scope="paragraph") == []
+
+
+def test_section_scope_still_rejects_a_marker_after_the_value():
+    """Across sections order DOES carry meaning; this is the AF defect and must stay caught."""
+    text = "## H\n\nAttains 90.4\\%.\n\n> **SUPERSEDED.**\n"
+    assert len(verify.unmarked_superseded(text, PAPER_VALS, scope="section")) == 1
+
+
+def test_retraction_in_a_different_paragraph_does_not_license_a_bare_quote():
+    """A retraction two paragraphs away is not a label on this number."""
+    text = ("The reachable share rises to 90.4\\% on one trace.\n"
+            "\n"
+            "An earlier draft got this wrong; we retract it.\n")
+    out = verify.unmarked_superseded(
+        text, PAPER_VALS, markers=verify.PAPER_MARKERS, scope="paragraph")
+    assert len(out) == 1
+
+
+def test_unknown_scope_is_rejected_rather_than_defaulted():
+    with pytest.raises(ValueError, match="scope must be"):
+        verify.unmarked_superseded("x", PAPER_VALS, scope="whole-file")

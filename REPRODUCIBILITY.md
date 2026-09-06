@@ -168,7 +168,7 @@ believed where an observation was available.
 
 ## 6. Controls wired into the harness
 
-**Twenty-one defects** during this work produced plausible-but-wrong numbers; `docs/claims_dependency.md`
+**Twenty-two defects** during this work produced plausible-but-wrong numbers; `docs/claims_dependency.md`
 catalogues each with the symptom it presented. The checks that catch them live in the code and the tests,
 not just in prose:
 
@@ -192,6 +192,7 @@ not just in prose:
 | The built PDF must not outlive its sources | `stoa.verify.stale_paper_pdf` — a correction in the `.tex` is not a correction until the PDF a reviewer reads is rebuilt |
 | Released prose must carry the current numbers | `stoa.verify.prose_drift` — twice a correction landed in the `.tex` and not in the markdown (§AE) |
 | A record may keep superseded values, but must mark them | `stoa.verify.unmarked_superseded` — the notebook stated a falsified conclusion 150 lines above its own retraction of it (§AF) |
+| Retracted values must not appear outside a retracting paragraph | `stoa.verify.unmarked_superseded(scope="paragraph")` — the 68 numeric checks are *presence* tests; with 90% and 53% injected into the abstract every one still passed (§AH) |
 | **Every guard above is itself tested**, in both directions | `tests/test_verify.py`, 24 tests, mutation-checked — four guards had lived in a script with no tests, where a refactor could delete one silently (§AG) |
 
 `pytest -q` runs all **173** tests, including the leakage guards and the fast/reference equivalence

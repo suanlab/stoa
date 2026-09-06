@@ -378,6 +378,27 @@ SUPERSEDED_VALUES = {
 }
 # "paper carried | regenerated" is an explicit before/after column header -- the value is
 # labelled superseded, just in different words. Accepting it is not a weakening.
+# The 68 checks above are PRESENCE tests: they ask whether the correct value appears in the
+# paper. They do not ask whether a superseded one also appears. With 90% and 53% injected into
+# the abstract -- the two values §AC falsified -- all 68 passed, because the correct values were
+# still there in §5. A retracted number can therefore sit in the abstract indefinitely.
+# The paper does cite superseded figures legitimately, but only in the paragraph that retracts
+# them, so the marker scope is the paragraph rather than the section.
+SUPERSEDED_IN_PAPER = {
+    "90.4": "reachable share, conversation (now 83.5)",
+    "52.8": "reachable share, toolagent (now 19.0)",
+    "89.5": "FCFS of attainable, toolagent (now 50.2)",
+    "93.2": "FCFS of attainable, conversation (now 87.4)",
+    "-154.6": "ladder constant, conversation (now -46.1)",
+    "-825.7": "ladder constant, toolagent (now -60.6)",
+    "64--88": "calibration headroom (now 67--90)",
+    "19 points": "LRB band width (2.1 between repairs, 17 to the reimplementation)",
+}
+for _tex in [ROOT / "paper" / "main.tex", *sorted((ROOT / "paper" / "sections").glob("*.tex"))]:
+    failures += verify.unmarked_superseded(
+        _tex.read_text(), SUPERSEDED_IN_PAPER,
+        label=str(_tex.relative_to(ROOT)), markers=verify.PAPER_MARKERS, scope="paragraph")
+
 NOTEBOOK = ROOT / "docs" / "claims_dependency.md"
 if NOTEBOOK.exists():
     failures += verify.unmarked_superseded(
