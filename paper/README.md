@@ -55,7 +55,7 @@ Three template requirements are easy to break and produce a silently wrong front
 
    Run that from a shell with no GitHub credentials, or in a logged-out browser. Checking it while
    authenticated tests your access, not the reviewer's — which is the exact failure mode
-   `../docs/claims_dependency.md` catalogues twenty-five times over.
+   `../docs/claims_dependency.md` catalogues twenty-six times over.
 3. **`\vldbtopmatter` immediately after `\maketitle`.** `pvldb.sty` has no `AtBeginDocument` hook, so
    omitting this drops the PVLDB Reference Format and Artifact Availability blocks with no error. Check
    for them in the rendered page 1, not in the log.

@@ -1479,3 +1479,57 @@ than under the broken one. Getting it right did not cost the claim; it sharpened
 
 Retiring the "55–66% of Belady" row was also right, and the repaired grid shows why: it now spans
 **41.9–86.4%**, a forty-five-point band. No point estimate in that range is citable.
+
+## §AL — the third consecutive pass to find a fix whose docstring claimed more coverage than its tests
+
+Pass 10. Standard three steps clean (222 tests, 70/70, body 12 pages). Passes 7 and 8 mutation-tested
+the placement and LRB fixes; this pass finished the set.
+
+| fix | tests failing on revert |
+|---|---|
+| CACHEUS second-chance demotion from S | 1 |
+| **CACHEUS adaptive scan target** | **0** |
+| `eval/online` LFU tie-break by LRU | 2 |
+| `gbdt.flatten()` | 6 |
+
+SR-LRU's docstring says: *"The demotion and the adaptive target are both load-bearing."* One of the
+two was pinned. That is the third pass running in which a comment or a test name asserted coverage
+that did not exist — §AI (a test named for three routines covering two), §AJ (a test whose setup
+disabled the mechanism its docstring named), and now a docstring naming two mechanisms of which one
+was tested.
+
+The claim was checked rather than assumed. Freezing `target_r` at its initial `n // 2` moves hits on
+all three workloads tried (16985→17019, 9109→9341, 14340→14324), so it *is* load-bearing and a
+behavioural test is writable. It now exists and fails when the update is frozen.
+
+Worth recording the direction: in two of the three, freezing the target **improves** the hit count.
+The adaptive split is faithfully implemented and does not win here — which is the same thing §5.5
+says about the whole adaptive-replacement family on singleton-heavy traces, arriving from a
+different direction. The test asserts the mechanism is wired in, not that it helps.
+
+### AL.1 A mutation that applies and still tests nothing
+
+Probing `eval/online`'s tie rules I changed `return (last_used.get(item, -1), 0)` to `(..., 1)` and
+read "NOT CAUGHT" as a coverage gap. It is not: a *constant* second component cannot change an
+ordering, so the mutation was semantically a no-op. The harness from §AG verifies that a mutation
+**applied**; it cannot tell whether the applied mutation **changes behaviour**.
+
+Reversing the LFU tie-break to MRU instead — a mutation that does change behaviour — fails two tests
+immediately.
+
+So the rule from §AG needs its second half: *a negative result from an intervention you did not
+confirm took effect is not evidence*, and "took effect" means changed the computation, not changed
+the file. Three passes established the first half; this is the first time the second half bit.
+
+### AL.2 An assertion on fields the policy never populates
+
+The first version of the new test asserted `p_moves > 0` and `0 < final_p < 40`. Both are zero for
+CACHEUS: they are ARC's diagnostics, and SR-LRU's scan target is not reported at all. The test failed,
+correctly, and for a reason unrelated to what it was testing.
+
+Reporting `target_r` would make the mechanism directly observable and is the right change. It is not
+made here: `experts.py` is a declared dependency of `reactive_real_full_lrb.json`, so even a
+diagnostic-only edit triggers a 35-minute regeneration, and slipping it in beside an unrelated pass
+is how an unverified change reaches an artifact. Recorded as an observation instead.
+
+This is the twenty-sixth defect whose only symptom was a plausible number.

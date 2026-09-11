@@ -11,6 +11,9 @@ from __future__ import annotations
 import pytest
 
 from stoa.eval.online import simulate_arc, simulate_fast
+import inspect
+import textwrap
+
 from stoa.experts import simulate_cacheus, simulate_lecar
 from stoa.traces import WorkloadConfig, generate_workload
 
@@ -99,3 +102,41 @@ def test_all_adaptive_policies_agree_on_a_trivially_large_cache():
     ref = simulate_fast(wl, "lru", n).hit_rate
     for r in (simulate_lecar(wl, n), simulate_cacheus(wl, n), simulate_arc(wl, n)):
         assert r.hit_rate == pytest.approx(ref, abs=1e-9), r.policy
+
+
+# NOTE: `simulate_cacheus` leaves `p_moves`/`final_p` at 0 -- they are ARC's diagnostics, and
+# SR-LRU's scan target is not reported. Asserting on them would have been asserting on fields the
+# policy never populates. Reporting `target_r` would make the mechanism directly observable and is
+# worth doing, but `experts.py` is a declared dependency of `reactive_real_full_lrb.json`, so even a
+# diagnostic-only change costs a 35-minute regeneration; it is left as an observation rather than
+# slipped in beside an unrelated pass. See §AL.
+
+
+def test_cacheus_target_movement_changes_the_outcome():
+    """The behavioural half: a frozen target must not reproduce the adaptive one. Measured
+    across three workloads, freezing moves hits by 16-232 out of ~9k-17k -- small, and in two
+    of the three it *improves* them, which is itself consistent with this paper's argument that
+    adaptive machinery is starved on singleton-heavy traces. Small is not zero, and the point
+    of the test is that the mechanism is wired in, not that it wins.
+    """
+    import stoa.experts as E
+
+    wl = _wl(n_items=900, horizon=20000, zipf_s=0.7, locality_beta=0.2)
+    adaptive = simulate_cacheus(wl, 90).hits
+
+    src = inspect.getsource(E.simulate_cacheus)
+    assert "target_r = (min(n - 1, target_r + 1)" in src, (
+        "the adaptive update is gone; this test can no longer distinguish the two regimes")
+
+    ns = dict(vars(E))
+    frozen_src = src.replace(
+        'target_r = (min(n - 1, target_r + 1) if region == "R"\n'
+        '                            else max(1, target_r - 1))',
+        "target_r = target_r")
+    assert frozen_src != src, "the frozen variant is textually identical; the probe is vacuous"
+    exec(compile(textwrap.dedent(frozen_src), "<frozen>", "exec"), ns)
+    frozen = ns["simulate_cacheus"](wl, 90).hits
+
+    assert adaptive != frozen, (
+        f"freezing the scan target changed nothing ({adaptive} hits either way); SR-LRU's "
+        "adaptive split is not actually feeding eviction")
