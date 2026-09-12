@@ -168,7 +168,7 @@ believed where an observation was available.
 
 ## 6. Controls wired into the harness
 
-**Twenty-six defects** during this work produced plausible-but-wrong numbers; `docs/claims_dependency.md`
+**Twenty-seven defects** during this work produced plausible-but-wrong numbers; `docs/claims_dependency.md`
 catalogues each with the symptom it presented. The checks that catch them live in the code and the tests,
 not just in prose:
 
@@ -188,6 +188,7 @@ not just in prose:
 | A constant belief must not outrank a learned one | `sequential.quantile_match` mid-rank ties, `run_belief_controls.py` — this control caught its own harness |
 | A learner whose labels have no variance must fail loudly, not silently randomize | `lrb.py` raises on zero label variance (§V) |
 | Artifacts must not outlive the code that produced them | `check_paper_numbers.py::DEPENDS_ON`, plus a guard asserting every artifact read is declared there |
+| Figure coverage is derived from `\includegraphics`, not maintained beside it | `stoa.verify.figure_coverage_gaps` — four of five freshness rules had aimed at figures the paper does not contain, and rules aimed at nothing never fire (§AM) |
 | **Figures** must not outlive the artifacts they plot | `stoa.verify.stale_figures` — the paper embeds the PDF, not the JSON, so corrected text can ship beside an uncorrected plot (§AD) |
 | The built PDF must not outlive its sources | `stoa.verify.stale_paper_pdf` — a correction in the `.tex` is not a correction until the PDF a reviewer reads is rebuilt |
 | Released prose must carry the current numbers | `stoa.verify.prose_drift` — twice a correction landed in the `.tex` and not in the markdown (§AE) |

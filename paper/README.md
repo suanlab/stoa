@@ -55,7 +55,7 @@ Three template requirements are easy to break and produce a silently wrong front
 
    Run that from a shell with no GitHub credentials, or in a logged-out browser. Checking it while
    authenticated tests your access, not the reviewer's — which is the exact failure mode
-   `../docs/claims_dependency.md` catalogues twenty-six times over.
+   `../docs/claims_dependency.md` catalogues twenty-seven times over.
 3. **`\vldbtopmatter` immediately after `\maketitle`.** `pvldb.sty` has no `AtBeginDocument` hook, so
    omitting this drops the PVLDB Reference Format and Artifact Availability blocks with no error. Check
    for them in the rendered page 1, not in the log.
@@ -97,10 +97,16 @@ still the open gate (`docs/claims_dependency.md` §B, §P).
 
 ## Figures
 
-Generated into `figs/` from `experiments/*.json` by `../scripts/make_figures.py`. Two are used —
-`fig_reactive.pdf` (reactive envelope, ARC and LRB) and `fig_capacity_ladder.pdf` (ranking quality
-against captured benefit across model class). The rest are available for a longer version, notably `fig_locomo_baselines.pdf` (leak-free
-LoCoMo: per-query retrieval dominates any query-agnostic placement).
+Generated into `figs/` from `experiments/*.json` by `../scripts/make_figures.py`. **Two are embedded:**
+`fig_reactive.pdf` (reactive envelope, ARC and LRB) and `fig_architecture.pdf` (the control-plane
+schematic, which plots no data). The other six are produced for a longer version and are *not* in the
+paper — notably `fig_locomo_baselines.pdf` (leak-free LoCoMo: per-query retrieval dominates any
+query-agnostic placement) and `fig_capacity_ladder.pdf`.
+
+An earlier revision of this paragraph named `fig_capacity_ladder.pdf` as one of the two used. It
+appears in no `.tex` file and never has; its description was edited twice without the premise being
+checked. `check_paper_numbers.py` now derives figure coverage from the `\includegraphics` calls
+themselves, so a rule aimed at an unused figure — or a used figure with no rule — fails the run.
 
 `fig_reactive` prefers **`reactive_real_full_lrb.json`** (the `--lrb` run) and falls back to
 `reactive_real_full.json`; it never reads a subsampled run. The run script derives its output name from

@@ -440,15 +440,21 @@ if NOTEBOOK.exists():
 # writes paper/figs/*.pdf. The paper embeds the PDF, not the JSON, so a figure older than the
 # data it plots ships a picture of a number the text no longer makes -- and nothing said so.
 # The build that caught this had figures fifteen days older than the artifacts they drew from.
+# Only what the paper embeds. Five rules lived here for two passes; four aimed at figures no
+# `.tex` file includes, so the guard read as covering the artifact -> figure edge while
+# covering one fifth of it. `make_figures.py` still produces the others for a longer version;
+# they are regenerable and unguarded, which is the honest description of an unused plot.
 FIG_SOURCES = {
     "fig_reactive.pdf": ("reactive_real_full_lrb.json", "reactive_real_full.json"),
-    "fig_capacity_ladder.pdf": ("capacity_ladder_fixed.json", "capacity_ladder.json"),
-    "fig_locomo_baselines.pdf": ("eval_locomo_leakfree.json",),
-    "fig_learnability.pdf": ("mooncake_length_sweep.json",),
-    "fig_sequential.pdf": ("mooncake_length_sweep.json",),
 }
 FIGS = ROOT / "paper" / "figs"
 failures += verify.stale_figures(FIG_SOURCES, FIGS, EXP)
+# A freshness rule can only protect what it is told about, and for two passes the list did
+# not match what the paper embeds. `fig_architecture` is a schematic: exempt from staleness,
+# but declared so, because an exemption on the record is not the same as an omission.
+failures += verify.figure_coverage_gaps(
+    [ROOT / "paper" / "main.tex", *sorted((ROOT / "paper" / "sections").glob("*.tex"))],
+    FIG_SOURCES, data_free=("fig_architecture.pdf",))
 
 # The last edge of the chain: a correction in the .tex is not a correction until the PDF is
 # rebuilt, and the PDF is what a reviewer reads.

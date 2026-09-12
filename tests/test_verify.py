@@ -380,3 +380,29 @@ def test_working_entry_point_is_silent():
 def test_each_promise_is_reported_once_even_when_repeated():
     text = "`from json import nope` and again `from json import nope`"
     assert len(verify.broken_entry_points(text, "DOC.md")) == 1
+
+
+# --- figure coverage derived from what the paper embeds ----------------------------------
+
+def test_embedded_figure_without_a_rule_is_flagged(tmp_path):
+    tex = _write(tmp_path / "a.tex", r"\includegraphics[width=1in]{fig_new.pdf}")
+    out = verify.figure_coverage_gaps([tex], {}, data_free=())
+    assert len(out) == 1 and "no freshness rule covers it" in out[0]
+
+
+def test_rule_for_an_unembedded_figure_is_flagged(tmp_path):
+    """The real defect: four of five rules aimed at figures no .tex includes."""
+    tex = _write(tmp_path / "a.tex", "no figures here")
+    out = verify.figure_coverage_gaps([tex], {"fig_unused.pdf": ("x.json",)})
+    assert len(out) == 1 and "does not embed" in out[0]
+
+
+def test_data_free_figure_is_exempt_but_must_be_declared(tmp_path):
+    tex = _write(tmp_path / "a.tex", r"\includegraphics[width=1in]{fig_schematic.pdf}")
+    assert verify.figure_coverage_gaps([tex], {}, data_free=("fig_schematic.pdf",)) == []
+    assert len(verify.figure_coverage_gaps([tex], {}, data_free=())) == 1
+
+
+def test_a_matched_pair_is_silent(tmp_path):
+    tex = _write(tmp_path / "a.tex", r"\includegraphics[width=1in]{fig_a.pdf}")
+    assert verify.figure_coverage_gaps([tex], {"fig_a.pdf": ("x.json",)}) == []

@@ -27,6 +27,7 @@ from typing import Iterable, Mapping, Sequence
 
 __all__ = [
     "PAPER_MARKERS",
+    "figure_coverage_gaps",
     "broken_entry_points",
     "dangling_paths",
     "module_digest",
@@ -340,4 +341,35 @@ def broken_entry_points(text: str, label: str) -> list[str]:
             if not hasattr(m, name):
                 out.append(f"{label} promises `from {mod} import {name}` but {mod} has no "
                            f"attribute {name!r}. A reader runs this before anything else.")
+    return out
+
+
+def figure_coverage_gaps(tex_sources: Iterable[Path], fig_sources: Mapping[str, Sequence[str]],
+                         data_free: Sequence[str] = ()) -> list[str]:
+    """Figures the paper embeds that no freshness rule covers, and rules aimed at nothing.
+
+    `stale_figures` can only protect figures it is told about, and for two passes the list it
+    was given did not match the list the paper uses: it guarded `fig_capacity_ladder.pdf`,
+    which appears in no `.tex` file at all, and said nothing about `fig_architecture.pdf`,
+    which the paper embeds. `paper/README.md` meanwhile asserted the wrong pair as "the two
+    that are used" -- an assertion edited twice without its premise being checked.
+
+    `data_free` names figures drawn from no artifact (a schematic), which are exempt from
+    *staleness* but still have to be declared, so that the exemption is a decision on the
+    record rather than an omission.
+    """
+    import re
+
+    used = set()
+    for p in tex_sources:
+        if p.exists():
+            used |= set(re.findall(r"includegraphics\[[^\]]*\]\{([\w.]+\.pdf)\}",
+                                   p.read_text()))
+    out = []
+    for fig in sorted(used - set(fig_sources) - set(data_free)):
+        out.append(f"the paper embeds {fig} but no freshness rule covers it. Add it to "
+                   "FIG_SOURCES, or declare it data-free if it plots nothing.")
+    for fig in sorted(set(fig_sources) - used):
+        out.append(f"FIG_SOURCES guards {fig}, which the paper does not embed. A rule aimed "
+                   "at an unused figure reads as coverage and is not.")
     return out
