@@ -17,6 +17,7 @@ Usage:  python3 scripts/check_paper_numbers.py
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -461,6 +462,11 @@ failures += verify.figure_coverage_gaps(
 _paper = ROOT / "paper"
 # The constrained quantity is the BODY's page count, not the file's. Measuring the file
 # agreed with the truth only while the references happened to fit on the body's last page.
+# The one requirement the CfP says can cost the paper, and the one no guard had ever looked
+# at: `ANONYMIZED` sat in main.tex through eleven passes. Network check is opt-in
+# (STOA_CHECK_URL=1) so an offline run cannot silently report it as passing.
+failures += verify.availability_url_problems(
+    _paper / "main.tex", check_network=os.environ.get("STOA_CHECK_URL") == "1")
 failures += verify.page_limit_violation(_paper / "main.pdf", limit=12)
 failures += verify.stale_paper_pdf(
     _paper / "main.pdf",

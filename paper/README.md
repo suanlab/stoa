@@ -35,8 +35,11 @@ python3 ../scripts/make_figures.py                     # regenerate figs/ from e
 Three template requirements are easy to break and produce a silently wrong front page:
 
 1. `\documentclass[sigconf, nonacm]{acmart}` followed by `\usepackage{pvldb}` inside the VLDB block.
-2. `\vldbdoi` / `\vldbpages` / `\vldbavailabilityurl` set via `\renewcommand`. The availability URL is
-   the **EA&B reproducibility-package link** and it currently reads `ANONYMIZED`. Two things must happen
+2. `ldbdoi` / `ldbpages` / `ldbavailabilityurl` set via `enewcommand`. The availability URL is
+   the **EA&B reproducibility-package link**; it now reads `https://github.com/suanlab/stoa`, the repository
+   was flipped public on 2026-09-13, and an anonymous `curl` plus an anonymous `git clone` both
+   succeed. `check_paper_numbers.py` rejects a placeholder always, and with `STOA_CHECK_URL=1`
+   fetches the URL with no credentials. Two things must happen
    before submission, in this order:
 
    **(a) The artifact repository is PRIVATE.** Flip it, then put the URL in `\vldbavailabilityurl`:

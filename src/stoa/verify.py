@@ -27,6 +27,7 @@ from typing import Iterable, Mapping, Sequence
 
 __all__ = [
     "PAPER_MARKERS",
+    "availability_url_problems",
     "figure_coverage_gaps",
     "broken_entry_points",
     "dangling_paths",
@@ -373,3 +374,52 @@ def figure_coverage_gaps(tex_sources: Iterable[Path], fig_sources: Mapping[str, 
         out.append(f"FIG_SOURCES guards {fig}, which the paper does not embed. A rule aimed "
                    "at an unused figure reads as coverage and is not.")
     return out
+
+
+def availability_url_problems(main_tex: Path, check_network: bool = False) -> list[str]:
+    r"""The EA&B availability URL: still a placeholder, or not anonymously reachable.
+
+    PVLDB is single-blind and requires the artifact in "a publicly accessible archival
+    repository". The guidelines add that "URLs that raise doubt about security and anonymity of
+    access will cause delays in paper evaluation and might jeopardize acceptance" -- which is
+    what a private repository's URL does. This is the one requirement whose failure the CfP
+    itself says can cost the paper.
+
+    The placeholder check always runs: `ANONYMIZED` sat in `ldbavailabilityurl` through eleven
+    re-verification passes, none of which looked at it, because every guard was pointed at
+    numbers. `check_network=True` additionally fetches the URL with no credentials, which is the
+    only way to see what a committee sees -- checking it while authenticated tests your own
+    access, not theirs.
+    """
+    import re
+
+    if not main_tex.exists():
+        return [f"{main_tex} is missing; the availability URL cannot be checked."]
+    m = re.search(r"\\renewcommand\\vldbavailabilityurl\{([^}]*)\}", main_tex.read_text())
+    if not m:
+        return ["no \\vldbavailabilityurl in main.tex. EA&B requires the reproducibility "
+                "package to be linked at submission."]
+    url = m.group(1).strip()
+    for placeholder in ("ANONYMIZED", "XXX", "TODO", "example.com"):
+        if placeholder in url:
+            return [f"\\vldbavailabilityurl is still a placeholder ({url}). EA&B requires a "
+                    "live public link at submission."]
+    if not url.startswith("https://"):
+        return [f"\\vldbavailabilityurl is {url!r}, not https. The CfP warns that URLs raising "
+                "doubt about security of access may jeopardize acceptance."]
+    if not check_network:
+        return []
+    import subprocess
+
+    try:
+        code = subprocess.run(
+            ["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}", "-L", "--max-time", "25", url],
+            capture_output=True, text=True, check=True,
+            env={"PATH": "/usr/bin:/bin", "HOME": "/nonexistent"}).stdout.strip()
+    except Exception as exc:                                  # noqa: BLE001
+        return [f"could not fetch {url}: {type(exc).__name__}: {exc}. Verify it by hand before "
+                "submitting; do not treat an unreachable check as a pass."]
+    if code != "200":
+        return [f"{url} returns HTTP {code} without credentials. A committee member sees this, "
+                "not what you see while logged in."]
+    return []

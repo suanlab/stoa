@@ -406,3 +406,34 @@ def test_data_free_figure_is_exempt_but_must_be_declared(tmp_path):
 def test_a_matched_pair_is_silent(tmp_path):
     tex = _write(tmp_path / "a.tex", r"\includegraphics[width=1in]{fig_a.pdf}")
     assert verify.figure_coverage_gaps([tex], {"fig_a.pdf": ("x.json",)}) == []
+
+
+# --- the EA&B availability URL ------------------------------------------------------------
+
+def test_placeholder_availability_url_is_rejected(tmp_path):
+    """ANONYMIZED sat in main.tex through eleven re-verification passes, because every guard
+    was pointed at numbers and this is not a number."""
+    t = _write(tmp_path / "main.tex",
+               r"\renewcommand\vldbavailabilityurl{https://github.com/ANONYMIZED/stoa}")
+    out = verify.availability_url_problems(t)
+    assert len(out) == 1 and "placeholder" in out[0]
+
+
+def test_missing_availability_command_is_rejected(tmp_path):
+    t = _write(tmp_path / "main.tex", r"\title{A paper with no availability URL}")
+    out = verify.availability_url_problems(t)
+    assert len(out) == 1 and "EA&B requires" in out[0]
+
+
+def test_non_https_url_is_rejected(tmp_path):
+    """The CfP warns that URLs raising doubt about security of access may jeopardize
+    acceptance."""
+    t = _write(tmp_path / "main.tex",
+               r"\renewcommand\vldbavailabilityurl{http://example.org/stoa}")
+    assert len(verify.availability_url_problems(t)) == 1
+
+
+def test_real_url_passes_without_touching_the_network(tmp_path):
+    t = _write(tmp_path / "main.tex",
+               r"\renewcommand\vldbavailabilityurl{https://github.com/suanlab/stoa}")
+    assert verify.availability_url_problems(t, check_network=False) == []
