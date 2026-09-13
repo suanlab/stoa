@@ -53,7 +53,7 @@ Placement studies of this kind, including three revisions of this one, fix a spl
 prefix, build features from it, place every block, and bill the result against the future. Feature
 construction can only describe a block that has been seen --- and on these traces 45--46\% of blocks have
 no pre-split access at all, while the hindsight oracle they are scored against ranks them anyway. Those
-blocks carry \textbf{97\% of the oracle's advantage}. A policy confined to the remaining 3\% looks flat
+blocks carry \textbf{95\% of the oracle's advantage}. A policy confined to the remaining 5\% looks flat
 however well it ranks, which is precisely what our earlier ``ranking does not convert into placement''
 result measured. We retract it.
 
@@ -91,7 +91,7 @@ older than the program that wrote it.
   representation $\times$ tier $\times$ timing, with a single serve-time $(L,C,B)$ knob
   (\Cref{sec:formulation}), and a control-plane architecture for it (\Cref{sec:arch}).
   \item \textbf{(C2)} A timing result on production traces. The split-instant protocol these studies use
-  makes 97\% of a hindsight oracle's advantage unreachable, because 45--46\% of blocks do not exist yet
+  makes 95\% of a hindsight oracle's advantage unreachable, because 45--46\% of blocks do not exist yet
   when it decides (\Cref{sec:reachable}). Deciding at each block's \emph{arrival} raises the reachable
   share from 3\% to 83.5\% and 2\% to 19.0\%; there, first-come-first-served admission captures 87.4\%
   and 50.2\% of what is reachable and a learned ranker captures less than FCFS on both, while the arrival
@@ -113,8 +113,8 @@ older than the program that wrote it.
   instantiate --- pointing \emph{against} our own framing: one representation leads at every budget
   rather than crossing. Reported as a direction with the sample size that would settle it, since none of
   the eight comparisons survives correction (\Cref{sec:representation}).
-  \item \textbf{(C6)} A reusable evaluation protocol: eighteen measurement defects that each manufactured
-  a plausible result here, grouped into seven mechanisms, and the cheap controls that catch them ---
+  \item \textbf{(C6)} A reusable evaluation protocol: nineteen measurement defects that each manufactured
+  a plausible result here, grouped into eight mechanisms, and the cheap controls that catch them ---
   including the rule that a null is reportable only alongside the sample size that would have resolved
   it, and the rule that every edge of the source $\rightarrow$ artifact $\rightarrow$ figure
   $\rightarrow$ paper chain needs its own freshness check (\Cref{sec:protocol}).

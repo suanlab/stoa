@@ -55,9 +55,9 @@ does a placement policy have to get right?
 Our answer is that it has to decide \emph{early}, not \emph{well}. Placement studies of this kind---ours
 included, for three revisions---fix a split instant, build features from the prefix, and place the
 blocks that already exist. On these traces 45--46\% of blocks have no pre-split access at all, and they
-carry \textbf{97\%} of a hindsight oracle's advantage: the protocol makes almost all of the benefit
+carry \textbf{95\%} of a hindsight oracle's advantage: the protocol makes almost all of the benefit
 unreachable, and any policy measured inside it looks flat however well it ranks. Moving the decision to
-each block's \emph{arrival} raises the reachable share from 3\% to \textbf{84\%} on one trace and 2\% to
+each block's \emph{arrival} raises the reachable share from 5\% to \textbf{84\%} on one trace and 4\% to
 \textbf{19\%} on the other. In that regime, first-come-first-served admission with a fixed action
 captures \textbf{87\%} of what is reachable on the first trace but only \textbf{50\%} on the second, and
 a learned arrival-time ranker (AUC 0.57, 0.64) captures less than FCFS on both. Timing is what recovers
@@ -71,7 +71,7 @@ adapt on a ghost hit, and 76--78\% of blocks are never reused, so the signal is 
 
 The protocol finding is not specific to us. Split-instant evaluation is the standard way this decision is
 studied, and on any workload where a large share of items arrive after the split it will understate what
-placement can do --- by a factor of 27 on one of our traces and 8 on the other. We give the diagnostic that detects it in one line (compare
+placement can do --- by a factor of 16 on one of our traces and 4.6 on the other. We give the diagnostic that detects it in one line (compare
 the oracle's advantage against the share of it a causal policy could reach) and the correction that
 removes it. Our own three retractions are reported as evidence for how invisible the failure is: each
 produced a plausible aggregate, and none was caught by any check that did not compare a reported

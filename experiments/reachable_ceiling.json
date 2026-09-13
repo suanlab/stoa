@@ -1,0 +1,168 @@
+{
+  "config": {
+    "requests": "full",
+    "splits": [
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7
+    ],
+    "reference": "prefix_greedy",
+    "why": "the paper's \u00a75.2 table mixed frames: its attainable gap was measured from prefix_greedy and its full gap was not. One reference here, and a split sweep so the result cannot be an artifact of where we cut."
+  },
+  "traces": {
+    "conversation": {
+      "rows": [
+        {
+          "split_frac": 0.3,
+          "n_blocks": 182790,
+          "blocks_with_no_pre_split_access": 117179,
+          "no_pre_split_pct": 64.1,
+          "reference": "prefix_greedy",
+          "reference_cost": 162001.1,
+          "oracle_cost": 47031.6,
+          "attainable_ceiling_cost": 160134.0,
+          "full_hindsight_gap": 114969.5,
+          "attainable_gap": 1867.0,
+          "unreachable_pct": 98.4,
+          "reachable_pct": 1.6
+        },
+        {
+          "split_frac": 0.4,
+          "n_blocks": 182790,
+          "blocks_with_no_pre_split_access": 99347,
+          "no_pre_split_pct": 54.4,
+          "reference": "prefix_greedy",
+          "reference_cost": 140529.6,
+          "oracle_cost": 34683.0,
+          "attainable_ceiling_cost": 137389.4,
+          "full_hindsight_gap": 105846.6,
+          "attainable_gap": 3140.2,
+          "unreachable_pct": 97.0,
+          "reachable_pct": 3.0
+        },
+        {
+          "split_frac": 0.5,
+          "n_blocks": 182790,
+          "blocks_with_no_pre_split_access": 82659,
+          "no_pre_split_pct": 45.2,
+          "reference": "prefix_greedy",
+          "reference_cost": 116875.8,
+          "oracle_cost": 23492.7,
+          "attainable_ceiling_cost": 111880.0,
+          "full_hindsight_gap": 93383.2,
+          "attainable_gap": 4995.8,
+          "unreachable_pct": 94.7,
+          "reachable_pct": 5.3
+        },
+        {
+          "split_frac": 0.6,
+          "n_blocks": 182790,
+          "blocks_with_no_pre_split_access": 65516,
+          "no_pre_split_pct": 35.8,
+          "reference": "prefix_greedy",
+          "reference_cost": 92486.3,
+          "oracle_cost": 12361.2,
+          "attainable_ceiling_cost": 87590.0,
+          "full_hindsight_gap": 80125.1,
+          "attainable_gap": 4896.3,
+          "unreachable_pct": 93.9,
+          "reachable_pct": 6.1
+        },
+        {
+          "split_frac": 0.7,
+          "n_blocks": 182790,
+          "blocks_with_no_pre_split_access": 49293,
+          "no_pre_split_pct": 27.0,
+          "reference": "prefix_greedy",
+          "reference_cost": 70163.8,
+          "oracle_cost": 8799.8,
+          "attainable_ceiling_cost": 65130.8,
+          "full_hindsight_gap": 61364.0,
+          "attainable_gap": 5033.0,
+          "unreachable_pct": 91.8,
+          "reachable_pct": 8.2
+        }
+      ],
+      "unreachable_min": 91.8,
+      "unreachable_max": 98.4
+    },
+    "toolagent": {
+      "rows": [
+        {
+          "split_frac": 0.3,
+          "n_blocks": 183300,
+          "blocks_with_no_pre_split_access": 119268,
+          "no_pre_split_pct": 65.1,
+          "reference": "prefix_greedy",
+          "reference_cost": 162399.6,
+          "oracle_cost": 48157.2,
+          "attainable_ceiling_cost": 160973.2,
+          "full_hindsight_gap": 114242.3,
+          "attainable_gap": 1426.4,
+          "unreachable_pct": 98.8,
+          "reachable_pct": 1.2
+        },
+        {
+          "split_frac": 0.4,
+          "n_blocks": 183300,
+          "blocks_with_no_pre_split_access": 101899,
+          "no_pre_split_pct": 55.6,
+          "reference": "prefix_greedy",
+          "reference_cost": 142526.6,
+          "oracle_cost": 36024.9,
+          "attainable_ceiling_cost": 140260.6,
+          "full_hindsight_gap": 106501.8,
+          "attainable_gap": 2266.0,
+          "unreachable_pct": 97.9,
+          "reachable_pct": 2.1
+        },
+        {
+          "split_frac": 0.5,
+          "n_blocks": 183300,
+          "blocks_with_no_pre_split_access": 84465,
+          "no_pre_split_pct": 46.1,
+          "reference": "prefix_greedy",
+          "reference_cost": 118752.4,
+          "oracle_cost": 24038.8,
+          "attainable_ceiling_cost": 114852.1,
+          "full_hindsight_gap": 94713.6,
+          "attainable_gap": 3900.3,
+          "unreachable_pct": 95.9,
+          "reachable_pct": 4.1
+        },
+        {
+          "split_frac": 0.6,
+          "n_blocks": 183300,
+          "blocks_with_no_pre_split_access": 67368,
+          "no_pre_split_pct": 36.8,
+          "reference": "prefix_greedy",
+          "reference_cost": 93923.7,
+          "oracle_cost": 13310.1,
+          "attainable_ceiling_cost": 89814.8,
+          "full_hindsight_gap": 80613.6,
+          "attainable_gap": 4108.9,
+          "unreachable_pct": 94.9,
+          "reachable_pct": 5.1
+        },
+        {
+          "split_frac": 0.7,
+          "n_blocks": 183300,
+          "blocks_with_no_pre_split_access": 50384,
+          "no_pre_split_pct": 27.5,
+          "reference": "prefix_greedy",
+          "reference_cost": 71072.9,
+          "oracle_cost": 9383.4,
+          "attainable_ceiling_cost": 66724.9,
+          "full_hindsight_gap": 61689.5,
+          "attainable_gap": 4348.0,
+          "unreachable_pct": 93.0,
+          "reachable_pct": 7.0
+        }
+      ],
+      "unreachable_min": 93.0,
+      "unreachable_max": 98.8
+    }
+  }
+}

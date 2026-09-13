@@ -2,7 +2,7 @@
 
 **Current framing (2026-09-05):** *Decide on Arrival: Placement Timing Beats Placement Prediction on
 Production KV Traces.* The paper gives the budget-constrained formulation, then reports what production
-traces say about it: split-instant evaluation makes 97% of the achievable benefit unreachable, moving the
+traces say about it: split-instant evaluation makes 95% of the achievable benefit unreachable, moving the
 decision to each block's arrival recovers it, and what captures the recovered benefit is deciding early
 rather than deciding well — though not order-independently, which an earlier draft got wrong.
 
@@ -35,7 +35,8 @@ python3 ../scripts/make_figures.py                     # regenerate figs/ from e
 Three template requirements are easy to break and produce a silently wrong front page:
 
 1. `\documentclass[sigconf, nonacm]{acmart}` followed by `\usepackage{pvldb}` inside the VLDB block.
-2. `ldbdoi` / `ldbpages` / `ldbavailabilityurl` set via `enewcommand`. The availability URL is
+2. `ldbdoi` / `ldbpages` / `ldbavailabilityurl` set via `
+enewcommand`. The availability URL is
    the **EA&B reproducibility-package link**; it now reads `https://github.com/suanlab/stoa`, the repository
    was flipped public on 2026-09-13, and an anonymous `curl` plus an anonymous `git clone` both
    succeed. `check_paper_numbers.py` rejects a placeholder always, and with `STOA_CHECK_URL=1`
@@ -58,7 +59,7 @@ Three template requirements are easy to break and produce a silently wrong front
 
    Run that from a shell with no GitHub credentials, or in a logged-out browser. Checking it while
    authenticated tests your access, not the reviewer's — which is the exact failure mode
-   `../docs/claims_dependency.md` catalogues twenty-seven times over.
+   `../docs/claims_dependency.md` catalogues twenty-eight times over.
 3. **`\vldbtopmatter` immediately after `\maketitle`.** `pvldb.sty` has no `AtBeginDocument` hook, so
    omitting this drops the PVLDB Reference Format and Artifact Availability blocks with no error. Check
    for them in the rendered page 1, not in the log.

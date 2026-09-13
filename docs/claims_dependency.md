@@ -1567,3 +1567,74 @@ Passes 7, 8 and 10 found tests whose names overstated what they pinned; this is 
 level up, in the guard's inventory rather than in a test's name.
 
 This is the twenty-seventh defect whose only symptom was a plausible number.
+
+## §AN — the paper's headline number was in no artifact, and mixed two reference frames
+
+This is the largest defect in the catalogue, and it was found by asking a question twelve
+re-verification passes had not: *which emphasised numbers is nothing watching?*
+
+Every pass had built guards around numbers that were **in** artifacts — staleness, figure freshness,
+prose drift, retracted values, provenance. None had asked the reverse. `verify.unbacked_emphasised_
+numbers` now answers it by extracting every `\textbf{...}` containing a digit and checking whether
+its digits appear among the values the checker asserts. Six came back, including:
+
+> `\textbf{96.9\% and 97.6\%}` — the *"97% of the oracle's advantage is unreachable"* that the
+> abstract, contribution C2, §5.2's table and §5.8 all turn on.
+
+It appeared in no artifact, and in no assertion, for the paper's entire life.
+
+### AN.1 And it was wrong, in a way the table itself revealed
+
+Recomputing §5.2 from the code showed the table mixes frames:
+
+| quantity | paper | recomputed (one frame) |
+|---|---|---|
+| blocks with no pre-split access | 45.2% / 46.1% | **45.2% / 46.1%** ✓ |
+| attainable gap | 4,996 / 3,900 | **4,995.8 / 3,900.3** ✓ |
+| full hindsight gap | 160,200 / 162,602 | **93,383 / 94,714** |
+| unreachable share | 96.9% / 97.6% | **94.7% / 95.9%** |
+
+The attainable gap matches `prefix_greedy - attainable_ceiling` to a decimal. The full gap is 1.72x
+`prefix_greedy - oracle` on *both* traces — a constant ratio, so not noise. The two halves of the
+headline fraction were measured from different references, which is §W in the one place it mattered
+most. Consequences propagate: the split-instant reachable share was 4,996/160,200 = 3.1% rather than
+4,996/93,383 = 5.3%, and the timing multiplier the abstract quotes as 27x is **15.8x** — computed by
+dividing an arrival-time ceiling that *was* in the right frame by a split-instant share that was not.
+
+The qualitative claim survives intact: ~95% of the gap is unreachable, so a policy confined to ~5%
+looks flat however well it ranks. The mechanism is unchanged. Only the numbers move, and they move
+down.
+
+### AN.2 The correction also answers the obvious objection, which nothing had tested
+
+`scripts/run_reachable_ceiling.py` computes all three costs through **one routine**
+(`place_with_beliefs`) at **one split**, differing only in the belief handed to it, and sweeps the
+split instant from 0.3 to 0.7. That second part matters: the most natural attack on this paper's
+central finding is *"you chose a split that makes the oracle unreachable."*
+
+| split | conversation | toolagent |
+|---|---|---|
+| 0.3 | 98.4% | 98.8% |
+| 0.5 | 94.7% | 95.9% |
+| 0.7 | 91.8% | 93.0% |
+
+It is **worse at earlier splits**, where more of the trace is still to come — which is what the
+mechanism predicts, since the unreachable share is driven by blocks that do not exist yet. The
+pathology is a property of the protocol, not of our choice within it. The paper now says so, with the
+sweep as evidence rather than as an assurance.
+
+### AN.3 The script written to fix a mixed-frame ratio mixed frames
+
+Its first version called `reference_costs` for the heuristic and the oracle and `attainable_ceiling`
+for the ceiling. `reference_costs` **takes no `split_frac`** — it is always 0.5 — so the numerator
+moved with the sweep and the denominator did not. The attainable gap came out **negative** at split
+0.3. It also passed a bare `RewardWeights()` where the module uses `DEFAULT_WEIGHTS`, whose
+`lambda_tokens` is 0.0005 rather than 1.0, inflating every cost by three orders of magnitude.
+
+Both were caught only because the output was *absurd* — a negative gap, an 89-million-unit span.
+Had the bug been milder it would have produced a plausible number, which is the subject of this entire
+document. The guard against it is not a check but a shape: every quantity in a ratio now comes from
+one routine at one split, differing only in its input.
+
+This is the twenty-eighth defect whose only symptom was a plausible number, and the first where the
+symptom was that there was no symptom at all — nothing had ever looked.

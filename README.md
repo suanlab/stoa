@@ -7,12 +7,12 @@ The paper asks what a KV-block placement policy has to get right, and answers th
 *early* rather than *well*. The short version:
 
 - **Split-instant evaluation understates placement.** On the two production traces we use, 45–46% of
-  blocks have no access before the split, and they carry **97%** of a hindsight oracle's advantage. A
+  blocks have no access before the split, and they carry **95%** of a hindsight oracle's advantage. A
   policy measured inside that protocol looks flat however well it ranks. The diagnostic is one extra
   placement pass (`stoa.sequential.attainable_ceiling`); we recommend reporting the reachable share
   alongside any "fraction of headroom captured".
-- **Moving the decision to each block's arrival recovers the benefit** — reachable share 3% → **83.5%**
-  on one trace, 2% → **19.0%** on the other, a factor of 27 and 8. There, first-come-first-served
+- **Moving the decision to each block's arrival recovers the benefit** — reachable share 5% → **83.5%**
+  on one trace, 4% → **19.0%** on the other, a factor of 16 and 4.6. There, first-come-first-served
   admission with a fixed action captures **87.4%** and **50.2%** of what is reachable, and a learned
   arrival-time ranker captures *less* on both. But the arrival **order** is not free: shuffling it costs
   3.3 points on one trace and **14.1** on the other. So the implication is narrower than "deciding at
@@ -63,7 +63,7 @@ The cost is that our GBDT is not `HistGradientBoostingRegressor`, and we say so 
 
 ## Read this before trusting a number
 
-`docs/claims_dependency.md` records **twenty-seven defects whose only symptom was a plausible number**, five
+`docs/claims_dependency.md` records **twenty-eight defects whose only symptom was a plausible number**, five
 claims we retracted, and two further sub-claims falsified after the paper had been rewritten around the
 surviving result. Two of the retractions were found by adversarial review *after* the error catalogue in
 the paper had been written; the two falsifications were found by a re-verification pass that noticed

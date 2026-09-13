@@ -33,9 +33,9 @@ _SRC = ROOT / "src"
 if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
-from stoa.environment import RewardWeights  # noqa: E402
 from stoa.mooncake import load_mooncake  # noqa: E402
-from stoa.sequential import attainable_ceiling, reference_costs  # noqa: E402
+from stoa.sequential import (DEFAULT_WEIGHTS, attainable_ceiling,  # noqa: E402
+                             place_with_beliefs)
 from stoa.simulator import TieringSimulator  # noqa: E402
 
 TRACES = {"conversation": "data/mooncake_conversation_trace.jsonl",
@@ -43,14 +43,34 @@ TRACES = {"conversation": "data/mooncake_conversation_trace.jsonl",
 
 
 def one(wl, split_frac: float, sim, w) -> dict:
+    """All three costs at ONE split, through ONE routine.
+
+    The first version of this function called `reference_costs` for the heuristic and the
+    oracle and `attainable_ceiling` for the ceiling. `reference_costs` takes no `split_frac`
+    -- it is always 0.5 -- so the numerator moved with the sweep and the denominator did not,
+    and the attainable gap came out *negative* at split 0.3. The script written to fix a
+    mixed-frame ratio mixed frames. It also passed a bare `RewardWeights()` where the module
+    uses `DEFAULT_WEIGHTS`, whose `lambda_tokens` is 0.0005 rather than 1.0, inflating every
+    cost by three orders of magnitude.
+
+    Both are avoided the same way: every quantity below comes from `place_with_beliefs` at the
+    same `split_frac`, differing only in the belief handed to it.
+    """
     st = max(1, wl.time_split(split_frac))
     pre = wl.prefix_stats(st)
+    fut = wl.future_counts(st)
     seen = [i.item_id for i in wl.items if pre.get(i.item_id, {}).get("count", 0) > 0]
     n_blocks = len(wl.items)
-    ref = reference_costs(wl, sim, w, split_frac=split_frac) \
-        if "split_frac" in reference_costs.__code__.co_varnames else reference_costs(wl, sim, w)
+
+    # heuristic: the future looks like the observed prefix.
+    heuristic = place_with_beliefs(
+        wl, {i.item_id: float(pre.get(i.item_id, {}).get("count", 0)) for i in wl.items},
+        sim, w, split_frac)
+    # oracle: clairvoyant over every block, including ones not yet seen.
+    oracle = place_with_beliefs(
+        wl, {i.item_id: float(fut.get(i.item_id, 0)) for i in wl.items}, sim, w, split_frac)
+    # ceiling: clairvoyant, but only about blocks a causal policy could have an opinion on.
     ceiling = attainable_ceiling(wl, seen, sim, w, split_frac=split_frac)
-    oracle, heuristic = ref["oracle_future"], ref["prefix_greedy"]
     full = heuristic - oracle
     attainable = heuristic - ceiling
     return {
@@ -77,7 +97,7 @@ def main() -> int:
     ap.add_argument("--out", type=str, default="experiments/reachable_ceiling.json")
     args = ap.parse_args()
 
-    sim, w = TieringSimulator(), RewardWeights()
+    sim, w = TieringSimulator(), DEFAULT_WEIGHTS
     out: dict = {"config": {"requests": args.requests or "full",
                             "splits": args.splits,
                             "reference": "prefix_greedy",

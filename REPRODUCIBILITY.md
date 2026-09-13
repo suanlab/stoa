@@ -64,7 +64,7 @@ falsified two §5.3 claims outright:
 
 | retracted / falsified | why |
 |---|---|
-| **RETRACTED** "ranking does not convert into placement" (the *decoupling* result, this paper's second framing) | normalized against a hindsight oracle a causal policy cannot reach: 45–46% of blocks have no pre-split access, and they carry 97% of the oracle's advantage (`docs/claims_dependency.md` §T, §U) |
+| **RETRACTED** "ranking does not convert into placement" (the *decoupling* result, this paper's second framing) | normalized against a hindsight oracle a causal policy cannot reach: 45–46% of blocks have no pre-split access, and they carry 95% of the oracle's advantage — 97% in an earlier revision, which mixed two reference frames (`docs/claims_dependency.md` §T, §U, §AN) |
 | **RETRACTED** "LRB sits below ARC at all 8 operating points" | the LRB training buffer was truncated to its tail, giving constant labels at 11 of 13 fits (`distinct_y=1`); the column measured **random eviction**, not LRB (§V) |
 | **FALSIFIED** "FCFS captures ~90% of what is reachable" | 87.4% on conversation but **50.2%** on toolagent (§AC) |
 | **FALSIFIED** "shuffling the arrival order costs under three points" | 3.3 points on conversation but **14.1** on toolagent; arrival order is not incidental (§AC) |
@@ -75,7 +75,7 @@ its source modules; `scripts/check_paper_numbers.py` now does (`DEPENDS_ON`), an
 found three more stale artifacts.
 
 Anything in `experiments/` predating 2026-08-18 should be read against §I, §T–§V and §AC before use.
-The results that survived every repair of the metric are: **timing recovers the benefit** (27x on one
+The results that survived every repair of the metric are: **timing recovers the benefit** (16x on one
 trace, 8x on the other) and **learning on top of arrival-time admission adds nothing**.
 
 ## 3b. Environment, and what is hand-rolled
@@ -168,7 +168,7 @@ believed where an observation was available.
 
 ## 6. Controls wired into the harness
 
-**Twenty-seven defects** during this work produced plausible-but-wrong numbers; `docs/claims_dependency.md`
+**Twenty-eight defects** during this work produced plausible-but-wrong numbers; `docs/claims_dependency.md`
 catalogues each with the symptom it presented. The checks that catch them live in the code and the tests,
 not just in prose:
 

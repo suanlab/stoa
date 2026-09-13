@@ -4,7 +4,7 @@
 \Cref{sec:formulation} frames placement as a learnable budget-constrained MDP. This section reports what
 we found when we tried to learn it on production KV traces, and it is organized around a defect rather
 than a result, because the defect came first and everything else follows from it: the protocol these
-studies use --- ours for three revisions --- makes 97\% of the achievable benefit unreachable, so a
+studies use --- ours for three revisions --- makes 95\% of the achievable benefit unreachable, so a
 policy measured inside it looks flat however well it ranks (\Cref{sec:reachable}). Moving the decision to
 each block's arrival recovers the benefit, and shows that the recoverable part is captured by
 \emph{deciding early} rather than by \emph{deciding well} (\Cref{sec:arrival}). We then report what a
@@ -44,7 +44,7 @@ whose denominator it has not characterized.
 Feature construction can only describe a block that has been seen. On these traces
 \textbf{45.2\% and 46.1\% of blocks have no pre-split access at all}, and a policy therefore has no
 opinion about them --- but the hindsight oracle it is scored against ranks them anyway, using knowledge
-of a future in which they exist. Those blocks carry \textbf{96.9\% and 97.6\%} of the oracle's total
+of a future in which they exist. Those blocks carry \textbf{94.7\% and 95.9\%} of the oracle's total
 advantage. The denominator of every ``captured headroom'' number we reported was, in other words,
 almost entirely unreachable by construction:
 
@@ -54,15 +54,21 @@ almost entirely unreachable by construction:
 & conversation & toolagent \\
 \midrule
 blocks with no pre-split access & 45.2\% & 46.1\% \\
-full hindsight gap & 160{,}200 & 162{,}602 \\
+full hindsight gap & 93{,}383 & 94{,}714 \\
 \textbf{attainable gap} (clairvoyance on visible blocks) & \textbf{4{,}996} & \textbf{3{,}900} \\
-share of the gap a causal policy cannot reach & \textbf{96.9\%} & \textbf{97.6\%} \\
+share of the gap a causal policy cannot reach & \textbf{94.7\%} & \textbf{95.9\%} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \medskip
-\noindent A policy confined to 3\% of the prize will look flat no matter how well it ranks, and that is
+\noindent\textbf{It is not an artifact of where we cut.} Sweeping the split instant from 0.3 to 0.7
+of the trace leaves the unreachable share at \textbf{91.8--98.4\%} on conversation and
+\textbf{93.0--98.8\%} on toolagent --- and it is \emph{worse} at earlier splits, where more of the
+trace is still to come. The pathology is a property of the protocol, not of our choice within it.
+
+\medskip
+\noindent A policy confined to 5\% of the prize will look flat no matter how well it ranks, and that is
 what our earlier ``decoupling'' result measured. We retract it (\Cref{sec:protocol}).
 
 \paragraph{The diagnostic is one line.} Compute the oracle's advantage twice --- once with clairvoyance
@@ -101,8 +107,8 @@ toolagent    & arrival-learned  & 0.635 & 9.0\% & 47.2\% \\
 \medskip
 \noindent Three readings survive and one does not.
 
-\emph{Timing recovers much of the benefit.} The reachable share rises from 3.1\% to \textbf{83.5\%} on
-conversation and 2.4\% to \textbf{19.0\%} on toolagent --- $27\times$ and $8\times$. The headroom was not
+\emph{Timing recovers much of the benefit.} The reachable share rises from 5.3\% to \textbf{83.5\%} on
+conversation and 4.1\% to \textbf{19.0\%} on toolagent --- $16\times$ and $4.6\times$. The headroom was not
 absent; the protocol could not reach it. The two traces differ by a factor of four in how much arrival
 timing exposes, which we cannot explain from two exemplars.
 
@@ -551,6 +557,17 @@ could have deleted any one silently. A test's \emph{name} is a claim about cover
 checks --- ours named for the three-routine tie invariant compared two of them --- and the only way to
 learn what a test pins is to break the thing and watch it fail --- having first checked that the
 break changed the computation and not merely the file.
+
+\paragraph{Emphasis without verification (one).} Our checker re-derives every number it is told
+about, and for the life of this paper it was not told about the one the abstract leads with. The
+``fraction of the oracle's advantage that is unreachable'' --- quoted in the abstract, in C2, in
+\Cref{sec:reachable} and here --- sat in no artifact and in no assertion, and when finally recomputed
+it was built from two different references: its attainable gap measured against the frequency
+heuristic, its full gap against something 1.72$\times$ larger on both traces. The qualitative finding
+survived; the figure moved from 97\% to 95\% and the timing multiplier from 27$\times$ to 16$\times$.
+The guard is a coverage test rather than a correctness one: extract every emphasised number in the
+source and fail if nothing asserts it. It answers ``what is nothing watching?'', which is a different
+question from ``is what we watch correct?'' and the one we had never asked.
 
 \paragraph{The controls.} Assert that the oracle beats the heuristic it is compared against; keep a
 no-learning baseline of the same functional form as the learned one; check that no single feature

@@ -389,6 +389,7 @@ DEPENDS_ON = {
     "locomo_power.json": ("stats.py",),
     "lrb_sweep.json": ("lrb.py", "eval/online.py"),
     "sampling_study.json": ("kvct.py",),
+    "reachable_ceiling.json": ("sequential.py", "mooncake.py"),
 }
 # The guard's own failure mode: add an artifact, forget to declare its dependencies, and it
 # is exempt from staleness checking forever without anything saying so.
@@ -410,6 +411,44 @@ failures += verify.stale_artifacts(DEPENDS_ON, EXP, SRC, manifest=_manifest)
 # Trace sizes: stated in the paper as a bare pair, in the reverse of the column order every
 # other table uses, and asserted by nothing. The artifact labels its rows, so the mapping is
 # recoverable rather than a matter of which one a reader assumes comes first.
+# §5.2's table: the paper's headline, and for twelve passes backed by nothing. Every row is
+# now derived from one artifact computed in one frame. See §AN for what the old numbers were
+# and why they could not all be right at once.
+d = load("reachable_ceiling.json")
+if d:
+    print("\nreachable ceiling (experiments/reachable_ceiling.json)")
+    for _t in ("conversation", "toolagent"):
+        rows = d["traces"][_t]["rows"]
+        at = [r for r in rows if r["split_frac"] == 0.5][0]
+        claim(f"{_t}: blocks with no pre-split access", f"{at['no_pre_split_pct']:.1f}\\%",
+              at["no_pre_split_pct"], "no_pre_split_pct @ 0.5")
+        claim(f"{_t}: full hindsight gap",
+              f"{at['full_hindsight_gap']:,.0f}".replace(",", "{,}"),
+              at["full_hindsight_gap"], "prefix_greedy - oracle @ 0.5")
+        claim(f"{_t}: attainable gap",
+              f"{at['attainable_gap']:,.0f}".replace(",", "{,}"),
+              at["attainable_gap"], "prefix_greedy - ceiling @ 0.5")
+        claim(f"{_t}: unreachable share", f"{at['unreachable_pct']:.1f}\\%",
+              at["unreachable_pct"], "1 - attainable/full @ 0.5")
+        lo, hi = d["traces"][_t]["unreachable_min"], d["traces"][_t]["unreachable_max"]
+        claim(f"{_t}: unreachable across splits 0.3-0.7",
+              f"{lo:.1f}--{hi:.1f}\\%", f"{lo}-{hi}", "split sweep")
+    # The pair as the abstract and §5.2 state it, rounded.
+    u = [round(d["traces"][t]["rows"][2]["unreachable_pct"], 1)
+         for t in ("conversation", "toolagent")]
+    claim("unreachable pair as stated in prose", f"{u[0]:.1f}\\% and {u[1]:.1f}\\%",
+          f"{u}", "both traces @ 0.5")
+    # And the multipliers, which divide the arrival ceiling by the split-instant one. Both
+    # numerator and denominator must come from the same span -- the defect of §AN.
+    _aa = load("arrival_admission.json")
+    if _aa:
+        _by = {(r["trace"], r["arm"]): r for r in _aa["results"]}
+        for _t, _needle in (("conversation", "16"), ("toolagent", "4.6")):
+            _arrival = _by[(_t, "arrival-ceiling")]["captured_pct"]
+            _split = [r for r in d["traces"][_t]["rows"] if r["split_frac"] == 0.5][0]["reachable_pct"]
+            claim(f"{_t}: timing multiplier", _needle, f"{_arrival / _split:.2f}x",
+                  "arrival ceiling / split-instant reachable")
+
 d = load("mooncake_length_sweep.json")
 if d:
     print("\ntrace sizes (experiments/mooncake_length_sweep.json)")
