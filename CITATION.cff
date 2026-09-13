@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+title: "STOA: reproducibility package for \"Decide on Arrival\""
+message: >-
+  If you use this artifact, cite the paper. If you use the attainable-ceiling
+  diagnostic specifically, §5.2 of the paper is the part to cite; the one-line
+  implementation is stoa.sequential.attainable_ceiling.
+type: software
+authors:
+  - name: "STOA Project"
+    email: suanlee@semyung.ac.kr
+    affiliation: "Semyung University"
+repository-code: "https://github.com/suanlab/stoa"
+license: Apache-2.0
+abstract: >-
+  Code, experiment artifacts and measurement protocol for a study of KV-block
+  placement on production Mooncake traces. The central finding is about
+  evaluation rather than about a policy: split-instant protocols leave almost
+  all of a hindsight oracle's advantage unreachable by construction, so a
+  policy measured inside one looks flat however well it ranks. Moving the
+  decision to each block's arrival recovers the benefit, and what captures it
+  is admission timing rather than prediction.
+
+  The package ships the controls as code, not as prose: every number in the
+  paper is re-derived from its artifact by scripts/check_paper_numbers.py,
+  every artifact is checked against the source that produced it, and the
+  defects this work made and caught are catalogued in
+  docs/claims_dependency.md.
+keywords:
+  - agent memory
+  - KV cache
+  - memory tiering
+  - cache replacement
+  - evaluation methodology
+  - reproducibility

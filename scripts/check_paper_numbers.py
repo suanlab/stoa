@@ -51,6 +51,9 @@ def load(name):
     return json.loads(p.read_text()) if p.exists() else None
 
 
+_ASSERTED: list[str] = []
+
+
 def claim(label: str, needle: str, derived, source: str) -> None:
     """Assert `needle` appears in the LaTeX source, and report what the artifact says.
 
@@ -59,6 +62,7 @@ def claim(label: str, needle: str, derived, source: str) -> None:
     """
     global checked
     checked += 1
+    _ASSERTED.append(str(needle))
     ok = re.sub(r"\s+", " ", needle) in TEX
     print(f"  [{'ok ' if ok else 'MISS'}] {label:<52} {derived}   ({source})")
     if not ok:
@@ -119,6 +123,31 @@ if d:
           f"{pct(min(ghosts), 1)}-{pct(max(ghosts), 1)}%", "arc_ghost_hit_rate_of_misses")
 
 # --- LoCoMo power analysis --------------------------------------------------------
+# §5.7's sample sizes reproduce exactly from the powered run's stored discordance counts --
+# they were correct all along and simply had no assertion, which is how a number survives
+# twelve passes unwatched. Derived here rather than regenerated: the artifact holds the raw
+# counts, and the paid LLM run that produced it need not be repeated to check arithmetic.
+d = load("eval_locomo_powered.json")
+if d:
+    from stoa.stats import n_for_power_mcnemar
+    print("\nLoCoMo required sample size (experiments/eval_locomo_powered.json)")
+    thr, n_arm = d["bonferroni_threshold"], 300
+    sizes, sizes_uncorr = [], []
+    for c in d["contrasts"]:
+        if c.get("high") != "stoa" or c.get("low") != "random":
+            continue
+        hi, lo = c["discordant_high"], c["discordant_low"]
+        p_disc, p_fav = (hi + lo) / n_arm, hi / (hi + lo)
+        sizes.append(n_for_power_mcnemar(p_disc, p_fav, alpha=thr, seed=0))
+        sizes_uncorr.append(n_for_power_mcnemar(p_disc, p_fav, alpha=0.05, seed=0))
+    if len(sizes) == 3:
+        claim("n per arm at the corrected threshold",
+              f"{sizes[0]}, {sizes[1]} and {sizes[2]} questions per arm",
+              f"alpha={thr}", "n_for_power_mcnemar on discordant counts")
+        claim("n per arm at an uncorrected 0.05",
+              f"{sizes_uncorr[0]}, {sizes_uncorr[1]} and {sizes_uncorr[2]}",
+              "alpha=0.05", "the sizing mistake an earlier revision made")
+
 d = load("locomo_power.json")
 if d:
     print("\nLoCoMo power (experiments/locomo_power.json)")
@@ -376,6 +405,36 @@ failures += verify.stale_artifacts(DEPENDS_ON, EXP, SRC, manifest=_manifest)
 # headline numbers, and nothing checked it. Twice now a correction landed in the .tex and not in
 # the markdown, most recently leaving the repository's front page advertising the two numbers a
 # re-verification pass had just falsified. These are the quantities a reader meets first.
+# The cost of shuffling the arrival order: the claim §AC falsified and the paper now states
+# in corrected form. Emphasised in both the introduction and §5.4 and asserted by nothing.
+# Trace sizes: stated in the paper as a bare pair, in the reverse of the column order every
+# other table uses, and asserted by nothing. The artifact labels its rows, so the mapping is
+# recoverable rather than a matter of which one a reader assumes comes first.
+d = load("mooncake_length_sweep.json")
+if d:
+    print("\ntrace sizes (experiments/mooncake_length_sweep.json)")
+    full = {r["trace"]: r["requests"] for r in d["grid"] if r.get("full_trace")}
+    if {"conversation", "toolagent"} <= set(full):
+        def _tex(n: int) -> str:
+            # LaTeX thousands separator, applied to the NUMBER only -- a blanket
+            # str.replace(",", "{,}") also rewrites the prose commas around it.
+            return f"{n:,}".replace(",", "{,}")
+
+        claim("requests per trace, conversation then toolagent",
+              f"conversation, {_tex(full['conversation'])} requests; "
+              f"toolagent, {_tex(full['toolagent'])}",
+              f"{full['conversation']} / {full['toolagent']}", "full_trace rows")
+
+_arr0 = load("arrival_admission.json")
+if _arr0:
+    _b = {(r["trace"], r["arm"]): r for r in _arr0["results"]}
+    print("\narrival order (experiments/arrival_admission.json)")
+    for _t, _needle in (("conversation", "3.3 points"), ("toolagent", "14.1 points")):
+        _cost = (_b[(_t, "arrival-fcfs")]["captured_of_attainable_pct"]
+                 - _b[(_t, "arrival-shuffled")]["captured_of_attainable_pct"])
+        claim(f"{_t}: cost of shuffling the arrival order", f"{_cost:.1f} points",
+              f"{_cost:.2f}", "fcfs - shuffled, of attainable")
+
 PROSE_FILES = ("README.md", "paper/README.md", "REPRODUCIBILITY.md")
 _arr = load("arrival_admission.json")
 if _arr:
@@ -425,7 +484,10 @@ for _tex in [ROOT / "paper" / "main.tex", *sorted((ROOT / "paper" / "sections").
         label=str(_tex.relative_to(ROOT)), markers=verify.PAPER_MARKERS, scope="paragraph")
 
 # A dangling path carries no wrong number, so every earlier stale-prose sweep missed it.
-for _doc in ("REPRODUCIBILITY.md", "README.md", "paper/README.md", "data/README.md"):
+# Makefile included: it is now the committee's entry point, so a target naming a deleted
+# script is the same defect as a claim table row pointing at a moved artifact (§AK).
+for _doc in ("REPRODUCIBILITY.md", "README.md", "paper/README.md", "data/README.md",
+             "Makefile"):
     _p = ROOT / _doc
     if _p.exists():
         _t = _p.read_text()
@@ -472,6 +534,18 @@ failures += verify.stale_paper_pdf(
     _paper / "main.pdf",
     [_paper / "main.tex", *sorted((_paper / "sections").glob("*.tex")),
      *[FIGS / f for f in FIG_SOURCES], ROOT / "docs" / "references.bib"])
+
+# Which emphasised numbers is nothing watching? MIN_CHECKS below guarantees the checker does a
+# certain AMOUNT of work; this guarantees it works on the right things. Twelve passes guarded
+# numbers that were in artifacts and never asked the reverse question -- which is how the
+# paper's headline 97% sat unbacked in §5.2.
+failures += verify.unbacked_emphasised_numbers(
+    [ROOT / "paper" / "main.tex", *sorted((ROOT / "paper" / "sections").glob("*.tex"))],
+    " ".join(_ASSERTED),
+    allow=(
+        # Definitional, not measured: these come from the formulation or the venue, not a run.
+        "12 pages", "50", "fifty",
+    ))
 
 # --- coverage guards, LAST so `checked` is final -----------------------------------
 # Sitting mid-file, this counted only the checks declared above it and passed while

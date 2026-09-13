@@ -15,7 +15,7 @@ including the three claims we retracted along the way (\Cref{sec:protocol}).
 \subsection{Sources and references}
 \label{sec:sources}
 We use \textbf{Mooncake}~\cite{qin2024mooncake}, replayed production traces from a general LLM serving
-stack (23{,}608 and 12{,}031 requests), and \textbf{kv-cache-tester}, anonymized agentic coding
+stack (conversation, 12{,}031 requests; toolagent, 23{,}608), and \textbf{kv-cache-tester}, anonymized agentic coding
 conversations (200 of 739 fetched). Each request lists the hash ids of the KV blocks it touches, so a
 repeated hash is a genuine reuse. Both sources record wall-clock request timestamps. Block ids in
 kv-cache-tester are conversation-scoped, so we namespace them before pooling; not doing so invents

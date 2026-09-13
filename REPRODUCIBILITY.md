@@ -213,3 +213,34 @@ check, in about 2 min 45 s.
 - Conversation sampling is a sorted prefix (`kvct._iter_conversations`), so repeated "samples" are nested.
   The corpus is heterogeneous along that index; randomized sampling with intervals is required and absent.
 - The `.env` used for the LLM experiments has been deleted; the exposed key should be rotated.
+
+## 8. For the Reproducibility Committee: start here
+
+The claim table above is complete but not ordered by cost. These four commands are that ordering,
+cheapest first. The first needs no data, no network and no credentials.
+
+```bash
+make verify           # ~4 min   231 tests + every paper number against its artifact
+make data-check       # instant  are the traces present and the right length?
+make reproduce-fast   # ~40 min  the central claims, regenerated from the Mooncake traces
+make reproduce-full   # ~6 h     the above plus the LRB hyperparameter sweep
+make reproduce-llm    # ~3 h     the two LoCoMo claims — needs OPENAI_API_KEY, costs about $5
+```
+
+`make verify` exits non-zero on any drift. It also checks things a number-checker usually does not:
+that no artifact is older than the code that produced it, that no figure is older than the data it
+plots, that the built PDF is not older than its sources, that released prose carries the current
+numbers, that no retracted value appears outside a retracting paragraph, and that every emphasised
+number in the paper is asserted against an artifact somewhere. Each of those guards exists because
+its absence let a wrong number into a draft; `docs/claims_dependency.md` names which.
+
+**What cannot be reproduced for free, stated plainly rather than discovered halfway through a run:**
+`reproduce-llm` calls a hosted model. Two results depend on it (§5.6 placement-vs-retrieval, §5.7 the
+representation pilot). They cannot be bit-reproduced even with a key — `temperature=0` pins sampling,
+not the served weights. The shipped artifacts record the prompts and the per-call response ids, and
+every *derived* quantity in those sections is re-checked from the stored responses by
+`check_paper_numbers.py`, so the arithmetic is verifiable without spending anything.
+
+Everything else is CPU-only and free. `pyproject.toml` keeps loose bounds so the package stays
+installable; `requirements-lock.txt` is the provenance record of the exact versions every number
+came from.

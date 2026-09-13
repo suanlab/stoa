@@ -27,6 +27,7 @@ from typing import Iterable, Mapping, Sequence
 
 __all__ = [
     "PAPER_MARKERS",
+    "unbacked_emphasised_numbers",
     "availability_url_problems",
     "figure_coverage_gaps",
     "broken_entry_points",
@@ -423,3 +424,48 @@ def availability_url_problems(main_tex: Path, check_network: bool = False) -> li
         return [f"{url} returns HTTP {code} without credentials. A committee member sees this, "
                 "not what you see while logged in."]
     return []
+
+
+def unbacked_emphasised_numbers(tex_sources: Iterable[Path], checked_text: str,
+                                allow: Sequence[str] = ()) -> list[str]:
+    r"""Numbers the paper emphasises that no check ever compared against an artifact.
+
+    The defect this exists for is the largest in the catalogue. `\textbf{96.9\%}` and
+    `\textbf{97.6\%}` -- the "97% of the oracle's advantage is unreachable" that the abstract,
+    C2, §5.2 and §5.8 all turn on -- appeared in no artifact and in no assertion. Twelve
+    re-verification passes had built guards around numbers that *were* in artifacts. Nothing
+    had ever asked the reverse question: which emphasised numbers is nothing watching?
+
+    `checked_text` is the concatenation of every value the checker asserts. A `\textbf{...}`
+    containing a number whose digits appear nowhere in that text is unbacked. `allow` exempts
+    figures that are definitional rather than measured (a page limit, a count of tiers).
+
+    This is a coverage test, not a correctness test: it cannot tell whether a checked number is
+    right, only whether anything is looking. `MIN_CHECKS` guarantees the checker does a certain
+    *amount* of work; this guarantees it does work on the right things.
+    """
+    import re
+
+    out = []
+    seen = set()
+    for p in tex_sources:
+        if not p.exists():
+            continue
+        for m in re.findall(r"\\textbf\{([^}]*\d[^}]*)\}", p.read_text()):
+            body = m.strip()
+            nums = re.findall(r"\d+(?:[.,]\d+)*", body)
+            if not nums:
+                continue
+            key = (p.name, body)
+            if key in seen or body in allow:
+                continue
+            seen.add(key)
+            # Backed if every numeric token in the phrase turns up in the checked values.
+            if all(n.replace("{,}", "").replace(",", "") in checked_text.replace(",", "")
+                   for n in nums):
+                continue
+            out.append(
+                f"{p.name} emphasises {body!r}, whose digits appear in no checked claim. "
+                "Either assert it against an artifact or stop emphasising it; the paper's "
+                "headline figure sat unbacked for twelve passes.")
+    return out
