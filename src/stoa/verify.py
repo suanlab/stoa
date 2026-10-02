@@ -27,6 +27,10 @@ from typing import Iterable, Mapping, Sequence
 
 __all__ = [
     "PAPER_MARKERS",
+    "leaked_annotations",
+    "author_block_problems",
+    "bibtex_problems",
+    "producer_problems",
     "unbacked_emphasised_numbers",
     "availability_url_problems",
     "figure_coverage_gaps",
@@ -246,18 +250,20 @@ def unmarked_superseded(text: str, values: Mapping[str, str], label: str = "note
     return out
 
 
-def body_pages(pdf: Path, heading: str = "REFERENCES") -> int:
-    """Pages the paper body occupies -- the page the bibliography starts on.
+def body_pages(pdf: Path, end_headings: Sequence[str] = ("REFERENCES",)) -> int:
+    """Pages the paper body occupies: the page on which the first end-of-body heading appears.
 
-    PVLDB's limit is "12 pages EXCLUDING references", so the constrained quantity is this, not
-    the page count of the file. For five re-verification passes the check read `pdfinfo` and
-    compared the whole PDF against 12. That agreed with the truth only while the references
-    happened to fit on the body's last page; it can fail in both directions, passing a paper
-    whose body runs to thirteen and failing a compliant one whose references spill over.
+    The constrained quantity is the body, not the file. PVLDB's limit is "12 pages EXCLUDING
+    references"; ICDE's is "12 pages, excluding references and the AI-generated content
+    acknowledgement", and the acknowledgement precedes the references, so for ICDE the body ends
+    at whichever of the two comes first -- pass both.
 
-    Raises rather than returning a sentinel: a page-limit check that cannot run must not look
-    like a page-limit check that passed.
+    Headings are matched as whole lines after collapsing letter-spacing: IEEEtran sets section
+    headings in small caps, which pdftotext renders as "R EFERENCES". The first IEEE build
+    therefore found no heading at all -- and raised, as designed, rather than reporting a page
+    count it had not measured.
     """
+    import re
     import shutil
     import subprocess
 
@@ -269,23 +275,28 @@ def body_pages(pdf: Path, heading: str = "REFERENCES") -> int:
             "do not treat this as a pass.")
     n = int(subprocess.run(["pdfinfo", str(pdf)], capture_output=True, text=True,
                            check=True).stdout.split("Pages:")[1].split()[0])
+    wanted = {h.upper().replace(" ", "") for h in end_headings}
     for page in range(1, n + 1):
         out = subprocess.run(["pdftotext", "-f", str(page), "-l", str(page), str(pdf), "-"],
                              capture_output=True, text=True, check=True).stdout
-        if heading in out:
-            return page
-    raise RuntimeError(f"no {heading!r} heading found in {pdf.name}; cannot locate the body's end")
+        for line in out.splitlines():
+            squashed = re.sub(r"\s+", "", line).upper()
+            if squashed in wanted:
+                return page
+    raise RuntimeError(f"none of {list(end_headings)} found as a heading in {pdf.name}; cannot "
+                       "locate the body's end")
 
 
-def page_limit_violation(pdf: Path, limit: int = 12) -> list[str]:
+def page_limit_violation(pdf: Path, limit: int = 12,
+                         end_headings: Sequence[str] = ("REFERENCES",)) -> list[str]:
     """The body over the venue's page limit, or a report that the check could not run."""
     try:
-        n = body_pages(pdf)
+        n = body_pages(pdf, end_headings)
     except (FileNotFoundError, RuntimeError) as exc:
         return [f"PAGE LIMIT UNCHECKED: {exc}"]
     if n > limit:
         return [f"OVER PAGE LIMIT: the body occupies {n} pages against a {limit}-page limit "
-                "excluding references. Cut before submitting."]
+                f"(body ends at the first of {list(end_headings)}). Cut before submitting."]
     return []
 
 
@@ -396,10 +407,20 @@ def availability_url_problems(main_tex: Path, check_network: bool = False) -> li
 
     if not main_tex.exists():
         return [f"{main_tex} is missing; the availability URL cannot be checked."]
-    m = re.search(r"\\renewcommand\\vldbavailabilityurl\{([^}]*)\}", main_tex.read_text())
+    text = main_tex.read_text()
+    # PVLDB carries the link in \vldbavailabilityurl; the IEEE/ICDE version defines \artifacturl
+    # and must also *use* it, or the macro exists while the PDF shows no link at all.
+    m = (re.search(r"\\renewcommand\\vldbavailabilityurl\{([^}]*)\}", text)
+         or re.search(r"\\newcommand\\artifacturl\{([^}]*)\}", text))
     if not m:
-        return ["no \\vldbavailabilityurl in main.tex. EA&B requires the reproducibility "
-                "package to be linked at submission."]
+        return ["no artifact URL macro in main.tex. The venue requires the reproducibility "
+                "package to be linked in the submission."]
+    if "artifacturl" in m.group(0):
+        sources = text + "".join(p.read_text() for p in
+                                 sorted((main_tex.parent / "sections").glob("*.tex")))
+        if r"\url{\artifacturl}" not in sources:
+            return [r"\artifacturl is defined but never rendered with \url{\artifacturl}; the "
+                    "PDF a reviewer reads does not contain the link."]
     url = m.group(1).strip()
     for placeholder in ("ANONYMIZED", "XXX", "TODO", "example.com"):
         if placeholder in url:
@@ -468,4 +489,139 @@ def unbacked_emphasised_numbers(tex_sources: Iterable[Path], checked_text: str,
                 f"{p.name} emphasises {body!r}, whose digits appear in no checked claim. "
                 "Either assert it against an artifact or stop emphasising it; the paper's "
                 "headline figure sat unbacked for twelve passes.")
+    return out
+
+
+def producer_problems(depends_on: Mapping[str, Sequence[str]], scripts: Path, src: Path,
+                      readers: Sequence[str] = (),
+                      producers: Mapping[str, str] | None = None) -> list[str]:
+    """Artifacts no script regenerates, and producer imports `DEPENDS_ON` fails to declare.
+
+    `DEPENDS_ON` was maintained by hand and drifted twice over. Four artifacts that load the
+    Mooncake traces did not declare `mooncake.py`, so correcting the loader's block size would
+    not have marked them stale. And three artifacts -- including the one behind §5.5's LRB band
+    -- had no producing script at all: they were assembled in-session, which ICDE's
+    Experiment, Analysis and Benchmark category forbids ("MUST provide all artifacts necessary
+    to reproduce the results. No exceptions").
+
+    A producer is a script under `scripts` whose source names the artifact, other than the
+    `readers` that only consume artifacts; `producers` maps names the producing script builds
+    programmatically (e.g. a `_full` / `_lrb` suffix) and so never spells out. Each producer's
+    direct `from stoa... import` lines are the modules the artifact encodes, and every one that
+    exists under `src` must be declared. Transitive imports are not followed: this catches the
+    omissions that actually happened, not every possible one.
+    """
+    import re
+
+    producers = dict(producers or {})
+    out = []
+    script_text = {p.name: p.read_text() for p in sorted(scripts.glob("*.py"))
+                   if p.name not in readers}
+    for art, declared in depends_on.items():
+        # The full filename, not its stem: "locomo_power" is a substring of
+        # "eval_locomo_powered", and the first version of this audit credited a second producer
+        # on that basis.
+        names = [n for n, t in script_text.items() if art in t]
+        if art in producers:
+            names = sorted(set(names) | {producers[art]})
+        names = [n for n in names if n in script_text]
+        if not names:
+            out.append(f"NO PRODUCER: {art} is cited but no script under scripts/ regenerates "
+                       "it. An artifact assembled by hand cannot be reproduced by anyone else.")
+            continue
+        imported = set()
+        for n in names:
+            for mod in re.findall(r"^\s*from\s+stoa\.([\w.]+)\s+import", script_text[n], re.M):
+                imported.add(mod.replace(".", "/") + ".py")
+        missing = sorted(m for m in imported if (src / m).exists() and m not in declared)
+        if missing:
+            out.append(f"UNDECLARED DEPENDENCY: {art} is produced by {', '.join(names)}, which "
+                       f"imports {', '.join(missing)}; DEPENDS_ON does not list "
+                       f"{'it' if len(missing) == 1 else 'them'}, so a change there would not "
+                       "mark this artifact stale.")
+    return out
+
+
+def bibtex_problems(blg: Path) -> list[str]:
+    """Errors BibTeX reported in its own log (`main.blg`).
+
+    Three entries in `references.bib` carried `%` comments inside the entry, which BibTeX does
+    not support; it reported "I was expecting a `,' or a `}'" on every build, for the life of
+    the paper. Nobody saw it, because every build step -- in the Makefile and in every
+    re-verification pass -- ran `bibtex main >/dev/null`. The check that the PDF had no
+    undefined citations passed throughout, since the entries still resolved. An error stream
+    that is discarded is not a stream that is clean.
+    """
+    import re
+
+    if not blg.exists():
+        return [f"{blg.name} is missing; build the paper so BibTeX's own log can be checked."]
+    text = blg.read_text(errors="ignore")
+    m = re.search(r"\(There (?:was|were) (\d+) error messages?\)", text)
+    if m and int(m.group(1)) > 0:
+        first = re.search(r"^(I was expecting.*|.*---line \d+ of file .*)$", text, re.M)
+        return [f"BibTeX reported {m.group(1)} error(s) in {blg.name}"
+                + (f", first: {first.group(1).strip()}" if first else "")
+                + ". Its output is easy to discard; this checks the log it writes anyway."]
+    return []
+
+
+def author_block_problems(main_tex: Path,
+                          placeholders: Sequence[str] = ("STOA Project", "AUTHOR NAME REQUIRED",
+                                                         "AUTHOR STATEMENT REQUIRED")) -> list[str]:
+    r"""Placeholder authorship in a single-blind submission.
+
+    `\author{STOA Project}` -- the repository's git user name, not a person -- sat on page 1
+    through every PVLDB re-verification pass. PVLDB's guidelines say "authors MUST include their
+    names and affiliations on the first page"; ICDE is likewise single-blind. Nothing checked,
+    because every guard was pointed at numbers. The ICDE acknowledgement also carries a marked
+    slot for the author's own statement of their role, which only the author can write.
+    """
+    if not main_tex.exists():
+        return [f"{main_tex} is missing."]
+    import re
+
+    # Strip LaTeX comments first: the comment explaining why this guard exists names the old
+    # placeholder, and the first version of the guard flagged its own documentation.
+    text = "\n".join(re.sub(r"(?<!\\)%.*$", "", ln) for ln in main_tex.read_text().splitlines())
+    return [f"main.tex still contains the placeholder {p!r}. A single-blind submission needs real "
+            "author names, and the AI-use acknowledgement needs the author's own statement."
+            for p in placeholders if p in text]
+
+
+def leaked_annotations(pdf: Path,
+                       markers: Sequence[str] = ("Verified:", "TODO", "FIXME", "XXX",
+                                                 "REQUIRED")) -> list[str]:
+    """Internal notes that reached the rendered PDF.
+
+    `references.bib` carried verification notes in its `note` field ("Verified: USENIX FAST'03.
+    Adaptively balances recency against frequency; ..."). ACM's style and IEEEtran both render
+    `note`, so the paper's reference list published them -- in the PVLDB version as well, where
+    nothing noticed for twelve passes, because every check read the LaTeX source and none read
+    the PDF a reviewer reads. Other entries carry Korean-language reminders ("arXiv ID 재확인
+    권장"); they happened not to be cited, so they happened not to render.
+
+    Checked on the output rather than inferred from the source: any marker above, and any Hangul
+    syllable in an English-language paper, is a leaked annotation.
+    """
+    import re
+    import shutil
+    import subprocess
+
+    if not pdf.exists():
+        return [f"{pdf} is missing; build it before checking what it publishes."]
+    if shutil.which("pdftotext") is None:
+        return ["pdftotext is unavailable, so the rendered PDF cannot be checked for leaked "
+                "annotations; do not treat this as a pass."]
+    text = subprocess.run(["pdftotext", str(pdf), "-"], capture_output=True, text=True,
+                          check=True).stdout
+    out = []
+    for mk in markers:
+        if mk in text:
+            ctx = text[max(0, text.index(mk) - 40): text.index(mk) + 60].replace("\n", " ")
+            out.append(f"the rendered PDF contains {mk!r}: ...{ctx}...")
+    hangul = re.findall(r"[가-힣]+", text)
+    if hangul:
+        out.append(f"the rendered PDF contains Hangul ({', '.join(sorted(set(hangul))[:5])}); in an "
+                   "English-language paper that is a leaked internal note.")
     return out

@@ -1638,3 +1638,96 @@ one routine at one split, differing only in its input.
 
 This is the twenty-eighth defect whose only symptom was a plausible number, and the first where the
 symptom was that there was no symptom at all — nothing had ever looked.
+
+## §AO — the ICDE conversion audit: block size, producers, the AI review, and a boundary
+
+Target changed to **ICDE 2027, research track, Experiment, Analysis & Benchmark, round 2
+(2026-11-11)**. The call requires all artifacts "necessary to reproduce the results. No exceptions",
+single-blind authorship, IEEE format, no appendix, and disclosure of AI-generated content in the
+acknowledgments. Preparing for that turned up more than formatting.
+
+### AO.1 Mooncake's block size is 512, not 256
+
+`BLOCK_TOKENS = 256`, cited to the Mooncake paper, sat in the loader, in Table 2 and in §5.9 for the
+life of the PVLDB paper. Mooncake's release README says 512, and the data settles it:
+`len(hash_ids) == ceil(input_length / 512)` for **35,639 of 35,639** production requests, and
+`/ 256` for none. The loader now enforces the identity per request and refuses a file that breaks it;
+`tests/test_mooncake_loader.py` fails three ways if the constant is put back.
+
+Effect, measured rather than argued. Every Mooncake block has the same size and every tier's capacity
+is a fraction of total bytes, so placement should be invariant to the constant. Regenerating
+`arrival_admission`, `reachable_ceiling` and `capacity_ladder_fixed` under 512 changed **0 of 208**
+numeric fields. The calibration sweep is not invariant -- it derives tier latency from KV bytes per
+block -- and was regenerated with `--block-tokens 512` (AO.6).
+
+### AO.2 The dependency map was maintained by hand, and four entries were missing
+
+Four artifacts that load the Mooncake traces did not declare `mooncake.py` (belief controls,
+calibration, reactive LRB, LRB sweep), so the block-size fix would not have marked them stale.
+`verify.producer_problems` now derives each artifact's dependencies from its producing script's
+imports and fails on any omission; it found nine artifacts with undeclared modules. The guard that
+consumes the map had also drifted to the middle of `check_paper_numbers.py`, where it could not see
+artifacts loaded below it -- `mooncake_length_sweep.json` escaped that way. That is §AA's defect,
+reintroduced by insertions made after §AA was fixed; the guards now run in the final block.
+
+### AO.3 Three cited artifacts had no producer
+
+- `lrb_retraction.json` (§5.5's LRB band) was assembled in-session; its broken column came from code
+  the fix replaced in place. `simulate_lrb(buffer_policy=...)` now keeps all three behaviours
+  selectable -- `tail_truncation` (the bug), `all_history`, `sliding_window` (adopted) -- with the
+  default path proven identical to the previous code (HEAD vs. new, same inputs, identical hits,
+  misses and ghost hits). `scripts/run_lrb_retraction.py` regenerates **all 32 cells exactly**,
+  including the retracted column.
+- `mooncake_length_sweep.json` had no producer and **no headroom column at all**, yet the paper took
+  Table 2's "headroom 87%" and §5.8's "81.0% to 87.2%" from it -- values computed before the §W fix,
+  while §5.8's calibration paragraph gave the same quantity as 80%. The paper stated two values for
+  one number. `scripts/run_headroom_by_length.py` recomputes it through `reference_costs`: **79.9% /
+  79.8%** at full length, moving from 70.4% / 72.2% at 1,500 requests. Table 2 now says 80%.
+- `run_capacity_ladder.py --fixed`, the command REPRODUCIBILITY.md gave, names a flag the script has
+  never had, and the Makefile target regenerated the *superseded* ladder. The artifact reproduces
+  exactly with `--out experiments/capacity_ladder_fixed.json`; both documents now say so.
+
+### AO.4 "Reviewer B" was an AI agent, and the paper said "produced during review"
+
+§5.5 read: *"An independent reimplementation of the same repair, produced during review of this paper,
+reports ≈63%."* The reviewer was one of the five AI agents in the review simulation of 2026-08-13; its
+code was never part of this repository. A reader takes "review of this paper" to mean peer review, and
+ICDE requires both disclosure of AI use and reproducibility of every result. The paper now says what
+it was, does not rely on the figure, and the checker no longer certifies the 17-point gap. The band of
+two **reproducible** repairs agrees to within 2.1 points, and LRB is below ARC at all eight operating
+points under both -- a cleaner claim than the one that leaned on code we could not ship.
+
+### AO.5 Internal notes were being published
+
+`references.bib` carried verification notes in its `note` field ("Verified: USENIX FAST'03.
+Adaptively balances recency against frequency; ..."). Both ACM's style and IEEEtran render `note`, so
+the reference list printed them -- **in the PVLDB PDF too**, unnoticed, because every check read the
+LaTeX source and none read the PDF. Other entries carried Korean reminders; they happened not to be
+cited, so they happened not to render. They now live in an unrendered `xnote` field, and
+`verify.leaked_annotations` reads the built PDF for markers and for any Hangul. Separately, BibTeX had
+reported three errors on every build for the paper's whole life -- `%` comments inside entries -- and
+nobody saw them because every build discarded BibTeX's output. `verify.bibtex_problems` reads
+`main.blg`.
+
+### AO.6 A third workload, and the boundary of the timing result
+
+Mooncake publishes a third FAST'25 workload, **synthetic** (public datasets, Poisson arrivals), now
+used as a control. Its older `arxiv-trace` is *not* a fourth workload: it has the toolagent trace's
+`output_length` at all 23,608 positions and its block counts at 98.9%. Counting it would count
+toolagent twice.
+
+On the synthetic control only 24.6% of blocks are new at the midpoint, and the unreachable share is
+65.0% (45.3--83.5% across splits) -- lower than production, still large, and monotone in the split
+within every trace. But **the timing result does not transfer**: new blocks carry only 26.7% of the
+gap while the split instant already reaches 35.0%, and every arrival-time policy falls below the
+frequency heuristic. Timing helps when the benefit sits on blocks that do not yet exist; the
+split-instant diagnostic says in advance which case a workload is in. The abstract, C2 and §5.4 now
+state the boundary. The title's "on Production KV Traces" was already the right scope.
+
+### AO.7 What the ICDE version omits
+
+The two LLM-dependent sections (placement vs. retrieval on LoCoMo; the representation pilot) are out:
+they need a paid hosted model and cannot be bit-reproduced even with one, which the EAB category's "no
+exceptions" rules out. Their artifacts and checker claims remain, skipped by name, and the PVLDB
+version is preserved at git tag `pvldb-final-2026-09`. C1 is demoted from contribution to frame: the
+traces exercise the tier axis only.

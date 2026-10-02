@@ -18,7 +18,9 @@ This is still not a calibration against a live deployment -- there is no GPU her
 gate remains open (docs/claims_dependency.md B). It is the honest intermediate: an explicit
 derivation from declared inputs, swept, with the conclusion reported as a range.
 
-CPU, about a minute. Usage: python3 scripts/run_calibration_sensitivity.py
+CPU. About 18 minutes per cost model on the full trace, so the 15 run in parallel by default
+(~20 minutes on a many-core machine; `--workers 1` for the sequential ~5 hours).
+Usage: python3 scripts/run_calibration_sensitivity.py
 """
 from __future__ import annotations
 
@@ -54,12 +56,32 @@ def _monotonic(table: dict[Tier, float]) -> bool:
     return all(a <= b for a, b in zip(caps, caps[1:]))
 
 
+_JOB: dict = {}
+
+
+def _one_cost_model(cfg):
+    """One (model, device) cost table: install it in THIS process, bill, report."""
+    mname, dname = cfg
+    model, device = MODELS[mname], DEVICES[dname]
+    table = derive_tier_read_ms(model, device, _JOB["block_tokens"])
+    sim_mod._TIER_READ_MS.update(table)
+    r = reference_costs(_JOB["wl"])
+    cap = _JOB["captured"]()
+    return {"model": mname, "device": dname,
+            "kv_bytes_per_token": model.kv_bytes_per_token(),
+            "read_ms": {t.value: round(v, 4) for t, v in table.items()},
+            "ratios": tier_ratios(table),
+            "headroom_pct": round(r["headroom_pct"], 2),
+            "captured_pct": round(cap, 2), "monotonic": _monotonic(table)}
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="Hardware-derived cost-model sensitivity")
     ap.add_argument("--requests", type=int, default=0, help="0 = full trace")
-    ap.add_argument("--block-tokens", type=int, default=256,
-                    help="Mooncake blocks are 256 tokens; kv-cache-tester's are 64")
+    ap.add_argument("--block-tokens", type=int, default=512,
+                    help="Mooncake blocks are 512 tokens (256 here until §AO); kv-cache-tester's are 64")
     ap.add_argument("--out", type=str, default="experiments/calibration_sensitivity.json")
+    ap.add_argument("--workers", type=int, default=16)
     args = ap.parse_args()
 
     paths = {"toolagent": "data/mooncake_toolagent_trace.jsonl",
@@ -114,26 +136,26 @@ def main() -> None:
                  "ratios": tier_ratios(base), "headroom_pct": round(r0["headroom_pct"], 2),
                  "captured_pct": round(cap0, 2), "monotonic": _monotonic(base)})
 
-    try:
-        for mname, model in MODELS.items():
-            for dname, device in DEVICES.items():
-                table = derive_tier_read_ms(model, device, args.block_tokens)
-                sim_mod._TIER_READ_MS.update(table)
-                r = reference_costs(wl)
-                cap = captured()
-                ratios = tier_ratios(table)
-                mono = _monotonic(table)
-                print(f"{mname:<16} {dname:<13} | {ratios['cpu']:8.1f} {ratios['disk']:9.1f} | "
-                      f"{r['headroom_pct']:7.1f}% | {cap:+7.1f}% | {'yes' if mono else 'NO'}",
-                      flush=True)
-                rows.append({"model": mname, "device": dname,
-                             "kv_bytes_per_token": model.kv_bytes_per_token(),
-                             "read_ms": {t.value: round(v, 4) for t, v in table.items()},
-                             "ratios": ratios,
-                             "headroom_pct": round(r["headroom_pct"], 2),
-                             "captured_pct": round(cap, 2), "monotonic": mono})
-    finally:
-        sim_mod._TIER_READ_MS.update(base)          # never leave the module perturbed
+    # Each cost model is independent and the module-level table is the only thing that varies,
+    # so the configurations run in separate forked processes: each mutates its own copy of
+    # `_TIER_READ_MS`, and the parent's is never touched. Rows come back in MODELS x DEVICES order,
+    # identical to the sequential loop this replaced (checked against its first rows, §AO).
+    global _JOB
+    _JOB = {"wl": wl, "captured": captured, "block_tokens": args.block_tokens}
+    configs = [(m, d) for m in MODELS for d in DEVICES]
+    if args.workers > 1:
+        import multiprocessing as mp
+        with mp.get_context("fork").Pool(min(args.workers, len(configs))) as pool:
+            results = pool.map(_one_cost_model, configs)
+    else:
+        results = [_one_cost_model(c) for c in configs]
+    for row in results:
+        r = row
+        print(f"{r['model']:<16} {r['device']:<13} | {r['ratios']['cpu']:8.1f} "
+              f"{r['ratios']['disk']:9.1f} | {r['headroom_pct']:7.1f}% | {r['captured_pct']:+7.1f}% | "
+              f"{'yes' if r['monotonic'] else 'NO'}", flush=True)
+        rows.append(row)
+    sim_mod._TIER_READ_MS.update(base)              # never leave the module perturbed
 
     derived = [r for r in rows if r["device"]]
     hs = [r["headroom_pct"] for r in derived]

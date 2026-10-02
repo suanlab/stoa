@@ -68,6 +68,16 @@ of the trace leaves the unreachable share at \textbf{91.8--98.4\%} on conversati
 trace is still to come. The pathology is a property of the protocol, not of our choice within it.
 
 \medskip
+\noindent\textbf{It is a property of arrivals, not of production.} Mooncake's third released workload
+is synthetic --- public datasets, Poisson arrivals --- and we use it as a control rather than pool it.
+Only 24.6\% of its blocks are new at the midpoint, against 45--46\% on the production traces, and the
+unreachable share falls with them: \textbf{65.0\%} at the midpoint and \textbf{45.3--83.5\%} across
+splits. Within every one of the three traces the share rises monotonically as the split moves earlier;
+across traces the level differs, production's new blocks carrying more of the oracle's advantage than
+synthetic ones at a similar new-block share. Even where only 8\% of blocks are new, almost half the
+advantage is out of reach.
+
+\medskip
 \noindent A policy confined to 5\% of the prize will look flat no matter how well it ranks, and that is
 what our earlier ``decoupling'' result measured. We retract it (\Cref{sec:protocol}).
 
@@ -111,6 +121,12 @@ toolagent    & arrival-learned  & 0.635 & 9.0\% & 47.2\% \\
 conversation and 4.1\% to \textbf{19.0\%} on toolagent --- $16\times$ and $4.6\times$. The headroom was not
 absent; the protocol could not reach it. The two traces differ by a factor of four in how much arrival
 timing exposes, which we cannot explain from two exemplars.
+
+\emph{It does not recover what is not there.} On the synthetic control, blocks new after the split carry
+only 26.7\% of the gap while the split instant already reaches 35.0\%; moving the decision to arrival
+recovers nothing, and every arrival-time policy --- learned, FCFS, shuffled --- falls \emph{below} the
+frequency heuristic. Timing helps exactly when the benefit sits on blocks that do not yet exist, and
+the diagnostic of \Cref{sec:reachable} says in advance which case a workload is in.
 
 \emph{Deciding at all captures most of it on one trace and half on the other.}
 First-come-first-served admission with a fixed action reaches \textbf{87.4\%} of the ceiling on
@@ -323,13 +339,12 @@ all accumulated rows, and dropping rows older than the memory window first. We a
 what a ``sliding memory window'' means.}
 
 \medskip
-\noindent \textbf{The band understates the uncertainty.} An independent reimplementation of the same
-repair, produced during review of this paper, reports $\approx$63\% at conversation/10\% where ours gives
-45.9\%. We cannot reconcile a 17-point difference without that code. So the honest reading is that our
-LRB \emph{point} estimates are not citable to better than about twenty points --- wider than several
-differences this paper's earlier drafts drew conclusions from. What survives that band is the ordering:
-\textbf{LRB is below ARC at all eight operating points under every repair we or the reviewer produced,
-including the 63\% reading.} That is the claim we make; the numbers are context for it.
+\noindent \textbf{What the band supports.} The two repairs agree to within 2.1 points at every operating
+point, and \textbf{LRB is below ARC at all eight operating points under both.} That ordering is the claim
+we make; the numbers are context for it. Both repairs and the retracted behaviour are selectable in the
+artifact, so the band is regenerated rather than reported. We do not claim the band bounds every
+reasonable reimplementation: a third repair produced in an AI-agent review we ran (see the Acknowledgment)
+reported a higher figure, and since its code is not ours to ship, we neither reproduce nor rely on it.
 
 The mechanism appears to be the one that limits ARC, seen from the other side. LRB learns from labels the
 trace supplies when a sampled block is requested again; a block that never returns yields a
@@ -360,121 +375,13 @@ result show, reaching for a more sophisticated policy does not by itself resolve
   \label{fig:reactive}
 \end{figure}
 
-\subsection{Placement is not retrieval}
-\label{sec:placement-vs-retrieval}
-A tiering scheduler decides what to keep hot; a retriever decides what enters the prompt. Our first
-attempt to measure the difference on LoCoMo~\cite{P51_maharana2024locomo} resolved nothing: two runs
-ranked the arms oppositely, and across nine comparisons in each, not one survived correction for
-multiplicity. A power analysis said why --- separating the query-agnostic arms needed 246--710 scored
-questions per arm and we had 30 --- and also said the reversal was not small-sample noise but came from
-the two runs drawing \emph{different dialogues}, which is \Cref{sec:sampling}'s failure in a different
-corpus.
-
-We therefore re-ran it at the size the analysis asked for: all ten released dialogues, 30 held-out
-questions each, \textbf{300 scored questions per arm}, LLM-judged. Because every arm answers the same
-questions the comparison is paired, so we test it with McNemar on the discordant pairs rather than
-Fisher on independent samples, and report a per-dialogue sign test alongside so a result cannot rest on
-one dialogue.
-
-\begin{center}\small
-\begin{tabular}{@{}rrrrr@{}}
-\toprule
-budget & demand & random & centrality & retrieval \\
-\midrule
-10\% & 12.0 & 6.7 & 1.7 & \textbf{51.7} \\
-25\% & 16.7 & 11.3 & 6.3 & \textbf{52.7} \\
-50\% & 29.3 & 25.3 & 16.3 & \textbf{55.3} \\
-\bottomrule
-\end{tabular}
-\end{center}
-\noindent{\footnotesize QA accuracy (\%), 300 questions per cell. The first three arms are
-query-agnostic placement; retrieval sees the question and is therefore better informed by construction.}
-
-\medskip
-\noindent \textbf{Six of the nine comparisons now survive Bonferroni correction}, where none did before.
-That is three distinct claims, each replicated at three nested budgets over the same 300 questions, not
-six independent findings --- and Bonferroni is the right correction precisely because those tests are
-dependent, since it controls the family-wise error rate under arbitrary dependence. Holm on the same
-nine $p$-values rejects the same six.
-
-\emph{Retrieval dominates placement, decisively.} It leads at every budget, by a factor of four at the
-tightest one, with $p < 10^{-15}$ and the same direction in \textbf{10 of 10 dialogues} (sign test
-$p = 0.002$). What was previously argued from scoping is now measured: a query-aware retriever and a
-query-agnostic placement policy are not competing for the same job, and a placement signal evaluated as
-if it were a retrieval signal will always look bad.
-
-\emph{The placement signal is nonetheless real within its own regime.} Ranking turns by evidence demand
-beats embedding centrality --- the fair same-regime baseline --- at every budget ($p \le
-1.2\times10^{-4}$). At the dialogue level it leads in 8, 10 and 9 dialogues of 10 (sign test $p = 0.008$,
-$0.002$, $0.022$); two of those three do not clear the corrected threshold on their own, so the
-question-level test is doing the work here. Query-agnostic placement is not noise; it is simply solving a different and
-strictly harder problem than retrieval, with no access to the query.
-
-\emph{One comparison is still unresolved, and we say by how much.} Demand versus random selection points
-the right way at all three budgets but reaches only $p = 0.029$, $0.068$ and $0.256$, and at the
-dialogue level says nothing at all (5--2, 6--2 and 7--3 dialogues; sign test $p = 0.45$, $0.29$, $0.34$).
-At the observed discordance rates, 80\% power would need \textbf{758, 1078 and 2589 questions per arm}
-at the corrected threshold we judge significance against --- 486, 667 and 1593 if one sizes at an
-uncorrected $0.05$, which is the mistake an earlier revision of this paper made. Against the 300 we ran,
-the shortfall is between $2.5\times$ and $8.6\times$. We report this as open with its sample size
-attached rather than as a null, and note that a required $n$ estimated from the same data whose null it
-describes is itself a noisy quantity: across seeds it moves by roughly 10\%.
-
-The reading we take from this is scoping, now with evidence behind it: placement governs latency and
-cost, retrieval governs which facts reach the model, and the two compose rather than compete.
-
-
-\subsection{The representation axis, and what it says about our own formulation}
-\label{sec:representation}
-\Cref{sec:formulation} decides representation jointly with tier because the two are argued to be
-coupled: a compressed item is cheap to serve but may cost accuracy, so the right form depends on the
-budget. Every experiment above holds representation at plaintext, which means that argument --- the
-reason the joint decision exists --- had never been tested. We test it here, on LoCoMo, with the same
-fact ids, questions and gold answers under three representations that differ only in text and token
-cost: the turn verbatim, an LLM summary, and an aggressive key--value extract. All three are
-\emph{textual}; the vector, graph, latent and parameter forms of \Cref{sec:formulation} are not
-instantiated anywhere in this work, so what follows probes the axis rather than exercising it. Budgets are a fraction of
-the \emph{plaintext} total for all three, so a compressed form is not quietly handed a larger allowance.
-
-\begin{center}\small
-\begin{tabular}{@{}rrrr@{}}
-\toprule
-budget & plaintext & summary & extract \\
-\midrule
-5\%  & 5.0  & \textbf{11.0} & 5.0  \\
-10\% & 10.0 & \textbf{15.0} & 7.0  \\
-25\% & 19.0 & \textbf{26.0} & 21.0 \\
-50\% & 32.0 & \textbf{38.0} & 22.0 \\
-\bottomrule
-\end{tabular}
-\end{center}
-\noindent{\footnotesize QA accuracy (\%), 100 questions per cell, LLM-judged. Mean compression ratio:
-summary $0.58\times$, extract $0.19\times$.}
-
-\medskip
-\noindent Two things are visible and one is not. The trade-off the formulation posits is \emph{visible}:
-compress far enough and utility appears to collapse, with the $0.19\times$ extract ten points behind
-plaintext at the loosest budget --- though that gap, like everything else here, clears no significance
-threshold. But the optimum \emph{does not move}. Summary leads at all four budgets, with the
-discordant pairs favouring it every time (6--0, 5--0, 11--4, 19--13). If that holds, representation on
-this workload need not be re-decided per operating point --- a weaker coupling than we assumed when we
-wrote \Cref{sec:formulation}.
-
-What is not visible is significance. \textbf{None of the eight comparisons survives correction} (best
-raw $p = 0.031$ against a 0.00625 threshold); at the observed discordance rates, resolving
-summary-versus-plaintext needs 188--1138 questions per cell at the corrected threshold (129--718 at an
-uncorrected $0.05$) against the 100 we ran. By the rule we impose
-on ourselves in \Cref{sec:protocol}, this is a direction with a sample size attached, not a result. We
-report it because it is the first time the axis has been exercised at all, and because the direction
-points against our own framing rather than for it.
-
-
 \subsection{What the measurement required}
 \label{sec:protocol}
 Every positive result we obtained before the final protocol was an artifact. We report the mechanisms
 because they generalize, and because the later ones were found only after the earlier catalogue had been
-written --- two by adversarial review, and three by re-verification passes run over a paper that had
-already passed every check it defined for itself.
+written --- two by an adversarial review we ran with AI reviewer agents (see the Acknowledgment), and the
+rest by re-verification passes run over a paper that had already passed every check it defined for
+itself.
 
 \paragraph{Reference-frame mismatches (six).} Two quantities that must share a frame --- the same split
 instant, ordering, tie rule, or question set --- were silently defined on different ones: a demand signal
@@ -485,7 +392,7 @@ metric that broke ties by label, inflating a raw count feature from AUC 0.51 to 
 at one split instant while costs were billed at another.
 
 \paragraph{Retracted claims (three).} Each survived our own checks and was found later --- the last two
-by adversarial review, after the catalogue below had already been written. \textbf{(i)} A headline
+by the AI-agent review, after the catalogue below had already been written. \textbf{(i)} A headline
 ``+66--88\% of headroom captured on agentic traces'' that reversed sign at a larger sample and that
 randomized draws showed had never been measurable (\Cref{sec:sampling}). \textbf{(ii)} A
 \emph{decoupling} claim --- prediction improves while placement does not --- that was an artifact of
@@ -495,11 +402,11 @@ non-monotonically on toolagent, so the repaired metric does not simply invert th
 LRB column that measured \emph{random eviction}: the training buffer was truncated to its tail, censored
 rows arrive in one contiguous burst per checkpoint, and from the third retrain onward every training
 label was identical, so the regressor returned a constant and eviction degenerated to a uniform draw.
-Two defensible repairs of that bug disagree by up to 2.1 points, and an independent reimplementation
-produced during review differs from ours by 17 (\Cref{sec:reaction}). We therefore report the column as
+Two defensible repairs of that bug disagree by up to 2.1 points (\Cref{sec:reaction}). We therefore
+report the column as
 a band and state the conclusion --- LRB below ARC at all eight operating points --- only at the
-coarseness that band supports. An earlier draft of this paragraph compressed the two figures into a
-single ``19 points'' attributed to the repairs, which is neither quantity.
+coarseness that band supports. An earlier draft of this paragraph said the repairs disagree by
+``19 points''; they disagree by 2.1, and the 19 came from a comparison this artifact cannot reproduce.
 
 Two further sub-claims were falsified in a later re-verification pass, after the paper had been
 rewritten around the arrival result: that first-come-first-served admission captures roughly 90\% of
@@ -513,7 +420,8 @@ predicted, and none of our checks compared the quantity against what it was arit
 
 \paragraph{Free-parameter extrapolations (three).} Each was a curve read from one point, in a parameter
 fixed for convenience. A reactive claim taken at a single cache size reversed under a sweep. A headroom
-taken at 6\% of the trace moved six points by full length (81.0\% to 87.2\%), and the placement
+taken at 1{,}500 requests moved by full length from 72.2\% to 79.8\% on toolagent and from 70.4\% to
+79.9\% on conversation, and the placement
 benefit read off it peaked mid-sweep rather than at the longest trace. And a learned-placement result taken at 40 and
 70 conversations --- \emph{nested prefixes} of a corpus whose per-conversation statistics vary threefold
 along the file index --- reversed sign at 150, from $+88\%$ to $-48\%$, and took a headline claim with it.
@@ -539,7 +447,7 @@ surface is: an assertion is updated, a record is banner-marked and left intact.
 \paragraph{Summaries of checked tables, unchecked (one).} Our checker re-derives every number in this
 paper from its artifact. It verified all eight rows of the LRB band above and passed, while a sentence
 elsewhere in the paper described that same band as ``two repairs disagreeing by 19 points'' --- the
-repairs disagree by 2.1, and 17 is the gap to an independent reimplementation. Every element of the
+repairs disagree by 2.1, and the 19 belonged to a different comparison altogether. Every element of the
 table was right and the summary of it was false. Row-level verification certifies a table, not the
 prose that aggregates it; widths, spans, maxima and ``at most'' claims need their own assertions,
 derived from the same artifact. The deeper form of the same gap: every check we had asked whether the
@@ -599,10 +507,11 @@ the hierarchy} so that latency order and capacity order disagree, which our fixe
 cannot express at all. Calibrating against a live deployment remains the open gate; this is the honest
 intermediate, not a substitute. The
 \emph{timing} axis of \Cref{sec:formulation} is not exercised at all, and the \emph{representation} axis
-only as the underpowered pilot of \Cref{sec:representation}; neither is touched by the KV traces. Both
+is not exercised here either: a pilot over three textual fidelities is in the artifact, but it depends on
+a paid hosted model, and this paper reports only what the artifact regenerates without one. Both
 sources are KV-block hash streams from transformer prefix caching, so they are independent in provenance
 but not in mechanism; with one exemplar per putative regime we cannot separate workload character from
-vendor, date, or block size (256 vs.\ 64 tokens). Sampling is not randomized and no confidence interval is
+vendor, date, or block size (512 vs.\ 64 tokens). Sampling is not randomized and no confidence interval is
 reported for the placement results, though the two remaining free parameters --- trace length and split
 instant --- are now swept rather than fixed. Of the learned and adaptive cache literature we evaluate
 ARC~\cite{S7_megiddo2003arc}, LeCaR~\cite{S8_vietri2018lecar}, CACHEUS~\cite{S9_rodriguez2021cacheus} and

@@ -30,14 +30,13 @@ across sources --- would give an operator a sizing rule, which is the most direc
 line of work could produce.
 
 \paragraph{Composing placement with retrieval.}
-\Cref{sec:placement-vs-retrieval} indicates the two are orthogonal in kind: placement sets latency and
-cost, retrieval sets which facts reach the model. The open problem is the composition --- a retriever
-running over a tiered store whose hot set a scheduler maintains, where a retrieval miss on a cold tier
-costs latency rather than accuracy. Neither literature evaluates that joint object, and our own LoCoMo
-measurement is far too small ($n=30$) to speak to it.
+Placement sets latency and cost; retrieval sets which facts reach the model. The open problem is the
+composition --- a retriever running over a tiered store whose hot set a scheduler maintains, where a
+retrieval miss on a cold tier costs latency rather than accuracy. Neither literature evaluates that
+joint object, and the KV traces here cannot: they record block reuse, not which facts a query needed.
 
 \paragraph{Sampling as a first-class experimental variable.}
-Three of our ten defects were extrapolations from a single value of a parameter fixed for convenience, and
+Three of the defects in \Cref{sec:protocol} were extrapolations from a single value of a parameter fixed for convenience, and
 the most damaging reversed a headline claim's sign. For trace-driven work we would now require of
 ourselves, and suggest for the area: randomized rather than prefix sampling, several disjoint draws with
 intervals, and a reported sweep over every quantity the design fixes --- trace length, pool size, tier

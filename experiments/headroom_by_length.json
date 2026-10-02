@@ -1,0 +1,77 @@
+{
+  "config": {
+    "lengths": [
+      1500,
+      6000,
+      12031,
+      23608
+    ],
+    "headroom": "(prefix_greedy - oracle) / prefix_greedy, via reference_costs",
+    "note": "conversation exhausts at 12,031 requests; toolagent at 23,608"
+  },
+  "rows": [
+    {
+      "trace": "conversation",
+      "requests": 1500,
+      "full_trace": false,
+      "n_blocks": 30634,
+      "oracle_cost": 5047.6,
+      "heuristic_cost": 17044.8,
+      "headroom_pct": 70.39
+    },
+    {
+      "trace": "conversation",
+      "requests": 6000,
+      "full_trace": false,
+      "n_blocks": 99716,
+      "oracle_cost": 13465.4,
+      "heuristic_cost": 60203.0,
+      "headroom_pct": 77.63
+    },
+    {
+      "trace": "conversation",
+      "requests": 12031,
+      "full_trace": true,
+      "n_blocks": 182790,
+      "oracle_cost": 23492.7,
+      "heuristic_cost": 116875.8,
+      "headroom_pct": 79.9
+    },
+    {
+      "trace": "toolagent",
+      "requests": 1500,
+      "full_trace": false,
+      "n_blocks": 16688,
+      "oracle_cost": 2275.5,
+      "heuristic_cost": 8191.5,
+      "headroom_pct": 72.22
+    },
+    {
+      "trace": "toolagent",
+      "requests": 6000,
+      "full_trace": false,
+      "n_blocks": 54803,
+      "oracle_cost": 8575.6,
+      "heuristic_cost": 31315.6,
+      "headroom_pct": 72.62
+    },
+    {
+      "trace": "toolagent",
+      "requests": 12031,
+      "full_trace": false,
+      "n_blocks": 100337,
+      "oracle_cost": 13810.9,
+      "heuristic_cost": 60916.3,
+      "headroom_pct": 77.33
+    },
+    {
+      "trace": "toolagent",
+      "requests": 23608,
+      "full_trace": true,
+      "n_blocks": 183300,
+      "oracle_cost": 24038.8,
+      "heuristic_cost": 118752.4,
+      "headroom_pct": 79.76
+    }
+  ]
+}

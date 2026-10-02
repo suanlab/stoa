@@ -120,10 +120,10 @@ DEVICES: dict[str, DeviceProfile] = {
 
 
 def derive_tier_read_ms(model: ModelProfile, device: DeviceProfile,
-                        block_tokens: int = 256) -> dict[Tier, float]:
+                        block_tokens: int = 512) -> dict[Tier, float]:
     """Per-tier read latency (ms) for one KV block, from the model and device profiles.
 
-    Mooncake's released traces use 256-token blocks and kv-cache-tester's use 64, which is
+    Mooncake's released traces use 512-token blocks (256 here until §AO) and kv-cache-tester's use 64, which is
     why `block_tokens` is a parameter and not a constant: block size changes every tier's
     latency by the same factor, so it moves the absolute scale but not the ratios.
     """

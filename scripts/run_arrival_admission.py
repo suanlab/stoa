@@ -53,8 +53,14 @@ from stoa.sequential import (attainable_ceiling, place_with_beliefs,  # noqa: E4
                              prefix_greedy_cost, quantile_match)
 from train_session_features import auc, fit_logistic, parse_requests, predict  # noqa: E402
 
+# Two production traces and one CONTROL. `synthetic` is Mooncake's third FAST'25 workload, built
+# from public datasets with Poisson arrivals; it is reported as a control, never pooled with the
+# production pair. Mooncake's older `arxiv-trace` is NOT used: it is the toolagent requests again
+# (identical output_length at all 23,608 positions, block counts at 98.9%), re-timed and
+# re-tokenized, so counting it as a third workload would count toolagent twice. See §AO.
 TRACES = {"conversation": "data/mooncake_conversation_trace.jsonl",
-          "toolagent": "data/mooncake_toolagent_trace.jsonl"}
+          "toolagent": "data/mooncake_toolagent_trace.jsonl",
+          "synthetic": "data/mooncake_synthetic_trace.jsonl"}
 
 
 def arrival_features(path: str, max_requests: int):

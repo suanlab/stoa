@@ -240,7 +240,7 @@ def test_body_pages_raises_when_no_bibliography_heading(tmp_path, monkeypatch):
         return subprocess.CompletedProcess(cmd, 0, stdout=out, stderr="")
 
     monkeypatch.setattr("subprocess.run", fake)
-    with pytest.raises(RuntimeError, match="no 'REFERENCES' heading"):
+    with pytest.raises(RuntimeError, match="found as a heading"):
         verify.body_pages(pdf)
 
 
@@ -422,7 +422,7 @@ def test_placeholder_availability_url_is_rejected(tmp_path):
 def test_missing_availability_command_is_rejected(tmp_path):
     t = _write(tmp_path / "main.tex", r"\title{A paper with no availability URL}")
     out = verify.availability_url_problems(t)
-    assert len(out) == 1 and "EA&B requires" in out[0]
+    assert len(out) == 1 and "requires the reproducibility package" in out[0]
 
 
 def test_non_https_url_is_rejected(tmp_path):
@@ -437,3 +437,79 @@ def test_real_url_passes_without_touching_the_network(tmp_path):
     t = _write(tmp_path / "main.tex",
                r"\renewcommand\vldbavailabilityurl{https://github.com/suanlab/stoa}")
     assert verify.availability_url_problems(t, check_network=False) == []
+
+
+# --- authorship and the artifact link in the IEEE version ----------------------------------
+
+def test_placeholder_author_is_rejected(tmp_path):
+    t = _write(tmp_path / "main.tex", r"\author{\IEEEauthorblockN{AUTHOR NAME REQUIRED}}")
+    assert len(verify.author_block_problems(t)) == 1
+
+
+def test_git_user_name_as_author_is_rejected(tmp_path):
+    """The defect: the repository's git user name sat in \\author through every PVLDB pass."""
+    t = _write(tmp_path / "main.tex", r"\author{STOA Project}")
+    assert len(verify.author_block_problems(t)) == 1
+
+
+def test_placeholder_named_only_in_a_comment_is_ignored(tmp_path):
+    t = _write(tmp_path / "main.tex", "% this guard refused STOA Project\n\\author{A. Person}\n")
+    assert verify.author_block_problems(t) == []
+
+
+def test_defined_but_unrendered_artifact_url_is_rejected(tmp_path):
+    t = _write(tmp_path / "main.tex", "\\newcommand\\artifacturl{https://github.com/x/y}\n")
+    (tmp_path / "sections").mkdir()
+    assert len(verify.availability_url_problems(t)) == 1
+
+
+def test_rendered_artifact_url_passes(tmp_path):
+    t = _write(tmp_path / "main.tex", "\\newcommand\\artifacturl{https://github.com/x/y}\n")
+    _write(tmp_path / "sections" / "a.tex", "see \\url{\\artifacturl}")
+    assert verify.availability_url_problems(t) == []
+
+
+def test_bibtex_errors_in_the_log_are_reported(tmp_path):
+    blg = _write(tmp_path / "main.blg",
+                 "I was expecting a `,' or a `}'---line 704 of file refs.bib\n(There were 3 error messages)\n")
+    out = verify.bibtex_problems(blg)
+    assert len(out) == 1 and "3 error" in out[0]
+
+
+def test_clean_bibtex_log_is_silent(tmp_path):
+    assert verify.bibtex_problems(_write(tmp_path / "main.blg", "Database file #1: refs.bib\n")) == []
+
+
+def test_letter_spaced_small_caps_heading_is_found(tmp_path, monkeypatch):
+    """IEEEtran small caps come out of pdftotext as "R EFERENCES"; the first IEEE build found
+    no heading and (correctly) raised rather than guessing."""
+    import subprocess
+    pdf = _write(tmp_path / "main.pdf")
+    monkeypatch.setattr("shutil.which", lambda _: "/usr/bin/pdftotext")
+    pages = {1: "body", 2: "more body\nACKNOWLEDGMENT\nthanks", 3: "R EFERENCES\n[1] x"}
+
+    def fake(cmd, **kw):
+        if cmd[0] == "pdfinfo":
+            return subprocess.CompletedProcess(cmd, 0, stdout="Pages:  3", stderr="")
+        return subprocess.CompletedProcess(cmd, 0, stdout=pages[int(cmd[2])], stderr="")
+
+    monkeypatch.setattr("subprocess.run", fake)
+    assert verify.body_pages(pdf, ("REFERENCES",)) == 3
+    # ICDE excludes the acknowledgement too, and it comes first.
+    assert verify.body_pages(pdf, ("ACKNOWLEDGMENT", "REFERENCES")) == 2
+
+
+def test_heading_word_inside_a_sentence_does_not_end_the_body(tmp_path, monkeypatch):
+    """Matched as a whole line: "(see the Acknowledgment)" in running text is not the heading."""
+    import subprocess
+    pdf = _write(tmp_path / "main.pdf")
+    monkeypatch.setattr("shutil.which", lambda _: "/usr/bin/pdftotext")
+    pages = {1: "a review we ran (see the Acknowledgment)", 2: "ACKNOWLEDGMENT"}
+
+    def fake(cmd, **kw):
+        if cmd[0] == "pdfinfo":
+            return subprocess.CompletedProcess(cmd, 0, stdout="Pages:  2", stderr="")
+        return subprocess.CompletedProcess(cmd, 0, stdout=pages[int(cmd[2])], stderr="")
+
+    monkeypatch.setattr("subprocess.run", fake)
+    assert verify.body_pages(pdf, ("ACKNOWLEDGMENT",)) == 2

@@ -21,8 +21,34 @@ curl -sL -o data/mooncake_conversation_trace.jsonl \
   https://raw.githubusercontent.com/kvcache-ai/Mooncake/main/FAST25-release/traces/conversation_trace.jsonl
 ```
 
-Expect 23,608 and 12,031 request lines. Several results run both traces **to exhaustion**, so a
-truncated download changes the numbers silently — `wc -l` them.
+Expect 12,031 (conversation) and 23,608 (toolagent) request lines. Several results run both traces
+**to exhaustion**, so a truncated download changes the numbers silently — `wc -l` them
+(`make data-check` does).
+
+**Block size is 512 tokens** — Mooncake's release README says so, and the data agrees:
+`len(hash_ids) == ceil(input_length / 512)` for every one of the 35,639 production requests.
+`stoa.mooncake.load_mooncake` enforces that identity per request and refuses a file that breaks it.
+(This repository assumed 256 until 2026-10-02; placement results were invariant to the
+correction, the calibration sweep was not — see `docs/claims_dependency.md` §AO.)
+
+### The synthetic control
+
+Mooncake's third FAST'25 workload is built from public datasets with Poisson arrivals. The paper
+uses it as a **control**, never pooled with the production pair:
+
+```bash
+curl -sL -o data/mooncake_synthetic_trace.jsonl \
+  https://raw.githubusercontent.com/kvcache-ai/Mooncake/main/FAST25-release/traces/synthetic_trace.jsonl
+```
+
+Expect 3,993 lines.
+
+### Not used: `arxiv-trace/mooncake_trace.jsonl`
+
+Mooncake also publishes an older single-file trace from its arXiv report. It is **not a fourth
+workload**: at every one of its 23,608 positions it has the same `output_length` as the toolagent
+trace, and the same number of blocks at 98.9% of them; only input lengths and timestamps were
+re-derived. Counting it would count toolagent twice.
 
 ## LoCoMo (required for the placement-vs-retrieval and representation results)
 

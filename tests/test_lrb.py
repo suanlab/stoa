@@ -140,13 +140,15 @@ def test_the_age_bound_reads_the_minimum_not_the_first_element():
     import re
 
     src = inspect.getsource(simulate_lrb)
-    guards = re.findall(r"if train_t and (\S+) < cutoff_t:", src)
-    assert guards, "the age-bound guard is gone entirely, not merely weakened"
-    for g in guards:
-        assert g == "min(train_t)", (
-            f"the window guard reads {g}, not min(train_t). The subsample reorders the buffer, "
-            "so a first-element guard stops firing after the first subsample and the window "
-            "becomes a no-op -- which produced numbers identical to having no window at all.")
+    # Match the comparison, not the surrounding `if` -- the first version of this test keyed on
+    # the exact line `if train_t and X < cutoff_t:` and broke when a buffer_policy condition
+    # was added in front of it, with the semantics untouched.
+    assert re.search(r"min\(train_t\)\s*<\s*cutoff_t", src), (
+        "the age-bound guard no longer reads min(train_t); it is gone or weakened")
+    assert not re.search(r"train_t\[0\]\s*<\s*cutoff_t", src), (
+        "the window guard reads train_t[0]. The subsample reorders the buffer, so a "
+        "first-element guard stops firing after the first subsample and the window becomes a "
+        "no-op -- which produced numbers identical to having no window at all.")
 
 
 def test_constant_training_labels_are_refused_rather_than_fitted():

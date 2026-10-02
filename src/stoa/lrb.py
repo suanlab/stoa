@@ -106,6 +106,7 @@ def simulate_lrb(
     max_depth: int = 5,
     max_train_rows: int = 60_000,
     seed: int = 0,
+    buffer_policy: str = "sliding_window",
 ) -> OnlineResult:
     """Replay `workload` through a `cache_slots` hot tier under an LRB-style policy.
 
@@ -113,7 +114,24 @@ def simulate_lrb(
     candidates, so the warm-up period is a well-defined heuristic rather than random
     eviction -- otherwise the first `train_interval` requests would inject noise that has
     nothing to do with what is being measured.
+
+    `buffer_policy` selects how the training buffer is bounded, and exists so that the LRB
+    retraction (§U) is reproducible from code rather than from a description of code:
+
+    * ``"sliding_window"`` (default, adopted): drop rows older than `memory_window`, then
+      subsample uniformly to `max_train_rows`. What a "sliding memory window" means.
+    * ``"all_history"``: no age bound; subsample uniformly over every accumulated row. The
+      other defensible reading of the published design.
+    * ``"tail_truncation"``: keep the newest `max_train_rows` rows -- **the bug**. Censored rows
+      arrive in one burst per checkpoint, so the tail holds only censored rows and from the
+      third fit the labels are constant. Kept selectable solely so the retracted column can be
+      regenerated; the zero-label-variance guard is bypassed in this mode, because the whole
+      point of running it is to reproduce what the guard now forbids.
+
+    The default path is behaviourally identical to the code before this parameter existed.
     """
+    if buffer_policy not in ("sliding_window", "all_history", "tail_truncation"):
+        raise ValueError(f"unknown buffer_policy {buffer_policy!r}")
     sim = sim or TieringSimulator()
     hot_lat, cold_lat = sim.read_latency(HOT), sim.read_latency(COLD)
     rng = random.Random(seed)
@@ -241,21 +259,28 @@ def simulate_lrb(
             # first-element guard silently stops firing. That is how this filter came to be
             # a no-op -- the run produced numbers identical to the unfiltered version, which
             # is the only reason it was noticed.
-            if train_t and min(train_t) < cutoff_t:
+            if (buffer_policy == "sliding_window" and train_t
+                    and min(train_t) < cutoff_t):
                 fresh = [i for i, t in enumerate(train_t) if t >= cutoff_t]
                 train_X = [train_X[i] for i in fresh]
                 train_y = [train_y[i] for i in fresh]
                 train_t = [train_t[i] for i in fresh]
             if len(train_X) > max_train_rows:
-                keep = train_rng.sample(range(len(train_X)), max_train_rows)
-                train_X = [train_X[i] for i in keep]
-                train_y = [train_y[i] for i in keep]
-                train_t = [train_t[i] for i in keep]
+                if buffer_policy == "tail_truncation":
+                    # The retracted behaviour, verbatim: keep the newest rows. No RNG draw.
+                    train_X = train_X[-max_train_rows:]
+                    train_y = train_y[-max_train_rows:]
+                    train_t = train_t[-max_train_rows:]
+                else:
+                    keep = train_rng.sample(range(len(train_X)), max_train_rows)
+                    train_X = [train_X[i] for i in keep]
+                    train_y = [train_y[i] for i in keep]
+                    train_t = [train_t[i] for i in keep]
             if len(train_X) >= 1000:
                 # A constant target silently turns this policy into random replacement, so
                 # refuse to fit rather than emit a number that looks like a learned result.
                 lo_y, hi_y = min(train_y), max(train_y)
-                if hi_y - lo_y < 1e-12:
+                if hi_y - lo_y < 1e-12 and buffer_policy != "tail_truncation":
                     raise RuntimeError(
                         f"LRB training labels are constant ({len(train_y)} rows, all "
                         f"{lo_y:.4f}); the model would be a no-op and eviction would be "

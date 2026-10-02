@@ -36,24 +36,30 @@ verify:
 
 # --- data ---------------------------------------------------------------------------------
 data-check:
-	@for f in data/mooncake_conversation_trace.jsonl data/mooncake_toolagent_trace.jsonl; do \
+	@for f in data/mooncake_conversation_trace.jsonl data/mooncake_toolagent_trace.jsonl \
+	          data/mooncake_synthetic_trace.jsonl; do \
 	  if [ -f $$f ]; then printf "%8d lines  %s\n" "$$(wc -l < $$f)" "$$f"; \
 	  else echo "MISSING $$f — see data/README.md"; fi; done
-	@echo "Expect 12031 (conversation) and 23608 (toolagent). Several results run both traces to exhaustion, so a"
+	@echo "Expect 12031 (conversation), 23608 (toolagent) and 3993 (synthetic control). Several results run both traces to exhaustion, so a"
 	@echo "truncated download changes the numbers silently."
 
 # --- tier 1: the central claims, CPU only, no API key -------------------------------------
+# run_capacity_ladder.py writes the SUPERSEDED capacity_ladder.json by default; the paper
+# cites the repaired-metric run, so the output path is explicit. An earlier version of this
+# target omitted it and regenerated the retracted artifact.
 reproduce-fast: data-check
 	$(PY) scripts/run_reachable_ceiling.py
+	$(PY) scripts/run_headroom_by_length.py
 	$(PY) scripts/run_arrival_admission.py
 	$(PY) scripts/run_belief_controls.py
-	$(PY) scripts/run_capacity_ladder.py
+	$(PY) scripts/run_capacity_ladder.py --out experiments/capacity_ladder_fixed.json
 	$(PY) scripts/run_calibration_sensitivity.py
 	$(PY) scripts/check_paper_numbers.py
 
 # --- tier 2: everything that does not cost money -------------------------------------------
 reproduce-full: reproduce-fast
 	$(PY) scripts/run_reactive_real.py --lrb
+	$(PY) scripts/run_lrb_retraction.py
 	$(PY) scripts/run_lrb_sweep.py
 	$(PY) scripts/run_split_sensitivity.py
 	$(PY) scripts/run_locomo_power.py

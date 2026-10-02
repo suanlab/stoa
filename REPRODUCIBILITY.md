@@ -7,6 +7,11 @@ controls that are wired into the harness.
 PVLDB EA&B submissions must link a package like this at submission time; the artifacts below are the
 package.
 
+> **This package accompanies the ICDE 2027 submission (Experiment, Analysis & Benchmark).** Every
+> result in that paper regenerates on CPU from public data, with no API key. The LLM-dependent rows
+> below (LoCoMo, the representation pilot) back the earlier PVLDB version, git tag
+> `pvldb-final-2026-09`, and are **not in the ICDE paper**; they are kept for the record and marked.
+
 ## 1. Environment
 
 CPU only — no GPU is required anywhere in this work. Every experiment trains against a tiering
@@ -125,7 +130,7 @@ believed where an observation was available.
 | Paper claim | Command | Artifact |
 |---|---|---|
 | Reuse distributions (Tab. 2, sample-dependent) | `python3 -c "from stoa.mooncake import *; print(trace_summary(load_mooncake('data/mooncake_toolagent_trace.jsonl')))"` | inline |
-| Headroom (oracle gap) 81% at 1.5k requests → 87% at full trace, both traces | `sequential.reference_costs` at each length | `experiments/mooncake_length_sweep.json` |
+| Headroom by trace length: 70.4% / 72.2% at 1,500 requests → **79.9% / 79.8%** at full length (conversation / toolagent). An earlier row said 81% → 87%, values from before the §W fix that also disagreed with the paper's own 80% (§AO.3) | `python3 scripts/run_headroom_by_length.py` | `experiments/headroom_by_length.json` |
 | Binary reuse = 99.7% / 80.6% of headroom | `scripts/train_on_mooncake.py` | `experiments/mooncake_rq2.json` |
 | **RETRACTED (§T, §U)** — decoupling grid: AUC 0.57→0.93 while captured stays in [+0.8%, +2.9%]. The denominator was an unreachable oracle; see the arrival rows below | `for n in 1500 6000 12031 23608; do python3 scripts/train_session_features.py --requests $n; done` | `experiments/mooncake_length_sweep.json`, `mooncake_session_rq2_full{12031,23608}.json` |
 | **RETRACTED** — kvct think-time capture; sign reverses with sample size | `python3 scripts/train_kvct_placement.py --convs {40,70,100,150} --out experiments/kvct_placement_n{N}.json` | `kvct_placement_n150.json` (−48%) vs `kvct_placement_fixed.json` (+88%) |
@@ -135,18 +140,21 @@ believed where an observation was available.
 | **Attainable ceiling**: 45–46% of blocks have no pre-split access; a causal policy can reach 3% / 2% of the oracle's advantage under split-instant, 83.5% / 19.0% at arrival | `python3 scripts/run_arrival_admission.py` | `experiments/arrival_admission.json` |
 | **Arrival-time admission**: FCFS with a fixed action captures 87.4% / 50.2% of the ceiling; a learned ranker (AUC 0.574, 0.635) captures 84.5% / 47.2% — less on both; shuffling arrival order costs 3.3 / 14.1 points | same run | `experiments/arrival_admission.json` |
 | **Belief controls**: a constant score must not beat a learned one (it did, until `quantile_match` was given mid-rank tie handling) | `python3 scripts/run_belief_controls.py` | `experiments/belief_controls.json` |
-| **Capacity ladder, repaired metric** (supersedes `capacity_ladder.json`: all three placement routines now break ties by tier speed, not enum order) | `python3 scripts/run_capacity_ladder.py --fixed` | `experiments/capacity_ladder_fixed.json` |
+| **Capacity ladder, repaired metric** (supersedes `capacity_ladder.json`: all three placement routines now break ties by tier speed, not enum order) | `python3 scripts/run_capacity_ladder.py --out experiments/capacity_ladder_fixed.json` (an earlier revision of this row gave a `--fixed` flag the script has never had) | `experiments/capacity_ladder_fixed.json` |
 | **Length attribution** (separates train length from eval length; AUC rises 38 points with the model held fixed) | `python3 scripts/train_session_features.py --train-requests N --requests M` | `experiments/mooncake_attribution_sweep.json` |
 | **Censoring sweep**: 83–88% of LRB's training rows are right-censored at the default window, 88–91% at a shorter one, across 12 configurations on both traces. (The earlier row claimed "LRB spans 55–66% of Belady across its grid" from the **broken** implementation; the repaired grid spans 41.9–86.4%, so no point estimate there is citable and the claim is retired. That artifact is kept at `experiments/superseded/lrb_sweep.json`.) | `python3 scripts/run_lrb_sweep.py` (~2.5 h) | `experiments/lrb_sweep.json` |
+| **LRB retraction, regenerated from code**: the retracted column (`tail_truncation`) and both repairs at all eight operating points; reproduces the stored table in all 32 cells (§AO.3) | `python3 scripts/run_lrb_retraction.py` | `experiments/lrb_retraction.json` |
+| **Reachable ceiling, one frame, split-swept, with the synthetic control**: 94.7% / 95.9% unreachable at the midpoint (91.8–98.8% across splits) on production; 65.0% (45.3–83.5%) on the synthetic control | `python3 scripts/run_reachable_ceiling.py` | `experiments/reachable_ceiling.json` |
+| **The boundary of the timing result**: on the synthetic control the split instant already reaches 35.0% while new blocks carry 26.7%, and every arrival-time policy falls below the frequency heuristic | `python3 scripts/run_arrival_admission.py` | `experiments/arrival_admission.json` |
 | **Split-instant sensitivity**: linear ≈ GBDT to within 0.2 pts at all 20 configurations; captured in [+0.2%, +3.6%]; oracle gap 81→92% | `python3 scripts/run_split_sensitivity.py` | `experiments/split_sensitivity.json` |
 | Working-set threshold on kvct (35% at a 1% tier → 99% at 10%) | `simulate_fast` sweep over `cache_frac`, 20 & 40 conversations | `experiments/reactive_kvct_sweep.json` |
-| LoCoMo: retrieval dominates placement | `python3 scripts/run_locomo_baselines.py` (needs `OPENAI_API_KEY`) | `experiments/eval_locomo_leakfree.json` |
+| *(PVLDB version only)* LoCoMo: retrieval dominates placement | `python3 scripts/run_locomo_baselines.py` (needs `OPENAI_API_KEY`) | `experiments/eval_locomo_leakfree.json` |
 | **Capacity ladder** (superseded by `capacity_ladder_fixed.json` — kept for the diff): linear / GBDT / MLP agree on placement to within 0.4 pts despite a 29-pt AUC spread | `python3 scripts/run_capacity_ladder.py` | `experiments/capacity_ladder.json` |
 | **Cost model derived from hardware, swept over 3 attention shapes × 5 device classes: headroom 67–90%, hand-written table 80%, 6/15 hierarchies non-monotonic** | `python3 scripts/run_calibration_sensitivity.py` | `experiments/calibration_sensitivity.json` |
 | LeCaR + CACHEUS on both full traces | `python3 scripts/run_reactive_real.py --lrb` | `experiments/reactive_real_full_lrb.json` |
-| **LoCoMo at adequate scale**: 10 dialogues, 300 questions/arm, paired McNemar + per-dialogue sign test | `python3 scripts/run_locomo_powered.py --judge` (needs `OPENAI_API_KEY`, ~2.5 h) | `experiments/eval_locomo_powered.json` |
-| **Representation axis measured** (plaintext / summary / extract at equal token budget) | `python3 scripts/run_representation_axis.py --judge` | `experiments/representation_axis.json` |
-| LoCoMo null reported with its power: 0/18 comparisons survive Bonferroni; 246–710 questions/arm at alpha=0.05, but the paper judges at the Bonferroni-corrected threshold, where the three budgets need **758 / 1078 / 2589** — an earlier revision quoted "486–667", which dropped the third budget and sized against the uncorrected alpha (§S) | `python3 scripts/run_locomo_power.py` (no LLM calls) | `experiments/locomo_power.json` |
+| *(PVLDB version only)* **LoCoMo at adequate scale**: 10 dialogues, 300 questions/arm, paired McNemar + per-dialogue sign test | `python3 scripts/run_locomo_powered.py --judge` (needs `OPENAI_API_KEY`, ~2.5 h) | `experiments/eval_locomo_powered.json` |
+| *(PVLDB version only)* **Representation axis measured** (plaintext / summary / extract at equal token budget) | `python3 scripts/run_representation_axis.py --judge` | `experiments/representation_axis.json` |
+| *(PVLDB version only)* LoCoMo null reported with its power: 0/18 comparisons survive Bonferroni; 246–710 questions/arm at alpha=0.05, but the paper judges at the Bonferroni-corrected threshold, where the three budgets need **758 / 1078 / 2589** — an earlier revision quoted "486–667", which dropped the third budget and sized against the uncorrected alpha (§S) | `python3 scripts/run_locomo_power.py` (no LLM calls) | `experiments/locomo_power.json` |
 | Cost-model sensitivity, uniform-multiplier (superseded — it varies scale, not ratios) | `python3 scripts/run_sensitivity.py` | `experiments/sensitivity.json` |
 | kvct tier-size sweep (35% → 99% of Belady) | `run_online`/`simulate_fast` sweep, 20 & 40 conversations | `experiments/reactive_kvct_sweep.json` |
 | Figures | `python3 scripts/make_figures.py` | `paper/figs/*.pdf` |

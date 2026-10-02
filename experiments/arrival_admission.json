@@ -68,6 +68,38 @@
       "captured_pct": 19.03,
       "captured_of_attainable_pct": 100.0,
       "n_arrivals_scored": 91649
+    },
+    {
+      "trace": "synthetic",
+      "arm": "arrival-learned",
+      "auc": 0.7298,
+      "captured_pct": -4.34,
+      "captured_of_attainable_pct": -16.28,
+      "n_arrivals_scored": 21924
+    },
+    {
+      "trace": "synthetic",
+      "arm": "arrival-fcfs",
+      "auc": 0.5,
+      "captured_pct": -2.47,
+      "captured_of_attainable_pct": -9.28,
+      "n_arrivals_scored": 21924
+    },
+    {
+      "trace": "synthetic",
+      "arm": "arrival-shuffled",
+      "auc": 0.5,
+      "captured_pct": -23.12,
+      "captured_of_attainable_pct": -86.72,
+      "n_arrivals_scored": 21924
+    },
+    {
+      "trace": "synthetic",
+      "arm": "arrival-ceiling",
+      "auc": 1.0,
+      "captured_pct": 26.66,
+      "captured_of_attainable_pct": 100.0,
+      "n_arrivals_scored": 21924
     }
   ]
 }

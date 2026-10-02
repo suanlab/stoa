@@ -38,8 +38,14 @@ from stoa.sequential import (DEFAULT_WEIGHTS, attainable_ceiling,  # noqa: E402
                              place_with_beliefs)
 from stoa.simulator import TieringSimulator  # noqa: E402
 
+# Two production traces and one CONTROL. `synthetic` is Mooncake's third FAST'25 workload, built
+# from public datasets with Poisson arrivals; it is reported as a control, never pooled with the
+# production pair. Mooncake's older `arxiv-trace` is NOT used: it is the toolagent requests again
+# (identical output_length at all 23,608 positions, block counts at 98.9%), re-timed and
+# re-tokenized, so counting it as a third workload would count toolagent twice. See §AO.
 TRACES = {"conversation": "data/mooncake_conversation_trace.jsonl",
-          "toolagent": "data/mooncake_toolagent_trace.jsonl"}
+          "toolagent": "data/mooncake_toolagent_trace.jsonl",
+          "synthetic": "data/mooncake_synthetic_trace.jsonl"}
 
 
 def one(wl, split_frac: float, sim, w) -> dict:

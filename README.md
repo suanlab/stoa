@@ -1,7 +1,7 @@
 # STOA — Storage & Tiered Orchestration for Agents
 
 Reproducibility package for **"Decide on Arrival: Placement Timing Beats Placement Prediction on
-Production KV Traces"** (submitted to PVLDB, Experiments Analysis & Benchmarks track).
+Production KV Traces"** (prepared for ICDE 2027, Experiment, Analysis & Benchmark category).
 
 The paper asks what a KV-block placement policy has to get right, and answers that it has to decide
 *early* rather than *well*. The short version:
@@ -46,7 +46,7 @@ claim to a command and an artifact.
 | `scripts/` | one script per experiment, each writing a named artifact |
 | `experiments/` | the artifacts every number in the paper is checked against |
 | `experiments/superseded/` | artifacts behind retracted claims, kept as record, read by nothing |
-| `paper/` | LaTeX source, PVLDB template vendored |
+| `paper/` | LaTeX source (IEEE format for ICDE; the PVLDB version is `main_pvldb.tex`) |
 | `docs/CONVENTIONS.md` | architecture, commands, and the conventions the codebase holds itself to |
 | `docs/claims_dependency.md` | the lab notebook: every claim, what it depends on, and what was retracted |
 | `tests/` | 173 tests, most of which pin a specific defect we hit |

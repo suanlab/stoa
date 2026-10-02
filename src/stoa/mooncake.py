@@ -22,6 +22,7 @@ Download (no GPU, ~4 MB):
 from __future__ import annotations
 
 import json
+import math
 from collections import defaultdict
 from pathlib import Path
 
@@ -29,7 +30,13 @@ from .credit import AccessTrace
 from .environment import ItemState, Representation, Tier
 from .traces import Workload
 
-BLOCK_TOKENS = 256          # Mooncake hashes one block per 256 tokens (paper §3)
+# Mooncake hashes one block per 512 tokens. This constant was 256 -- cited to "paper §3" --
+# until 2026-10-02, when the upstream release README ("The block size is 512 tokens") and the
+# data were checked against each other: len(hash_ids) == ceil(input_length / 512) for 35,639 of
+# 35,639 requests across both traces, and == ceil(input_length / 256) for none. The loader now
+# enforces that identity per request, so a wrong constant fails on the first line it reads
+# rather than surviving as a citation. See docs/claims_dependency.md §AO.
+BLOCK_TOKENS = 512
 BYTES_PER_TOKEN = 2 * 2 * 32 * 128 * 2 // 1024   # illustrative KV bytes/token; calibrate in M0-3
 
 
@@ -56,8 +63,15 @@ def load_mooncake(path: str, max_requests: int | None = None,
             if max_requests is not None and t >= max_requests:
                 break
             rec = json.loads(line)
+            hashes = rec.get("hash_ids", [])
+            n_in = rec.get("input_length")
+            if n_in is not None and hashes and len(hashes) != math.ceil(n_in / BLOCK_TOKENS):
+                raise ValueError(
+                    f"{path}, request {t}: {len(hashes)} hash_ids for {n_in} input tokens, but "
+                    f"BLOCK_TOKENS={BLOCK_TOKENS} predicts {math.ceil(n_in / BLOCK_TOKENS)}. "
+                    "The block size this module assumes does not match the trace.")
             wall[t] = float(rec.get("timestamp", t))      # real arrival time, was discarded
-            for h in rec.get("hash_ids", []):
+            for h in hashes:
                 steps[h].append(t)
             t += 1
 

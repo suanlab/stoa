@@ -44,8 +44,20 @@ checked = 0
 _LOADED: list[str] = []
 
 
+# Results the ICDE version deliberately omits: they depend on a paid hosted model, and ICDE's
+# EAB category requires every result to be reproducible from the artifact, "no exceptions". The
+# artifacts stay in experiments/ and their claims stay in this file for the record (they back
+# the PVLDB version, git tag pvldb-final-2026-09); they are skipped by name, loudly, rather than
+# deleted. See docs/claims_dependency.md §AO.
+NOT_IN_THIS_PAPER = {"eval_locomo_powered.json", "representation_axis.json",
+                     "locomo_power.json", "eval_locomo_leakfree.json"}
+
+
 def load(name):
     """Read an artifact, recording the name so the staleness map can be audited against it."""
+    if name in NOT_IN_THIS_PAPER:
+        print(f"\n[skip] {name}: not in this paper (LLM-dependent; omitted for ICDE EAB)")
+        return None
     _LOADED.append(name)
     p = EXP / name
     return json.loads(p.read_text()) if p.exists() else None
@@ -318,14 +330,10 @@ if d:
                  for r in d["rows"])
     claim("widest disagreement between the two repairs", f"{widest:.1f} points",
           "2.1 points", "lrb_repair_* spread")
-    note = d.get("independent_reimplementation", "")
-    # Targeted, not greedy: an earlier version matched the "/10%" of "conversation/10%"
-    # and reported a 53-point gap. The two readings are the reviewer's and ours.
-    m = re.search(r"~?(\d+(?:\.\d+)?)% at .*? where ours gives (\d+(?:\.\d+)?)%", note)
-    if m:
-        gap = abs(float(m.group(1)) - float(m.group(2)))
-        claim("independent reimplementation gap", f"{gap:.0f}-point difference",
-              "17-point difference", "independent_reimplementation")
+    # The "17-point reimplementation gap" assertion that stood here was removed in §AO: its
+    # source was a repair produced by an AI agent in an internal review simulation, whose code is
+    # not part of this artifact. A number nobody can regenerate is not one the checker should
+    # certify, and the paper no longer states it.
 
 # --- capacity ladder on the corrected metric ---------------------------------------
 d = load("capacity_ladder_fixed.json")
@@ -377,30 +385,36 @@ if d:
 # artifacts to the paper and none compared artifacts to their own dependencies.
 SRC = ROOT / "src" / "stoa"
 DEPENDS_ON = {
-    # artifact -> modules whose behaviour it encodes
+    # artifact -> modules whose behaviour it encodes. Audited against each producing script's
+    # direct imports by verify.producer_problems, which is how the omissions below were found:
+    # four artifacts that load the Mooncake traces had not declared mooncake.py (§AO).
     "arrival_admission.json": ("sequential.py", "mooncake.py"),
     "capacity_ladder_fixed.json": ("sequential.py", "gbdt.py", "mooncake.py"),
-    "calibration_sensitivity.json": ("sequential.py", "calibration.py", "simulator.py"),
-    "belief_controls.json": ("sequential.py",),
-    "reactive_real_full_lrb.json": ("eval/online.py", "experts.py", "lrb.py"),
-    "lrb_retraction.json": ("lrb.py",),
-    "eval_locomo_powered.json": ("eval/memqa.py", "stats.py"),
-    "representation_axis.json": ("eval/representation.py", "stats.py"),
-    "locomo_power.json": ("stats.py",),
-    "lrb_sweep.json": ("lrb.py", "eval/online.py"),
+    "calibration_sensitivity.json": ("sequential.py", "calibration.py", "simulator.py",
+                                     "environment.py", "mooncake.py"),
+    "belief_controls.json": ("sequential.py", "mooncake.py"),
+    "reactive_real_full_lrb.json": ("eval/online.py", "experts.py", "lrb.py", "mooncake.py"),
+    "lrb_retraction.json": ("lrb.py", "eval/online.py", "mooncake.py"),
+    "eval_locomo_powered.json": ("eval/memqa.py", "stats.py", "eval/locomo.py",
+                                 "eval/retrieval.py", "llm.py"),
+    "representation_axis.json": ("eval/representation.py", "stats.py", "eval/locomo.py",
+                                 "eval/memqa.py", "llm.py"),
+    "locomo_power.json": ("stats.py", "eval/locomo.py", "eval/memqa.py",
+                          "eval/retrieval.py", "llm.py"),
+    "lrb_sweep.json": ("lrb.py", "eval/online.py", "mooncake.py"),
     "sampling_study.json": ("kvct.py",),
-    "reachable_ceiling.json": ("sequential.py", "mooncake.py"),
+    "reachable_ceiling.json": ("sequential.py", "mooncake.py", "simulator.py"),
+    "headroom_by_length.json": ("sequential.py", "mooncake.py"),
 }
-# The guard's own failure mode: add an artifact, forget to declare its dependencies, and it
-# is exempt from staleness checking forever without anything saying so.
-failures += verify.undeclared_artifacts(_LOADED, DEPENDS_ON, EXP)
 # mtime alone gave a false positive during pass 7's mutation testing: restoring a file from
 # backup moves the timestamp without changing a byte. The manifest records what each artifact
 # was actually generated from, so a moved timestamp with a matching digest is silent and a
 # differing digest is reported with both digests named.
 _PROV = EXP / ".provenance.json"
 _manifest = json.loads(_PROV.read_text()) if _PROV.exists() else None
-failures += verify.stale_artifacts(DEPENDS_ON, EXP, SRC, manifest=_manifest)
+# The guards that consume DEPENDS_ON run in the final block, after every load(). From here
+# they could not see artifacts loaded further down, and one escaped that way: the §AA defect,
+# reintroduced by later insertions above them. See §AO.
 
 # The released prose -- README.md, paper/README.md, REPRODUCIBILITY.md -- restates the paper's
 # headline numbers, and nothing checked it. Twice now a correction landed in the .tex and not in
@@ -449,20 +463,61 @@ if d:
             claim(f"{_t}: timing multiplier", _needle, f"{_arrival / _split:.2f}x",
                   "arrival ceiling / split-instant reachable")
 
-d = load("mooncake_length_sweep.json")
+# Trace sizes and the length dependence of headroom, from headroom_by_length.json -- which has a
+# producer. Its predecessor (mooncake_length_sweep.json) had none, carried no headroom column at
+# all, and the paper's "87%" / "81.0% to 87.2%" predated the §W fix while §5.8 said 80% (§AO).
+d = load("headroom_by_length.json")
 if d:
-    print("\ntrace sizes (experiments/mooncake_length_sweep.json)")
-    full = {r["trace"]: r["requests"] for r in d["grid"] if r.get("full_trace")}
-    if {"conversation", "toolagent"} <= set(full):
-        def _tex(n: int) -> str:
-            # LaTeX thousands separator, applied to the NUMBER only -- a blanket
-            # str.replace(",", "{,}") also rewrites the prose commas around it.
-            return f"{n:,}".replace(",", "{,}")
+    print("\nheadroom by length (experiments/headroom_by_length.json)")
+    rows = {(r["trace"], r["requests"]): r for r in d["rows"]}
+    full = {r["trace"]: r for r in d["rows"] if r["full_trace"]}
 
-        claim("requests per trace, conversation then toolagent",
-              f"conversation, {_tex(full['conversation'])} requests; "
-              f"toolagent, {_tex(full['toolagent'])}",
-              f"{full['conversation']} / {full['toolagent']}", "full_trace rows")
+    def _tex(n: int) -> str:
+        return f"{n:,}".replace(",", "{,}")
+
+    claim("requests per trace, conversation then toolagent",
+          f"conversation, {_tex(full['conversation']['requests'])} requests; "
+          f"toolagent, {_tex(full['toolagent']['requests'])}",
+          f"{full['conversation']['requests']} / {full['toolagent']['requests']}", "full_trace rows")
+    for _t, _needle in (("toolagent", "from {a:.1f}\\% to {b:.1f}\\% on toolagent"),
+                        ("conversation", "from {a:.1f}\\% to {b:.1f}\\% on conversation")):
+        a_, b_ = rows[(_t, 1500)]["headroom_pct"], full[_t]["headroom_pct"]
+        claim(f"{_t}: headroom 1,500 requests -> full", _needle.format(a=a_, b=b_),
+              f"{a_} -> {b_}", "reference_costs by length")
+    _h = round((full["conversation"]["headroom_pct"] + full["toolagent"]["headroom_pct"]) / 2)
+    claim("Table 2 headroom at full length", f"heuristic vs.\\ oracle & {_h}\\%",
+          f"{full['conversation']['headroom_pct']} / {full['toolagent']['headroom_pct']}",
+          "full_trace rows, rounded")
+
+# The synthetic control (§5.2, §5.4): reported, never pooled.
+d = load("reachable_ceiling.json")
+if d and "synthetic" in d["traces"]:
+    print("\nsynthetic control (experiments/reachable_ceiling.json)")
+    sy = d["traces"]["synthetic"]
+    mid = [r for r in sy["rows"] if r["split_frac"] == 0.5][0]
+    claim("synthetic: blocks new at the midpoint", f"{mid['no_pre_split_pct']:.1f}\\%",
+          mid["no_pre_split_pct"], "no_pre_split_pct @ 0.5")
+    claim("synthetic: unreachable at the midpoint", f"{mid['unreachable_pct']:.1f}\\%",
+          mid["unreachable_pct"], "@ 0.5")
+    claim("synthetic: unreachable across splits",
+          f"{sy['unreachable_min']:.1f}--{sy['unreachable_max']:.1f}\\%",
+          f"{sy['unreachable_min']}-{sy['unreachable_max']}", "split sweep")
+    claim("synthetic: split instant already reaches", f"{mid['reachable_pct']:.1f}\\%",
+          mid["reachable_pct"], "reachable_pct @ 0.5")
+    _lo = min(r["no_pre_split_pct"] for r in sy["rows"])
+    claim("synthetic: fewest new blocks across splits", f"only {_lo:.0f}\\% of blocks are new",
+          _lo, "min no_pre_split_pct")
+    _aa = load("arrival_admission.json")
+    if _aa:
+        _by = {(r["trace"], r["arm"]): r for r in _aa["results"]}
+        _c = _by[("synthetic", "arrival-ceiling")]["captured_pct"]
+        claim("synthetic: new blocks carry", f"only {_c:.1f}\\% of the gap", _c,
+              "arrival-ceiling captured_pct")
+        _neg = [a for a in ("arrival-learned", "arrival-fcfs", "arrival-shuffled")
+                if _by[("synthetic", a)]["captured_of_attainable_pct"] < 0]
+        assert len(_neg) == 3, (
+            "the paper says every arrival-time policy falls below the frequency heuristic on the "
+            f"synthetic control; only {_neg} do")
 
 _arr0 = load("arrival_admission.json")
 if _arr0:
@@ -516,6 +571,10 @@ SUPERSEDED_IN_PAPER = {
     "-825.7": "ladder constant, toolagent (now -60.6)",
     "64--88": "calibration headroom (now 67--90)",
     "19 points": "LRB band width (2.1 between repairs, 17 to the reimplementation)",
+    # Non-bold, so the emphasis guard could not see them; they survived the §AN correction.
+    "share from 3\\%": "split-instant reachable share (now 5.3%)",
+    "and 2\\% to": "split-instant reachable share, toolagent (now 4.1%)",
+    "87.2\\%": "headroom at full length (now 79.8-79.9%)",
 }
 for _tex in [ROOT / "paper" / "main.tex", *sorted((ROOT / "paper" / "sections").glob("*.tex"))]:
     failures += verify.unmarked_superseded(
@@ -568,7 +627,14 @@ _paper = ROOT / "paper"
 # (STOA_CHECK_URL=1) so an offline run cannot silently report it as passing.
 failures += verify.availability_url_problems(
     _paper / "main.tex", check_network=os.environ.get("STOA_CHECK_URL") == "1")
-failures += verify.page_limit_violation(_paper / "main.pdf", limit=12)
+# ICDE 2027: "12 pages, excluding references and the AI-generated content acknowledgement".
+# The acknowledgement precedes the references, so the body ends at whichever comes first.
+failures += verify.page_limit_violation(_paper / "main.pdf", limit=12,
+                                        end_headings=("ACKNOWLEDGMENT", "ACKNOWLEDGMENTS",
+                                                      "REFERENCES"))
+failures += verify.bibtex_problems(_paper / "main.blg")
+failures += verify.author_block_problems(_paper / "main.tex")
+failures += verify.leaked_annotations(_paper / "main.pdf")
 failures += verify.stale_paper_pdf(
     _paper / "main.pdf",
     [_paper / "main.tex", *sorted((_paper / "sections").glob("*.tex")),
@@ -586,13 +652,23 @@ failures += verify.unbacked_emphasised_numbers(
         "12 pages", "50", "fifty",
     ))
 
+# --- artifact guards, LAST so every load() above is visible to them -------------------
+failures += verify.undeclared_artifacts(_LOADED, DEPENDS_ON, EXP)
+failures += verify.stale_artifacts(DEPENDS_ON, EXP, SRC, manifest=_manifest)
+failures += verify.producer_problems(
+    DEPENDS_ON, ROOT / "scripts", SRC,
+    readers=("check_paper_numbers.py", "make_figures.py", "record_provenance.py"),
+    producers={"reactive_real_full_lrb.json": "run_reactive_real.py",
+               "capacity_ladder_fixed.json": "run_capacity_ladder.py"})
+
 # --- coverage guards, LAST so `checked` is final -----------------------------------
 # Sitting mid-file, this counted only the checks declared above it and passed while
 # a third of the paper went unchecked.
 REQUIRED = ("reactive_real_full_lrb.json", "capacity_ladder.json",
-            "mooncake_length_sweep.json", "mooncake_attribution_sweep.json",
-            "split_sensitivity.json", "lrb_retraction.json", "locomo_power.json",
-            "eval_locomo_powered.json", "representation_axis.json",
+            "headroom_by_length.json",
+            "split_sensitivity.json", "lrb_retraction.json", "reachable_ceiling.json",
+            "lrb_sweep.json",
+
             "calibration_sensitivity.json", "sampling_study.json",
             "arrival_admission.json", "belief_controls.json",
             "capacity_ladder_fixed.json")
