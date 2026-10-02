@@ -1731,3 +1731,33 @@ they need a paid hosted model and cannot be bit-reproduced even with one, which 
 exceptions" rules out. Their artifacts and checker claims remain, skipped by name, and the PVLDB
 version is preserved at git tag `pvldb-final-2026-09`. C1 is demoted from contribution to frame: the
 traces exercise the tier axis only.
+
+### AO.8 The calibration sweep under the correct block size, and a lapse in how it was rerun
+
+AO.1 predicted placement would be invariant to the block-size correction and the calibration sweep
+would not. Both held. Five regenerated artifacts -- 477 numeric fields -- changed in none; the
+calibration sweep, which derives tier latency from KV bytes per block, moved:
+
+| | 256-token blocks | 512-token blocks |
+|---|---|---|
+| headroom across 15 derived cost models | 67--90% | **60--83%** |
+| hand-written table | 79.8% | 79.8% |
+| non-monotonic hierarchies | 6 / 15 | 6 / 15 |
+| GPU:CPU latency ratio | 1:80--1:250 | 1:80--1:250 |
+
+§5.8's conclusion -- the hand-written table falls inside the hardware-derived range -- survives; the
+range is corrected. Larger blocks make the bandwidth term weigh more against fixed overhead, so the
+downward shift is the expected direction.
+
+The lapse. The sweep runs ~18 minutes per cost model on the full trace, so it was parallelised with a
+forked process pool and launched immediately on the full trace. It deadlocked: torch had built its
+intra-op thread pool in the parent, the forked children inherited its locks held, and fifteen workers
+sat at 0.0% CPU for **70 minutes** before anyone looked. The fix is one line (pin torch to a single
+thread before any work); the lapse was launching a long run on an untested change. The rerun was gated
+on two checks that should have come first: the parallel path completing on an 800-request prefix, and
+its output matching a sequential run on the same prefix (16 of 16 rows identical). The rule this
+notebook keeps restating -- *confirm an intervention took effect before reading its result* -- applies
+to the harness that produces results as much as to the results.
+
+The commit that closed this conversion (dd32069) said this lapse "is recorded in the notebook". When
+that commit was made, it was not; this subsection was written afterwards to make the statement true.
