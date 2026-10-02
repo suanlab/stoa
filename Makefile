@@ -1,4 +1,4 @@
-# Tiered reproduction for the PVLDB Reproducibility Committee.
+# Tiered reproduction for a reproducibility committee (ICDE 2027 EAB: "no exceptions").
 #
 # The claim->command->artifact table in REPRODUCIBILITY.md is complete but not ordered by cost:
 # some rows take seconds, one takes 2.5 hours, and two need a paid API key. A committee member

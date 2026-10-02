@@ -4,8 +4,8 @@ Every number in the paper is produced by a script in this repository from public
 each claim to the command that regenerates it, states what is and is not calibrated, and lists the
 controls that are wired into the harness.
 
-PVLDB EA&B submissions must link a package like this at submission time; the artifacts below are the
-package.
+ICDE's Experiment, Analysis & Benchmark category requires "all artifacts necessary to reproduce the
+results. No exceptions"; the artifacts below are that package.
 
 > **This package accompanies the ICDE 2027 submission (Experiment, Analysis & Benchmark).** Every
 > result in that paper regenerates on CPU from public data, with no API key. The LLM-dependent rows
@@ -112,18 +112,18 @@ process-order-dependent global feeds a number. `scripts/run_capacity_ladder.py` 
 `run_representation_axis.py --judge` roughly 2,400, plus embeddings. At gpt-4o-mini list pricing that is
 about **$3–5** and **$1** respectively. Everything else in this artifact is CPU-only and free.
 
-## 3c. Before submitting: the artifact link
+## 3c. The artifact link
 
-The repository is **private** while the paper is in revision. EA&B requires the reproducibility package
-to be reachable at submission ("there are no excuses"), so before the abstract deadline:
+The repository has been **public since 2026-09-13** at `https://github.com/suanlab/stoa`, and the paper
+links it through `\artifacturl` in `paper/main.tex`. Verify it the way a reviewer sees it, with no
+GitHub session:
 
-1. `gh repo edit <owner>/stoa --visibility public --accept-visibility-change-consequences`
-2. Put that URL in `\vldbavailabilityurl` in `paper/main.tex` and rebuild.
-3. **Open the URL with no GitHub session** — `curl -sSo /dev/null -w '%{http_code}' <url>` must print
-   `200`. Checking while logged in tests your access, not a reviewer's.
+```bash
+STOA_CHECK_URL=1 python3 scripts/check_paper_numbers.py   # fetches the URL with no credentials
+curl -sSo /dev/null -w '%{http_code}\n' https://github.com/suanlab/stoa   # must print 200
+```
 
-Step 3 is not paranoia. Every defect in `docs/claims_dependency.md` shares one shape: a report was
-believed where an observation was available.
+Checking while logged in tests your own access, not a reviewer's.
 
 ## 4. Claim → command → artifact
 

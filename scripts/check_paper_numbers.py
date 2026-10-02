@@ -569,7 +569,8 @@ SUPERSEDED_IN_PAPER = {
     "93.2": "FCFS of attainable, conversation (now 87.4)",
     "-154.6": "ladder constant, conversation (now -46.1)",
     "-825.7": "ladder constant, toolagent (now -60.6)",
-    "64--88": "calibration headroom (now 67--90)",
+    "64--88": "calibration headroom (now 60--83)",
+    "67--90": "calibration headroom under 256-token blocks (now 60--83, §AO)",
     "19 points": "LRB band width (2.1 between repairs, 17 to the reimplementation)",
     # Non-bold, so the emphasis guard could not see them; they survived the §AN correction.
     "share from 3\\%": "split-instant reachable share (now 5.3%)",

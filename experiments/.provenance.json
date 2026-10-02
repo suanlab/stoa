@@ -1,46 +1,68 @@
 {
   "arrival_admission.json": {
-    "mooncake.py": "ba6797c829f1bb9f2c27ce5b974dd9349c4da3c1884d69245de9f1d90161a243",
+    "mooncake.py": "c88e9b76ca7c21aecb7ec9f0a69e1e4415dfb549cb53d0015b6226676aad9f4f",
     "sequential.py": "064f7480580757c896d75f53245801332732649dfa288fb0f4002c50243ddc1d"
   },
   "belief_controls.json": {
+    "mooncake.py": "c88e9b76ca7c21aecb7ec9f0a69e1e4415dfb549cb53d0015b6226676aad9f4f",
     "sequential.py": "064f7480580757c896d75f53245801332732649dfa288fb0f4002c50243ddc1d"
   },
   "calibration_sensitivity.json": {
-    "calibration.py": "a18a394526b456c73036133eab700549933048d98a1270d17dbf8a11f6718475",
+    "calibration.py": "6843db251cb085f6c115653c919edf2a1f88abedb21f97d9760d0b97a6c6457a",
+    "environment.py": "89785be4c02498077c291a84d5944f1e5aaf02335542ca9c6db0311c32d7e0cc",
+    "mooncake.py": "c88e9b76ca7c21aecb7ec9f0a69e1e4415dfb549cb53d0015b6226676aad9f4f",
     "sequential.py": "064f7480580757c896d75f53245801332732649dfa288fb0f4002c50243ddc1d",
     "simulator.py": "9efcbde0ab8d4f4330cbb1886ff560419baa62591b59a7a8154050b558a92359"
   },
   "capacity_ladder_fixed.json": {
     "gbdt.py": "c4d2b4281c90a009a71e472a490d023ec0043a41e0d559f5877cab0b387ab4e4",
-    "mooncake.py": "ba6797c829f1bb9f2c27ce5b974dd9349c4da3c1884d69245de9f1d90161a243",
+    "mooncake.py": "c88e9b76ca7c21aecb7ec9f0a69e1e4415dfb549cb53d0015b6226676aad9f4f",
     "sequential.py": "064f7480580757c896d75f53245801332732649dfa288fb0f4002c50243ddc1d"
   },
   "eval_locomo_powered.json": {
+    "eval/locomo.py": "0ddabe10e567b6a63db71b4f144b19bed62f7a1a337da4a8d01d486de4040455",
     "eval/memqa.py": "eebaa43d01814492c27f920b243c59d0f122769c151e9d6d574560e7df82ae90",
+    "eval/retrieval.py": "9a5ab4c761f6c72584f12699444f37b86c00bf09902de7d4fc8d5b2e522ec5fb",
+    "llm.py": "05c48ec77bbb8203610bd7c599651cea3ed0c30203d26999ad8ff462a4f488bb",
     "stats.py": "1518ba85270fa136a701d2f55c1054d78413d28e9b825424204605c80e4fb1f7"
   },
+  "headroom_by_length.json": {
+    "mooncake.py": "c88e9b76ca7c21aecb7ec9f0a69e1e4415dfb549cb53d0015b6226676aad9f4f",
+    "sequential.py": "064f7480580757c896d75f53245801332732649dfa288fb0f4002c50243ddc1d"
+  },
   "locomo_power.json": {
+    "eval/locomo.py": "0ddabe10e567b6a63db71b4f144b19bed62f7a1a337da4a8d01d486de4040455",
+    "eval/memqa.py": "eebaa43d01814492c27f920b243c59d0f122769c151e9d6d574560e7df82ae90",
+    "eval/retrieval.py": "9a5ab4c761f6c72584f12699444f37b86c00bf09902de7d4fc8d5b2e522ec5fb",
+    "llm.py": "05c48ec77bbb8203610bd7c599651cea3ed0c30203d26999ad8ff462a4f488bb",
     "stats.py": "1518ba85270fa136a701d2f55c1054d78413d28e9b825424204605c80e4fb1f7"
   },
   "lrb_retraction.json": {
-    "lrb.py": "58d52229ce197db2723c9dbf1caf9bb6d59a308405efce04ffa7c048a25e1a6a"
+    "eval/online.py": "6313a4406f7e851574a74fc69fd877975de4667a81c4d1658ab8a8c7447630cb",
+    "lrb.py": "06eab436a27ce129ddb4bcbddb2a95005f195262facbd00ce78d26d899fa72a4",
+    "mooncake.py": "c88e9b76ca7c21aecb7ec9f0a69e1e4415dfb549cb53d0015b6226676aad9f4f"
   },
   "lrb_sweep.json": {
     "eval/online.py": "6313a4406f7e851574a74fc69fd877975de4667a81c4d1658ab8a8c7447630cb",
-    "lrb.py": "58d52229ce197db2723c9dbf1caf9bb6d59a308405efce04ffa7c048a25e1a6a"
+    "lrb.py": "06eab436a27ce129ddb4bcbddb2a95005f195262facbd00ce78d26d899fa72a4",
+    "mooncake.py": "c88e9b76ca7c21aecb7ec9f0a69e1e4415dfb549cb53d0015b6226676aad9f4f"
   },
   "reachable_ceiling.json": {
-    "mooncake.py": "ba6797c829f1bb9f2c27ce5b974dd9349c4da3c1884d69245de9f1d90161a243",
-    "sequential.py": "064f7480580757c896d75f53245801332732649dfa288fb0f4002c50243ddc1d"
+    "mooncake.py": "c88e9b76ca7c21aecb7ec9f0a69e1e4415dfb549cb53d0015b6226676aad9f4f",
+    "sequential.py": "064f7480580757c896d75f53245801332732649dfa288fb0f4002c50243ddc1d",
+    "simulator.py": "9efcbde0ab8d4f4330cbb1886ff560419baa62591b59a7a8154050b558a92359"
   },
   "reactive_real_full_lrb.json": {
     "eval/online.py": "6313a4406f7e851574a74fc69fd877975de4667a81c4d1658ab8a8c7447630cb",
     "experts.py": "3d94173ad5bc6f3ac4af62fe163083ae36866a275a72aeb602bf183d76cde165",
-    "lrb.py": "58d52229ce197db2723c9dbf1caf9bb6d59a308405efce04ffa7c048a25e1a6a"
+    "lrb.py": "06eab436a27ce129ddb4bcbddb2a95005f195262facbd00ce78d26d899fa72a4",
+    "mooncake.py": "c88e9b76ca7c21aecb7ec9f0a69e1e4415dfb549cb53d0015b6226676aad9f4f"
   },
   "representation_axis.json": {
+    "eval/locomo.py": "0ddabe10e567b6a63db71b4f144b19bed62f7a1a337da4a8d01d486de4040455",
+    "eval/memqa.py": "eebaa43d01814492c27f920b243c59d0f122769c151e9d6d574560e7df82ae90",
     "eval/representation.py": "ab932f5f6eadf02d9948da3cce8db6a3b4bd5ade0f8c000234f74047716292aa",
+    "llm.py": "05c48ec77bbb8203610bd7c599651cea3ed0c30203d26999ad8ff462a4f488bb",
     "stats.py": "1518ba85270fa136a701d2f55c1054d78413d28e9b825424204605c80e4fb1f7"
   },
   "sampling_study.json": {

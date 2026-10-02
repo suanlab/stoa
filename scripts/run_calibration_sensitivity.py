@@ -58,6 +58,15 @@ def _monotonic(table: dict[Tier, float]) -> bool:
 
 _JOB: dict = {}
 
+# Forking after torch has spun up its intra-op thread pool deadlocks the children: they inherit
+# the pool's locks held. The first parallel run of this script sat 70 minutes with fifteen
+# workers at 0.0% CPU. Pinning torch to a single thread before any torch work means no pool
+# exists to inherit. (run_capacity_ladder.py pins it too, for determinism.)
+import torch  # noqa: E402
+
+torch.set_num_threads(1)
+torch.set_num_interop_threads(1)
+
 
 def _one_cost_model(cfg):
     """One (model, device) cost table: install it in THIS process, bill, report."""

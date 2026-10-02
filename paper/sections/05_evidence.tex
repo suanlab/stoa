@@ -499,7 +499,7 @@ ratios are what a placement policy responds to, so it never tested the parameter
 therefore derive the table instead: KV bytes per block follow exactly from a model's attention shape
 ($2 \times \text{layers} \times \text{kv\_heads} \times \text{head\_dim} \times \text{dtype}$ per
 token), and per-tier latency is that divided by a declared device-class bandwidth plus a fixed overhead.
-Sweeping three attention shapes against five device classes puts headroom at \textbf{67--90\%}, which
+Sweeping three attention shapes against five device classes puts headroom at \textbf{60--83\%}, which
 contains the 80\% our hand-written table gives --- the conclusion survives, but two things about the
 table do not. Its GPU:CPU latency ratio is 1:10 where the derivation gives 1:80 to 1:250, an order of
 magnitude in the ratio the policy is most sensitive to; and \textbf{6 of the 15 device classes reorder
