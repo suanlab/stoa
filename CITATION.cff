@@ -6,9 +6,11 @@ message: >-
   implementation is stoa.sequential.attainable_ceiling.
 type: software
 authors:
-  - name: "STOA Project"
+  - family-names: Lee
+    given-names: Suan
     email: suanlee@semyung.ac.kr
     affiliation: "Semyung University"
+    orcid: "https://orcid.org/0000-0002-3047-1167"
 repository-code: "https://github.com/suanlab/stoa"
 license: Apache-2.0
 abstract: >-
