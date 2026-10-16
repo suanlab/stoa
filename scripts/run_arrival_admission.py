@@ -164,11 +164,26 @@ def main() -> None:
         c_pref = prefix_greedy_cost(wl)
         c_orac = place_with_beliefs(
             wl, {i.item_id: float(fut.get(i.item_id, 0)) for i in wl.items})
-        c_ceil = attainable_ceiling(wl, ev_ids)
+        # Blocks that already exist at the split keep the frequency heuristic's belief in EVERY
+        # arm, the ceiling included; only the new blocks' beliefs vary (§AP). The first causal
+        # version gave pre-split blocks belief 0 in the arrival arms while the baseline placed them
+        # by frequency, so every arrival arm discarded knowledge the baseline kept -- small on the
+        # production traces, where those blocks carry ~5% of the gap, but enough on the synthetic
+        # control to make even a clairvoyant arrival policy lose to the heuristic.
+        # This mirrors the split-instant ceiling exactly: there, visible blocks are clairvoyant and
+        # new blocks sit at their heuristic belief (0, having no prefix); here the roles swap.
+        base = {i.item_id: float(pre[i.item_id]["count"]) for i in wl.items}
+
+        def with_new(beliefs_for_new):
+            b = dict(base)
+            b.update(beliefs_for_new)
+            return b
+
+        c_ceil = place_with_beliefs(wl, with_new({i: float(fut.get(i, 0)) for i in ev_ids}))
         span, reach = c_pref - c_orac, c_pref - c_ceil
 
         def score(vals):
-            belief = dict(zip(ev_ids, quantile_match(list(vals), ref)))
+            belief = with_new(dict(zip(ev_ids, quantile_match(list(vals), ref))))
             c = place_with_beliefs(wl, belief)
             return (100.0 * (c_pref - c) / span if span > 0 else 0.0,
                     100.0 * (c_pref - c) / reach if reach > 0 else 0.0)

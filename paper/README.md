@@ -3,21 +3,23 @@
 **Target (2026-10-02): ICDE 2027, research track, Experiment, Analysis & Benchmark (EAB), round 2 —
 deadline 2026-11-11, 5 PM PT.** Title: *[Experiment, Analysis, and Benchmark] Decide on Arrival:
 Placement Timing Beats Placement Prediction on Production KV Traces.* The paper reports what production
-traces say about KV-block placement: split-instant evaluation leaves ~95% of a hindsight oracle's
-advantage unreachable, and moving the decision to each block's arrival raises the reachable share from
-5.3% to 83.5% (conversation) and from 4.1% to 19.0% (toolagent), where first-come-first-served
-admission captures 87.4% and 50.2% of it. On Mooncake's synthetic control, where the benefit is not on
-new blocks, timing recovers nothing — which the same diagnostic predicts.
+traces say about KV-block placement: split-instant evaluation leaves 94.7% and 95.9% of a hindsight
+oracle's advantage on blocks that do not yet exist, so the best split-time policy reaches 5.3%
+(conversation) and 4.1% (toolagent) of it. Deciding at each block's arrival instead, even
+first-come-first-served admission captures 75.0% and 84.7%, and 52.6% on Mooncake's synthetic control.
+Which arrival-time rule is best the evaluation cannot settle, because within a finite trace earlier
+arrivals have more time to be reused.
 
 The PVLDB-formatted version is `main_pvldb.tex`; its exact last revision is git tag
 `pvldb-final-2026-09`. It was never submitted. The ICDE version drops the two LLM-dependent sections
 (they need a paid hosted model, and EAB requires every result to be reproducible "no exceptions") and
 demotes the formulation from contribution to frame. See `../docs/claims_dependency.md` §AO.
 
-**Five claims were retracted on the way here** and two further sub-claims falsified, including the
-previous framing ("Ranking Is Not Placement"). See `../docs/claims_dependency.md` §I, §T, §U (the
-retractions), §AC (the two falsifications), and §AD onward (the guards added so each class fails
-loudly next time).
+**Five claims were retracted on the way here**, three of which the paper counts (the other two predate
+its framing), including the previous framing ("Ranking Is Not Placement"). Two further sub-claims were
+falsified (§AC) and then withdrawn with two more readings when an audit found the arrival-time
+experiment leaky (§AP). See `../docs/claims_dependency.md` §I, §T, §U (the retractions), §AC, §AP, and
+§AD onward (the guards added so each class fails loudly next time).
 
 The experimental record is `../docs/claims_dependency.md` — the lab notebook, one section per finding,
 in the order they were found. `../docs/research_plan.md` is the **pre-registration**, written 2026-07-15
@@ -109,8 +111,9 @@ paper reads — an earlier revision had two such files diverge silently.
 | §5.3 capacity ladder | linear / GBDT / MLP / oracle, full traces |
 | §5.5 reaction | full traces; ARC, LeCaR, CACHEUS + LRB, with ghost-hit and censoring diagnostics |
 | placement vs retrieval, representation axis | **omitted from the ICDE version** (LLM-dependent; in `main_pvldb.tex`) |
-| §5.2 synthetic control | Mooncake's third workload; unreachable share 45.3–83.5%; timing boundary |
-| §5.8 protocol | ten defects + the controls that catch them |
+| §5.2 synthetic control | Mooncake's third workload; unreachable share 45.3–83.5%; arrival-time margin narrows (52.6% vs 35.0%) |
+| §5.4 arrival-time admission | causal design (§AP): FCFS 75.0 / 84.7 / 52.6% of the full gap; rule ranking left open (exposure confound) |
+| §5.8 protocol | twenty-four defects + the controls that catch them |
 
 Every number in the paper is asserted against its artifact by `../scripts/check_paper_numbers.py`; run it
 after regenerating any experiment.

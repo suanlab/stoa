@@ -17,6 +17,10 @@
 # accident. Fisher/McNemar (src/stoa/stats.py), gradient-boosted trees (src/stoa/gbdt.py)
 # and every cache policy are hand-rolled with no library fallback path, so installing those
 # libraries changes nothing. See REPRODUCIBILITY.md.
+# `+cpu` is a local build tag that only the PyTorch index serves; PyPI has `torch-2.13.0` but no
+# `+cpu` file, so without the line below `pip install -r` fails with "no matching distribution".
+# Verified 2026-10-16 against both indexes (audit M3).
+--extra-index-url https://download.pytorch.org/whl/cpu
 torch==2.13.0+cpu
 numpy==2.2.6
 httpx==0.28.1

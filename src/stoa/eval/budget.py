@@ -1,4 +1,8 @@
-"""Budget-conditioned control frontier (docs/research_plan.md §8 RQ1/RQ3; M9-12).
+"""Scaffolding for the formulation and architecture of sections 3-4 (the learned control
+plane). No result reported in the ICDE paper uses this module; it is kept because the
+formulation is offered as a frame, and removing it would orphan its tests (audit L1).
+
+Budget-conditioned control frontier (docs/research_plan.md §8 RQ1/RQ3; M9-12).
 
 RQ3's promise is a single serve-time knob (L, C, B): the operator sets a budget and
 one policy adapts, tracing the accuracy/latency/cost frontier without retraining.

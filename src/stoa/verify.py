@@ -27,6 +27,7 @@ from typing import Iterable, Mapping, Sequence
 
 __all__ = [
     "PAPER_MARKERS",
+    "citation_hygiene",
     "leaked_annotations",
     "author_block_problems",
     "bibtex_problems",
@@ -54,8 +55,11 @@ SUPERSESSION_MARKERS = ("SUPERSEDED", "RETRACTED", "FALSIFIED", "do not cite", "
 
 # The paper cites superseded numbers legitimately, but only where it is retracting them. These
 # are the phrases it uses to do that; anything else quoting a retracted figure is a leak.
-PAPER_MARKERS = ("retract", "earlier draft", "previously said", "superseded", "falsified",
-                 "we withhold", "no longer", "was false", "is neither", "wrong")
+PAPER_MARKERS = ("retract", "earlier draft", "earlier revision", "previously said", "superseded",
+                 "falsified", "we withhold", "was false", "is neither quantity", "an earlier version")
+# Markers must be specific phrases. "is neither" and "wrong" were here, added to let one §5.8
+# sentence through, and "is neither" then silenced the guard on the conclusion's "The answer is
+# neither yes nor no but a decoupling" -- a retracted claim stated as the contribution (audit H6).
 
 
 def _mtime(p: Path) -> float:
@@ -634,4 +638,32 @@ def leaked_annotations(pdf: Path,
     if hangul:
         out.append(f"the rendered PDF contains Hangul ({', '.join(sorted(set(hangul))[:5])}); in an "
                    "English-language paper that is a leaked internal note.")
+    return out
+
+
+def citation_hygiene(bib_text: str, cited: Iterable[str]) -> list[str]:
+    """Cited entries with placeholder authors or no way to locate the work.
+
+    The reference list printed "Cold-RL authors" as the authors of a cited paper -- a placeholder
+    written into `references.bib` and never replaced -- and two cited entries (LRB, ARC) carried no
+    URL, DOI or arXiv identifier. An audit that verified every arXiv ID still missed the first,
+    because it checked identifiers, not authors (audit M9). Uncited entries are not checked: they
+    never reach the PDF.
+    """
+    import re
+
+    out = []
+    for key in sorted(set(cited)):
+        m = re.search(r"@\w+\{" + re.escape(key) + r",(.*?)(?=\n@|\Z)", bib_text, re.S)
+        if not m:
+            out.append(f"cited key {key} is not in the bibliography")
+            continue
+        body = m.group(1)
+        auth = re.search(r"\bauthor\s*=\s*\{(.*?)\}\s*,?\s*\n", body, re.S)
+        a = auth.group(1) if auth else ""
+        if (not a or re.search(r"\bauthors\}?$", a.strip("{} ")) or re.search(r",\s*(and|\})", a)
+                or a.strip("{} ").lower().endswith(" authors")):
+            out.append(f"{key}: author field {a!r} is a placeholder or malformed")
+        if not re.search(r"\b(url|doi|eprint)\s*=", body):
+            out.append(f"{key}: no url, doi or eprint -- a reader cannot locate the cited work")
     return out

@@ -525,3 +525,18 @@ def test_module_outside_the_allowlist_is_reported_not_imported(monkeypatch):
     monkeypatch.setattr(importlib, "import_module", lambda m: called.append(m))
     out = verify.broken_entry_points("`from os import system`", "DOC.md")
     assert called == [] and len(out) == 1 and "not imported" in out[0]
+
+
+def test_placeholder_author_in_a_cited_entry_is_reported():
+    bib = "@article{k1,\n  title = {T},\n  author = {{Cold-RL authors}},\n  eprint = {1}}\n"
+    assert any("placeholder" in x for x in verify.citation_hygiene(bib, ["k1"]))
+
+
+def test_cited_entry_without_an_identifier_is_reported():
+    bib = "@inproceedings{k2,\n  title={ARC},\n  author={Megiddo, Nimrod},\n  year={2003}\n}\n"
+    assert any("no url, doi or eprint" in x for x in verify.citation_hygiene(bib, ["k2"]))
+
+
+def test_complete_cited_entry_is_clean():
+    bib = "@inproceedings{k3,\n  author={Song, Zhenyu and Lloyd, Wyatt},\n  url={https://x}\n}\n"
+    assert verify.citation_hygiene(bib, ["k3"]) == []

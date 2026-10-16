@@ -3,13 +3,13 @@
 
 \Cref{sec:formulation} frames placement as a learnable budget-constrained MDP. This section reports what
 we found when we tried to learn it on production KV traces, and it is organized around a defect rather
-than a result, because the defect came first and everything else follows from it: the protocol these
-studies use --- ours for three revisions --- makes 95\% of the achievable benefit unreachable, so a
+than a result, because the defect came first and everything else follows from it: the split-instant
+protocol, which we used for three revisions, makes 95\% of the achievable benefit unreachable, so a
 policy measured inside it looks flat however well it ranks (\Cref{sec:reachable}). Moving the decision to
 each block's arrival recovers the benefit, and shows that the recoverable part is captured by
 \emph{deciding early} rather than by \emph{deciding well} (\Cref{sec:arrival}). We then report what a
 better ranker buys once the metric is repaired (\Cref{sec:capacity}), where reaction stands
-(\Cref{sec:reaction}), and --- at length, because it is the most transferable part --- the protocol,
+(\Cref{sec:reaction}), and, at length because it is the most transferable part, the protocol,
 including the three claims we retracted along the way (\Cref{sec:protocol}).
 
 \subsection{Sources and references}
@@ -21,21 +21,24 @@ repeated hash is a genuine reuse. Both sources record wall-clock request timesta
 kv-cache-tester are conversation-scoped, so we namespace them before pooling; not doing so invents
 cross-conversation reuse.
 
-Three references bound every policy, all billed on the true future: a \textbf{hindsight oracle} that ranks
-and places knowing future access counts; a \textbf{frequency heuristic} that assumes the future looks like
-the observed prefix; and a \textbf{naive} all-plaintext baseline. ``Headroom'' is
+Two references bound every policy, both billed on the true future: a \textbf{hindsight oracle} that ranks
+and places knowing future access counts, and a \textbf{frequency heuristic} that assumes the future looks
+like the observed prefix. ``Headroom'' is
 $(\text{cost}_{\text{heur}} - \text{cost}_{\text{oracle}})/\text{cost}_{\text{heur}}$; ``captured'' is the
-fraction of that interval a learned policy recovers.
+fraction of that interval a learned policy recovers. Cost combines latency, money and context tokens
+with weights $\lambda_L = 0.1$ per ms, $\lambda_C = 1$ per USD and $\lambda_B = 0.0005$ per token, which
+the artifact documents as illustrative unit-normalising values and has not changed since its first
+commit.
 
 \subsection{The protocol decides what is reachable}
 \label{sec:reachable}
-Placement studies of this kind fix a \emph{split instant}: observe the trace up to some point, build
-features from that prefix, place every block, and bill the result against what the future turns out to
-contain. It is the natural protocol, it is what we ran for three revisions of this paper, and it has a
-structural defect that no aggregate computed inside it can reveal.
+A natural way to evaluate placement is to fix a \emph{split instant}: observe the trace up to some
+point, build features from that prefix, place every block, and bill the result against what the future
+turns out to contain. It is what we ran for three revisions of this paper, and it has a structural defect
+that no aggregate computed inside it can reveal.
 
 The defect is general, not particular to our setup. Whenever a workload admits new items after the split
---- which is to say, whenever it is not a closed working set --- a split-time policy has no opinion about
+(that is, whenever it is not a closed working set), a split-time policy has no opinion about
 those items while the hindsight oracle it is scored against ranks them freely. The reported ``fraction of
 headroom captured'' then divides by a quantity that is partly unreachable, and the unreachable share
 grows with the arrival rate. Any study reporting that fraction without bounding it is reporting a number
@@ -55,8 +58,8 @@ almost entirely unreachable by construction:
 \midrule
 blocks with no pre-split access & 45.2\% & 46.1\% \\
 full hindsight gap & 93{,}383 & 94{,}714 \\
-\textbf{attainable gap} (clairvoyance on visible blocks) & \textbf{4{,}996} & \textbf{3{,}900} \\
-share of the gap a causal policy cannot reach & \textbf{94.7\%} & \textbf{95.9\%} \\
+\textbf{attainable gap} (visible blocks only) & \textbf{4{,}996} & \textbf{3{,}900} \\
+share no causal policy can reach & \textbf{94.7\%} & \textbf{95.9\%} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -65,11 +68,13 @@ share of the gap a causal policy cannot reach & \textbf{94.7\%} & \textbf{95.9\%
 \noindent\textbf{It is not an artifact of where we cut.} Sweeping the split instant from 0.3 to 0.7
 of the trace leaves the unreachable share at \textbf{91.8--98.4\%} on conversation and
 \textbf{93.0--98.8\%} on toolagent --- and it is \emph{worse} at earlier splits, where more of the
-trace is still to come. The pathology is a property of the protocol, not of our choice within it.
+trace is still to come. Nor is it an artifact of the cost weights: scaling $\lambda_L$ or $\lambda_B$ by
+0.1 or by 10 leaves it at 91.8--99.2\%. The pathology is a property of the protocol, not of our choices
+within it.
 
 \medskip
 \noindent\textbf{It is a property of arrivals, not of production.} Mooncake's third released workload
-is synthetic --- public datasets, Poisson arrivals --- and we use it as a control rather than pool it.
+is synthetic (public datasets, Poisson arrivals), and we use it as a control rather than pool it.
 Only 24.6\% of its blocks are new at the midpoint, against 45--46\% on the production traces, and the
 unreachable share falls with them: \textbf{65.0\%} at the midpoint and \textbf{45.3--83.5\%} across
 splits. Within every one of the three traces the share rises monotonically as the split moves earlier;
@@ -81,8 +86,8 @@ advantage is out of reach.
 \noindent A policy confined to 5\% of the prize will look flat no matter how well it ranks, and that is
 what our earlier ``decoupling'' result measured. We retract it (\Cref{sec:protocol}).
 
-\paragraph{The diagnostic is one line.} Compute the oracle's advantage twice --- once with clairvoyance
-over every item, once restricted to the items the policy could have had an opinion about --- and take the
+\paragraph{The diagnostic is one line.} Compute the oracle's advantage twice, once with clairvoyance
+over every item and once restricted to the items the policy could have had an opinion about, and take the
 ratio. If it is far from one, the protocol is the finding. It costs a single extra placement pass, it
 needs no new data, and running it on the first day would have saved this paper three revisions. We ship
 it as \texttt{attainable\_ceiling} in the artifact and recommend it as a standard reporting requirement
@@ -90,117 +95,106 @@ for placement and admission studies: \emph{state the reachable share alongside a
 
 \subsection{Deciding on arrival, not at a split}
 \label{sec:arrival}
-The 97\% lives in blocks that do not exist yet when a split-time policy decides. The fix is not a better
-model but an earlier decision: place each block \emph{when it first appears}, from context available at
-that instant --- the shared-prefix session's age, request rate and recency, the block's position within
-its request, the request's length. No feature reads the future; the model is fitted on the first half of
-arrivals in arrival order and places the second half.
+About 95\% of the oracle's advantage lives in blocks that do not exist yet when a split-time policy
+decides. The alternative is an earlier decision: place each block \emph{when it first appears}, from
+context available at that instant (the shared-prefix session's age, request rate and recency, the block's
+position within its request, the request's length). Nothing the policy uses reads the future. The arrival
+population is exactly the blocks first seen at or after the billing split. The model is fitted on blocks
+first seen before it, each labelled by its reuse within a fixed window that closes before the split.
+Every arm's belief magnitudes come from the previous period's analogue (blocks first seen before the
+split, counted up to it) rather than from the evaluation blocks' own future. Blocks that already exist
+keep the frequency heuristic's belief in every arm, so the arms differ only in how they treat new blocks.
 
 \begin{center}\small
-\begin{tabular}{@{}llrrr@{}}
+\begin{tabular}{@{}lrrrr@{}}
 \toprule
-trace & arm & AUC & of full gap & of attainable \\
+ & split-time & \multicolumn{3}{c}{arrival-time, causal} \\
+\cmidrule(l){3-5}
+trace & ceiling & FCFS & learned (AUC) & shuffled \\
 \midrule
-conversation & arrival-learned  & 0.574 & 70.5\% & 84.5\% \\
-             & \textbf{arrival-FCFS} & 0.500 & \textbf{73.0\%} & \textbf{87.4\%} \\
-             & arrival-shuffled & 0.500 & 70.2\% & 84.1\% \\
-             & ceiling          & 1.000 & 83.5\% & 100.0\% \\
-\midrule
-toolagent    & arrival-learned  & 0.635 & 9.0\% & 47.2\% \\
-             & \textbf{arrival-FCFS} & 0.500 & \textbf{9.6\%} & \textbf{50.2\%} \\
-             & arrival-shuffled & 0.500 & 6.9\% & 36.1\% \\
-             & ceiling          & 1.000 & 19.0\% & 100.0\% \\
+conversation & 5.3 & \textbf{75.0} & 59.5 (0.56) & 58.4 \\
+toolagent    & 4.1 & \textbf{84.7} & 58.7 (0.61) & 57.9 \\
+synthetic    & 35.0 & \textbf{52.6} & 50.5 (0.75) & 42.7 \\
 \bottomrule
 \end{tabular}
 \end{center}
+\noindent{\footnotesize Percent of the full hindsight gap. The split-time ceiling is clairvoyant on every
+block visible at the split; the arrival-time arms are causal policies.}
 
 \medskip
-\noindent Three readings survive and one does not.
+\noindent\emph{Deciding at arrival puts most of the advantage within reach.} A causal
+first-come-first-served rule captures 75.0\% and 84.7\% of the oracle's advantage on the production
+traces, where no split-time policy, even a clairvoyant one, can exceed 5.3\% and 4.1\%. On the synthetic
+control, where only a quarter of blocks are new at the split, the margin narrows but holds: 52.6\% against
+35.0\%.
 
-\emph{Timing recovers much of the benefit.} The reachable share rises from 5.3\% to \textbf{83.5\%} on
-conversation and 4.1\% to \textbf{19.0\%} on toolagent --- $16\times$ and $4.6\times$. The headroom was not
-absent; the protocol could not reach it. The two traces differ by a factor of four in how much arrival
-timing exposes, which we cannot explain from two exemplars.
+\emph{Which arrival rule is best, this evaluation cannot say.} FCFS leads the learned ranker by 2--26
+points and a shuffled order by 10--27. But within a finite trace, blocks arriving in the first quarter of
+the evaluation period see 2.3--4.6 times the future accesses of those arriving in the last quarter, and
+arrival order alone predicts reuse with AUC 0.55--0.58, close to the learned ranker's 0.56--0.75. Arrival
+order is entangled with exposure time, a property of the evaluation window rather than of the rule;
+separating them needs an evaluation in which every block has equal exposure (\Cref{sec:open}).
 
-\emph{It does not recover what is not there.} On the synthetic control, blocks new after the split carry
-only 26.7\% of the gap while the split instant already reaches 35.0\%; moving the decision to arrival
-recovers nothing, and every arrival-time policy --- learned, FCFS, shuffled --- falls \emph{below} the
-frequency heuristic. Timing helps exactly when the benefit sits on blocks that do not yet exist, and
-the diagnostic of \Cref{sec:reachable} says in advance which case a workload is in.
+\emph{An earlier version of this experiment was wrong in three ways, and four of its readings are
+withdrawn.} Its training labels counted accesses after the split (34.3\% and 46.3\% of training-label
+mass), its train/eval cut was a different instant from its billing split, and its belief magnitudes were
+the evaluation blocks' true future counts; it also gave pre-split blocks a belief of zero in the arrival
+arms. Correcting these withdraws the readings that a learned ranker captures less than FCFS, that FCFS
+captures 87\% and 50\% of what is reachable, that arrival order is worth 14 points, and that timing
+recovers nothing on the synthetic control (\Cref{sec:protocol}).
 
-\emph{Deciding at all captures most of it on one trace and half on the other.}
-First-come-first-served admission with a fixed action reaches \textbf{87.4\%} of the ceiling on
-conversation but only \textbf{50.2\%} on toolagent. An earlier draft of this paper reported 93\% and
-90\% and concluded that ``deciding at all'' was sufficient; those numbers were computed before a
-tie-breaking defect in the baseline routines was fixed, and the toolagent figure did not survive the
-correction (\Cref{sec:protocol}).
+The design implication we can support is coarse: build an \textbf{admission point} rather than a
+predictor, and rank admission rules only under equal exposure. Baleen~\cite{S12_wong2024baleen} is the one
+system among those we survey that decides admission rather than eviction, and it optimizes a downstream
+system cost rather than miss rate.
 
-\emph{Learning on top adds nothing.} The learned arm, at AUC 0.574 and 0.635, reaches 84.5\% and 47.2\%
---- below FCFS on both traces. This is the one claim that has survived every correction to the metric.
-
-\emph{But the arrival \textbf{order} is not free, and we previously said it was.} Shuffling the order in
-which arrivals are placed costs 3.3 points on conversation and \textbf{14.1 points} on toolagent. An
-earlier draft reported ``under three points'' on both and concluded that almost all of the benefit was
-in \emph{when} the decision is taken rather than in any ordering. On toolagent that is false:
-first-come-first-served is doing real work there, and a deployment cannot treat arrival order as
-incidental. We retract the claim.
-
-
-The design implication is the one the earlier framing could not reach: on these workloads, build an
-\textbf{admission point}, not a predictor. That is also where the caching literature has been pointing.
-Baleen~\cite{S12_wong2024baleen} is the one system among those we survey that decides admission rather
-than eviction, and it optimizes a downstream system cost rather than miss rate.
-
-\subsection{What a better ranker buys, once the metric is fixed}
+\subsection{What a better ranker buys inside the split protocol}
 \label{sec:capacity}
-The capacity ladder of our earlier draft asked whether a stronger model converts into a better placement.
-Under the corrected metric --- ties broken by tier speed rather than enum order, and every belief
-quantile-matched onto one magnitude multiset so that only the ordering varies --- the answer is that
-ranking quality moves the outcome monotonically and never enough to help:
+Within the split-instant protocol, does a stronger model convert into a better placement? With ties
+broken by tier speed and every belief quantile-matched onto one magnitude multiset, the scored blocks' own
+pre-split counts, so that only the ordering varies:
 
 \begin{center}\small
 \begin{tabular}{@{}lrrr@{}}
 \toprule
 rung & AUC (conv / tool) & \% of attainable (conv) & (tool) \\
 \midrule
-constant        & 0.50 / 0.50 & $-46.1$  & $-60.6$ \\
-random          & 0.49 / 0.50 & $-208.2$ & $-838.6$ \\
-$\log$(count)   & 0.64 / 0.71 & $-70.7$  & $-59.1$ \\
-logistic        & 0.81 / 0.93 & $-18.8$  & $-32.1$ \\
-GBDT            & 0.80 / 0.91 & $-23.9$  & $-32.8$ \\
-MLP             & 0.82 / 0.93 & $-8.5$   & $-19.3$ \\
+constant        & 0.50 / 0.50 & $-48.6$ & $-60.6$ \\
+random          & 0.49 / 0.50 & $-62.7$ & $-284.0$ \\
+$\log$(count)   & 0.64 / 0.71 & $0.0$   & $0.0$ \\
+logistic        & 0.81 / 0.93 & $+50.7$ & $+55.0$ \\
+GBDT            & 0.80 / 0.91 & $+47.6$ & $+44.9$ \\
+MLP             & 0.82 / 0.93 & $+52.6$ & $+59.5$ \\
 \midrule
-ceiling         & 1.00        & $100$    & $100$ \\
+ceiling         & 1.00        & $100$   & $100$ \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \medskip
-\noindent On toolagent the damage falls monotonically as AUC rises ($-60.6 \to -59.1 \to -32.1 \to
--19.3$), so ranking quality does convert --- into less harm. On conversation it does not: the constant
-belief ($-46.1$) beats $\log$(count) ($-70.7$) despite carrying no information. An earlier draft claimed
-monotonicity on both traces from numbers computed before the baseline tie-break was fixed; with the fix
-it holds on one trace only, and we no longer claim it in general. Every arm is nonetheless below the
-frequency baseline, because forcing an imperfect ranking onto the oracle's magnitude multiset assigns
-large beliefs to blocks that will not be reused.
+\noindent Ranking quality converts monotonically on both traces. $\log$(count) reproduces the frequency
+heuristic exactly, since it ranks by the same counts the magnitudes come from, and each better model
+recovers more, the best about half of what is attainable. But what is attainable is the 5\% of
+\Cref{sec:reachable}: the strongest model gains 2.8\% and 2.5\% of the oracle's advantage. A previous
+version of this table placed every rung on the evaluation blocks' true future counts, which no deployed
+policy has; there every rung fell below the heuristic and conversion failed on one trace.
 
-\paragraph{The magnitude convention decides the sign, and we measured by how much.}
-We report the table above under a stated convention because it does not survive an unstated one. Running
-each rung twice --- once on the scale its own scores naturally produce, once quantile-matched onto a
-common multiset, \emph{with the ordering identical in both} --- gives:
+\paragraph{The magnitude convention moves the result more than ranking does.}
+Running each rung twice, once on the scale its own scores naturally produce and once on the common
+multiset, \emph{with the ordering identical in both}, gives:
 
 \begin{center}\small
 \begin{tabular}{@{}llrrr@{}}
 \toprule
-trace & rung & native scale & common scale & difference \\
+trace & rung & native & common & $\Delta$ \\
 \midrule
-conversation & logistic & $+75.0$ & $-18.8$ & 93.8 \\
-             & $\log$(count) & $-39.2$ & $-70.7$ & 31.5 \\
-             & random   & $-81.1$ & $-208.2$ & 127.1 \\
+conversation & logistic & $+74.1$ & $+50.7$ & 23.4 \\
+             & $\log$(count) & $-40.7$ & $0.0$ & $-40.7$ \\
+             & random   & $-84.5$ & $-62.7$ & $-21.8$ \\
 \midrule
-toolagent    & logistic & $+84.8$ & $-32.1$ & 117.0 \\
-             & $\log$(count) & $-25.2$ & $-59.1$ & 33.9 \\
-             & random   & $-630.2$ & $-838.6$ & 208.5 \\
+toolagent    & logistic & $+87.8$ & $+55.0$ & 32.7 \\
+             & $\log$(count) & $-25.2$ & $0.0$ & $-25.2$ \\
+             & random   & $-665.4$ & $-284.0$ & $-381.5$ \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -208,25 +202,19 @@ toolagent    & logistic & $+84.8$ & $-32.1$ & 117.0 \\
 attached to an identical ranking.}
 
 \medskip
-\noindent The same policy, with the same ordering, scores $+84.8\%$ or $-32.1\%$ depending on a choice
-of scale. The gap runs from \textbf{31.5 to 208.5 points} --- an order of magnitude larger than any
-effect this paper or its predecessors reported. An earlier draft asserted that this control ``changes
-the captured headroom by about two points''; that number was never computed, and it is wrong by two
-orders of magnitude.
-
-We therefore claim neither column. What we do claim is the comparison \emph{within} a column, which is
-well defined: on the common scale, ranking quality converts monotonically into less harm. And we claim
-the methodological point, which we think is the more useful one: \textbf{``fraction of headroom
-captured'' is not a quantity until the magnitude convention is stated}, and no version of this paper,
-nor any placement study we are aware of, states it.
+\noindent The same policy, with the same ordering, scores $+87.8\%$ or $+55.0\%$ depending on a choice of
+scale, and across rungs the scale moves the result by \textbf{22 to 381 points}, more than any ranking
+difference above. We report the common-scale column, where only ordering varies, and make the
+methodological point: \textbf{``fraction of headroom captured'' is not a quantity until the magnitude
+convention is stated}, and none of our earlier drafts stated it.
 
 
 \input{sections/table2_regimes}
 
 \subsection{A measurement that was never a measurement}
 \label{sec:sampling}
-We also attempted the obvious follow-up --- fit a richer per-block model on the agentic source and place
-with it --- and first obtained what looked like a strong positive: $+66$ to $+88\%$ of the headroom
+We also attempted the obvious follow-up (fit a richer per-block model on the agentic source and place
+with it) and first obtained what looked like a strong positive: $+66$ to $+88\%$ of the headroom
 captured, reproducing across what we took to be two samples. It was not a result, and the way it failed is
 worth more than the number would have been.
 
@@ -294,7 +282,7 @@ the whole adaptive-replacement family collapses into a band a few points wide, w
 at the small tiers where the decision actually matters.
 
 The diagnostics say why, and the reason is specific to KV workloads. Every policy in this family adapts
-on a \emph{ghost hit} --- a miss on a block it recently evicted --- whether it updates a split (ARC) or
+on a \emph{ghost hit} (a miss on a block it recently evicted), whether it updates a split (ARC) or
 an expert weight (LeCaR, CACHEUS). But 76--78\% of blocks in these traces are never reused at all, so
 most evictions are correct and produce no signal. Measured, ARC receives an adaptation signal on
 \textbf{3.5--7.3\% of misses}; the regret-based policies read the same channel, which is why they land
@@ -383,8 +371,8 @@ written --- two by an adversarial review we ran with AI reviewer agents (see the
 rest by re-verification passes run over a paper that had already passed every check it defined for
 itself.
 
-\paragraph{Reference-frame mismatches (six).} Two quantities that must share a frame --- the same split
-instant, ordering, tie rule, or question set --- were silently defined on different ones: a demand signal
+\paragraph{Reference-frame mismatches (six).} Two quantities that must share a frame (the same split
+instant, ordering, tie rule, or question set) were silently defined on different ones: a demand signal
 computed from the questions being scored; policy features derived from whole-trace access counts; an
 oracle that inherited the heuristic's ordering and so showed zero headroom; a train/test split taken over
 access-event indices rather than time, which on real traces falls past the end of the trace; a ranking
@@ -395,7 +383,7 @@ at one split instant while costs were billed at another.
 by the AI-agent review, after the catalogue below had already been written. \textbf{(i)} A headline
 ``+66--88\% of headroom captured on agentic traces'' that reversed sign at a larger sample and that
 randomized draws showed had never been measurable (\Cref{sec:sampling}). \textbf{(ii)} A
-\emph{decoupling} claim --- prediction improves while placement does not --- that was an artifact of
+\emph{decoupling} claim (prediction improves while placement does not) that was an artifact of
 normalizing against an oracle ranking blocks a causal policy cannot see (\Cref{sec:reachable});
 normalized against what is attainable, ranking quality converts monotonically on conversation and
 non-monotonically on toolagent, so the repaired metric does not simply invert the retracted one. \textbf{(iii)} A reported
@@ -404,15 +392,13 @@ rows arrive in one contiguous burst per checkpoint, and from the third retrain o
 label was identical, so the regressor returned a constant and eviction degenerated to a uniform draw.
 Two defensible repairs of that bug disagree by up to 2.1 points (\Cref{sec:reaction}). We therefore
 report the column as
-a band and state the conclusion --- LRB below ARC at all eight operating points --- only at the
+a band and state the conclusion (LRB below ARC at all eight operating points) only at the
 coarseness that band supports. An earlier draft of this paragraph said the repairs disagree by
 ``19 points''; they disagree by 2.1, and the 19 came from a comparison this artifact cannot reproduce.
 
-Two further sub-claims were falsified in a later re-verification pass, after the paper had been
-rewritten around the arrival result: that first-come-first-served admission captures roughly 90\% of
-what is attainable (it captures 50.2\% on toolagent) and that the arrival \emph{order} is worth under
-three points (14.1 on toolagent). Both had been stated from artifacts generated before a tie-break
-fix to the routines that produce the denominator.
+A later re-verification pass ``falsified'' two sub-claims of the arrival result using numbers that, an
+audit then showed, came from a leaky version of the experiment itself; under the corrected design both
+questions turn out to be entangled with exposure time and are left open (\Cref{sec:arrival}).
 
 The common shape is worth naming: in all three the \emph{aggregate looked reasonable}. A flat captured
 fraction, a plausible interval, a learned policy landing below ARC --- each is what the hypothesis
@@ -423,8 +409,8 @@ fixed for convenience. A reactive claim taken at a single cache size reversed un
 taken at 1{,}500 requests moved by full length from 72.2\% to 79.8\% on toolagent and from 70.4\% to
 79.9\% on conversation, and the placement
 benefit read off it peaked mid-sweep rather than at the longest trace. And a learned-placement result taken at 40 and
-70 conversations --- \emph{nested prefixes} of a corpus whose per-conversation statistics vary threefold
-along the file index --- reversed sign at 150, from $+88\%$ to $-48\%$, and took a headline claim with it.
+70 conversations, \emph{nested prefixes} of a corpus whose per-conversation statistics vary threefold
+along the file index, reversed sign at 150, from $+88\%$ to $-48\%$, and took a headline claim with it.
 
 \paragraph{Believing a report over an observation (one).} An edit script targeted a heading an earlier
 revision had removed, matched nothing, and printed success anyway.
@@ -432,14 +418,14 @@ revision had removed, matched nothing, and printed success anyway.
 \paragraph{Derived and parallel surfaces outliving their source (three).} A result is not one file but a chain:
 source $\rightarrow$ artifact $\rightarrow$ figure $\rightarrow$ paper. Fixing a link does not refresh
 what follows it, and nothing in our pipeline compared adjacent links. Three artifacts the paper cited
-were generated \emph{before} a fix to the code that produced them --- two of them denominators --- which
+were generated \emph{before} a fix to the code that produced them (two of them denominators), which
 is how the two falsified sub-claims above reached a draft. After adding a freshness check on that first
 edge and observing it pass, we found the plotted figures were fifteen days older than the artifacts they
 draw: the text carried the corrected ladder while the figure still showed the retracted one, because the
 paper embeds the PDF and a number-checker cannot see inside it. A freshness check on one edge reads like
 a freshness check on the chain; it is not, and a guard that has only ever passed has not been tested.
-The same claim also lives on surfaces that are not downstream of the paper but parallel to it --- a
-repository README, a lab notebook --- and correcting the document that \emph{makes} a claim does not
+The same claim also lives on surfaces that are not downstream of the paper but parallel to it (a
+repository README, a lab notebook), and correcting the document that \emph{makes} a claim does not
 correct the documents that \emph{recorded} it. Our notebook stated a falsified conclusion in the present
 tense a hundred and fifty lines above its own retraction of it. Which repair applies depends on what the
 surface is: an assertion is updated, a record is banner-marked and left intact.
@@ -468,14 +454,23 @@ break changed the computation and not merely the file.
 
 \paragraph{Emphasis without verification (one).} Our checker re-derives every number it is told
 about, and for the life of this paper it was not told about the one the abstract leads with. The
-``fraction of the oracle's advantage that is unreachable'' --- quoted in the abstract, in C2, in
-\Cref{sec:reachable} and here --- sat in no artifact and in no assertion, and when finally recomputed
+``fraction of the oracle's advantage that is unreachable'', quoted in the abstract, in C2, in
+\Cref{sec:reachable} and here, sat in no artifact and in no assertion, and when finally recomputed
 it was built from two different references: its attainable gap measured against the frequency
 heuristic, its full gap against something 1.72$\times$ larger on both traces. The qualitative finding
-survived; the figure moved from 97\% to 95\% and the timing multiplier from 27$\times$ to 16$\times$.
+survived; the figure moved from 97\% to 95\%.
 The guard is a coverage test rather than a correctness one: extract every emphasised number in the
 source and fail if nothing asserts it. It answers ``what is nothing watching?'', which is a different
 question from ``is what we watch correct?'' and the one we had never asked.
+
+\paragraph{Leaks that no number check can see (five).} Found by an audit after every number check
+passed. The arrival-time experiment labelled its training blocks with accesses after the split; cut its
+training and evaluation sets at a different instant from the one it billed at; set every policy's belief
+magnitudes from the evaluation blocks' true future counts, a leak of the label distribution that four
+other experiments shared; and gave pre-split blocks a belief of zero in the arrival arms while the
+baseline placed them by frequency. Its ``ceiling'' then mixed past-window and future-window counts in one
+greedy ordering, and a causal rule exceeded it. Each produced a self-consistent number that matched its
+artifact exactly, so none was visible to a check that compares the paper to its artifacts.
 
 \paragraph{The controls.} Assert that the oracle beats the heuristic it is compared against; keep a
 no-learning baseline of the same functional form as the learned one; check that no single feature
@@ -511,14 +506,16 @@ is not exercised here either: a pilot over three textual fidelities is in the ar
 a paid hosted model, and this paper reports only what the artifact regenerates without one. Both
 sources are KV-block hash streams from transformer prefix caching, so they are independent in provenance
 but not in mechanism; with one exemplar per putative regime we cannot separate workload character from
-vendor, date, or block size (512 vs.\ 64 tokens). Sampling is not randomized and no confidence interval is
-reported for the placement results, though the two remaining free parameters --- trace length and split
-instant --- are now swept rather than fixed. Of the learned and adaptive cache literature we evaluate
+vendor, date, or block size (512 vs.\ 64 tokens). Sampling is not randomized, every placement result is
+a single deterministic run, and no confidence interval is reported for them, though trace length, split
+instant and cost weights are now swept rather than fixed. The arrival-time comparison is a static
+placement over a finite window, in which arrival order is entangled with exposure time, so it ranks
+protocols but not admission rules. Of the learned and adaptive cache literature we evaluate
 ARC~\cite{S7_megiddo2003arc}, LeCaR~\cite{S8_vietri2018lecar}, CACHEUS~\cite{S9_rodriguez2021cacheus} and
 a reimplementation of LRB~\cite{S6_song2020lrb}; Hawkeye, Mockingjay and Baleen are positioned in
 \Cref{sec:related} but not run, the first two because a KV block hash carries no analogue of the program
 counter their predictors are indexed by. Our LRB is the
-published mechanism rebuilt from the paper, not the authors' artifact --- as are our LeCaR and CACHEUS, whose
-CR-LFU expert we approximate by LFU --- and the uniform block size of both sources removes one of LRB's
+published mechanism rebuilt from the paper, not the authors' artifact (as are our LeCaR and CACHEUS, whose
+CR-LFU expert we approximate by LFU), and the uniform block size of both sources removes one of LRB's
 advantages over LRU, so the underperformance we report should be read as a statement about this workload
 rather than about these designs.

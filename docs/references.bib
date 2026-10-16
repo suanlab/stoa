@@ -435,7 +435,8 @@
 @article{F20_xiong2025raggym,
   title  = {{RAG-Gym}: Optimizing Reasoning and Search Agents with Process Supervision},
   author = {Xiong, Guangzhi and Jin, Qiao and Wang, Xiao and others},
-  year   = {2025}, journal = {arXiv}, eprint = {2502.13957}, archivePrefix = {arXiv}}
+  year   = {2025}, journal = {arXiv:2502.13957v1}, eprint = {2502.13957}, archivePrefix = {arXiv},
+  xnote  = {Title is v1's; later arXiv versions are retitled. Audit M9.}}
 
 @article{F21_sun2025zerosearch,
   title  = {{ZeroSearch}: Incentivize the Search Capability of {LLMs} without Searching},
@@ -644,7 +645,7 @@
 
 @article{S4_coldrl2025,
   title  = {Cold-{RL}: Learning Cache Eviction with Offline Reinforcement Learning for {NGINX}},
-  author = {{Cold-RL authors}},
+  author = {Gupta, Aayush and Bhayani, Arpit},
   year   = {2025}, journal = {arXiv}, eprint = {2508.12485}, archivePrefix = {arXiv}}
 
 % ---- [검증필요] 정식 인용 전 재확인 ----
@@ -660,9 +661,12 @@
 @inproceedings{qin2024mooncake,
   title={Mooncake: Trading More Storage for Less Computation --- A KVCache-centric Architecture for Serving LLM Chatbot},
   author={Qin, Ruoyu and Li, Zheming and He, Weiran and Zhang, Mingxing and Wu, Yongwei and Zheng, Weimin and Xu, Xinran},
-  booktitle={USENIX Conference on File and Storage Technologies (FAST)},
+  booktitle={23rd USENIX Conference on File and Storage Technologies (FAST)},
   year={2025},
-  note={arXiv:2407.00079; traces at github.com/kvcache-ai/Mooncake}
+  url={https://www.usenix.org/conference/fast25/presentation/qin},
+  note={Traces: github.com/kvcache-ai/Mooncake, FAST25-release},
+  xnote={Was paired with arXiv:2407.00079, an earlier technical report with a different title
+         ("A KVCache-centric Disaggregated Architecture for LLM Serving"); audit M9.}
 }
 
 @inproceedings{S6_song2020lrb,
@@ -671,6 +675,7 @@
   booktitle={17th USENIX Symposium on Networked Systems Design and Implementation (NSDI)},
   pages={529--544},
   year={2020},
+  url={https://www.usenix.org/conference/nsdi20/presentation/song},
   xnote={Verified: USENIX NSDI'20 proceedings. Feature vector is the sequence of deltas
         between an object's past request times -- the same family as our think-time features.}
 }
@@ -684,6 +689,7 @@
   author={Megiddo, Nimrod and Modha, Dharmendra S.},
   booktitle={2nd USENIX Conference on File and Storage Technologies (FAST)},
   year={2003},
+  url={https://www.usenix.org/conference/fast-03/arc-self-tuning-low-overhead-replacement-cache},
   xnote={Verified: USENIX FAST'03. Adaptively balances recency against frequency; the
         recency-vs-frequency inversion we observe across sources is its founding motivation.}
 }
@@ -755,4 +761,27 @@
   address   = {Santa Clara, CA},
   publisher = {{USENIX} Association},
   url       = {https://www.usenix.org/conference/fast24/presentation/wong}
+}
+
+% --- KV-cache serving systems (added 2026-10-16, audit L6; each verified against its arXiv page) ---
+@inproceedings{kwon2023pagedattention,
+  title     = {Efficient Memory Management for Large Language Model Serving with {PagedAttention}},
+  author    = {Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and others},
+  booktitle = {29th ACM Symposium on Operating Systems Principles (SOSP)},
+  year      = {2023},
+  eprint    = {2309.06180}, archivePrefix = {arXiv}
+}
+@inproceedings{zheng2024sglang,
+  title     = {{SGLang}: Efficient Execution of Structured Language Model Programs},
+  author    = {Zheng, Lianmin and Yin, Liangsheng and Xie, Zhiqiang and Sun, Chuyue and Huang, Jeff and others},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2024},
+  eprint    = {2312.07104}, archivePrefix = {arXiv}
+}
+@inproceedings{gao2024cachedattention,
+  title     = {Cost-Efficient Large Language Model Serving for Multi-turn Conversations with {CachedAttention}},
+  author    = {Gao, Bin and He, Zhuomin and Sharma, Puru and Kang, Qingxuan and Jevdjic, Djordje and others},
+  booktitle = {USENIX Annual Technical Conference (ATC)},
+  year      = {2024},
+  eprint    = {2403.19708}, archivePrefix = {arXiv}
 }

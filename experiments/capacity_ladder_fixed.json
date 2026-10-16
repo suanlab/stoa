@@ -10,8 +10,8 @@
       "train": "toolagent",
       "rung": "constant",
       "auc_cross_trace": 0.5,
-      "captured_pct": -2.47,
-      "captured_of_attainable_pct": -46.08,
+      "captured_pct": -2.6,
+      "captured_of_attainable_pct": -48.58,
       "auc_in_trace": null
     },
     {
@@ -19,8 +19,8 @@
       "train": "toolagent",
       "rung": "random",
       "auc_cross_trace": 0.4931,
-      "captured_pct": -11.14,
-      "captured_of_attainable_pct": -208.19,
+      "captured_pct": -3.36,
+      "captured_of_attainable_pct": -62.71,
       "auc_in_trace": null
     },
     {
@@ -28,8 +28,8 @@
       "train": "toolagent",
       "rung": "count",
       "auc_cross_trace": 0.6394,
-      "captured_pct": -3.78,
-      "captured_of_attainable_pct": -70.71,
+      "captured_pct": 0.0,
+      "captured_of_attainable_pct": 0.0,
       "auc_in_trace": null
     },
     {
@@ -37,8 +37,8 @@
       "train": "toolagent",
       "rung": "linear",
       "auc_cross_trace": 0.8116,
-      "captured_pct": -1.01,
-      "captured_of_attainable_pct": -18.79,
+      "captured_pct": 2.71,
+      "captured_of_attainable_pct": 50.73,
       "auc_in_trace": 0.8145
     },
     {
@@ -46,8 +46,8 @@
       "train": "toolagent",
       "rung": "gbdt",
       "auc_cross_trace": 0.8039,
-      "captured_pct": -1.28,
-      "captured_of_attainable_pct": -23.88,
+      "captured_pct": 2.55,
+      "captured_of_attainable_pct": 47.57,
       "auc_in_trace": 0.9342
     },
     {
@@ -55,8 +55,8 @@
       "train": "toolagent",
       "rung": "mlp",
       "auc_cross_trace": 0.8192,
-      "captured_pct": -0.46,
-      "captured_of_attainable_pct": -8.52,
+      "captured_pct": 2.82,
+      "captured_of_attainable_pct": 52.65,
       "auc_in_trace": 0.8509
     },
     {
@@ -91,8 +91,8 @@
       "train": "conversation",
       "rung": "random",
       "auc_cross_trace": 0.4967,
-      "captured_pct": -34.54,
-      "captured_of_attainable_pct": -838.65,
+      "captured_pct": -11.69,
+      "captured_of_attainable_pct": -283.96,
       "auc_in_trace": null
     },
     {
@@ -100,8 +100,8 @@
       "train": "conversation",
       "rung": "count",
       "auc_cross_trace": 0.7088,
-      "captured_pct": -2.43,
-      "captured_of_attainable_pct": -59.09,
+      "captured_pct": 0.0,
+      "captured_of_attainable_pct": 0.0,
       "auc_in_trace": null
     },
     {
@@ -109,8 +109,8 @@
       "train": "conversation",
       "rung": "linear",
       "auc_cross_trace": 0.9255,
-      "captured_pct": -1.32,
-      "captured_of_attainable_pct": -32.14,
+      "captured_pct": 2.27,
+      "captured_of_attainable_pct": 55.05,
       "auc_in_trace": 0.9285
     },
     {
@@ -118,8 +118,8 @@
       "train": "conversation",
       "rung": "gbdt",
       "auc_cross_trace": 0.9116,
-      "captured_pct": -1.35,
-      "captured_of_attainable_pct": -32.81,
+      "captured_pct": 1.85,
+      "captured_of_attainable_pct": 44.94,
       "auc_in_trace": 0.9665
     },
     {
@@ -127,8 +127,8 @@
       "train": "conversation",
       "rung": "mlp",
       "auc_cross_trace": 0.9306,
-      "captured_pct": -0.79,
-      "captured_of_attainable_pct": -19.26,
+      "captured_pct": 2.45,
+      "captured_of_attainable_pct": 59.53,
       "auc_in_trace": 0.9466
     },
     {

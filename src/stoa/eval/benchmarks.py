@@ -1,4 +1,7 @@
-"""Benchmark registry (docs/stoa_design.md §5).
+"""PVLDB version only: backs the LLM-dependent LoCoMo and representation results, which the
+ICDE paper omits because they need a paid hosted model (audit L1, section AO.7).
+
+Benchmark registry (docs/stoa_design.md §5).
 
 STOA is evaluated on long-term agent-memory benchmarks, with retrieval
 components stress-tested on the Big ANN streaming/filtered tracks. Metrics:

@@ -1,4 +1,8 @@
-"""STOA control plane (docs/stoa_design.md §3).
+"""Scaffolding for the formulation and architecture of sections 3-4 (the learned control
+plane). No result reported in the ICDE paper uses this module; it is kept because the
+formulation is offered as a frame, and removing it would orphan its tests (audit L1).
+
+STOA control plane (docs/stoa_design.md §3).
 
 Sits above a MemOS-style store, LMCache-style tiering, and an M+-style latent
 path. Online actions migrate/serve; offline (sleep-time) actions consolidate

@@ -49,6 +49,10 @@ python scripts/finetune_rl.py          # M6-9  REINFORCE fine-tune on top of BC 
 python scripts/run_budget_frontier.py  # M9-12 budget-conditioned frontier (RQ3)
 
 # production-trace experiments (need data/mooncake_*.jsonl; see src/stoa/mooncake.py)
+python scripts/run_reachable_ceiling.py   # how much of the oracle's advantage a split-time policy can reach
+python scripts/run_arrival_admission.py   # arrival-time admission, causal design (src/stoa/causal.py)
+python scripts/run_arrival_diagnostics.py # exposure confound + the leaky design's label leak, measured
+python scripts/run_weight_sensitivity.py  # unreachable share under order-of-magnitude changes to each lambda
 python scripts/run_reactive_real.py       # reactive tiering incl. ARC, full traces
 python scripts/run_capacity_ladder.py     # linear -> GBDT -> MLP -> oracle; the "not the model" control
 python scripts/run_sampling_study.py      # randomized-draw control (CI on the kvct claim)
@@ -174,7 +178,7 @@ simulator/training/eval) — keep it in sync when you add or rename config field
 - **A fraction is reported with its denominator characterized.** Any "share of headroom captured" must
   be accompanied by the share a *causal* policy could reach (`sequential.attainable_ceiling`). Reporting
   the first without the second is how this project's central claim came to be an artifact for three
-  revisions: 97% of the denominator was unreachable by construction.
+  revisions: 95% of the denominator was unreachable by construction.
 - **A shared convention is fixed in every routine that uses it, or in none.** `place_with_beliefs`,
   `prefix_greedy_cost` and `_oracle_cost` all choose among equal-cost actions. Fixing the tie rule in one
   left the numerator and denominator of every reported fraction computed under different rules, and the
@@ -188,4 +192,11 @@ simulator/training/eval) — keep it in sync when you add or rename config field
 - **Beliefs are compared on one magnitude scale.** `sequential.quantile_match` (with mid-rank tie
   handling) exists because the same policy with the same ordering scores +85% or −32% depending on the
   scale its beliefs sit on. State the convention or the number is not a quantity.
+- **The common scale is causal.** The reference distribution a belief is quantile-matched onto comes
+  from what a deployed policy could have seen (pre-split reuse counts, `causal.analogue_magnitudes`),
+  never from the evaluation blocks' future counts: that is a leak of the label distribution, and five
+  producers carried it while every number check passed (notebook §AP). Training labels likewise end
+  before the split (`causal.windowed_training_labels`), and train, evaluation and billing share one
+  instant (`causal.split_by_arrival`). `tests/test_causal.py` fails if a producer assigns a reference
+  scale from future counts.
 - `web/index.html` is a self-contained interactive visualization (no build step).

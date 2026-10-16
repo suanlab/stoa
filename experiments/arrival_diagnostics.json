@@ -1,0 +1,38 @@
+{
+  "config": {
+    "split": "time_split(0.5)",
+    "quarters": "of the evaluation period"
+  },
+  "rows": [
+    {
+      "trace": "conversation",
+      "eval_first_quarter_mean_future": 0.408,
+      "eval_last_quarter_mean_future": 0.174,
+      "first_over_last": 2.35,
+      "auc_arrival_order": 0.555,
+      "old_design_cut": 5374,
+      "billing_split": 6015,
+      "old_design_label_mass_after_cut_pct": 34.3
+    },
+    {
+      "trace": "toolagent",
+      "eval_first_quarter_mean_future": 0.414,
+      "eval_last_quarter_mean_future": 0.178,
+      "first_over_last": 2.33,
+      "auc_arrival_order": 0.549,
+      "old_design_cut": 10786,
+      "billing_split": 11803,
+      "old_design_label_mass_after_cut_pct": 46.3
+    },
+    {
+      "trace": "synthetic",
+      "eval_first_quarter_mean_future": 1.841,
+      "eval_last_quarter_mean_future": 0.397,
+      "first_over_last": 4.64,
+      "auc_arrival_order": 0.584,
+      "old_design_cut": 1129,
+      "billing_split": 1996,
+      "old_design_label_mass_after_cut_pct": 89.0
+    }
+  ]
+}

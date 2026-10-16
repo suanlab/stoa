@@ -1,4 +1,8 @@
-"""Behavioral-cloning warm-start for the GNN factored policy (RQ2; M6-9).
+"""Scaffolding for the formulation and architecture of sections 3-4 (the learned control
+plane). No result reported in the ICDE paper uses this module; it is kept because the
+formulation is offered as a frame, and removing it would orphan its tests (audit L1).
+
+Behavioral-cloning warm-start for the GNN factored policy (RQ2; M6-9).
 
 The Belady oracle is expensive (needs the future) but its *labels* are a supervised
 target. Following PARROT (arXiv:2006.16239), we warm-start the GNN policy by

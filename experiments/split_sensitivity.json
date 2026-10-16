@@ -11,10 +11,10 @@
     "note": "sensitivity band over a free parameter, NOT a sampling CI"
   },
   "summary": {
-    "captured_min": 0.2,
-    "captured_max": 3.64,
-    "oracle_gap_min": 80.95,
-    "oracle_gap_max": 91.93
+    "captured_min": 0.36,
+    "captured_max": 5.96,
+    "oracle_gap_min": 70.35,
+    "oracle_gap_max": 87.46
   },
   "results": [
     {
@@ -22,100 +22,100 @@
       "eval": "conversation",
       "train": "toolagent",
       "auc_linear": 0.7772,
-      "captured_linear_pct": 0.26,
+      "captured_linear_pct": 0.46,
       "auc_gbdt": 0.7859,
-      "captured_gbdt_pct": 0.36,
-      "oracle_gap_pct": 81.45
+      "captured_gbdt_pct": 0.64,
+      "oracle_gap_pct": 70.97
     },
     {
       "split_frac": 0.3,
       "eval": "toolagent",
       "train": "conversation",
       "auc_linear": 0.863,
-      "captured_linear_pct": 0.32,
+      "captured_linear_pct": 0.58,
       "auc_gbdt": 0.8395,
-      "captured_gbdt_pct": 0.2,
-      "oracle_gap_pct": 80.95
+      "captured_gbdt_pct": 0.36,
+      "oracle_gap_pct": 70.35
     },
     {
       "split_frac": 0.4,
       "eval": "conversation",
       "train": "toolagent",
       "auc_linear": 0.8113,
-      "captured_linear_pct": 1.18,
+      "captured_linear_pct": 2.1,
       "auc_gbdt": 0.7912,
-      "captured_gbdt_pct": 0.98,
-      "oracle_gap_pct": 84.42
+      "captured_gbdt_pct": 1.73,
+      "oracle_gap_pct": 75.32
     },
     {
       "split_frac": 0.4,
       "eval": "toolagent",
       "train": "conversation",
       "auc_linear": 0.8862,
-      "captured_linear_pct": 0.94,
+      "captured_linear_pct": 1.67,
       "auc_gbdt": 0.8757,
-      "captured_gbdt_pct": 0.77,
-      "oracle_gap_pct": 84.02
+      "captured_gbdt_pct": 1.38,
+      "oracle_gap_pct": 74.72
     },
     {
       "split_frac": 0.5,
       "eval": "conversation",
       "train": "toolagent",
       "auc_linear": 0.8116,
-      "captured_linear_pct": 2.31,
+      "captured_linear_pct": 3.97,
       "auc_gbdt": 0.8039,
-      "captured_gbdt_pct": 2.28,
-      "oracle_gap_pct": 87.21
+      "captured_gbdt_pct": 3.91,
+      "oracle_gap_pct": 79.9
     },
     {
       "split_frac": 0.5,
       "eval": "toolagent",
       "train": "conversation",
       "auc_linear": 0.9255,
-      "captured_linear_pct": 2.1,
+      "captured_linear_pct": 3.62,
       "auc_gbdt": 0.9116,
-      "captured_gbdt_pct": 1.93,
-      "oracle_gap_pct": 87.12
+      "captured_gbdt_pct": 3.32,
+      "oracle_gap_pct": 79.76
     },
     {
       "split_frac": 0.6,
       "eval": "conversation",
       "train": "toolagent",
       "auc_linear": 0.8165,
-      "captured_linear_pct": 2.61,
+      "captured_linear_pct": 4.31,
       "auc_gbdt": 0.8116,
-      "captured_gbdt_pct": 2.53,
-      "oracle_gap_pct": 91.46
+      "captured_gbdt_pct": 4.18,
+      "oracle_gap_pct": 86.63
     },
     {
       "split_frac": 0.6,
       "eval": "toolagent",
       "train": "conversation",
       "auc_linear": 0.9294,
-      "captured_linear_pct": 2.65,
+      "captured_linear_pct": 4.39,
       "auc_gbdt": 0.9214,
-      "captured_gbdt_pct": 2.5,
-      "oracle_gap_pct": 90.94
+      "captured_gbdt_pct": 4.14,
+      "oracle_gap_pct": 85.83
     },
     {
       "split_frac": 0.7,
       "eval": "conversation",
       "train": "toolagent",
       "auc_linear": 0.8415,
-      "captured_linear_pct": 3.45,
+      "captured_linear_pct": 5.65,
       "auc_gbdt": 0.8321,
-      "captured_gbdt_pct": 3.62,
-      "oracle_gap_pct": 91.93
+      "captured_gbdt_pct": 5.91,
+      "oracle_gap_pct": 87.46
     },
     {
       "split_frac": 0.7,
       "eval": "toolagent",
       "train": "conversation",
       "auc_linear": 0.9275,
-      "captured_linear_pct": 3.64,
+      "captured_linear_pct": 5.96,
       "auc_gbdt": 0.9306,
-      "captured_gbdt_pct": 3.59,
-      "oracle_gap_pct": 91.5
+      "captured_gbdt_pct": 5.88,
+      "oracle_gap_pct": 86.8
     }
   ]
 }

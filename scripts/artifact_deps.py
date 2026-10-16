@@ -13,7 +13,9 @@ DEPENDS_ON = {
     # artifact -> modules whose behaviour it encodes. Audited against each producing script's
     # direct imports by verify.producer_problems, which is how the omissions below were found:
     # four artifacts that load the Mooncake traces had not declared mooncake.py (§AO).
-    "arrival_admission.json": ("sequential.py", "mooncake.py"),
+    "arrival_admission.json": ("sequential.py", "mooncake.py", "causal.py"),
+    "arrival_diagnostics.json": ("sequential.py", "mooncake.py", "causal.py"),
+    "weight_sensitivity.json": ("sequential.py", "mooncake.py", "simulator.py"),
     "capacity_ladder_fixed.json": ("sequential.py", "gbdt.py", "mooncake.py"),
     "calibration_sensitivity.json": ("sequential.py", "calibration.py", "simulator.py",
                                      "environment.py", "mooncake.py"),

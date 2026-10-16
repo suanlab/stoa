@@ -17,7 +17,7 @@ SHELL := /bin/bash
 .PHONY: help verify reproduce-fast reproduce-full reproduce-llm figures paper clean data-check
 
 help:
-	@echo "make verify          — 231 tests + every paper number against its artifact (no data needed)"
+	@echo "make verify          — 261 tests + every paper number against its artifact (no data needed)"
 	@echo "make data-check      — are the traces present and the right length?"
 	@echo "make reproduce-fast  — regenerate the central claims from the Mooncake traces (~40 min)"
 	@echo "make reproduce-full  — the above plus the LRB hyperparameter sweep (~6 h)"
@@ -40,6 +40,7 @@ data-check:
 	          data/mooncake_synthetic_trace.jsonl; do \
 	  if [ -f $$f ]; then printf "%8d lines  %s\n" "$$(wc -l < $$f)" "$$f"; \
 	  else echo "MISSING $$f — see data/README.md"; fi; done
+	@cd data && sha256sum -c --quiet SHA256SUMS && echo "SHA-256 matches the pinned Mooncake commit for all three traces."
 	@echo "Expect 12031 (conversation), 23608 (toolagent) and 3993 (synthetic control). Several results run both traces to exhaustion, so a"
 	@echo "truncated download changes the numbers silently."
 
@@ -51,9 +52,11 @@ reproduce-fast: data-check
 	$(PY) scripts/run_reachable_ceiling.py
 	$(PY) scripts/run_headroom_by_length.py
 	$(PY) scripts/run_arrival_admission.py
+	$(PY) scripts/run_arrival_diagnostics.py
 	$(PY) scripts/run_belief_controls.py
 	$(PY) scripts/run_capacity_ladder.py --out experiments/capacity_ladder_fixed.json
 	$(PY) scripts/run_calibration_sensitivity.py
+	$(PY) scripts/run_weight_sensitivity.py
 	$(PY) scripts/check_paper_numbers.py
 
 # --- tier 2: everything that does not cost money -------------------------------------------

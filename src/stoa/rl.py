@@ -1,4 +1,8 @@
-"""Offline policy-gradient fine-tuning of the GNN policy (docs/research_plan.md §3, §10; M6-9/M9-12).
+"""Scaffolding for the formulation and architecture of sections 3-4 (the learned control
+plane). No result reported in the ICDE paper uses this module; it is kept because the
+formulation is offered as a frame, and removing it would orphan its tests (audit L1).
+
+Offline policy-gradient fine-tuning of the GNN policy (docs/research_plan.md §3, §10; M6-9/M9-12).
 
 Behavioral cloning (train.py) imitates the capacity-*greedy* Belady heuristic, but
 the factored per-node argmax has no view of the *global* tier-capacity constraint,

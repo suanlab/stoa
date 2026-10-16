@@ -3,17 +3,17 @@
 
 Our result closes one question and sharpens several others.
 
-\paragraph{What can a scheduler do that ordering cannot?}
-\Cref{sec:arrival} shows that first-come-first-served admission captures 87.4\% of the reachable benefit
-on conversation but only 50.2\% on toolagent, and that a learned ranker adds nothing on top of it on
-either. So the recoverable benefit is not in per-item prediction. It is partly in \emph{when} the
-decision is taken and partly --- on toolagent, worth 14 points --- in the order arrivals are admitted in,
-which we do not currently model. What remains unclaimed on toolagent is large: half the reachable
-benefit, and 81\% of the hindsight gap that arrival timing does not expose at all. Both have to come from
-something the per-item formulation does not express: admission under contention, coordinated eviction
-across concurrently-live sessions, or migration timed against idle windows. Identifying which of these
-carries the gap, and building an evaluation that can see it, is the substantive next step, and it is a
-scheduling question rather than a modelling one.
+\paragraph{Which admission rule, and what lies beyond admission?}
+\Cref{sec:arrival} shows that deciding at arrival puts most of the oracle's advantage within reach:
+first-come-first-served admission alone leaves about a quarter of it unclaimed on conversation and a
+sixth on toolagent. It cannot say which arrival-time rule is best. In a finite trace a block that arrives
+early has more time to be reused than one that arrives late, so first-come-first-served admission
+inherits an advantage from the evaluation window itself. Comparing admission rules needs an evaluation
+that gives every block the same exposure, a rolling window or a fixed post-arrival horizon, before any
+rule can be called better. Whatever such an evaluation leaves unclaimed has to come from something the
+per-item formulation does not express: admission under contention, coordinated eviction across
+concurrently-live sessions, or migration timed against idle windows. That is a scheduling question
+rather than a modelling one.
 
 \paragraph{Calibration, and what a mis-specified cost model hides.}
 Our tables are placeholders, and we saw concretely how misleading that is: under them the per-item optimal

@@ -16,10 +16,14 @@ output token counts, and remapped block hashes." Confirm current terms before re
 ```bash
 mkdir -p data
 curl -sL -o data/mooncake_toolagent_trace.jsonl \
-  https://raw.githubusercontent.com/kvcache-ai/Mooncake/main/FAST25-release/traces/toolagent_trace.jsonl
+  https://raw.githubusercontent.com/kvcache-ai/Mooncake/3cca71daccf2a7afb8fe3f0295358f70e3a69fdb/FAST25-release/traces/toolagent_trace.jsonl
 curl -sL -o data/mooncake_conversation_trace.jsonl \
-  https://raw.githubusercontent.com/kvcache-ai/Mooncake/main/FAST25-release/traces/conversation_trace.jsonl
+  https://raw.githubusercontent.com/kvcache-ai/Mooncake/3cca71daccf2a7afb8fe3f0295358f70e3a69fdb/FAST25-release/traces/conversation_trace.jsonl
 ```
+
+**Pinned** to Mooncake commit `3cca71daccf2` (the URLs above name it), so an upstream change cannot
+alter these files silently; `data/SHA256SUMS` records each file's SHA-256 and `make data-check`
+verifies them. (The URLs pointed at `main` until the 2026-10-16 audit, item M2.)
 
 Expect 12,031 (conversation) and 23,608 (toolagent) request lines. Several results run both traces
 **to exhaustion**, so a truncated download changes the numbers silently — `wc -l` them
@@ -38,7 +42,7 @@ uses it as a **control**, never pooled with the production pair:
 
 ```bash
 curl -sL -o data/mooncake_synthetic_trace.jsonl \
-  https://raw.githubusercontent.com/kvcache-ai/Mooncake/main/FAST25-release/traces/synthetic_trace.jsonl
+  https://raw.githubusercontent.com/kvcache-ai/Mooncake/3cca71daccf2a7afb8fe3f0295358f70e3a69fdb/FAST25-release/traces/synthetic_trace.jsonl
 ```
 
 Expect 3,993 lines.

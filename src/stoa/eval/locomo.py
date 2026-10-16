@@ -1,4 +1,7 @@
-"""LoCoMo benchmark adapter (Maharana et al., 2024; arXiv:2402.17753).
+"""PVLDB version only: backs the LLM-dependent LoCoMo and representation results, which the
+ICDE paper omits because they need a paid hosted model (audit L1, section AO.7).
+
+LoCoMo benchmark adapter (Maharana et al., 2024; arXiv:2402.17753).
 
 LoCoMo is ~300-turn multi-session conversational memory: each sample is a long
 two-speaker dialogue plus QA pairs whose `evidence` field names the dialogue turns

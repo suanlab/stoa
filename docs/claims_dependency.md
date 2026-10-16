@@ -1761,3 +1761,101 @@ to the harness that produces results as much as to the results.
 
 The commit that closed this conversion (dd32069) said this lapse "is recorded in the notebook". When
 that commit was made, it was not; this subsection was written afterwards to make the statement true.
+
+## §AP — an audit of the arrival-time experiment: three leaks, a confound, and four withdrawn readings
+
+On 2026-10-16 the author had an AI agent run a 24-item research-quality audit over the repository and
+the ICDE draft (saved locally as `AUDIT.md`, not part of the artifact). Every number check passed at the
+time. The audit's High findings, and what fixing them changed:
+
+**H2, the arrival-time experiment leaked in three ways.** (a) Training labels counted accesses up to the
+end of the trace, so 34.3% (conversation) and 46.3% (toolagent) of training-label mass came from after
+the train/eval cut. (b) The train/eval cut was the median *request* while the billing split was
+`time_split(0.5)`, two different instants. (c) Belief magnitudes were `quantile_match`-ed onto the
+evaluation blocks' **true future counts**, so the reference distribution was a label. The same pattern
+(c) sat in four more producers: `run_belief_controls.py`, `run_capacity_ladder.py`,
+`run_calibration_sensitivity.py` and `run_split_sensitivity.py`; the audit's grep found four of the
+five, and the fifth surfaced only while fixing the others. The fix is `src/stoa/causal.py`:
+`split_by_arrival` (one instant for training, evaluation and billing), `windowed_training_labels`
+(label = accesses in `(t, t+w]`, kept only if `t+w < split`) and `analogue_magnitudes` (the scale is the
+pre-split reuse distribution, resampled). `tests/test_causal.py` pins all three structurally, including a
+scan that fails if any producer assigns a reference scale from future counts.
+
+**Fixing the leaks exposed a confound the leaky design had hidden.** The first causal rerun gave
+pre-split blocks a belief of zero in the arrival arms but not in the split arms, so arrival arms looked
+worse for a reason unrelated to timing. The symmetric design keeps the heuristic (prefix-count) belief
+for pre-split blocks in every arm and changes only what new blocks receive. Its "arrival ceiling" mixes a
+past scale for old blocks with a future scale for new ones and is **not an upper bound**:
+first-come-first-served beat it on both production traces. The paper therefore reports every arm as a
+share of the full hindsight gap and drops the ceiling.
+
+**And a confound the design cannot remove.** In a finite window a block arriving in the first quarter
+sees 2.35x (conversation), 2.33x (toolagent) and 4.64x (synthetic) the future reuse of one arriving in
+the last quarter, and arrival order alone ranks future reuse at AUC 0.555 / 0.549 / 0.584
+(`experiments/arrival_diagnostics.json`). FCFS is close to "admit by exposure time", so FCFS beating the
+learned ranker (AUC 0.56 / 0.61 / 0.75) does not show the ranker is worse.
+
+| | before (leaky) | after (causal, % of full gap) |
+|---|---|---|
+| split-time ceiling | 5.3 / 4.1 | 5.3 / 4.1 / 35.0 (unchanged) |
+| FCFS | 87.4% / 50.2% "of reachable" | **75.0 / 84.7 / 52.6** |
+| learned ranker | 84.5% / 47.2% "of reachable" | 59.5 / 58.7 / 50.5 |
+| shuffled order | 3.3 / 14.1 points below FCFS | 58.4 / 57.9 / 42.7 |
+
+**Withdrawn, not corrected (four readings):** that a learned ranker captures less than FCFS; that FCFS
+captures 87% and 50% of what is reachable; that arrival order is worth 14 points; and that timing
+recovers nothing on the synthetic control (FCFS now reaches 52.6% there against a 35.0% split
+ceiling). The §AC falsifications were measured on the leaky design, so their numbers go with it.
+**Survives, and is stronger:** no split-time policy passes 5.3% / 4.1% of the oracle's advantage, while
+the simplest arrival-time rule captures 75–85% of it.
+
+The capacity ladder and belief controls were rerun on the causal scale. The ladder is now **monotone in
+AUC on both traces** (it was non-monotone on conversation), the strongest model gains under 3% of the
+full gap, and the scale choice moves a result by 22 to 381 points. The paper's earlier sentence that the
+ladder "never helps" is withdrawn. `split_sensitivity.json` moved most: its oracle-gap range went from
+81–92% to 70–87%, and captured from [+0.2, +3.6] to [+0.4, +6.0]; the paper does not cite it, and
+REPRODUCIBILITY.md now does with the new values.
+
+**The other High findings.** H1: the conclusion still stated the retracted decoupling result as the
+contribution; rewritten. H4: §5.4 now states the label horizon, the split and the magnitude scale. H5:
+Table 2's "+2%" row came from the retracted frame and is gone. H6: retracted *claims* (no number) now
+have a vocabulary guard (`SUPERSEDED_IN_PAPER` entries "decoupling", "ranking does not convert", ...),
+and the retraction-marker list was tightened after `"is neither"` was found to excuse the very sentence
+it should have caught. M4: a cost-weight sweep (`run_weight_sensitivity.py`) puts the unreachable share
+at 91.8–99.2% under order-of-magnitude changes to each λ.
+
+### AP.1 What the fixes themselves got wrong, and what caught it
+
+Three defects were introduced or uncovered **while fixing the audit**, which is the pattern of §AL
+again.
+
+- **The open-problems section kept the withdrawn numbers.** After §5.4, the abstract, the introduction
+  and the conclusion were rewritten, §6's first paragraph still said FCFS "captures 87.4% of the
+  reachable benefit on conversation but only 50.2% on toolagent" and that order was "worth 14 points".
+  No guard listed those values as superseded, because the values they replaced had been listed and these
+  had not. They are now in `SUPERSEDED_IN_PAPER`, mutation-checked (injecting "50.2" into the abstract
+  fails the checker).
+- **Rewriting the checker deleted checks.** Replacing the arrival block by span also removed the
+  reachable-ceiling, headroom-by-length and synthetic-control claims that sat between the old markers.
+  The emphasis-coverage guard (§AN) caught it at once: eight emphasised numbers suddenly had no
+  assertion. The blocks were restored from the committed checker.
+- **Hand rounding drifted from the artifact.** The paper said 55.1, 52.7, 0.57 and "22 to 382"; the
+  artifact formats 55.05, 52.65, 0.565 and 381.46 as 55.0, 52.6, 0.56 and 381. The artifact wins.
+
+### AP.2 Counts, defined once (audit M1)
+
+- **Tests:** 261, and `check_paper_numbers.py` now collects the suite and fails if README.md,
+  REPRODUCIBILITY.md or the Makefile states another number (they said 173, 163 and 231).
+- **Retractions:** the paper counts **three** (the sampling headline §I, the decoupling result §T/§U,
+  the LRB column §V). Five appear in REPRODUCIBILITY.md because two earlier ones ("Mooncake omits timing",
+  "two AUC regimes") predate the paper's framing. The two §AC falsifications and two further readings
+  are **withdrawn** here, which the paper reports as "four readings".
+- **Defects:** the paper's §5.8 catalogue counts twenty-four: reference-frame mismatches (6), retracted
+  claims (3), free-parameter extrapolations (3), believing a report (1), derived surfaces (3), unchecked
+  summaries (1), unverified interventions (1), emphasis without verification (1), and this section's
+  arrival-experiment defects (5: post-split labels, mismatched cut, future-count magnitudes, zeroed
+  pre-split beliefs, the mixed-scale ceiling).
+
+Deferred, with reason: audit L8 (shortening defect narratives in code docstrings) touches every module
+for no change in behaviour and would invalidate the provenance hashes of every artifact; it is left for
+after submission.

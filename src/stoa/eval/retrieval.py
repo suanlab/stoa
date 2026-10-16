@@ -1,4 +1,7 @@
-"""Embedding-retrieval baselines for the budget-QA harness (the RAG comparison).
+"""PVLDB version only: backs the LLM-dependent LoCoMo and representation results, which the
+ICDE paper omits because they need a paid hosted model (audit L1, section AO.7).
+
+Embedding-retrieval baselines for the budget-QA harness (the RAG comparison).
 
 Reviewers of a memory paper will ask the obvious question: *why not just retrieve
 with embeddings?* Comparing STOA's demand-based selection only against RANDOM

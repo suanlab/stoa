@@ -1,4 +1,8 @@
-"""Factored orchestrator policy (docs/stoa_design.md §3).
+"""Scaffolding for the formulation and architecture of sections 3-4 (the learned control
+plane). No result reported in the ICDE paper uses this module; it is kept because the
+formulation is offered as a frame, and removing it would orphan its tests (audit L1).
+
+Factored orchestrator policy (docs/stoa_design.md §3).
 
 π_θ = π_rep · π_tier · π_time on a shared GNN trunk over the memory graph.
 Acting on batches of items via a Decima-style GNN avoids per-item combinatorics.

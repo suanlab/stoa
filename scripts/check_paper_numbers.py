@@ -260,30 +260,57 @@ if d:
 # paper as verified on a machine where the artifacts were never generated. Require both a
 # minimum number of checks and that every artifact the paper depends on is present.
 
-# --- arrival-time admission: the paper's new headline ------------------------------
+# --- arrival-time admission, causal design (section 5.4, audit H2) ------------------------------
 d = load("arrival_admission.json")
-if d:
-    print("\narrival admission (experiments/arrival_admission.json)")
+_rc = load("reachable_ceiling.json")
+_dg = load("arrival_diagnostics.json")
+if d and _rc and _dg:
+    print("\narrival admission, causal (experiments/arrival_admission.json)")
     by = {(r["trace"], r["arm"]): r for r in d["results"]}
-    for trace in ("conversation", "toolagent"):
-        for arm, label in (("arrival-learned", "learned"), ("arrival-fcfs", "FCFS"),
-                           ("arrival-shuffled", "shuffled"), ("arrival-ceiling", "ceiling")):
-            r = by.get((trace, arm))
-            if not r:
-                continue
-            # Accept the cells with or without \textbf: emphasis is typography, and a
-            # checker that fails on it is a checker people learn to ignore.
-            g, a_ = r["captured_pct"], r["captured_of_attainable_pct"]
-            plain = f"{g:.1f}\\% & {a_:.1f}\\%"
-            bold = f"\\textbf{{{g:.1f}\\%}} & \\textbf{{{a_:.1f}\\%}}"
-            found = any(re.sub(r"\s+", " ", n) in TEX for n in (plain, bold))
-            # Report through claim() so the count and failure list stay in one place; pass
-            # whichever form is present so the needle check cannot disagree with `found`.
-            claim(f"{trace} {label} row", bold if found and plain not in TEX else plain,
-                  plain, "arrival row")
-        ceil = by[(trace, "arrival-ceiling")]["captured_pct"]
-        claim(f"{trace} reachable share at arrival", f"{ceil:.1f}\\%",
-              f"{ceil:.1f}%", "arrival-ceiling")
+    split_ceiling = {t: [r for r in v["rows"] if r["split_frac"] == 0.5][0]["reachable_pct"]
+                     for t, v in _rc["traces"].items()}
+    fcfs, learned, shuf, auc_l = {}, {}, {}, {}
+    for t in ("conversation", "toolagent", "synthetic"):
+        fcfs[t] = by[(t, "arrival-fcfs")]["captured_pct"]
+        learned[t] = by[(t, "arrival-learned")]["captured_pct"]
+        shuf[t] = by[(t, "arrival-shuffled")]["captured_pct"]
+        auc_l[t] = by[(t, "arrival-learned")]["auc"]
+        claim(f"{t}: table row (split ceiling, FCFS, learned (AUC), shuffled)",
+              f"{t} & {split_ceiling[t]:.1f} & \\textbf{{{fcfs[t]:.1f}}} & "
+              f"{learned[t]:.1f} ({auc_l[t]:.2f}) & {shuf[t]:.1f}",
+              f"{fcfs[t]:.1f}", "arrival row, % of full gap")
+        assert fcfs[t] > split_ceiling[t], (
+            f"{t}: a causal arrival rule no longer beats the split-time ceiling; the paper says it does")
+    claim("FCFS, production, in text", f"captures {fcfs['conversation']:.1f}\\% and "
+          f"{fcfs['toolagent']:.1f}\\% of the oracle's advantage", "", "arrival text")
+    claim("split ceiling, production, in text",
+          f"can exceed {split_ceiling['conversation']:.1f}\\% and {split_ceiling['toolagent']:.1f}\\%",
+          "", "reachable_ceiling @ 0.5")
+    claim("synthetic margin", f"{fcfs['synthetic']:.1f}\\% against\n{split_ceiling['synthetic']:.1f}\\%",
+          "", "arrival vs split, synthetic")
+    lead_l = [fcfs[t] - learned[t] for t in fcfs]
+    lead_s = [fcfs[t] - shuf[t] for t in fcfs]
+    claim("FCFS leads, ranges", f"leads the learned ranker by {min(lead_l):.0f}--{max(lead_l):.0f}\n"
+          f"points and a shuffled order by {min(lead_s):.0f}--{max(lead_s):.0f}",
+          f"{lead_l} / {lead_s}", "fcfs - learned / shuffled")
+    claim("learned ranker AUC range", f"the learned ranker's {min(auc_l.values()):.2f}--"
+          f"{max(auc_l.values()):.2f}", "", "arrival-learned auc")
+    rows = {r["trace"]: r for r in _dg["rows"]}
+    ratio = [r["first_over_last"] for r in _dg["rows"]]
+    aucs = [r["auc_arrival_order"] for r in _dg["rows"]]
+    claim("exposure ratio (section 5.4)", f"{min(ratio):.1f}--{max(ratio):.1f} times", "", "diagnostics")
+    claim("exposure ratio (introduction)", f"{min(ratio):.1f} to {max(ratio):.1f} times", "", "diagnostics")
+    claim("arrival-order AUC", f"AUC {min(aucs):.2f}--{max(aucs):.2f}", "", "diagnostics")
+    claim("old design's label leak", f"{rows['conversation']['old_design_label_mass_after_cut_pct']:.1f}\\% and "
+          f"{rows['toolagent']['old_design_label_mass_after_cut_pct']:.1f}\\% of training-label",
+          "", "diagnostics")
+    # Abstract, rounded.
+    claim("abstract: split ceiling", f"reaches {split_ceiling['conversation']:.1f}\\% and\n"
+          f"{split_ceiling['toolagent']:.1f}\\% of it", "", "abstract")
+    claim("abstract: FCFS", f"captures {fcfs['conversation']:.0f}\\%\nand {fcfs['toolagent']:.0f}\\% of it, "
+          f"and {fcfs['synthetic']:.0f}\\% on", "", "abstract")
+    claim("introduction: FCFS", f"\\textbf{{{fcfs['conversation']:.1f}\\%}} of the oracle's advantage on one "
+          f"trace and \\textbf{{{fcfs['toolagent']:.1f}\\%}}", "", "introduction")
 
 # --- the retracted claims must not reappear ----------------------------------------
 RETRACTED = [
@@ -335,47 +362,60 @@ if d:
     # not part of this artifact. A number nobody can regenerate is not one the checker should
     # certify, and the paper no longer states it.
 
-# --- capacity ladder on the corrected metric ---------------------------------------
+# --- capacity ladder, causal magnitude scale (section 5.3, audit H2) ---------------------------
+def _sg(v):
+    return "0.0" if round(v, 1) == 0 else f"{v:+.1f}"
+
+
 d = load("capacity_ladder_fixed.json")
 if d:
-    print("\ncapacity ladder, corrected metric (experiments/capacity_ladder_fixed.json)")
+    print("\ncapacity ladder, causal scale (experiments/capacity_ladder_fixed.json)")
     by = {(r["eval"], r["rung"]): r for r in d["results"]}
     for rung in ("constant", "random", "count", "linear", "gbdt", "mlp"):
-        c = by.get(("conversation", rung))
-        t = by.get(("toolagent", rung))
-        if not (c and t):
-            continue
-        # Both cells of the row, so a lone number cannot satisfy the check.
-        row = (f"${c['captured_of_attainable_pct']:.1f}$ & "
-               f"${t['captured_of_attainable_pct']:.1f}$")
-        claim(f"ladder row: {rung}", row, row, "captured_of_attainable_pct")
-    # The paper claims monotonicity on toolagent ONLY, and says so explicitly. Asserting it
-    # on both traces is what an earlier revision did, from numbers predating the baseline
-    # tie-break fix.
-    tool = [by[("toolagent", r)]["captured_of_attainable_pct"]
-            for r in ("constant", "count", "linear", "mlp") if ("toolagent", r) in by]
-    assert tool == sorted(tool), (
-        f"toolagent ladder is no longer monotone in AUC: {tool}; the paper claims it is")
-    conv = [by[("conversation", r)]["captured_of_attainable_pct"]
-            for r in ("constant", "count", "linear", "mlp") if ("conversation", r) in by]
-    assert conv != sorted(conv), (
-        f"conversation ladder became monotone: {conv}; the paper says it is not, so update it")
+        c, t = by[("conversation", rung)], by[("toolagent", rung)]
+        claim(f"ladder row: {rung}", f"${_sg(c['captured_of_attainable_pct'])}$ & "
+              f"${_sg(t['captured_of_attainable_pct'])}$", "", "captured_of_attainable_pct")
+    # The paper now claims monotone conversion on BOTH traces, rungs ordered by AUC.
+    for tr in ("conversation", "toolagent"):
+        rungs = sorted(("count", "linear", "gbdt", "mlp"), key=lambda r: by[(tr, r)]["auc_cross_trace"])
+        vals = [by[(tr, r)]["captured_of_attainable_pct"] for r in rungs]
+        assert vals == sorted(vals), f"{tr}: ladder not monotone in AUC ({list(zip(rungs, vals))})"
+    best = max(by[(tr, r)]["captured_pct"] for tr in ("conversation", "toolagent")
+               for r in ("linear", "gbdt", "mlp"))
+    assert best < 3.0, f"the abstract says the strongest model gains under 3% of the gap; it gains {best}"
+    claim("strongest model, of the full gap",
+          f"gains {max(by[('conversation', r)]['captured_pct'] for r in ('linear', 'gbdt', 'mlp')):.1f}\\% and "
+          f"{max(by[('toolagent', r)]['captured_pct'] for r in ('linear', 'gbdt', 'mlp')):.1f}\\%", "", "ladder")
 
-# --- belief magnitude control ------------------------------------------------------
+# --- belief magnitude control, causal scale (section 5.3) -----------------------------------
 d = load("belief_controls.json")
 if d:
     print("\nbelief controls (experiments/belief_controls.json)")
     for r in d["results"]:
         if r["rung"] == "ceiling":
             continue
-        row = (f"${r['native_of_attainable']:+.1f}$ & ${r['common_scale_of_attainable']:+.1f}$ & "
-               f"{abs(r['magnitude_contribution']):.1f}")
+        diff = r["magnitude_contribution"]
+        dtxt = f"{diff:.1f}" if diff >= 0 else f"${diff:.1f}$"
+        row = (f"${_sg(r['native_of_attainable'])}$ & ${_sg(r['common_scale_of_attainable'])}$ & {dtxt}")
         claim(f"{r['trace']} {r['rung']} magnitude row", row, row, "belief control row")
     s2 = d["summary"]
     claim("magnitude contribution range",
-          f"{s2['magnitude_min_points']:.1f} to {s2['magnitude_max_points']:.1f} points",
-          f"{s2['magnitude_min_points']:.1f}-{s2['magnitude_max_points']:.1f}", "summary")
+          f"{s2['magnitude_min_points']:.0f} to {s2['magnitude_max_points']:.0f} points",
+          f"{s2['magnitude_min_points']}-{s2['magnitude_max_points']}", "summary")
 
+# Cost-weight sensitivity (audit M4).
+d = load("weight_sensitivity.json")
+if d:
+    print("\nweight sensitivity (experiments/weight_sensitivity.json)")
+    sm = d["summary"]
+    claim("unreachable share across weight variants",
+          f"{sm['unreachable_min']:.1f}--{sm['unreachable_max']:.1f}\\%", "", "weight variants @ 0.5")
+    _rc2 = load("reachable_ceiling.json")
+    if _rc2:
+        prod = [r["unreachable_pct"] for t in ("conversation", "toolagent")
+                for r in _rc2["traces"][t]["rows"]] + [r["unreachable_pct"] for r in d["rows"]]
+        claim("abstract: 92--99 across splits and weights",
+              f"stays at {min(prod):.0f}--{max(prod):.0f}\\%", "", "splits + weights")
 
 # --- staleness guard ---------------------------------------------------------------
 # An artifact older than the code that produces it is not evidence about the current code.
@@ -399,11 +439,6 @@ _manifest = json.loads(_PROV.read_text()) if _PROV.exists() else None
 # headline numbers, and nothing checked it. Twice now a correction landed in the .tex and not in
 # the markdown, most recently leaving the repository's front page advertising the two numbers a
 # re-verification pass had just falsified. These are the quantities a reader meets first.
-# The cost of shuffling the arrival order: the claim §AC falsified and the paper now states
-# in corrected form. Emphasised in both the introduction and §5.4 and asserted by nothing.
-# Trace sizes: stated in the paper as a bare pair, in the reverse of the column order every
-# other table uses, and asserted by nothing. The artifact labels its rows, so the mapping is
-# recoverable rather than a matter of which one a reader assumes comes first.
 # §5.2's table: the paper's headline, and for twelve passes backed by nothing. Every row is
 # now derived from one artifact computed in one frame. See §AN for what the old numbers were
 # and why they could not all be right at once.
@@ -431,16 +466,6 @@ if d:
          for t in ("conversation", "toolagent")]
     claim("unreachable pair as stated in prose", f"{u[0]:.1f}\\% and {u[1]:.1f}\\%",
           f"{u}", "both traces @ 0.5")
-    # And the multipliers, which divide the arrival ceiling by the split-instant one. Both
-    # numerator and denominator must come from the same span -- the defect of §AN.
-    _aa = load("arrival_admission.json")
-    if _aa:
-        _by = {(r["trace"], r["arm"]): r for r in _aa["results"]}
-        for _t, _needle in (("conversation", "16"), ("toolagent", "4.6")):
-            _arrival = _by[(_t, "arrival-ceiling")]["captured_pct"]
-            _split = [r for r in d["traces"][_t]["rows"] if r["split_frac"] == 0.5][0]["reachable_pct"]
-            claim(f"{_t}: timing multiplier", _needle, f"{_arrival / _split:.2f}x",
-                  "arrival ceiling / split-instant reachable")
 
 # Trace sizes and the length dependence of headroom, from headroom_by_length.json -- which has a
 # producer. Its predecessor (mooncake_length_sweep.json) had none, carried no headroom column at
@@ -486,40 +511,20 @@ if d and "synthetic" in d["traces"]:
     _lo = min(r["no_pre_split_pct"] for r in sy["rows"])
     claim("synthetic: fewest new blocks across splits", f"only {_lo:.0f}\\% of blocks are new",
           _lo, "min no_pre_split_pct")
-    _aa = load("arrival_admission.json")
-    if _aa:
-        _by = {(r["trace"], r["arm"]): r for r in _aa["results"]}
-        _c = _by[("synthetic", "arrival-ceiling")]["captured_pct"]
-        claim("synthetic: new blocks carry", f"only {_c:.1f}\\% of the gap", _c,
-              "arrival-ceiling captured_pct")
-        _neg = [a for a in ("arrival-learned", "arrival-fcfs", "arrival-shuffled")
-                if _by[("synthetic", a)]["captured_of_attainable_pct"] < 0]
-        assert len(_neg) == 3, (
-            "the paper says every arrival-time policy falls below the frequency heuristic on the "
-            f"synthetic control; only {_neg} do")
-
-_arr0 = load("arrival_admission.json")
-if _arr0:
-    _b = {(r["trace"], r["arm"]): r for r in _arr0["results"]}
-    print("\narrival order (experiments/arrival_admission.json)")
-    for _t, _needle in (("conversation", "3.3 points"), ("toolagent", "14.1 points")):
-        _cost = (_b[(_t, "arrival-fcfs")]["captured_of_attainable_pct"]
-                 - _b[(_t, "arrival-shuffled")]["captured_of_attainable_pct"])
-        claim(f"{_t}: cost of shuffling the arrival order", f"{_cost:.1f} points",
-              f"{_cost:.2f}", "fcfs - shuffled, of attainable")
 
 PROSE_FILES = ("README.md", "paper/README.md", "REPRODUCIBILITY.md")
 _arr = load("arrival_admission.json")
-if _arr:
+_rch = load("reachable_ceiling.json")
+if _arr and _rch:
     _by = {(r["trace"], r["arm"]): r for r in _arr["results"]}
     HEADLINE = {}
     for _t in ("conversation", "toolagent"):
-        # The reachable share IS the ceiling arm's captured_pct: what a clairvoyant policy
-        # restricted to blocks it could have seen actually captures.
-        HEADLINE[f"reachable share, {_t}"] = f"{_by[(_t, 'arrival-ceiling')]['captured_pct']:.1f}"
-        HEADLINE[f"FCFS of attainable, {_t}"] = (
-            f"{_by[(_t, 'arrival-fcfs')]['captured_of_attainable_pct']:.1f}")
-    failures += verify.prose_drift(PROSE_FILES, HEADLINE, ROOT, trigger="reachable share")
+        # The causal headline (audit H2): the best split-time policy against plain FCFS admission
+        # at arrival, both as a share of the same full hindsight gap.
+        _at = [r for r in _rch["traces"][_t]["rows"] if r["split_frac"] == 0.5][0]
+        HEADLINE[f"split-time ceiling, {_t}"] = f"{_at['reachable_pct']:.1f}%"
+        HEADLINE[f"FCFS of the full gap, {_t}"] = f"{_by[(_t, 'arrival-fcfs')]['captured_pct']:.1f}%"
+    failures += verify.prose_drift(PROSE_FILES, HEADLINE, ROOT, trigger="first-come-first-served")
 
 # The lab notebook legitimately records superseded measurements -- rewriting them would destroy
 # the record. But an unmarked one reads as current: §V.2 stated "shuffling the arrival order
@@ -555,6 +560,21 @@ SUPERSEDED_IN_PAPER = {
     "share from 3\\%": "split-instant reachable share (now 5.3%)",
     "and 2\\% to": "split-instant reachable share, toolagent (now 4.1%)",
     "87.2\\%": "headroom at full length (now 79.8-79.9%)",
+    "The 97\\%": "the unreachable share (now ~95%, section 5.2)",
+    # Retracted CLAIMS, not numbers (audit H6). The conclusion and the related-work section both
+    # restated the decoupling result as "the contribution" for months: no number, so no number
+    # check could see them. A retracted claim may appear only inside a paragraph retracting it.
+    "decoupling": "the retracted decoupling result (section T)",
+    "neither yes nor no": "the retracted decoupling framing",
+    "ranking quality improves substantially while": "the retracted decoupling claim",
+    "an oracle's ordering would recover": "contradicts section 5.2: most of the gap is unreachable",
+    "ranking does not convert": "the retracted decoupling claim",
+    # The leaky arrival design's readings (audit H2, notebook section AP).
+    "50.2": "FCFS of attainable, toolagent, from the leaky arrival design",
+    "19.0\\%": "reachable share at arrival, toolagent, from the leaky arrival design",
+    "worth 14 points": "arrival order's value, from the leaky arrival design",
+    "timing multiplier": "arrival ceiling / split ceiling, from the leaky arrival design",
+    "of what is reachable": "FCFS against a mixed-scale ceiling that is not an upper bound",
 }
 for _tex in [ROOT / "paper" / "main.tex", *sorted((ROOT / "paper" / "sections").glob("*.tex"))]:
     failures += verify.unmarked_superseded(
@@ -571,6 +591,27 @@ for _doc in ("REPRODUCIBILITY.md", "README.md", "paper/README.md", "data/README.
         _t = _p.read_text()
         failures += verify.dangling_paths(_t, ROOT, _doc)
         failures += verify.broken_entry_points(_t, _doc)
+
+# Stated test counts (audit M1): the README said 173, REPRODUCIBILITY 163 and the Makefile 231 while
+# the suite held 261. A count is a claim like any other; collect the suite and compare.
+import re as _re
+import subprocess as _sp
+
+_col = _sp.run([sys.executable, "-m", "pytest", "--collect-only", "-q"], cwd=ROOT,
+               capture_output=True, text=True)
+_m = _re.search(r"(\d+) tests? collected", _col.stdout)
+if _m:
+    _n = int(_m.group(1))
+    _pat = _re.compile(r"(?:# |\| |all \*\*|— |min   )(\d+)\*{0,2} tests\b")
+    for _doc in ("README.md", "REPRODUCIBILITY.md", "Makefile", "paper/README.md"):
+        _p = ROOT / _doc
+        if not _p.exists():
+            continue
+        for _hit in _pat.finditer(_p.read_text()):
+            if int(_hit.group(1)) != _n:
+                failures.append(f"{_doc} says {_hit.group(1)} tests; the suite collects {_n}.")
+else:
+    failures.append("could not collect the test suite to check stated test counts")
 
 NOTEBOOK = ROOT / "docs" / "claims_dependency.md"
 if NOTEBOOK.exists():
@@ -615,6 +656,11 @@ failures += verify.page_limit_violation(_paper / "main.pdf", limit=12,
 failures += verify.bibtex_problems(_paper / "main.blg")
 failures += verify.author_block_problems(_paper / "main.tex")
 failures += verify.leaked_annotations(_paper / "main.pdf")
+_cited = set()
+for _t in [_paper / "main.tex", *sorted((_paper / "sections").glob("*.tex"))]:
+    for _m in re.findall(r"\\cite[a-z]*\{([^}]*)\}", _t.read_text()):
+        _cited |= {k.strip() for k in _m.split(",")}
+failures += verify.citation_hygiene((ROOT / "docs" / "references.bib").read_text(), _cited)
 failures += verify.stale_paper_pdf(
     _paper / "main.pdf",
     [_paper / "main.tex", *sorted((_paper / "sections").glob("*.tex")),
@@ -633,10 +679,14 @@ failures += verify.unbacked_emphasised_numbers(
     ))
 
 # --- artifact guards, LAST so every load() above is visible to them -------------------
+# Artifacts this paper does not cite are not held to freshness here: their staleness cannot
+# affect a number the paper states. They are named, not silently dropped.
+_IN_PAPER = {k: v for k, v in DEPENDS_ON.items() if k not in NOT_IN_THIS_PAPER}
+print(f"\n[skip] freshness of {sorted(set(DEPENDS_ON) - set(_IN_PAPER))}: not cited by this paper")
 failures += verify.undeclared_artifacts(_LOADED, DEPENDS_ON, EXP)
-failures += verify.stale_artifacts(DEPENDS_ON, EXP, SRC, manifest=_manifest)
+failures += verify.stale_artifacts(_IN_PAPER, EXP, SRC, manifest=_manifest)
 failures += verify.producer_problems(
-    DEPENDS_ON, ROOT / "scripts", SRC,
+    _IN_PAPER, ROOT / "scripts", SRC,
     readers=("check_paper_numbers.py", "make_figures.py", "record_provenance.py"),
     producers={"reactive_real_full_lrb.json": "run_reactive_real.py",
                "capacity_ladder_fixed.json": "run_capacity_ladder.py"})

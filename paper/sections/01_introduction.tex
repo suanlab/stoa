@@ -49,23 +49,24 @@ Having built the formulation, we take seriously the empirical question it invite
 actually learnable?}---and answer it on production KV traces rather than on synthetic workloads. The
 answer turned out to depend less on the model than on \emph{when the model is asked}.
 
-Placement studies of this kind, including three revisions of this one, fix a split instant: observe a
-prefix, build features from it, place every block, and bill the result against the future. Feature
+A natural way to evaluate this decision, and the one three revisions of this paper used, fixes a split
+instant: observe a prefix, build features from it, place every block, and bill the result against the
+future. Feature
 construction can only describe a block that has been seen --- and on these traces 45--46\% of blocks have
 no pre-split access at all, while the hindsight oracle they are scored against ranks them anyway. Those
 blocks carry \textbf{95\% of the oracle's advantage}. A policy confined to the remaining 5\% looks flat
 however well it ranks, which is precisely what our earlier ``ranking does not convert into placement''
 result measured. We retract it.
 
-Moving the decision to each block's \emph{arrival} --- placing it the moment it first appears, from the
-session context available at that instant --- raises the reachable share from 5\% to \textbf{83.5\%} on
-one trace and 4\% to \textbf{19.0\%} on the other. What captures it is not prediction:
-first-come-first-served admission with a fixed action reaches 87.4\% and 50.2\% of the ceiling, while a
-learned arrival-time ranker at AUC 0.574 and 0.635 reaches 84.5\% and 47.2\% --- less, on both. But the
-arrival \emph{order} is not free: shuffling it costs 3.3 points on one trace and \textbf{14.1} on the
-other. So the design implication is narrower than ``deciding at all is enough'': build an
-\textbf{admission point} rather than a predictor, and do not assume the order it admits in is
-incidental.
+Moving the decision to each block's \emph{arrival}, placing it the moment it first appears from the
+session context available at that instant, changes what is within reach. Even first-come-first-served
+admission captures \textbf{75.0\%} of the oracle's advantage on one trace and \textbf{84.7\%} on the
+other, where no split-time policy, even a clairvoyant one, can pass 5.3\% and 4.1\%. A learned
+arrival-time ranker does no better than arrival order, but we do not read that as a verdict on
+prediction: within a finite trace, blocks that arrive early see 2.3 to 4.6 times the future reuse of
+blocks that arrive late, so arrival order is entangled with exposure time. The design implication we can
+support is the coarse one: build an \textbf{admission point}, decide at arrival, and compare admission
+rules only under equal exposure.
 
 Reaction is competitive for a related reason. Tiering rules that forecast nothing at all --- LRU, LFU and
 a fill-once cache --- reach 75--99\% of Belady's hit rate on one Mooncake trace and 40--94\% on the other,
@@ -79,9 +80,10 @@ because it is not a flattering story. Three claims were retracted, the last two 
 adversarial review we ran with AI reviewer agents, \emph{after} the error catalogue below had been
 written: a headline that randomized sampling
 showed had never been measurable, the decoupling result above, and an LRB column that turned out to
-measure random eviction because a training buffer was truncated to its tail. Two further sub-claims of
-the present framing were falsified later still, by a re-verification pass run after this paper was
-rewritten: three of the artifacts it cited predated a fix to the code that produced them. In every case
+measure random eviction because a training buffer was truncated to its tail. Later still, after every
+number check passed, an audit of our own arrival-time experiment found that its training labels, its
+split and its belief magnitudes all used information a deployed policy would not have; correcting them
+withdrew four readings this paper used to make. In every case
 the aggregate looked reasonable, which is the point --- none of our checks asked whether a reported
 quantity was arithmetically able to be what it claimed, and none asked whether a stored result was
 older than the program that wrote it.
@@ -93,23 +95,21 @@ older than the program that wrote it.
   (\Cref{sec:formulation}), and a control-plane sketch for it (\Cref{sec:arch}). The production traces
   exercise the tier axis only; we offer the formulation as the frame the measurements are read
   against, and do not claim to have evaluated it.
-  \item \textbf{(C2)} A timing result on production traces. The split-instant protocol these studies use
+  \item \textbf{(C2)} A timing result on production traces. A split-instant evaluation protocol
   makes 95\% of a hindsight oracle's advantage unreachable, because 45--46\% of blocks do not exist yet
-  when it decides (\Cref{sec:reachable}). Deciding at each block's \emph{arrival} raises the reachable
-  share from 5.3\% to 83.5\% and 4.1\% to 19.0\%; there, first-come-first-served admission captures
-  87.4\% and 50.2\% of what is reachable and a learned ranker captures less than FCFS on both, while the
-  arrival order is worth 14 points on one trace (\Cref{sec:arrival}). On a synthetic control whose
-  benefit is not on new blocks, timing recovers nothing, and the diagnostic says so in advance. Once the metric is repaired, ranking quality
-  converts monotonically on one trace and not the other, and never enough to help
-  (\Cref{sec:capacity}).
+  when it decides (\Cref{sec:reachable}); inside it, a better ranker helps monotonically but over a 5\%
+  sliver (\Cref{sec:capacity}). Deciding at each block's \emph{arrival} lets even first-come-first-served
+  admission capture 75.0\% and 84.7\% of the advantage, and 52.6\% on a synthetic control, beyond the
+  split-time ceiling in every case (\Cref{sec:arrival}). Which arrival-time rule is best is entangled with
+  exposure time in a finite trace, and we leave it open.
   \item \textbf{(C3)} Measurements of reactive tiering on both sources against the adaptive-replacement
   family (ARC, LeCaR, CACHEUS) and a reimplemented LRB --- the best of them beating the best plain rule by
   at most 4.6 points of Belady across eight operating points --- together with an eviction-signal inversion
   that makes a policy tuned on one source a poor default for the other, and a measured explanation: KV
   traces are dominated by one-time blocks, which starve the ghost-hit channel all four adapt on
   (\Cref{sec:reaction}).
-  \item \textbf{(C4)} A reusable evaluation protocol: nineteen measurement defects that each manufactured
-  a plausible result here, grouped into eight mechanisms, and the cheap controls that catch them ---
+  \item \textbf{(C4)} A reusable evaluation protocol: twenty-four measurement defects that each manufactured
+  a plausible result here, grouped into nine mechanisms, and the cheap controls that catch them ---
   including the rule that a null is reportable only alongside the sample size that would have resolved
   it, and the rule that every edge of the source $\rightarrow$ artifact $\rightarrow$ figure
   $\rightarrow$ paper chain needs its own freshness check (\Cref{sec:protocol}).

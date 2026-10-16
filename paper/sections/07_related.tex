@@ -18,6 +18,11 @@ trajectory-fracturing that edits cause. But they operate over a single fixed rep
 choose a physical tier or schedule offline consolidation---orthogonal to, and composable with, STOA.
 
 \paragraph{Systems tiering and ML-for-systems.}
+Serving systems already make prefix KV blocks reusable: PagedAttention~\cite{kwon2023pagedattention}
+manages them in pages that requests can share, SGLang~\cite{zheng2024sglang} reuses them across
+requests through a prefix tree, and CachedAttention~\cite{gao2024cachedattention} and
+Mooncake~\cite{qin2024mooncake} keep them across a hierarchy of storage tiers, with hand-designed
+policies for what stays where; our traces come from the last of these.
 LMCache~\cite{F5_liu2025lmcache} tiers KV-cache bytes to cut miss-rate; H2O~\cite{S1_zhang2023h2o} evicts
 by attention score. The learnability of such decisions is established: PARROT~\cite{S2_liu2020parrot}
 imitates a Belady oracle for cache replacement, Cold-RL~\cite{S4_coldrl2025} does eviction with offline
@@ -68,5 +73,6 @@ Mockingjay and Baleen are positioned but not run.
 
 In short, each line optimizes one axis and freezes the others, and none decides representation, tier,
 \emph{and} timing jointly under a shared budget (\Cref{tab:positioning}). Our contribution is not a better
-policy but a measurement: on production KV traces, ranking quality improves substantially while the
-placement benefit it buys does not, and we report the protocol needed to see that.
+policy but a measurement: on production KV traces the usual split-instant protocol leaves most of a
+hindsight oracle's advantage out of any policy's reach, deciding at each block's arrival brings much of
+it back into reach, and we report the protocol needed to see that.

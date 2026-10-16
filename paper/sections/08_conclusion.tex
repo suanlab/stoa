@@ -1,21 +1,24 @@
 \section{Conclusion}
 \label{sec:conclusion}
 
-For every item an agent remembers, three coupled questions---in what representation, on which tier, and
-when to (re)materialize it---are today answered separately by three research communities. We gave a single
-budget-constrained formulation that unifies them under one serve-time knob, and then asked whether the
-resulting decision is learnable.
+For every item an agent remembers, three coupled questions (in what representation, on which tier, and
+when to materialize it) are today answered separately by three research communities. We offered a single
+budget-constrained formulation as a frame and measured one of its axes, placement across tiers, on
+production KV traces.
 
-The answer is neither yes nor no but a decoupling, and that is the contribution. Reuse is predictable on
-production traces and becomes more so with data, yet the placement benefit that predictability buys stays
-near zero across the whole range; ordering, not calibration, is what the outcome turns on, and an oracle's
-ordering would recover almost all of the gap. Reactive tiering, forecasting nothing, already delivers most
-of the achievable benefit on one trace and rather less on the other, with the eviction signal itself
-inverting between sources.
+The finding is about when to decide, and it is first a finding about evaluation. Evaluated at a split
+instant, as is natural, more than nine-tenths of a hindsight oracle's advantage is out of any policy's
+reach, whatever the split and whatever the cost weights; inside that protocol a better ranker helps
+monotonically, but over a sliver. Deciding at each block's arrival puts most of the advantage within
+reach: even first-come-first-served admission captures three-quarters or more of it on both production
+traces. Which arrival-time rule is best we cannot yet say, because in a finite evaluation window arrival
+order is entangled with exposure time. Reactive tiering, forecasting nothing, already delivers much of the
+achievable hit rate, and the adaptive-replacement family adds little to it, because the signal it adapts on
+is scarce when most blocks are never reused.
 
-We arrived here only after removing ten measurement defects, each of which had
-produced a plausible positive result; we report those mechanisms and the controls that catch them, because
-the same traps are available to anyone measuring a memory scheduler. The useful next move is not a bigger model. It is to calibrate the cost
-model against real tiers, to sweep the parameters an experiment fixes for convenience before believing any
-result that depends on them, and to ask what a scheduler could do that ordering alone cannot. Agent memory
-is ready to be scheduled---but first it has to be measured in a way that can tell schedulers apart.
+We arrived here only after removing twenty-four measurement defects, each of which had produced a
+plausible result, including leaks in our own arrival-time experiment that an audit found after every
+number check had passed. We report their mechanisms and the controls that catch them, because the same
+traps are open to anyone measuring a memory scheduler. The next steps are an evaluation with equal
+exposure per block, a cost model calibrated against real tiers, and the habit of asking what a reported
+fraction's denominator could have been.

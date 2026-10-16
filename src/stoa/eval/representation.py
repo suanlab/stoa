@@ -1,4 +1,7 @@
-"""The representation axis, exercised on real data.
+"""PVLDB version only: backs the LLM-dependent LoCoMo and representation results, which the
+ICDE paper omits because they need a paid hosted model (audit L1, section AO.7).
+
+The representation axis, exercised on real data.
 
 The formulation in the paper decides representation x tier x timing jointly, and argues the
 axes are coupled: a compressed representation is cheap to serve but may cost accuracy, so

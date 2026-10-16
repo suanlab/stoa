@@ -42,3 +42,4 @@ dist/
 
 # Local session pointer, not part of the published artifact.
 CLAUDE.md
+!data/SHA256SUMS

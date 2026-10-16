@@ -43,24 +43,24 @@ ORCID 0000-0002-3047-1167}}
 \maketitle
 
 \begin{abstract}
-How a memory system for LLM agents should place KV-cache blocks across storage tiers is usually
-evaluated at a split instant: observe a prefix, place the blocks that exist, and bill the result
-against a hindsight oracle. On two production Mooncake traces we show that this protocol measures
-almost nothing. Of the oracle's advantage, 94.7\% and 95.9\% sits on blocks that do not yet exist at
-the split, so any causal policy is confined to the remaining 5\% and looks flat however well it ranks;
-the share is 92--99\% at every split from 0.3 to 0.7 and is worse at earlier ones. Moving the decision
-to each block's arrival raises the reachable share from 5\% to 84\% on one trace and from 4\% to 19\%
-on the other. There, first-come-first-served admission captures 87\% and 50\% of what is reachable,
-and a learned arrival-time ranker captures less on both, while the arrival order itself is worth up to
-14 points. On Mooncake's synthetic control, where only a quarter of blocks are new at the split, the
-unreachable share is lower and timing recovers nothing --- the same diagnostic predicts which case a
-workload is in. Purely reactive tiering tells the same story from the other side: LRU, LFU and a fill-once
-cache reach 75--99\% and 40--94\% of Belady's hit rate, the adaptive-replacement family (ARC, LeCaR,
-CACHEUS) adds at most 4.6 points, and a learned replacement policy (LRB) stays below ARC at every
-operating point, because 76--78\% of blocks are never reused and the signals all of them adapt on are
-scarce. We give a one-line diagnostic for the protocol failure and the correction that removes it, and
-release an artifact that regenerates every number on CPU, together with the catalogue of measurement
-defects we made and caught along the way.
+A natural way to evaluate how a memory system for LLM agents should place KV-cache blocks across
+storage tiers, and the one we used for three revisions of this work, is at a split instant: observe a
+prefix, place the blocks that exist, and bill the result against a hindsight oracle. On two production
+Mooncake traces this protocol measures almost nothing. Of the oracle's advantage, 94.7\% and 95.9\% sits
+on blocks that do not yet exist at the split, so the best possible split-time policy reaches 5.3\% and
+4.1\% of it; the share stays at 92--99\% for every split from 0.3 to 0.7 and under order-of-magnitude
+changes to the cost weights. Inside that protocol a better ranker helps monotonically, but only over the
+sliver: the strongest model gains under 3\% of the oracle's advantage. Deciding at each block's arrival
+instead puts most of the advantage within reach. Even first-come-first-served admission captures 75\%
+and 85\% of it, and 53\% on Mooncake's synthetic control, more than any split-time policy could. Which
+arrival-time rule is best this evaluation cannot settle, because within a finite trace earlier arrivals
+have more time to be reused. Reactive tiering is consistent with this: LRU, LFU and a fill-once cache
+reach 75--99\% and 40--94\% of Belady's hit rate, the best adaptive policy (ARC, LeCaR, CACHEUS) beats
+the best of those rules, each chosen per operating point, by at most 4.6 points, and a learned
+replacement policy (LRB) stays below ARC, because 76--78\% of blocks are never reused. We give a one-line
+diagnostic for the protocol failure, release an artifact that regenerates every number on CPU, and
+catalogue the measurement defects we made and caught, including leaks in our own arrival-time experiment
+that survived every number check.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -83,9 +83,9 @@ KV cache, memory tiering, cache replacement, evaluation methodology, LLM agents,
 used through the Claude Code agentic environment) was used extensively throughout this work. It wrote
 most of the code in the released artifact, designed and ran most of the experiments and analyses,
 drafted and revised most of the text, and generated the figures from the stored results; its contributions are recorded commit by commit in
-the artifact's history. The ``adversarial review'' referred to in \Cref{sec:protocol} was an internal
-exercise in which AI agents were prompted to act as reviewers; it was not peer review, and one figure it
-produced (a third LRB repair) is neither reproduced nor relied on here. Every number in this paper is
+the artifact's history. The ``adversarial review'' and the audit referred to in \Cref{sec:protocol} were
+internal exercises in which AI agents were prompted to act as reviewers; neither was peer review, and one
+figure the review produced (a third LRB repair) is neither reproduced nor relied on here. Every number in this paper is
 re-derived from the released artifact by a checker shipped with it. The initial concept and research
 idea were proposed by the author. The author takes full responsibility for the content of this paper.
 

@@ -1,0 +1,133 @@
+{
+  "config": {
+    "split_frac": 0.5,
+    "default_weights": {
+      "lambda_latency": 0.1,
+      "lambda_cost": 1.0,
+      "lambda_tokens": 0.0005
+    },
+    "variants": [
+      "default",
+      "lambda_latency x0.1",
+      "lambda_latency x10",
+      "lambda_tokens x0.1",
+      "lambda_tokens x10"
+    ]
+  },
+  "summary": {
+    "unreachable_min": 91.8,
+    "unreachable_max": 99.2
+  },
+  "rows": [
+    {
+      "trace": "conversation",
+      "variant": "default",
+      "weights": {
+        "lambda_latency": 0.1,
+        "lambda_cost": 1.0,
+        "lambda_tokens": 0.0005
+      },
+      "unreachable_pct": 94.7,
+      "full_hindsight_gap": 93383.2
+    },
+    {
+      "trace": "conversation",
+      "variant": "lambda_latency x0.1",
+      "weights": {
+        "lambda_latency": 0.010000000000000002,
+        "lambda_cost": 1.0,
+        "lambda_tokens": 0.0005
+      },
+      "unreachable_pct": 97.2,
+      "full_hindsight_gap": 49658.3
+    },
+    {
+      "trace": "conversation",
+      "variant": "lambda_latency x10",
+      "weights": {
+        "lambda_latency": 1.0,
+        "lambda_cost": 1.0,
+        "lambda_tokens": 0.0005
+      },
+      "unreachable_pct": 92.3,
+      "full_hindsight_gap": 530631.6
+    },
+    {
+      "trace": "conversation",
+      "variant": "lambda_tokens x0.1",
+      "weights": {
+        "lambda_latency": 0.1,
+        "lambda_cost": 1.0,
+        "lambda_tokens": 5e-05
+      },
+      "unreachable_pct": 91.8,
+      "full_hindsight_gap": 52974.6
+    },
+    {
+      "trace": "conversation",
+      "variant": "lambda_tokens x10",
+      "weights": {
+        "lambda_latency": 0.1,
+        "lambda_cost": 1.0,
+        "lambda_tokens": 0.005
+      },
+      "unreachable_pct": 99.0,
+      "full_hindsight_gap": 494282.8
+    },
+    {
+      "trace": "toolagent",
+      "variant": "default",
+      "weights": {
+        "lambda_latency": 0.1,
+        "lambda_cost": 1.0,
+        "lambda_tokens": 0.0005
+      },
+      "unreachable_pct": 95.9,
+      "full_hindsight_gap": 94713.6
+    },
+    {
+      "trace": "toolagent",
+      "variant": "lambda_latency x0.1",
+      "weights": {
+        "lambda_latency": 0.010000000000000002,
+        "lambda_cost": 1.0,
+        "lambda_tokens": 0.0005
+      },
+      "unreachable_pct": 97.5,
+      "full_hindsight_gap": 50417.3
+    },
+    {
+      "trace": "toolagent",
+      "variant": "lambda_latency x10",
+      "weights": {
+        "lambda_latency": 1.0,
+        "lambda_cost": 1.0,
+        "lambda_tokens": 0.0005
+      },
+      "unreachable_pct": 94.4,
+      "full_hindsight_gap": 537676.5
+    },
+    {
+      "trace": "toolagent",
+      "variant": "lambda_tokens x0.1",
+      "weights": {
+        "lambda_latency": 0.1,
+        "lambda_cost": 1.0,
+        "lambda_tokens": 5e-05
+      },
+      "unreachable_pct": 93.9,
+      "full_hindsight_gap": 53676.8
+    },
+    {
+      "trace": "toolagent",
+      "variant": "lambda_tokens x10",
+      "weights": {
+        "lambda_latency": 0.1,
+        "lambda_cost": 1.0,
+        "lambda_tokens": 0.005
+      },
+      "unreachable_pct": 99.2,
+      "full_hindsight_gap": 502042.8
+    }
+  ]
+}
