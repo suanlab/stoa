@@ -65,7 +65,12 @@ def load_mooncake(path: str, max_requests: int | None = None,
             rec = json.loads(line)
             hashes = rec.get("hash_ids", [])
             n_in = rec.get("input_length")
-            if n_in is not None and hashes and len(hashes) != math.ceil(n_in / BLOCK_TOKENS):
+            if hashes and n_in is None:
+                # Used to skip the block-size check silently. A record that cannot be checked
+                # is a format this loader was not written for (audit L4).
+                raise ValueError(f"{path}, request {t}: no input_length, so the block-size "
+                                 "identity cannot be checked; refusing rather than skipping.")
+            if hashes and len(hashes) != math.ceil(n_in / BLOCK_TOKENS):
                 raise ValueError(
                     f"{path}, request {t}: {len(hashes)} hash_ids for {n_in} input tokens, but "
                     f"BLOCK_TOKENS={BLOCK_TOKENS} predicts {math.ceil(n_in / BLOCK_TOKENS)}. "

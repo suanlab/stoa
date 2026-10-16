@@ -26,13 +26,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 
 def main() -> int:
-    spec = ROOT / "scripts" / "check_paper_numbers.py"
-    ns: dict = {}
-    src = spec.read_text()
-    start = src.index("DEPENDS_ON = {")
-    end = src.index("}", start) + 1
-    exec(src[start:end], ns)
-    depends_on = ns["DEPENDS_ON"]
+    from artifact_deps import DEPENDS_ON as depends_on   # no exec (audit L2)
 
     # Only the modules some artifact actually depends on. A dirty `verify.py` cannot make an
     # artifact stale, and refusing on it would train the user to pass a --force nobody checks.

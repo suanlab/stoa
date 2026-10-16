@@ -125,10 +125,13 @@ def main() -> int:
         for sf in args.splits:
             r = one(wl, sf, sim, w)
             rows.append(r)
+            pct = (lambda v, w: f"{v:>{w}.1f}%" if v is not None else f"{'n/a':>{w + 1}}")
             print(f"{sf:>6.1f} {r['no_pre_split_pct']:>7.1f}% {r['full_hindsight_gap']:>12,.0f} "
-                  f"{r['attainable_gap']:>11,.0f} {r['unreachable_pct']:>11.1f}% "
-                  f"{r['reachable_pct']:>9.1f}%")
-        u = [r["unreachable_pct"] for r in rows]
+                  f"{r['attainable_gap']:>11,.0f} {pct(r['unreachable_pct'], 11)} "
+                  f"{pct(r['reachable_pct'], 9)}")
+        u = [r["unreachable_pct"] for r in rows if r["unreachable_pct"] is not None]
+        if not u:
+            sys.exit(f"{name}: the hindsight gap is zero at every split; nothing to report")
         out["traces"][name] = {"rows": rows,
                               "unreachable_min": min(u), "unreachable_max": max(u)}
         print(f"  unreachable across splits: {min(u):.1f}%–{max(u):.1f}%")

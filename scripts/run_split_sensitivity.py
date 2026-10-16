@@ -67,7 +67,8 @@ def main() -> None:
             wl = wls[ev]
             st = max(1, wl.time_split(frac))
             stats, fut = wl.prefix_stats(st), wl.future_counts(st)
-            reused = [v for v in fut.values() if v > 0]
+            # Causal scale (§AP): mean reuse observable before the split, not after it.
+            reused = [v["count"] for v in stats.values() if v["count"] > 0]
             mean_reuse = sum(reused) / max(1, len(reused))
             c_pref = place_with_beliefs(
                 wl, {i.item_id: stats[i.item_id]["count"] for i in wl.items}, split_frac=frac)

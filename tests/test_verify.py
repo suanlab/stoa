@@ -363,7 +363,8 @@ def test_superseded_subdirectory_does_not_vouch_for_the_top_level_path(tmp_path)
 # --- entry points a document promises ----------------------------------------------------
 
 def test_missing_symbol_in_a_real_module_is_reported():
-    out = verify.broken_entry_points('python3 -c "from json import no_such_name"', "DOC.md")
+    out = verify.broken_entry_points('python3 -c "from json import no_such_name"', "DOC.md",
+                                     allowed_roots=("json",))
     assert len(out) == 1 and "no attribute" in out[0]
 
 
@@ -374,12 +375,13 @@ def test_unimportable_module_is_reported_not_raised():
 
 
 def test_working_entry_point_is_silent():
-    assert verify.broken_entry_points('`from json import loads`', "DOC.md") == []
+    assert verify.broken_entry_points('`from json import loads`', "DOC.md",
+                                      allowed_roots=("json",)) == []
 
 
 def test_each_promise_is_reported_once_even_when_repeated():
     text = "`from json import nope` and again `from json import nope`"
-    assert len(verify.broken_entry_points(text, "DOC.md")) == 1
+    assert len(verify.broken_entry_points(text, "DOC.md", allowed_roots=("json",))) == 1
 
 
 # --- figure coverage derived from what the paper embeds ----------------------------------
@@ -513,3 +515,13 @@ def test_heading_word_inside_a_sentence_does_not_end_the_body(tmp_path, monkeypa
 
     monkeypatch.setattr("subprocess.run", fake)
     assert verify.body_pages(pdf, ("ACKNOWLEDGMENT",)) == 2
+
+
+
+def test_module_outside_the_allowlist_is_reported_not_imported(monkeypatch):
+    """Audit L3: a document must not be able to make the checker import arbitrary code."""
+    import importlib
+    called = []
+    monkeypatch.setattr(importlib, "import_module", lambda m: called.append(m))
+    out = verify.broken_entry_points("`from os import system`", "DOC.md")
+    assert called == [] and len(out) == 1 and "not imported" in out[0]

@@ -121,11 +121,14 @@ def main() -> None:
         c_ceil = attainable_ceiling(wl, d["ids"])
         span, reach = c_pref - c_orac, c_pref - c_ceil
 
-        # Every rung is placed on ONE common magnitude scale -- the clairvoyant belief's own
-        # multiset -- so only the ORDERING differs between rungs. Without this the min-max
-        # transform moves items across the argmin's belief thresholds differently per model
-        # and the ladder measures the transform as much as the model.
-        ref_magnitudes = [float(fut.get(i, 0)) for i in d["ids"]]
+        # Every rung is placed on ONE common magnitude scale, so only the ORDERING differs
+        # between rungs. Without this the min-max transform moves items across the argmin's
+        # belief thresholds differently per model and the ladder measures the transform as much
+        # as the model. The scale used to be the clairvoyant belief's own multiset -- the scored
+        # blocks' true future counts -- which made every rung's number one a deployed policy
+        # could not reach. It is now their pre-split counts (§AP): still common to all rungs,
+        # and observable at decision time.
+        ref_magnitudes = [float(stats[i]["count"]) if i in stats else 0.0 for i in d["ids"]]
 
         def captured(scores_by_rank) -> tuple[float, float]:
             """(% of the full hindsight gap, % of what a causal policy could attain)."""

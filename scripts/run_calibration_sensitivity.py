@@ -111,8 +111,9 @@ def main() -> None:
     lo, hi = min(scores), max(scores)
     norm = [(v - lo) / (hi - lo) if hi > lo else 0.0 for v in scores]
     st = max(1, wl.time_split(0.5))
-    fut = wl.future_counts(st)
-    reused = [v for v in fut.values() if v > 0]
+    # Causal scale (§AP): the mean reuse observable before the split, not the future's.
+    pre = wl.prefix_stats(st)
+    reused = [v["count"] for v in pre.values() if v["count"] > 0]
     mean_reuse = sum(reused) / max(1, len(reused))
     belief = {i: p * mean_reuse for i, p in zip(ids, norm)}
 

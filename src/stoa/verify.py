@@ -326,7 +326,8 @@ def dangling_paths(text: str, root: Path, label: str,
     return out
 
 
-def broken_entry_points(text: str, label: str) -> list[str]:
+def broken_entry_points(text: str, label: str,
+                        allowed_roots: Sequence[str] = ("stoa",)) -> list[str]:
     """`python3 -c "from X import Y"` commands a document promises that no longer import.
 
     The reproduction package offers four of these for data acquisition. A rename makes the
@@ -341,6 +342,15 @@ def broken_entry_points(text: str, label: str) -> list[str]:
     out = []
     seen = set()
     for mod, names in re.findall(r'from ([\w.]+) import ([\w, ]+)', text):
+        if mod.split(".")[0] not in allowed_roots:
+            # Importing executes module code; a document should not be able to name an
+            # arbitrary module and have the checker run it (audit L3). Out-of-allowlist
+            # promises are reported as unchecked, never silently passed.
+            if (mod, "*") not in seen:
+                seen.add((mod, "*"))
+                out.append(f"{label} names `from {mod} import ...`, outside the checked "
+                           f"package(s) {list(allowed_roots)}; it was not imported or verified.")
+            continue
         for name in (n.strip() for n in names.split(",")):
             if not name or (mod, name) in seen:
                 continue

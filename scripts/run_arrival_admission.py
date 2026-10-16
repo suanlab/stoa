@@ -49,6 +49,8 @@ if str(_SRC) not in sys.path:
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from stoa.mooncake import load_mooncake  # noqa: E402
+from stoa.causal import (analogue_magnitudes, split_by_arrival,  # noqa: E402
+                         windowed_training_labels)
 from stoa.sequential import (attainable_ceiling, place_with_beliefs,  # noqa: E402
                              prefix_greedy_cost, quantile_match)
 from train_session_features import auc, fit_logistic, parse_requests, predict  # noqa: E402
@@ -127,25 +129,37 @@ def main() -> None:
         wl = load_mooncake(path, max_requests=args.requests or None)
         X, y, ids, arrival = arrival_features(path, n_req)
 
-        # Temporal split IN ARRIVAL ORDER: fit on blocks that arrived in the first half,
-        # place the ones that arrive later. This is the deployable protocol -- no block is
-        # scored by a model that saw its own future.
-        cut = arrival[len(arrival) // 2] if arrival else 0
-        tr_idx = [i for i, t in enumerate(arrival) if t <= cut]
-        ev_idx = [i for i, t in enumerate(arrival) if t > cut]
+        # ONE instant for everything (§AP). The train/eval cut used to be the median block
+        # arrival while costs were billed at time_split(0.5); they differed by 641 and 1,017
+        # requests. Now the cut IS the billing split, so the evaluation population is exactly
+        # the blocks with no pre-split access -- the population §5.2 says carries most of the
+        # oracle's advantage.
+        st = max(1, wl.time_split(0.5))
+        tr_idx, ev_idx = split_by_arrival(arrival, st)
         if len(tr_idx) < 100 or len(ev_idx) < 100:
             print(f"{name}: too few arrivals to split ({len(tr_idx)}/{len(ev_idx)})")
             continue
 
-        # Binary target: will this block ever be used again after arrival?
-        w = fit_logistic([X[i] for i in tr_idx], [1.0 if y[i] > 0 else 0.0 for i in tr_idx])
+        # Training labels that are fully observed before the split (§AP). They used to count
+        # every later access, so 34.3% / 46.3% of training-label mass came from the evaluation
+        # period. A fixed window keeps the label's meaning the same for every row.
+        steps_of = {b: wl.traces[b].access_steps for b in ids}
+        window = st // 2
+        fit_idx, fit_lab = windowed_training_labels(arrival, ids, steps_of, st, window)
+        assert all(arrival[i] + window < st for i in fit_idx), "a training label crosses the split"
+        w = fit_logistic([X[i] for i in fit_idx], [1.0 if v > 0 else 0.0 for v in fit_lab])
         scores = predict(w, [X[i] for i in ev_idx])
+        # AUC is scored against the evaluation blocks' true future -- that is the test truth, and
+        # it never reaches the model or the beliefs.
         a_auc = auc(scores, [1.0 if y[i] > 0 else 0.0 for i in ev_idx])
 
         ev_ids = [ids[i] for i in ev_idx]
-        st = max(1, wl.time_split(0.5))
         fut = wl.future_counts(st)
-        ref = [float(fut.get(i, 0)) for i in ev_ids]
+        # Magnitudes a causal policy can use (§AP): the previous period's equivalent of the
+        # evaluation population -- blocks first seen before the split, counted up to it, i.e.
+        # their prefix counts. These used to be the evaluation blocks' TRUE future counts.
+        pre = wl.prefix_stats(st)
+        ref = analogue_magnitudes((v["count"] for v in pre.values()), len(ev_ids))
 
         c_pref = prefix_greedy_cost(wl)
         c_orac = place_with_beliefs(
@@ -189,10 +203,11 @@ def main() -> None:
     out.write_text(json.dumps(
         {"config": {"requests": args.requests or "full",
                     "protocol": ("blocks placed at first appearance from request-level "
-                                 "context; temporal split in arrival order; beliefs "
-                                 "quantile-matched to a common magnitude scale"),
-                    "why": ("the split-instant protocol leaves 97% of the hindsight gap "
-                            "unreachable; this targets that 97%")},
+                                 "context; train/eval cut = billing split = time_split(0.5); "
+                                 "training labels windowed to end before the split; belief "
+                                 "magnitudes from the pre-split analogue population"),
+                    "why": ("the split-instant protocol leaves ~95% of the hindsight gap "
+                            "unreachable; this targets it, causally (§AP)")},
          "results": rows}, indent=2))
     print(f"\nwrote {out}")
 

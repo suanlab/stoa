@@ -68,7 +68,11 @@ def main() -> None:
             wl, {i.item_id: float(fut.get(i.item_id, 0)) for i in wl.items})
         c_ceil = attainable_ceiling(wl, ids)
         span, reach = c_pref - c_orac, c_pref - c_ceil
-        ref = [float(fut.get(i, 0)) for i in ids]
+        # Causal magnitudes (§AP): the scored blocks' OWN pre-split counts -- the frequency
+        # heuristic's beliefs -- not their true future counts, which this used to read. Every
+        # arm shares the one multiset, so the comparison still isolates ordering.
+        pre = wl.prefix_stats(st)
+        ref = [float(pre.get(i, {}).get("count", 0)) for i in ids]
         reused = [v for v in ref if v > 0]
         mean_reuse = sum(reused) / max(1, len(reused))
 

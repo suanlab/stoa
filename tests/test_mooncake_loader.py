@@ -46,3 +46,10 @@ def test_wrong_constant_is_caught_on_real_shaped_input(tmp_path, monkeypatch):
              "hash_ids": list(range(14))}]              # the upstream README's own example
     with pytest.raises(ValueError):
         mooncake.load_mooncake(_trace(tmp_path, rows))
+
+
+def test_record_without_input_length_is_refused_not_skipped(tmp_path):
+    """Audit L4: the identity check used to be skipped silently when input_length was absent."""
+    rows = [{"timestamp": 0, "output_length": 5, "hash_ids": [1, 2]}]
+    with pytest.raises(ValueError, match="cannot be checked"):
+        mooncake.load_mooncake(_trace(tmp_path, rows))

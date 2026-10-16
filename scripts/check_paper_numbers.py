@@ -384,28 +384,7 @@ if d:
 # headline table by up to 39 points. Nothing caught it, because every check compared
 # artifacts to the paper and none compared artifacts to their own dependencies.
 SRC = ROOT / "src" / "stoa"
-DEPENDS_ON = {
-    # artifact -> modules whose behaviour it encodes. Audited against each producing script's
-    # direct imports by verify.producer_problems, which is how the omissions below were found:
-    # four artifacts that load the Mooncake traces had not declared mooncake.py (§AO).
-    "arrival_admission.json": ("sequential.py", "mooncake.py"),
-    "capacity_ladder_fixed.json": ("sequential.py", "gbdt.py", "mooncake.py"),
-    "calibration_sensitivity.json": ("sequential.py", "calibration.py", "simulator.py",
-                                     "environment.py", "mooncake.py"),
-    "belief_controls.json": ("sequential.py", "mooncake.py"),
-    "reactive_real_full_lrb.json": ("eval/online.py", "experts.py", "lrb.py", "mooncake.py"),
-    "lrb_retraction.json": ("lrb.py", "eval/online.py", "mooncake.py"),
-    "eval_locomo_powered.json": ("eval/memqa.py", "stats.py", "eval/locomo.py",
-                                 "eval/retrieval.py", "llm.py"),
-    "representation_axis.json": ("eval/representation.py", "stats.py", "eval/locomo.py",
-                                 "eval/memqa.py", "llm.py"),
-    "locomo_power.json": ("stats.py", "eval/locomo.py", "eval/memqa.py",
-                          "eval/retrieval.py", "llm.py"),
-    "lrb_sweep.json": ("lrb.py", "eval/online.py", "mooncake.py"),
-    "sampling_study.json": ("kvct.py",),
-    "reachable_ceiling.json": ("sequential.py", "mooncake.py", "simulator.py"),
-    "headroom_by_length.json": ("sequential.py", "mooncake.py"),
-}
+from artifact_deps import DEPENDS_ON  # noqa: E402  (shared with record_provenance.py)
 # mtime alone gave a false positive during pass 7's mutation testing: restoring a file from
 # backup moves the timestamp without changing a byte. The manifest records what each artifact
 # was actually generated from, so a moved timestamp with a matching digest is silent and a
