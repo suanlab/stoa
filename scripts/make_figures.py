@@ -45,8 +45,11 @@ def _load(name):
 
 
 def _save(fig, stem):
-    for ext in ("pdf", "png"):
-        fig.savefig(OUT / f"{stem}.{ext}")
+    # No timestamps in the output: matplotlib stamps a CreationDate into every PDF, so each run
+    # changed the file's hash and the committed PDF build manifest called a reproduced figure stale
+    # (2026-10-19 second pass). PNG gets the same treatment for its "Software" chunk.
+    fig.savefig(OUT / f"{stem}.pdf", metadata={"CreationDate": None, "ModDate": None})
+    fig.savefig(OUT / f"{stem}.png", metadata={"Software": None})
     plt.close(fig)
     print(f"wrote paper/figs/{stem}.pdf|.png")
 
@@ -205,7 +208,7 @@ def fig_reactive():
     Uses the FULL traces; an 800-request subsample gave different values and reversed the
     trend in tier size, so the subsample artifact is deliberately not the figure's source.
     """
-    d = _load("reactive_real_full_lrb.json") or _load("reactive_real_full.json")
+    d = _load("reactive_real_full_lrb.json")
     if not d:
         return
     import numpy as np
@@ -215,10 +218,10 @@ def fig_reactive():
     x = np.arange(len(fracs)); w = 0.35
     fig, ax = plt.subplots(figsize=(3.6, 2.6))
     cols = {"toolagent": OI["blue"], "conversation": OI["orange"]}
-    # The bar is an oracle OVER policies, so its label must say how many it picks from --
-    # a run with LRB enabled picks from five, not four, and mislabelling it would overstate
-    # what a single deployable policy achieves.
-    n_pol = 5 if all("lrb_over_belady" in r for n in names for r in tr[n]["rows"]) else 4
+    # The bar is an oracle OVER policies, so its label must say how many it picks from:
+    # best_reactive_over_belady maximizes over LRU, LFU, fill-once, ARC, LeCaR and CACHEUS, plus
+    # LRB when it ran. An earlier label said five (2026-10-19 second pass).
+    n_pol = 7 if all("lrb_over_belady" in r for n in names for r in tr[n]["rows"]) else 6
     for i, n in enumerate(names):
         vals = [r["best_reactive_over_belady"] * 100 for r in tr[n]["rows"]]
         ax.bar(x + (i - 0.5) * w, vals, w, color=cols.get(n, OI["green"]),

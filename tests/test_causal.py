@@ -73,8 +73,12 @@ PRODUCERS = ["run_arrival_admission.py", "run_belief_controls.py", "run_capacity
 # assignments to a fixpoint; sinks are what set a policy's belief magnitude or training label.
 import ast
 
-SINK_NAMES = {"ref", "ref_magnitudes", "mean_reuse", "reused", "fit_lab"}
-SINK_CALLS = {"analogue_magnitudes": None, "quantile_match": 1, "windowed_training_labels": None}
+SINK_NAMES = {"ref", "ref_magnitudes", "mean_reuse", "reused", "fit_lab", "mag_arms", "order_arms",
+              "scores", "learned_rank", "base"}
+SINK_CALLS = {"analogue_magnitudes": None, "quantile_match": None, "windowed_training_labels": None,
+              "bill": None, "fit_logistic": None, "predict": None}
+# `with_new` and `place_with_beliefs` are not sinks: the clairvoyant ceiling and the oracle are
+# allowed to read the future, by definition.
 
 
 def _names(node):
@@ -109,7 +113,19 @@ def _pairs(n):
 def belief_taint(src: str, sources=("fut", "future_counts")) -> list[str]:
     tree = ast.parse(src)
     tainted = set(sources)
-    assigns = [n for n in ast.walk(tree) if isinstance(n, (ast.Assign, ast.AnnAssign)) and n.value]
+    # Every binding form: =, annotated, augmented (+=), walrus, and for-loop / comprehension targets.
+    assigns = []
+    for n in ast.walk(tree):
+        if isinstance(n, (ast.Assign, ast.AnnAssign)) and n.value is not None:
+            assigns.append(n)
+        elif isinstance(n, ast.AugAssign):
+            assigns.append(ast.Assign(targets=[n.target], value=n.value, lineno=n.lineno))
+        elif isinstance(n, ast.NamedExpr):
+            assigns.append(ast.Assign(targets=[n.target], value=n.value, lineno=n.lineno))
+        elif isinstance(n, ast.For):
+            # Statement-level loops only: a comprehension's variables are local to it, and its taint
+            # already reaches the enclosing expression, which _names() walks whole.
+            assigns.append(ast.Assign(targets=[n.target], value=n.iter, lineno=n.lineno))
     changed = True
     while changed:
         changed = False
@@ -136,6 +152,27 @@ def belief_taint(src: str, sources=("fut", "future_counts")) -> list[str]:
     return bad
 
 
+# Scripts that DO set a belief scale from future counts, kept only as the record behind retracted
+# claims (REPRODUCIBILITY.md marks their artifacts retracted or record-only). Listed so the
+# exclusion is a decision, not an omission; a test below proves the taint check sees them.
+RECORD_ONLY = {"train_session_features.py": "mooncake_session_rq2*.json, retracted (§T, §U)",
+               "train_kvct_placement.py": "kvct_placement*.json, retracted (§I)"}
+# Read by the checker on purpose: Table 3 prints these retracted runs as the record of the reversal,
+# so every cell must still be reproducible (2026-10-19 second pass). Reading them is not citing them.
+CHECKED_AS_RECORD = {"train_kvct_placement.py"}
+
+
+@pytest.mark.parametrize("script", sorted(RECORD_ONLY))
+def test_record_only_scripts_are_flagged_and_cited_by_nothing(script):
+    assert belief_taint((SCRIPTS / script).read_text()), f"{script} no longer leaks; move it to PRODUCERS"
+    checker = (SCRIPTS / "check_paper_numbers.py").read_text()
+    stem = RECORD_ONLY[script].split("*")[0].split(".")[0]
+    if script in CHECKED_AS_RECORD:
+        assert "Table 3's left column (retracted" in checker, f"{script}'s artifacts read outside Table 3"
+    else:
+        assert f'load("{stem}' not in checker, f"the paper's checker reads an artifact of {script}"
+
+
 @pytest.mark.parametrize("script", PRODUCERS)
 def test_no_belief_magnitude_is_read_from_future_counts(script):
     """`fut` may feed the oracle, the ceiling and AUC truth; it may not set a belief or a label."""
@@ -154,6 +191,12 @@ def test_no_belief_magnitude_is_read_from_future_counts(script):
     "stats, ref = wl.prefix_stats(st), wl.future_counts(st)",             # tuple, paired
     "b = quantile_match(scores, [fut[i] for i in ev_ids])",               # inlined into the sink
     "fit_lab = [y[i] for i in fit_idx]",                                  # labels from eval truth
+    "mag_arms = {'constant-mean': mean(fut[i] for i in ev_ids)}",         # a constant from the future
+    "g, r = bill({i: fut[i] for i in ev_ids}, tie)",                      # truth straight to billing
+    "order_arms = {'x': (None, [y[i] for i in ev_idx])}",                 # an arm scored by the truth
+    "ref = []\nref += [fut[i] for i in ev_ids]",                          # augmented assignment
+    "for t in [fut]:\n    ref = list(t.values())",                       # for-loop alias
+    "if (t := fut):\n    ref = list(t.values())",                        # walrus
 ])
 def test_taint_check_catches_reintroduced_leaks(mutant):
     assert belief_taint(mutant, ("fut", "future_counts", "y")), f"missed: {mutant!r}"

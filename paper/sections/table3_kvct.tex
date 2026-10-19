@@ -6,14 +6,15 @@
     \midrule
     20 conversations & --- & $-541\%$ $[-1207, +78]$ \\
     40 conversations & $+88\%$ & $-67\%$ $[-234, +66]$ \\
-    70 conversations & $+87\%$ & --- \\
+    70 conversations & $+75\%$ & --- \\
     100 conversations & $-9\%$ & --- \\
     150 conversations & $-48\%$ & --- \\
     \bottomrule
   \end{tabular}
   \caption{Headroom captured by a learned placement policy on agentic traces, the same pipeline measured
   two ways. Left: sorted-prefix samples, which are nested and drawn from a corpus whose per-conversation
-  statistics vary threefold along the file index --- the numbers we first reported, and their reversal.
+  statistics vary threefold along the file index --- the numbers we first reported (regression variant,
+  all features), and their reversal; an earlier revision printed the classifier's $+87\%$ at 70.
   Right: randomized draws at the same sizes, summarized by their observed range --- four draws cannot
   support a parametric interval. The spread is an order of magnitude wider than any effect, so this
   quantity was never measurable under this protocol. We report it as a cautionary measurement.}

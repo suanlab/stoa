@@ -1,3 +1,7 @@
+> **SUPERSEDED — historical draft, not the paper.** Early (CIDR-era) prose kept for the record. Its
+> claims predate the corrections in `docs/claims_dependency.md` (§T onward) and several are retracted;
+> the current text is `paper/sections/*.tex`.
+
 # 5. Preliminary Evidence
 
 *(Draft prose. ~2 pp. All numbers come from reproducible artifacts in `experiments/`; regenerate figures

@@ -8,6 +8,7 @@
     {
       "trace": "conversation",
       "axis": "order",
+      "tie": "new-behind",
       "arm": "order-arrival",
       "auc": null,
       "captured_pct": 58.99,
@@ -17,6 +18,7 @@
     {
       "trace": "conversation",
       "axis": "order",
+      "tie": "new-behind",
       "arm": "order-learned",
       "auc": 0.5649,
       "captured_pct": 59.47,
@@ -26,6 +28,7 @@
     {
       "trace": "conversation",
       "axis": "order",
+      "tie": "new-behind",
       "arm": "order-shuffled",
       "auc": null,
       "captured_pct": 58.35,
@@ -35,6 +38,7 @@
     {
       "trace": "conversation",
       "axis": "magnitude",
+      "tie": "new-behind",
       "arm": "constant-mean",
       "auc": null,
       "new_block_belief": 1.5407,
@@ -45,11 +49,64 @@
     {
       "trace": "conversation",
       "axis": "magnitude",
+      "tie": "new-behind",
       "arm": "constant-median",
       "auc": null,
       "new_block_belief": 1.0,
       "captured_pct": 45.49,
       "captured_of_attainable_pct": 65.65,
+      "n_arrivals_scored": 82659
+    },
+    {
+      "trace": "conversation",
+      "axis": "order",
+      "tie": "new-ahead",
+      "arm": "order-arrival",
+      "auc": null,
+      "captured_pct": 77.15,
+      "captured_of_attainable_pct": 111.36,
+      "n_arrivals_scored": 82659
+    },
+    {
+      "trace": "conversation",
+      "axis": "order",
+      "tie": "new-ahead",
+      "arm": "order-learned",
+      "auc": 0.5649,
+      "captured_pct": 77.26,
+      "captured_of_attainable_pct": 111.51,
+      "n_arrivals_scored": 82659
+    },
+    {
+      "trace": "conversation",
+      "axis": "order",
+      "tie": "new-ahead",
+      "arm": "order-shuffled",
+      "auc": null,
+      "captured_pct": 76.5,
+      "captured_of_attainable_pct": 110.42,
+      "n_arrivals_scored": 82659
+    },
+    {
+      "trace": "conversation",
+      "axis": "magnitude",
+      "tie": "new-ahead",
+      "arm": "constant-mean",
+      "auc": null,
+      "new_block_belief": 1.5407,
+      "captured_pct": 75.0,
+      "captured_of_attainable_pct": 108.25,
+      "n_arrivals_scored": 82659
+    },
+    {
+      "trace": "conversation",
+      "axis": "magnitude",
+      "tie": "new-ahead",
+      "arm": "constant-median",
+      "auc": null,
+      "new_block_belief": 1.0,
+      "captured_pct": 75.0,
+      "captured_of_attainable_pct": 108.25,
       "n_arrivals_scored": 82659
     },
     {
@@ -64,6 +121,7 @@
     {
       "trace": "toolagent",
       "axis": "order",
+      "tie": "new-behind",
       "arm": "order-arrival",
       "auc": null,
       "captured_pct": 58.73,
@@ -73,6 +131,7 @@
     {
       "trace": "toolagent",
       "axis": "order",
+      "tie": "new-behind",
       "arm": "order-learned",
       "auc": 0.6098,
       "captured_pct": 58.7,
@@ -82,6 +141,7 @@
     {
       "trace": "toolagent",
       "axis": "order",
+      "tie": "new-behind",
       "arm": "order-shuffled",
       "auc": null,
       "captured_pct": 57.87,
@@ -91,6 +151,7 @@
     {
       "trace": "toolagent",
       "axis": "magnitude",
+      "tie": "new-behind",
       "arm": "constant-mean",
       "auc": null,
       "new_block_belief": 2.1391,
@@ -101,11 +162,64 @@
     {
       "trace": "toolagent",
       "axis": "magnitude",
+      "tie": "new-behind",
       "arm": "constant-median",
       "auc": null,
       "new_block_belief": 1.0,
       "captured_pct": 45.56,
       "captured_of_attainable_pct": 65.95,
+      "n_arrivals_scored": 84465
+    },
+    {
+      "trace": "toolagent",
+      "axis": "order",
+      "tie": "new-ahead",
+      "arm": "order-arrival",
+      "auc": null,
+      "captured_pct": 78.59,
+      "captured_of_attainable_pct": 113.77,
+      "n_arrivals_scored": 84465
+    },
+    {
+      "trace": "toolagent",
+      "axis": "order",
+      "tie": "new-ahead",
+      "arm": "order-learned",
+      "auc": 0.6098,
+      "captured_pct": 78.39,
+      "captured_of_attainable_pct": 113.48,
+      "n_arrivals_scored": 84465
+    },
+    {
+      "trace": "toolagent",
+      "axis": "order",
+      "tie": "new-ahead",
+      "arm": "order-shuffled",
+      "auc": null,
+      "captured_pct": 78.1,
+      "captured_of_attainable_pct": 113.06,
+      "n_arrivals_scored": 84465
+    },
+    {
+      "trace": "toolagent",
+      "axis": "magnitude",
+      "tie": "new-ahead",
+      "arm": "constant-mean",
+      "auc": null,
+      "new_block_belief": 2.1391,
+      "captured_pct": 84.65,
+      "captured_of_attainable_pct": 122.54,
+      "n_arrivals_scored": 84465
+    },
+    {
+      "trace": "toolagent",
+      "axis": "magnitude",
+      "tie": "new-ahead",
+      "arm": "constant-median",
+      "auc": null,
+      "new_block_belief": 1.0,
+      "captured_pct": 76.21,
+      "captured_of_attainable_pct": 110.32,
       "n_arrivals_scored": 84465
     },
     {
@@ -120,6 +234,7 @@
     {
       "trace": "synthetic",
       "axis": "order",
+      "tie": "new-behind",
       "arm": "order-arrival",
       "auc": null,
       "captured_pct": 44.06,
@@ -129,6 +244,7 @@
     {
       "trace": "synthetic",
       "axis": "order",
+      "tie": "new-behind",
       "arm": "order-learned",
       "auc": 0.7516,
       "captured_pct": 50.49,
@@ -138,6 +254,7 @@
     {
       "trace": "synthetic",
       "axis": "order",
+      "tie": "new-behind",
       "arm": "order-shuffled",
       "auc": null,
       "captured_pct": 42.72,
@@ -147,6 +264,7 @@
     {
       "trace": "synthetic",
       "axis": "magnitude",
+      "tie": "new-behind",
       "arm": "constant-mean",
       "auc": null,
       "new_block_belief": 1.4911,
@@ -157,11 +275,64 @@
     {
       "trace": "synthetic",
       "axis": "magnitude",
+      "tie": "new-behind",
       "arm": "constant-median",
       "auc": null,
       "new_block_belief": 1.0,
       "captured_pct": 33.63,
       "captured_of_attainable_pct": 53.66,
+      "n_arrivals_scored": 10793
+    },
+    {
+      "trace": "synthetic",
+      "axis": "order",
+      "tie": "new-ahead",
+      "arm": "order-arrival",
+      "auc": null,
+      "captured_pct": 53.22,
+      "captured_of_attainable_pct": 84.94,
+      "n_arrivals_scored": 10793
+    },
+    {
+      "trace": "synthetic",
+      "axis": "order",
+      "tie": "new-ahead",
+      "arm": "order-learned",
+      "auc": 0.7516,
+      "captured_pct": 56.94,
+      "captured_of_attainable_pct": 90.86,
+      "n_arrivals_scored": 10793
+    },
+    {
+      "trace": "synthetic",
+      "axis": "order",
+      "tie": "new-ahead",
+      "arm": "order-shuffled",
+      "auc": null,
+      "captured_pct": 52.1,
+      "captured_of_attainable_pct": 83.15,
+      "n_arrivals_scored": 10793
+    },
+    {
+      "trace": "synthetic",
+      "axis": "magnitude",
+      "tie": "new-ahead",
+      "arm": "constant-mean",
+      "auc": null,
+      "new_block_belief": 1.4911,
+      "captured_pct": 52.64,
+      "captured_of_attainable_pct": 84.01,
+      "n_arrivals_scored": 10793
+    },
+    {
+      "trace": "synthetic",
+      "axis": "magnitude",
+      "tie": "new-ahead",
+      "arm": "constant-median",
+      "auc": null,
+      "new_block_belief": 1.0,
+      "captured_pct": 52.64,
+      "captured_of_attainable_pct": 84.01,
       "n_arrivals_scored": 10793
     },
     {

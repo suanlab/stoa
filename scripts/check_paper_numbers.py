@@ -88,7 +88,7 @@ def pct(x, nd=0):
 print("Checking paper claims against experiments/*.json\n")
 
 # --- reactive tiering + ARC + LRB -------------------------------------------------
-d = load("reactive_real_full_lrb.json") or load("reactive_real_full.json")
+d = load("reactive_real_full_lrb.json")   # no fallback: reactive_real_full.json has no target
 if d:
     print("reactive (experiments/reactive_real_full_lrb.json)")
     for trace in ("toolagent", "conversation"):
@@ -260,67 +260,82 @@ if d:
 # paper as verified on a machine where the artifacts were never generated. Require both a
 # minimum number of checks and that every artifact the paper depends on is present.
 
-# --- arrival-time admission: order and magnitude separated (section V-C, notebook AP, AQ) -------
+# --- arrival-time admission: order x magnitude x tie convention x action space (V-C; AP-AR) ----
 d = load("arrival_admission.json")
+_to = load("tier_only.json")
 _rc = load("reachable_ceiling.json")
 _dg = load("arrival_diagnostics.json")
-if d and _rc and _dg:
-    print("\narrival admission, order vs magnitude (experiments/arrival_admission.json)")
-    by = {(r["trace"], r["arm"]): r for r in d["results"]}
-    cap = {k: v["captured_pct"] for k, v in by.items()}
-    split_ceiling = {t: [r for r in v["rows"] if r["split_frac"] == 0.5][0]["reachable_pct"]
-                     for t, v in _rc["traces"].items()}
+if d and _to and _rc and _dg:
+    print("\narrival admission, both conventions (arrival_admission.json, tier_only.json)")
+    CFG = {("all", "new-behind"): d["results"], ("all", "new-ahead"): d["results"],
+           ("tier", "new-behind"): _to["arrival_admission"]["results"],
+           ("tier", "new-ahead"): _to["arrival_admission"]["results"]}
+
+    def _ceil(acts, t):
+        src = _rc if acts == "all" else _to["reachable_ceiling"]
+        return [r for r in src["traces"][t]["rows"] if r["split_frac"] == 0.5][0]["reachable_pct"]
+
+    def cap(acts, tie, t, arm):
+        return [r["captured_pct"] for r in CFG[(acts, tie)]
+                if r["trace"] == t and r.get("tie") == tie and r["arm"] == arm][0]
+
+    def _f1(v):
+        return f"{v:.1f}".replace("-0.0", "0.0")
+
     ORDER = ("order-arrival", "order-learned", "order-shuffled")
-    MAG = ("constant-mean", "constant-median")
-    for t in ("conversation", "toolagent", "synthetic"):
-        a = by[(t, "order-learned")]["auc"]
-        claim(f"{t}: table row", f"{t} & {split_ceiling[t]:.1f} & {cap[(t, 'order-arrival')]:.1f} & "
-              f"{cap[(t, 'order-learned')]:.1f} ({a:.2f}) & {cap[(t, 'order-shuffled')]:.1f} & "
-              f"{cap[(t, 'constant-mean')]:.1f} & {cap[(t, 'constant-median')]:.1f}",
-              "", "arrival row, % of full gap")
-    prod = ("conversation", "toolagent")
-    arms = [cap[(t, a)] for t in prod for a in ORDER + MAG]
-    assert min(arms) > max(split_ceiling[t] for t in prod), \
-        "an arrival-time arm no longer beats the split ceiling on production; the paper says all do"
-    claim("production range of every arrival arm", f"{min(arms):.0f}--{max(arms):.0f}\\%", "",
-          "all arms, production")
-    claim("split ceiling, production", f"cannot exceed {split_ceiling['conversation']:.1f}\\% and "
-          f"{split_ceiling['toolagent']:.1f}\\%", "", "reachable_ceiling @ 0.5")
-    sy = [cap[("synthetic", a)] for a in ORDER + MAG]
-    assert min(sy) < split_ceiling["synthetic"] < max(sy), \
-        "the paper says the synthetic margin is not robust (one arm below the split ceiling)"
-    claim("synthetic span vs ceiling", f"span {min(sy):.1f}--{max(sy):.1f}\\% against a "
-          f"{split_ceiling['synthetic']:.1f}\\% ceiling", "", "synthetic arms")
-    spread = {t: max(cap[(t, a)] for a in ORDER) - min(cap[(t, a)] for a in ORDER)
-              for t in ("conversation", "toolagent", "synthetic")}
-    claim("order spread, production", f"within {spread['conversation']:.1f} and "
-          f"{spread['toolagent']:.1f} points", "", "max-min of order arms")
-    lead = cap[("synthetic", "order-learned")] - cap[("synthetic", "order-arrival")]
-    assert all(cap[("synthetic", "order-learned")] >= cap[("synthetic", a)] for a in ORDER)
-    claim("synthetic ranker lead", f"ranker lead, by {lead:.1f} points", "", "learned - arrival")
-    gap = {t: cap[(t, "constant-mean")] - cap[(t, "constant-median")] for t in spread}
-    claim("magnitude gap, production", f"by {gap['conversation']:.1f} and {gap['toolagent']:.1f}\npoints",
-          "", "mean - median")
-    claim("magnitude gap, abstract/intro", f"{gap['conversation']:.0f}--{gap['toolagent']:.0f} points",
-          "", "rounded")
-    claim("magnitude gap, introduction", f"{gap['conversation']:.0f} to {gap['toolagent']:.0f} points",
-          "", "rounded")
-    mean_b = {t: by[(t, "constant-mean")]["new_block_belief"] for t in prod}
-    med_b = {t: by[(t, "constant-median")]["new_block_belief"] for t in prod}
-    assert med_b == {"conversation": 1.0, "toolagent": 1.0}, med_b
-    claim("constant beliefs", f"(1.0 to {mean_b['conversation']:.2f} and {mean_b['toolagent']:.2f})",
-          "", "new_block_belief")
-    assert max(spread["conversation"], spread["toolagent"]) < 2.0 < min(gap.values()), \
-        "the paper says order moves production results by about a point and magnitude by far more"
+    ARMS = ORDER + ("constant-mean", "constant-median")
+    PROD = ("conversation", "toolagent")
+    short = {"conversation": "conv", "toolagent": "tool"}
+    for (acts, tie) in CFG:
+        for t in PROD:
+            row = (f"& {short[t]} & {_ceil(acts, t):.1f} & "
+                   + " & ".join(_f1(cap(acts, tie, t, a)) for a in ARMS) + " \\\\")
+            claim(f"{acts}/{tie} {t} row", row, "", "arrival row")
+    auc_l = {t: [r["auc"] for r in d["results"] if r["trace"] == t and r["arm"] == "order-learned"][0]
+             for t in PROD}
+    claim("learned AUC", f"AUC is {auc_l['conversation']:.2f} and {auc_l['toolagent']:.2f}", "", "auc")
+    orders = [cap(a, tie, t, o) for (a, tie) in CFG for t in PROD for o in ORDER]
+    ceils = [_ceil(a, t) for a in ("all", "tier") for t in PROD]
+    for (a, tie) in CFG:
+        for t in PROD:
+            for o in ORDER:
+                assert cap(a, tie, t, o) >= 3 * _ceil(a, t), f"{a}/{tie}/{t}/{o} below 3x the ceiling"
+    claim("order arms vs ceiling", f"{min(orders):.1f}--{max(orders):.1f}\\% against "
+          f"{min(ceils):.1f}--{max(ceils):.1f}\\%", "", "all configurations")
+    spread = max(max(cap(a, tie, t, o) for o in ORDER) - min(cap(a, tie, t, o) for o in ORDER)
+                 for (a, tie) in CFG for t in PROD)
+    # Specific needles: a bare "within 2.1 points" also matched the LRB band's sentence (2026-10-19).
+    claim("order spread, every configuration", f"land within {spread:.1f} points of each other", "", "max-min")
+    claim("order spread, abstract", f"at most {spread:.1f} points", "", "max-min")
+    shift = [cap(a, "new-ahead", t, o) - cap(a, "new-behind", t, o)
+             for a in ("all", "tier") for t in PROD for o in ORDER]
+    claim("tie shift", f"by {min(shift):.0f}--{max(shift):.0f} points", "", "ahead - behind")
+    claim("tie shift, abstract", f"moves it by {min(shift):.0f}--{max(shift):.0f}.", "", "rounded")
+    claim("tie shift, introduction", f"{min(shift):.0f} to {max(shift):.0f} points", "", "rounded")
+    rep = [cap("all", tie, t, o) - cap("tier", tie, t, o)
+           for tie in ("new-behind", "new-ahead") for t in PROD for o in ORDER]
+    claim("representation adds", f"adds {min(rep):.0f}--{max(rep):.0f} more", "", "all - tier")
+    assert all(cap("tier", "new-behind", t, "constant-median") == 0 for t in PROD), \
+        "the paper says the median arm reproduces the split baseline (tier, behind)"
+    worst = max(max(cap(a, tie, t, arm) for a, tie in CFG) - min(cap(a, tie, t, arm) for a, tie in CFG)
+                for t in PROD for arm in ARMS)
+    claim("convention sensitivity of one arm", f"up to {worst:.0f} points", "", "max over configs")
+    sy_all = [cap("all", tie, "synthetic", a) for tie in ("new-behind", "new-ahead") for a in ARMS]
+    sy_tier = [cap("tier", tie, "synthetic", a) for tie in ("new-behind", "new-ahead") for a in ARMS]
+    assert max(sy_tier) < _ceil("tier", "synthetic"), "the paper says tier-only arrival never helps on synthetic"
+    claim("synthetic", f"{_ceil('all', 'synthetic'):.1f}\\% ({_ceil('tier', 'synthetic'):.1f}\\% with tier-only\n"
+          f"actions) and its arrival arms span {_f1(min(sy_all))}--{_f1(max(sy_all))}\\% "
+          f"({_f1(min(sy_tier))}--{_f1(max(sy_tier))}\\%)", "", "synthetic")
     rows = {r["trace"]: r for r in _dg["rows"]}
     ratio = [r["first_over_last"] for r in _dg["rows"]]
     aucs = [r["auc_arrival_order"] for r in _dg["rows"]]
     claim("exposure ratio", f"{min(ratio):.1f}--{max(ratio):.1f} times", "", "diagnostics")
-    claim("arrival-order AUC", f"AUC 0.55--0.58", f"{min(aucs):.3f}-{max(aucs):.3f}", "diagnostics")
     assert f"{min(aucs):.2f}" == "0.55" and f"{max(aucs):.2f}" == "0.58"
-    claim("old design's label leak", f"{rows['conversation']['old_design_label_mass_after_cut_pct']:.1f}\\% and "
-          f"{rows['toolagent']['old_design_label_mass_after_cut_pct']:.1f}\\% of training-label",
-          "", "diagnostics")
+    claim("arrival-order AUC", "AUC 0.55--0.58", f"{min(aucs):.3f}-{max(aucs):.3f}", "diagnostics")
+    claim("old design's label leak", f"({rows['conversation']['old_design_label_mass_after_cut_pct']:.1f}\\% and "
+          f"{rows['toolagent']['old_design_label_mass_after_cut_pct']:.1f}\\% of label", "", "diagnostics")
+    claim("split ceiling, introduction", f"(\\textbf{{{_ceil('all', 'conversation'):.1f}\\%}} and "
+          f"\\textbf{{{_ceil('all', 'toolagent'):.1f}\\%}} of", "", "reachable_ceiling @ 0.5")
 
 # Table 2 (audit pass 2026-10-19): every cell from a producer.
 _ss = load("source_stats.json")
@@ -344,6 +359,17 @@ if _ss and _sm and _hb:
     full = {r["trace"]: r["headroom_pct"] for r in _hb["rows"] if r["full_trace"]}
     claim("Table 2 Mooncake headroom pair", f"({full['conversation']:.1f}\\% and {full['toolagent']:.1f}\\%)",
           "", "headroom_by_length")
+
+# Table 3's left column (retracted sorted-prefix runs, the record of the reversal): every cell from
+# an artifact. "+87%" at 70 was the classifier variant beside regression values; "-9%" at 100 had no
+# shipped artifact (2026-10-19 second pass).
+_t3 = {40: load("kvct_placement_fixed.json"), 70: load("kvct_placement_n70.json"),
+       100: load("kvct_placement_n100.json"), 150: load("kvct_placement_n150.json")}
+if all(_t3.values()):
+    print("\nTable 3, sorted-prefix column (kvct_placement_*.json)")
+    for n, dd in _t3.items():
+        v = [r["regression_headroom_pct"] for r in dd["results"] if r["features"] == "block+session+think"][0]
+        claim(f"Table 3 {n} conversations", f"{n} conversations & ${v:+.0f}\\%$", v, "regression, all features")
 
 # The eviction-signal inversion (section V-F): it quoted a superseded artifact until 2026-10-19.
 _kv = load("reactive_kvct_sweep.json")
@@ -574,10 +600,8 @@ if _arr and _rch:
         # at arrival, both as a share of the same full hindsight gap.
         _at = [r for r in _rch["traces"][_t]["rows"] if r["split_frac"] == 0.5][0]
         HEADLINE[f"split-time ceiling, {_t}"] = f"{_at['reachable_pct']:.1f}%"
-    # Every arrival arm on production, as a range, and the mean/median magnitude gap (notebook AQ).
-    _arms = [r["captured_pct"] for r in _arr["results"]
-             if r["trace"] in ("conversation", "toolagent") and r.get("axis") in ("order", "magnitude")]
-    HEADLINE["arrival range, production"] = f"{min(_arms):.0f}–{max(_arms):.0f}%"
+    HEADLINE["arrival vs split, at least"] = "three times"
+    HEADLINE["tie-convention shift"] = "18–39"
     failures += verify.prose_drift(PROSE_FILES, HEADLINE, ROOT, trigger="arrival")
 
 # The lab notebook legitimately records superseded measurements -- rewriting them would destroy
@@ -688,7 +712,7 @@ if NOTEBOOK.exists():
 # covering one fifth of it. `make_figures.py` still produces the others for a longer version;
 # they are regenerable and unguarded, which is the honest description of an unused plot.
 FIG_SOURCES = {
-    "fig_reactive.pdf": ("reactive_real_full_lrb.json", "reactive_real_full.json"),
+    "fig_reactive.pdf": ("reactive_real_full_lrb.json",),
 }
 FIGS = ROOT / "paper" / "figs"
 failures += verify.stale_figures(FIG_SOURCES, FIGS, EXP)
@@ -758,14 +782,13 @@ failures += verify.producer_problems(
 # --- coverage guards, LAST so `checked` is final -----------------------------------
 # Sitting mid-file, this counted only the checks declared above it and passed while
 # a third of the paper went unchecked.
-REQUIRED = ("reactive_real_full_lrb.json", "capacity_ladder.json",
-            "headroom_by_length.json",
-            "split_sensitivity.json", "lrb_retraction.json", "reachable_ceiling.json",
-            "lrb_sweep.json",
-
-            "calibration_sensitivity.json", "sampling_study.json",
-            "arrival_admission.json", "belief_controls.json",
-            "capacity_ladder_fixed.json")
+# Every artifact the ICDE paper cites, and only those. `capacity_ladder.json` (superseded) and
+# `split_sensitivity.json` (not cited) used to be here, so a reproducer was told they were required.
+REQUIRED = ("reactive_real_full_lrb.json", "headroom_by_length.json", "lrb_retraction.json",
+            "reachable_ceiling.json", "lrb_sweep.json", "calibration_sensitivity.json",
+            "sampling_study.json", "arrival_admission.json", "arrival_diagnostics.json",
+            "belief_controls.json", "capacity_ladder_fixed.json", "weight_sensitivity.json",
+            "source_stats.json", "reactive_kvct_sweep.json", "tier_only.json")
 missing = [n for n in REQUIRED if not (EXP / n).exists()]
 if missing:
     failures.append("artifacts absent, so their claims went unchecked: " + ", ".join(missing))

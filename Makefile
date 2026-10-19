@@ -19,7 +19,7 @@ SHELL := /bin/bash
 .PHONY: help verify reproduce-fast reproduce-full reproduce-llm figures paper clean data-check
 
 help:
-	@echo "make verify          — 279 tests + every paper number against its artifact (no data needed)"
+	@echo "make verify          — 287 tests + every paper number against its artifact (no data needed)"
 	@echo "make data-check      — are the traces present and the right length?"
 	@echo "make reproduce-fast  — regenerate the central claims from the Mooncake traces (~40 min)"
 	@echo "make reproduce-full  — the above plus the LRB hyperparameter sweep (~6 h)"
@@ -59,6 +59,10 @@ reproduce-fast: data-check
 	$(PY) scripts/run_capacity_ladder.py --out experiments/capacity_ladder_fixed.json
 	$(PY) scripts/run_calibration_sensitivity.py
 	$(PY) scripts/run_weight_sensitivity.py
+	$(PY) scripts/run_tier_only.py
+	# Figures are byte-deterministic, so regenerating them from reproduced artifacts leaves the
+	# committed PDF build manifest valid; without this step the figure guard reports them stale.
+	$(PY) scripts/make_figures.py
 	$(PY) scripts/check_paper_numbers.py
 
 # --- tier 2: everything that does not cost money -------------------------------------------
@@ -72,7 +76,11 @@ reproduce-full: reproduce-fast
 	$(PY) scripts/run_source_stats.py
 	$(PY) scripts/run_reactive_kvct.py
 	$(PY) scripts/run_sampling_study.py --sizes 20,40 --draws 4
+	# Table 3's left column: the retracted sorted-prefix runs, kept reproducible as the record.
+	$(PY) scripts/train_kvct_placement.py --convs 40 --out experiments/kvct_placement_fixed.json
+	for n in 70 100 150; do $(PY) scripts/train_kvct_placement.py --convs $$n --out experiments/kvct_placement_n$$n.json; done
 	$(PY) scripts/run_locomo_power.py
+	$(PY) scripts/make_figures.py
 	$(PY) scripts/check_paper_numbers.py
 
 # --- tier 3: the two claims that need a paid third-party API --------------------------------
@@ -97,4 +105,5 @@ paper: figures
 	$(PY) scripts/check_paper_numbers.py
 
 clean:
-	rm -f paper/main.aux paper/main.bbl paper/main.blg paper/main.log paper/main.out
+	# main.bbl and main.blg are tracked (the checker reads main.blg); clean leaves them.
+	rm -f paper/main.aux paper/main.log paper/main.out

@@ -1,3 +1,7 @@
+> **SUPERSEDED — historical draft, not the paper.** Early (CIDR-era) prose kept for the record. Its
+> claims predate the corrections in `docs/claims_dependency.md` (§T onward) and several are retracted;
+> the current text is `paper/sections/*.tex`.
+
 # 1. Introduction
 
 *(Draft prose for the CIDR paper. ~1.5 pp. Convert `[cite:key]` to `\cite{key}` at typesetting;

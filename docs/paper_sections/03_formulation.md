@@ -1,3 +1,7 @@
+> **SUPERSEDED — historical draft, not the paper.** Early (CIDR-era) prose kept for the record. Its
+> claims predate the corrections in `docs/claims_dependency.md` (§T onward) and several are retracted;
+> the current text is `paper/sections/*.tex`.
+
 # 3. Problem Formulation
 
 *(Draft prose for the CIDR paper's technical core. Notation kept general; code

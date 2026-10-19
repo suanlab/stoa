@@ -4,11 +4,11 @@
 Our result closes one question and sharpens several others.
 
 \paragraph{What should an admission point believe about a block it has never seen?}
-\Cref{sec:arrival} shows that deciding at arrival puts most of the oracle's advantage within reach, and
-that the result then turns on one number: the reuse assumed for a new block relative to a block seen
-once. We set it by hand, to the mean or the median of the previous period; learning it per session or per
-request, causally, is the obvious next model, and the one that would turn the 45--85\% range into a
-point. Ranking new blocks against each other is a second-order question, and comparing rules on it needs
+\Cref{sec:arrival} shows that deciding at arrival puts more of the oracle's advantage within reach, and
+that the result then turns on one decision: where a block never seen ranks against blocks seen once. We
+fixed it by convention, and the conventions alone move the result by 18--39 points; learning it per
+session or per request, causally, and admitting online rather than allocating statically, is the obvious
+next model. Ranking new blocks against each other is a second-order question, and comparing rules on it needs
 an evaluation that gives every block the same exposure, a rolling window or a fixed post-arrival horizon,
 because in a finite trace early arrivals have more time to be reused. Whatever such an evaluation leaves
 unclaimed has to come from something the per-item formulation does not express: admission under

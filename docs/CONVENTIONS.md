@@ -15,9 +15,10 @@ shipping product. It proposes a *learned memory-tier orchestrator* for LLM agent
 decides, per memory item, its **representation × storage tier × update timing** under
 latency/cost/token budgets, framed as a single budget-constrained MDP.
 
-The current `src/stoa` tree is an **interface scaffold (stubs)**. Modules define the shapes from the
-design doc; most behavior is placeholder logic marked with `TODO(Mx-y)` pointing at roadmap
-milestones. When implementing, fill stubs in roadmap order (M0→M18), not opportunistically.
+`src/stoa` began as an interface scaffold. The modules the paper's results use (`sequential`,
+`simulator`, `mooncake`, `kvct`, `causal`, `eval/online`, `experts`, `lrb`, `gbdt`, `stats`, `verify`)
+are implemented and tested; the learned control plane (`rl`, `train`, `orchestrator`, `policy`, `llm`)
+is scaffolding no reported number uses, and a few `TODO(Mx-y)` markers remain there.
 
 **The design docs are the source of truth**, and code comments cite them by section
 (e.g. `docs/stoa_design.md §2`). Before changing a module's semantics, read the referenced section.
@@ -30,9 +31,10 @@ milestones. When implementing, fill stubs in roadmap order (M0→M18), not oppor
 ## Commands
 
 ```bash
+# poppler-utils (pdftotext, pdfinfo, pdffonts) is needed by the checker
 python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"          # editable install + pytest
-pip install -e ".[rl]"           # + torch (CPU) & numpy — needed for the GNN policy (M6-9)
+pip install -r requirements-lock.txt   # the reference versions, every package pinned
+pip install -e . --no-deps             # the package itself
 
 pytest -q                        # run all tests (GNN tests skip cleanly without torch)
 pytest tests/test_environment.py::test_action_space_is_masked   # single test
@@ -54,7 +56,7 @@ python scripts/run_arrival_admission.py   # arrival-time admission, causal desig
 python scripts/run_arrival_diagnostics.py # exposure confound + the leaky design's label leak, measured
 python scripts/run_weight_sensitivity.py  # unreachable share under order-of-magnitude changes to each lambda
 python scripts/run_reactive_real.py       # reactive tiering incl. ARC, full traces
-python scripts/run_capacity_ladder.py     # linear -> GBDT -> MLP -> oracle; the "not the model" control
+python scripts/run_capacity_ladder.py --out experiments/capacity_ladder_fixed.json  # the ladder the paper cites; the default path is the superseded run
 python scripts/run_sampling_study.py      # randomized-draw control (CI on the kvct claim)
 python scripts/run_reactive_real.py --lrb # + the LRB-style learned policy (~35 min)
 python scripts/run_lrb_sweep.py           # LRB hyperparameter grid; the negative result is not tuning
@@ -171,8 +173,9 @@ simulator/training/eval) — keep it in sync when you add or rename config field
   must be real and verified; flag unconfirmed ones rather than inventing them.
 - The public API is re-exported from `stoa/__init__.py`; update `__all__` when adding exported names.
 - **Paper numbers are checked, not trusted.** `scripts/check_paper_numbers.py` reads `experiments/*.json`,
-  reformats each headline quantity, and greps `paper/*.tex` for it — the source, not the log or the PDF,
-  since a log reports success for edits that matched nothing. Run it after any experiment re-run; it has
+  reformats each headline quantity, and greps `paper/*.tex` for it — the source, not the LaTeX log,
+  since a log reports success for edits that matched nothing. Separately it reads the built PDF (body
+  length, fonts, leaked notes) and BibTeX's `main.blg`, because those are what a reviewer receives. Run it after any experiment re-run; it has
   already caught four double-rounding drifts (0.765 → "76" vs "77") and one claim that silently mixed two
   hyperparameter settings. When it fails, fix the paper, not the checker.
 - **A fraction is reported with its denominator characterized.** Any "share of headroom captured" must

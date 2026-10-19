@@ -13,7 +13,10 @@ DEPENDS_ON = {
     # artifact -> modules whose behaviour it encodes. Audited against each producing script's
     # direct imports by verify.producer_problems, which is how the omissions below were found:
     # four artifacts that load the Mooncake traces had not declared mooncake.py (§AO).
-    "arrival_admission.json": ("sequential.py", "mooncake.py", "causal.py"),
+    "arrival_admission.json": ("sequential.py", "mooncake.py", "causal.py", "credit.py",
+                               "eval/oracle.py", "gnn.py", "simulator.py"),
+    "tier_only.json": ("sequential.py", "mooncake.py", "causal.py", "credit.py", "eval/oracle.py",
+                       "gnn.py", "simulator.py", "environment.py"),
     "arrival_diagnostics.json": ("sequential.py", "mooncake.py", "causal.py"),
     "weight_sensitivity.json": ("sequential.py", "mooncake.py", "simulator.py"),
     "source_stats.json": ("mooncake.py", "kvct.py"),
@@ -33,6 +36,10 @@ DEPENDS_ON = {
                           "eval/retrieval.py", "llm.py"),
     "lrb_sweep.json": ("lrb.py", "eval/online.py", "mooncake.py"),
     "sampling_study.json": ("kvct.py",),
+    "kvct_placement_fixed.json": ("kvct.py", "sequential.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py"),
+    "kvct_placement_n70.json": ("kvct.py", "sequential.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py"),
+    "kvct_placement_n100.json": ("kvct.py", "sequential.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py"),
+    "kvct_placement_n150.json": ("kvct.py", "sequential.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py"),
     "reachable_ceiling.json": ("sequential.py", "mooncake.py", "simulator.py"),
     "headroom_by_length.json": ("sequential.py", "mooncake.py"),
 }

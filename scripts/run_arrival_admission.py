@@ -43,6 +43,10 @@ from stoa.causal import (analogue_magnitudes, split_by_arrival,  # noqa: E402
 from stoa.sequential import (attainable_ceiling, place_with_beliefs,  # noqa: E402
                              prefix_greedy_cost, quantile_match)
 from train_session_features import auc, fit_logistic, parse_requests, predict  # noqa: E402
+from stoa.credit import weighted_cost  # noqa: E402
+from stoa.eval.oracle import DEFAULT_WEIGHTS  # noqa: E402
+from stoa.gnn import LEGAL_ACTIONS  # noqa: E402  (after run_tier_only's patch, when it applies)
+from stoa.simulator import TieringSimulator  # noqa: E402
 
 # Two production traces and one CONTROL. `synthetic` is Mooncake's third FAST'25 workload, built
 # from public datasets with Poisson arrivals; it is reported as a control, never pooled with the
@@ -98,6 +102,10 @@ def arrival_features(path: str, max_requests: int):
             arrival.append(t)
         sess_steps[sid].append(t)
     return X, y, ids, arrival
+
+
+TIES = ("new-behind", "new-ahead")
+TIE_EPS = 1e-9
 
 
 def main() -> None:
@@ -171,7 +179,25 @@ def main() -> None:
         c_ceil = place_with_beliefs(wl, with_new({i: float(fut.get(i, 0)) for i in ev_ids}))
         span, reach = c_pref - c_orac, c_pref - c_ceil
 
-        def bill(belief_for_new):
+        # TIE CONVENTION (§AR). place_with_beliefs sorts stably and every pre-split item precedes
+        # every new one, so at EQUAL belief a new block is placed BEHIND the pre-split block --
+        # a convention, not a measurement, and it moved the order arms by ~20 points and the
+        # mean/median gap by up to 39. Both conventions are reported. "new-ahead" adds TIE_EPS to
+        # every new-block belief: enough to win a tie, and asserted below never to change which
+        # action a belief selects.
+        sim = TieringSimulator()
+        rep = wl.items[0].representation
+
+        def _argmin_action(v):
+            return min(LEGAL_ACTIONS, key=lambda a_: (weighted_cost(
+                sim.cost_of_placement(a_, v, rep), DEFAULT_WEIGHTS), sim.read_latency(a_.tier)))
+
+        def bill(belief_for_new, tie):
+            if tie == "new-ahead":
+                vals = set(belief_for_new.values())
+                assert all(_argmin_action(v) == _argmin_action(v + TIE_EPS) for v in vals), \
+                    "TIE_EPS changed an action choice"
+                belief_for_new = {k: v + TIE_EPS for k, v in belief_for_new.items()}
             c = place_with_beliefs(wl, with_new(belief_for_new))
             return (100.0 * (c_pref - c) / span if span > 0 else 0.0,
                     100.0 * (c_pref - c) / reach if reach > 0 else 0.0)
@@ -193,31 +219,34 @@ def main() -> None:
         for rnk, k in enumerate(_ord):
             learned_rank[k] = float(rnk)
         order_arms = {
-            "order-arrival": (None, [-float(k) for k in range(len(ev_idx))]),  # ev_idx is in arrival order
-            "order-learned": (a_auc, learned_rank),
-            "order-shuffled": (None, [float(v) for v in perm]),
+            "order-arrival": [-float(k) for k in range(len(ev_idx))],   # ev_idx is in arrival order
+            "order-learned": learned_rank,
+            "order-shuffled": [float(v) for v in perm],
         }
         # MAGNITUDE arms: one constant belief for every new block. place_with_beliefs sorts
         # stably, so equal beliefs are taken in item order, i.e. arrival order.
         mag_arms = {"constant-mean": _st.mean(ref), "constant-median": _st.median(ref)}
 
-        for arm, (au, vals) in order_arms.items():
-            g, r = bill(dict(zip(ev_ids, quantile_match(list(vals), ref))))
-            print(f"{name:<13} | {arm:<17} | {au if au is not None else float('nan'):6.3f} | "
-                  f"{g:7.1f}% | {r:8.1f}%")
-            rows.append({"trace": name, "axis": "order", "arm": arm,
-                         "auc": round(au, 4) if au is not None else None,
-                         "captured_pct": round(g, 2),
-                         "captured_of_attainable_pct": round(r, 2),
-                         "n_arrivals_scored": len(ev_idx)})
-        for arm, m in mag_arms.items():
-            g, r = bill({i: m for i in ev_ids})
-            print(f"{name:<13} | {arm:<17} | {'':>6} | {g:7.1f}% | {r:8.1f}%   (belief {m:.2f})")
-            rows.append({"trace": name, "axis": "magnitude", "arm": arm, "auc": None,
-                         "new_block_belief": round(m, 4),
-                         "captured_pct": round(g, 2),
-                         "captured_of_attainable_pct": round(r, 2),
-                         "n_arrivals_scored": len(ev_idx)})
+        for tie in TIES:
+            for arm, vals in order_arms.items():
+                au = a_auc if arm == "order-learned" else None   # reported only; truth-derived
+                g, r = bill(dict(zip(ev_ids, quantile_match(list(vals), ref))), tie)
+                print(f"{name:<13} | {arm:<17} | {au if au is not None else float('nan'):6.3f} | "
+                      f"{g:7.1f}% | {r:8.1f}%   [{tie}]")
+                rows.append({"trace": name, "axis": "order", "tie": tie, "arm": arm,
+                             "auc": round(au, 4) if au is not None else None,
+                             "captured_pct": round(g, 2),
+                             "captured_of_attainable_pct": round(r, 2),
+                             "n_arrivals_scored": len(ev_idx)})
+            for arm, m in mag_arms.items():
+                g, r = bill({i: m for i in ev_ids}, tie)
+                print(f"{name:<13} | {arm:<17} | {'':>6} | {g:7.1f}% | {r:8.1f}%   "
+                      f"(belief {m:.2f}) [{tie}]")
+                rows.append({"trace": name, "axis": "magnitude", "tie": tie, "arm": arm,
+                             "auc": None, "new_block_belief": round(m, 4),
+                             "captured_pct": round(g, 2),
+                             "captured_of_attainable_pct": round(r, 2),
+                             "n_arrivals_scored": len(ev_idx)})
         ceil_g = 100.0 * reach / span if span > 0 else 0.0
         print(f"{name:<13} | {'arrival-ceiling':<17} | {1.0:6.3f} | {ceil_g:7.1f}% | {100.0:8.1f}%")
         rows.append({"trace": name, "axis": "diagnostic", "arm": "arrival-ceiling", "auc": 1.0,

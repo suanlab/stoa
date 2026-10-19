@@ -65,7 +65,7 @@ python3 -c "from stoa.eval.locomo import load_locomo; load_locomo()"
 
 10 dialogues, 1,986 questions. The repository has a `LICENSE.txt`; **check it before redistributing**.
 
-## kv-cache-tester (optional — used only for the cautionary sampling study)
+## kv-cache-tester (needed for Table 2, Table 3 and §V-F)
 
 Anonymized agentic-coding conversations from `github.com/callanjfox/kv-cache-tester`.
 
@@ -73,9 +73,11 @@ Anonymized agentic-coding conversations from `github.com/callanjfox/kv-cache-tes
 python3 -c "from stoa.kvct import download; download(200)"
 ```
 
-This source supports exactly one result in the paper, and that result is a **negative** one: the
-quantity we tried to measure on it has a spread an order of magnitude wider than any effect
-(`docs/claims_dependency.md` §J). Everything else runs without it.
+The paper uses this source in three places: Table 2's agentic column (`run_source_stats.py`), the
+sampling study behind Table 3 and §V-E (`run_sampling_study.py`, a **negative** result: the quantity
+has a spread an order of magnitude wider than any effect), and the eviction-signal inversion in §V-F
+(`run_reactive_kvct.py`). `make reproduce-full` runs all three; `make verify` and `make reproduce-fast`
+run without it.
 
 ## Derived caches (never committed, rebuilt on demand)
 

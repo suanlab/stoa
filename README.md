@@ -13,15 +13,15 @@ The paper asks what a KV-block placement policy has to get right, and answers th
   Inside that protocol a better ranker helps monotonically, but the strongest model gains under 3% of
   the advantage. The diagnostic is one extra placement pass (`stoa.sequential.attainable_ceiling`); we
   recommend reporting the reachable share alongside any "fraction of headroom captured".
-- **Deciding at each block's arrival puts most of the advantage within reach.** Every arrival-time rule we
-  test captures **45–85%** of it on production, against 5.3% / 4.1% for the best split-time policy. Within
-  that range, the order new blocks are ranked in barely matters: with their magnitudes held equal, arrival
-  order, a learned ranker and a random order land within 1.1 / 0.9 points. What matters is the reuse a
-  rule assumes for a block it has never seen: moving that constant from the median (1.0) to the mean
-  (1.54 / 2.14) moves the result by **29.5 / 39.1 points**. On Mooncake's synthetic control the margin
-  is not robust (33.6–52.6% against a 35.0% split-time ceiling). Two earlier versions of this experiment
-  were wrong, one leaking future information and one comparing order arms that also differed in
-  magnitude; the paper's §V-C and the notebook's §AP and §AQ say how.
+- **Deciding at each block's arrival puts more within reach, by a margin that depends on conventions.**
+  Under every tie convention and action space we tried, ranking new blocks at arrival captures **at least
+  three times** what a clairvoyant split-time policy can (23.7–78.6% of the oracle's advantage against
+  4.1–8.2%). How a rule ranks new blocks among themselves moves the result by at most **2.1 points**; where
+  it ranks them against blocks already seen moves it by **18–39 points**, and letting placement also choose
+  a representation (as the placeholder cost model allows) adds 15–34 more. On Mooncake's synthetic control
+  deciding at arrival does not reliably help. Earlier versions of this experiment leaked future
+  information, compared order arms that also differed in magnitude, and fixed both conventions without
+  saying so; the paper's §V-C and the notebook's §AP–§AR say how.
 - **Reaction is competitive.** Rules that forecast nothing reach 75–99% of Belady on toolagent and 40–94% on conversation, and the
   adaptive family (ARC, LeCaR, CACHEUS) beats the best of them by at most 4.6 points.
 
@@ -34,7 +34,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-lock.txt      # exact versions the paper's numbers came from, FIRST
 pip install -e . --no-deps                # then the package itself, without re-resolving them
 
-pytest -q                                  # 279 tests, ~3 min
+pytest -q                                  # 287 tests, ~3 min
 python3 scripts/check_paper_numbers.py     # every paper number vs its artifact
 ```
 
@@ -57,7 +57,7 @@ claim to a command and an artifact.
 | `paper/` | LaTeX source (IEEE format for ICDE; the PVLDB version is `main_pvldb.tex`) |
 | `docs/CONVENTIONS.md` | architecture, commands, and the conventions the codebase holds itself to |
 | `docs/claims_dependency.md` | the lab notebook: every claim, what it depends on, and what was retracted |
-| `tests/` | 279 tests, most of which pin a specific defect we hit |
+| `tests/` | 287 tests, most of which pin a specific defect we hit |
 
 ## What is hand-rolled, and why it matters
 

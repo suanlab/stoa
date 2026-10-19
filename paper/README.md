@@ -5,9 +5,9 @@ deadline 2026-11-11, 5 PM PT.** Title: *[Experiment, Analysis, and Benchmark] De
 Placement Timing Beats Placement Prediction on Production KV Traces.* The paper reports what production
 traces say about KV-block placement: split-instant evaluation leaves 94.7% and 95.9% of a hindsight
 oracle's advantage on blocks that do not yet exist, so the best split-time policy reaches 5.3%
-(conversation) and 4.1% (toolagent) of it. Deciding at each block's arrival instead, every
-rule tested captures 45–85% on production, and the reuse a rule assumes for an unseen block moves the
-result by 29.5 / 39.1 points while the order it ranks such blocks in moves it by about one.
+(conversation) and 4.1% (toolagent) of it. Deciding at each block's arrival instead captures at
+least three times as much under every convention tried (tie rule, tier-only or full action space); ranking
+among new blocks moves the result by at most 2.1 points, ranking them against seen blocks by 18–39.
 
 The PVLDB-formatted version is `main_pvldb.tex`; its exact last revision is git tag
 `pvldb-final-2026-09`. It was never submitted. The ICDE version drops the two LLM-dependent sections
@@ -17,7 +17,8 @@ demotes the formulation from contribution to frame. See `../docs/claims_dependen
 **Five claims were retracted on the way here**, three of which the paper counts (the other two predate
 its framing), including the previous framing ("Ranking Is Not Placement"). Two further sub-claims were
 falsified (§AC) and then withdrawn with two more readings when an audit found the arrival-time
-experiment leaky (§AP). See `../docs/claims_dependency.md` §I, §T, §U (the retractions), §AC, §AP, and
+experiment leaky (§AP); re-verifying that fix withdrew two more (§AQ), six in all. See
+`../docs/claims_dependency.md` §I, §T, §U (the retractions), §AC, §AP, §AQ, and
 §AD onward (the guards added so each class fails loudly next time).
 
 The experimental record is `../docs/claims_dependency.md` — the lab notebook, one section per finding,
@@ -30,8 +31,9 @@ IEEE conference format (`IEEEtran.cls`, `IEEEtran.bst`, both from the local TeX 
 
 ```bash
 # any TeX Live with IEEEtran; or simply `make paper` from the repository root
+python3 ../scripts/make_figures.py                     # FIRST: figs/ from experiments/*.json (deterministic)
 pdflatex main && bibtex main && pdflatex main && pdflatex main   # -> main.pdf
-python3 ../scripts/make_figures.py                     # regenerate figs/ from experiments/*.json
+python3 ../scripts/record_pdf_build.py                 # content digests, so a fresh clone can verify the PDF
 python3 ../scripts/check_paper_numbers.py              # every number, guard and requirement below
 ```
 
@@ -106,12 +108,12 @@ paper reads — an earlier revision had two such files diverge silently.
 |---|---|
 | Abstract, §1–§8 | complete prose, aligned to the arrival-timing framing |
 | Table 1 (positioning) | complete |
-| §V-B length sweep | both traces run to exhaustion |
+| §V-G length sweep (headroom 1,500 requests → full) | both traces run to exhaustion |
 | §V-D capacity ladder | linear / GBDT / MLP / oracle, full traces |
 | §V-F reaction | full traces; ARC, LeCaR, CACHEUS + LRB, with ghost-hit and censoring diagnostics |
 | placement vs retrieval, representation axis | **omitted from the ICDE version** (LLM-dependent; in `main_pvldb.tex`) |
-| §V-B synthetic control | Mooncake's third workload; unreachable share 45.3–83.5%; arrival-time margin not robust (33.6–52.6% vs 35.0%) |
-| §V-C arrival-time admission | causal (§AP), order and magnitude separated (§AQ): 45–85% on production; order ≈1 point, magnitude 29.5 / 39.1 |
+| §V-B synthetic control | Mooncake's third workload; unreachable share 45.3–83.5%; arrival-time arms do not reliably beat the split ceiling |
+| §V-C arrival-time admission | causal (§AP); order vs magnitude (§AQ); tie convention × action space (§AR): ≥3× the split ceiling everywhere on production |
 | §V-G protocol | twenty-five defects + the controls that catch them |
 
 Every number in the paper is asserted against its artifact by `../scripts/check_paper_numbers.py`; run it

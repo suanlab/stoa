@@ -6,8 +6,8 @@ we found when we tried to learn it on production KV traces, and it is organized 
 than a result, because the defect came first and everything else follows from it: the split-instant
 protocol, which we used for three revisions, makes 95\% of the achievable benefit unreachable, so a
 policy measured inside it looks flat however well it ranks (\Cref{sec:reachable}). Moving the decision to
-each block's arrival puts most of the benefit within reach, and there the belief assigned to an unseen
-block matters far more than how blocks are ranked (\Cref{sec:arrival}). We then report what a
+each block's arrival puts more of it within reach on the production traces, and there where an unseen
+block ranks against seen ones matters far more than how unseen blocks are ranked (\Cref{sec:arrival}). We then report what a
 better ranker buys once the metric is repaired (\Cref{sec:capacity}), where reaction stands
 (\Cref{sec:reaction}), and, at length because it is the most transferable part, the protocol,
 including the three claims we retracted along the way (\Cref{sec:protocol}).
@@ -96,64 +96,71 @@ for placement and admission studies: \emph{state the reachable share alongside a
 \subsection{Deciding on arrival, not at a split}
 \label{sec:arrival}
 About 95\% of the oracle's advantage lives in blocks that do not exist yet when a split-time policy
-decides. The alternative is an earlier decision: place each block \emph{when it first appears}, from
-context available at that instant (the shared-prefix session's age, request rate and recency, the block's
+decides. The alternative is an earlier decision: form each block's belief \emph{when it first appears},
+from context available at that instant (the shared-prefix session's age, request rate and recency, the block's
 position within its request, the request's length). Nothing the policy uses reads the future. The arrival
 population is exactly the blocks first seen at or after the billing split. The model is fitted on blocks
 first seen before it, each labelled by its reuse within a fixed window that closes before the split.
-A belief has an order and a magnitude, and the arms vary them separately. The three
-\emph{order} arms put every new block's score onto one magnitude multiset, the previous period's analogue
-(blocks first seen before the split, counted up to it), so they differ only in which block gets which
-value. The two \emph{magnitude} arms give every new block one constant, the mean or the median of that
-multiset, and admit them in arrival order. Blocks that already exist keep the frequency heuristic's belief
-in every arm.
+A belief has an order and a magnitude, and the arms vary them separately. The three \emph{order} arms
+rank new blocks by arrival (earliest highest), by a learned score, or at random, and quantile-match that
+rank onto one multiset, the pre-split blocks' access counts resampled to the number of new blocks (about
+three-quarters of its values are 1), so they differ only in which block receives which value. The two
+\emph{magnitude} arms give every new block one constant, the mean or the median of that multiset. Two
+conventions the evaluation must fix are varied as well: whether placement may choose a block's
+representation and timing along with its tier, as the cost model allows, or the tier only, the one
+choice physically meaningful for a KV block; and whether a new block whose belief ties a pre-split
+block's is placed behind it or ahead of it. The beliefs are causal; the allocation is one static
+capacity-constrained assignment over the window, the same machinery as every other arm.
 
-\begin{center}\small\setlength{\tabcolsep}{2.1pt}
-\begin{tabular}{@{}lr@{\hspace{5pt}}rrr@{\hspace{6pt}}rr@{}}
+\begin{center}\small\setlength{\tabcolsep}{2.4pt}
+\begin{tabular}{@{}llrrrrrr@{}}
 \toprule
- & split & \multicolumn{3}{c}{order (one multiset)} & \multicolumn{2}{c}{magnitude} \\
-\cmidrule(lr){3-5}\cmidrule(l){6-7}
-trace & ceiling & arrival & learned (AUC) & shuffled & mean & median \\
+actions, tie & trace & split & arrival & learned & shuffled & mean & median \\
 \midrule
-conversation & 5.3 & 59.0 & 59.5 (0.56) & 58.4 & 75.0 & 45.5 \\
-toolagent    & 4.1 & 58.7 & 58.7 (0.61) & 57.9 & 84.7 & 45.6 \\
-synthetic    & 35.0 & 44.1 & 50.5 (0.75) & 42.7 & 52.6 & 33.6 \\
+all, behind  & conv & 5.3 & 59.0 & 59.5 & 58.4 & 75.0 & 45.5 \\
+             & tool & 4.1 & 58.7 & 58.7 & 57.9 & 84.7 & 45.6 \\
+all, ahead   & conv & 5.3 & 77.2 & 77.3 & 76.5 & 75.0 & 75.0 \\
+             & tool & 4.1 & 78.6 & 78.4 & 78.1 & 84.7 & 76.2 \\
+tier, behind & conv & 8.2 & 25.9 & 26.9 & 24.7 & 56.7 & 0.0 \\
+             & tool & 5.9 & 25.4 & 25.3 & 23.7 & 75.2 & 0.0 \\
+tier, ahead  & conv & 8.2 & 60.9 & 61.1 & 59.6 & 56.7 & 56.7 \\
+             & tool & 5.9 & 63.6 & 63.2 & 62.6 & 75.2 & 59.0 \\
 \bottomrule
 \end{tabular}
 \end{center}
-\noindent{\footnotesize Percent of the full hindsight gap. The split-time ceiling is clairvoyant on every
-block visible at the split; every arrival-time arm is causal.}
+\noindent{\footnotesize Percent of the full hindsight gap. ``split'' is the clairvoyant split-time ceiling;
+the other columns are causal arrival-time arms. The learned ranker's AUC is 0.56 and 0.61.}
 
 \medskip
-\noindent\emph{Deciding at arrival puts most of the advantage within reach.} On the production traces
-every arrival-time arm captures 45--85\% of the oracle's advantage, where a policy that places only the
-blocks present at the split, even a clairvoyant one, cannot exceed 5.3\% and 4.1\%. On the synthetic
-control, where only a quarter of blocks are new at the split, the margin narrows and is not robust: the
-arms span 33.6--52.6\% against a 35.0\% ceiling.
+\noindent\emph{Deciding at arrival puts more within reach under every convention.} Every order arm
+captures at least three times what a clairvoyant split-time policy can, 23.7--78.6\% against 4.1--8.2\%,
+and so does the constant mean. Only the median arm can gain nothing: with tier-only actions and new blocks
+behind, it reproduces the split-time baseline exactly.
 
-\emph{What an arrival rule assumes matters more than how it ranks.} With magnitudes held fixed, arrival
-order, a learned ranker and a random order land within 1.1 and 0.9 points of each other on the production
-traces; only on the synthetic control does the ranker lead, by 6.4 points. Changing the constant every
-new block receives from the median to the mean (1.0 to 1.54 and 2.14) moves the result by 29.5 and 39.1
-points: at 1.0 a new block ties with, and is placed behind, every pre-split block seen once. An admission
-point therefore has to decide how far to trust a block it has never seen against one seen once, the same
-lesson as \Cref{sec:capacity}: the magnitude convention moves the result more than ranking does. Arrival
-order is itself weakly predictive (AUC 0.55--0.58), because in a finite trace blocks arriving in the first
-quarter see 2.3--4.6 times the future accesses of those in the last, so even the small differences in
-order are confounded with exposure (\Cref{sec:open}).
+\emph{How a rule ranks new blocks hardly matters; where it ranks them matters most.} Within each
+configuration the three order arms land within 2.1 points of each other. Moving new blocks ahead of
+equal-belief pre-split blocks moves the same arms by 18--39 points, and allowing representation choices
+adds 15--34 more, because the cost model compresses any block it expects to be reused. An admission point
+therefore has to decide how far to trust a block it has never seen against one seen once, a decision a
+split-time evaluation never meets; ranking among new blocks is secondary. Arrival order is itself weakly
+predictive (AUC 0.55--0.58), since early arrivals see 2.3--4.6 times the future accesses of late ones.
 
-\emph{Two earlier versions of this experiment were wrong, and six of their readings are withdrawn.} The
-first leaked: its training labels counted accesses after the split (34.3\% and 46.3\% of training-label
-mass), its train/eval cut was a different instant from its billing split, its belief magnitudes were the
-evaluation blocks' true future counts, and it gave pre-split blocks a belief of zero in the arrival arms.
-The second compared a first-come-first-served arm holding every new block at the mean against learned and
-shuffled arms on the spread multiset, so its ``order'' comparison was mostly a magnitude comparison. Withdrawn:
-that a learned ranker captures less than FCFS, that FCFS captures 87\% and 50\% of what is reachable, that
-arrival order is worth 14 points, that timing recovers nothing on the synthetic control, that FCFS leads
-the ranker by 2 to 26 points, and that this lead reflects exposure time (\Cref{sec:protocol}).
+\emph{The synthetic control does not follow.} Its split-time ceiling is 35.0\% (52.1\% with tier-only
+actions) and its arrival arms span 33.6--56.9\% (0.0--36.1\%), so there deciding at arrival does not
+reliably help, and with tier-only actions never does.
 
-The design implication we can support is coarse: build an \textbf{admission point} rather than a
-predictor, and treat the belief it assigns an unseen block as the first-order design choice. Baleen~\cite{S12_wong2024baleen} is the one
+\emph{Earlier versions of this experiment were wrong four times, and six of their readings are
+withdrawn.} The first leaked: training labels counted post-split accesses (34.3\% and 46.3\% of label
+mass), its train/eval cut differed from its billing split, and its magnitudes were the evaluation blocks'
+true future counts. The first causal rerun gave pre-split blocks a belief of zero in the arrival arms.
+The next compared a constant-mean FCFS arm with order arms on the spread multiset, so its order comparison
+was a magnitude comparison. And every version fixed one tie convention and one action space without
+saying so. Withdrawn: that a learned ranker captures less than FCFS, that FCFS captures 87\% and 50\% of
+what is reachable, that arrival order is worth 14 points, that timing recovers nothing on the synthetic
+control, that FCFS leads the ranker by 2 to 26 points, and that this lead reflects exposure time.
+
+The design implication we can support is coarse: build an \textbf{admission point}, and treat where it
+ranks an unseen block against blocks already seen as the first-order design choice. Baleen~\cite{S12_wong2024baleen} is the one
 system among those we survey that decides admission rather than eviction, and it optimizes a downstream
 system cost rather than miss rate.
 
@@ -284,7 +291,7 @@ fill-once cache at that operating point.}
 
 \medskip
 \noindent Across eight operating points and four designs, \textbf{the best adaptive or learned policy
-beats the best pure rule by at most 4.6 points of Belady}, and at two points by nothing at all. Which
+beats the best pure rule by at most 4.6 points of Belady}, and at the loosest tier by at most 0.1. Which
 design wins also moves: LeCaR at the tightest tier on both traces and ARC at 5\%; above that, ARC and
 then plain LRU on conversation, LeCaR on toolagent. That is the substantive finding --- not that these policies fail, but that on KV-block workloads
 the whole adaptive-replacement family collapses into a band a few points wide, well short of the oracle
@@ -365,8 +372,9 @@ result show, reaching for a more sophisticated policy does not by itself resolve
   \centering
   \includegraphics[width=\columnwidth]{fig_reactive.pdf}
   \caption{Reactive tiering as a fraction of Belady's hit rate, full Mooncake traces. Bars are a
-  per-operating-point best-of-five envelope, an oracle over policies rather than a policy. Diamonds are
-  ARC, which meets the envelope at 5\% and 10\% but falls short at both extremes; crosses are the
+  per-operating-point best-of-seven envelope, an oracle over policies rather than a policy. Diamonds are
+  ARC, which meets the envelope at 5\% on both traces and at 10\% on conversation but falls short
+  elsewhere; crosses are the
   LRB-style learned policy, which is below ARC everywhere.}
   \label{fig:reactive}
 \end{figure}
@@ -375,9 +383,9 @@ result show, reaching for a more sophisticated policy does not by itself resolve
 \label{sec:protocol}
 Every positive result we obtained before the final protocol was an artifact. We report the mechanisms
 because they generalize, and because the later ones were found only after the earlier catalogue had been
-written --- two by an adversarial review we ran with AI reviewer agents (see the Acknowledgment), and the
-rest by re-verification passes run over a paper that had already passed every check it defined for
-itself.
+written: two by an adversarial review we ran with AI reviewer agents (see the Acknowledgment), five by an
+audit and the rest by re-verification passes, both also AI-run, over a paper that had already passed
+every check it defined for itself.
 
 \paragraph{Reference-frame mismatches (six).} Two quantities that must share a frame (the same split
 instant, ordering, tie rule, or question set) were silently defined on different ones: a demand signal
@@ -405,8 +413,8 @@ coarseness that band supports. An earlier draft of this paragraph said the repai
 ``19 points''; they disagree by 2.1, and the 19 came from a comparison this artifact cannot reproduce.
 
 A later re-verification pass ``falsified'' two sub-claims of the arrival result using numbers that, an
-audit then showed, came from a leaky version of the experiment itself; under the corrected design both
-questions turn out to be entangled with exposure time and are left open (\Cref{sec:arrival}).
+audit then showed, came from a leaky version of the experiment itself; both are withdrawn, and the
+corrected design answers them differently (\Cref{sec:arrival}).
 
 The common shape is worth naming: in all three the \emph{aggregate looked reasonable}. A flat captured
 fraction, a plausible interval, a learned policy landing below ARC --- each is what the hypothesis
@@ -471,15 +479,17 @@ The guard is a coverage test rather than a correctness one: extract every emphas
 source and fail if nothing asserts it. It answers ``what is nothing watching?'', which is a different
 question from ``is what we watch correct?'' and the one we had never asked.
 
-\paragraph{Leaks and confounds that no number check can see (six).} Found after every number check
-passed, five by an audit and the sixth by the re-verification of its fixes. The arrival-time experiment labelled its training blocks with accesses after the split; cut its
+\paragraph{Leaks and confounds that no number check can see (seven).} Found after every number check
+passed, five by an audit and two by re-verifying its fixes. The arrival-time experiment labelled its training blocks with accesses after the split; cut its
 training and evaluation sets at a different instant from the one it billed at; set every policy's belief
 magnitudes from the evaluation blocks' true future counts, a leak of the label distribution that four
 other experiments shared; and gave pre-split blocks a belief of zero in the arrival arms while the
 baseline placed them by frequency. Its ``ceiling'' then mixed past-window and future-window counts in one
 greedy ordering, and a causal rule exceeded it. And its corrected version's ``order-only'' controls
 differed from the first-come-first-served arm in belief magnitude as well: tied scores receive their tie
-block's mean, so a constant score is a magnitude choice. Each produced a self-consistent number that
+block's mean, so a constant score is a magnitude choice. And every version fixed two conventions without
+stating them, where a new block ties a seen one and whether placement may also compress, which together
+move one arm by up to 76 points. Each produced a self-consistent number that
 matched its artifact exactly, so none was visible to a check that compares the paper to its artifacts.
 
 \paragraph{The controls.} Assert that the oracle beats the heuristic it is compared against; keep a
@@ -511,17 +521,18 @@ magnitude in the ratio the policy is most sensitive to; and \textbf{6 of the 15 
 the hierarchy} so that latency order and capacity order disagree, which our fixed per-tier capacity table
 cannot express at all. Calibrating against a live deployment remains the open gate; this is the honest
 intermediate, not a substitute. The
-\emph{timing} axis of \Cref{sec:formulation} (when an item is materialized) is not exercised at all; the
-title's timing is the instant a placement is decided, a different quantity, and the \emph{representation} axis
-is not exercised here either: a pilot over three textual fidelities is in the artifact, but it depends on
+\emph{timing} and \emph{representation} axes of \Cref{sec:formulation} are chosen by the simulator from
+placeholder cost tables but carry no signal from the traces, which is why \Cref{sec:arrival} also reports
+tier-only placement; the title's timing is the instant a belief is formed, a different quantity. A
+representation pilot over three textual fidelities is in the artifact, but it depends on
 a paid hosted model, and this paper reports only what the artifact regenerates without one. Both
 sources are KV-block hash streams from transformer prefix caching, so they are independent in provenance
 but not in mechanism; with one exemplar per putative regime we cannot separate workload character from
 vendor, date, or block size (512 vs.\ 64 tokens). Sampling is not randomized, every placement result is
 a single deterministic run, and no confidence interval is reported for them, though trace length, split
-instant and cost weights are now swept rather than fixed. The arrival-time comparison is a static
-placement over a finite window, in which arrival order is entangled with exposure time, so it ranks
-protocols but not admission rules. Of the learned and adaptive cache literature we evaluate
+instant, cost weights, tie convention and action space are now swept rather than fixed. The arrival-time
+arms form beliefs causally but are allocated capacity in one static assignment, not admitted online, so
+they bound what an admission point could reach rather than measure one. Of the learned and adaptive cache literature we evaluate
 ARC~\cite{S7_megiddo2003arc}, LeCaR~\cite{S8_vietri2018lecar}, CACHEUS~\cite{S9_rodriguez2021cacheus} and
 a reimplementation of LRB~\cite{S6_song2020lrb}; Hawkeye, Mockingjay and Baleen are positioned in
 \Cref{sec:related} but not run, the first two because a KV block hash carries no analogue of the program

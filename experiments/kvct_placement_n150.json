@@ -4,7 +4,7 @@
     "source": "kv-cache-tester",
     "protocol": "single workload, single split instant, conversation-disjoint train/eval"
   },
-  "prefix_greedy": 517131.92,
+  "prefix_greedy": 517147.52,
   "oracle": 100578.12,
   "headroom_pct": 80.55,
   "results": [
@@ -12,7 +12,7 @@
       "features": "block",
       "auc": 0.8801,
       "classifier_headroom_pct": -23.91,
-      "regression_headroom_pct": -23.99
+      "regression_headroom_pct": -23.98
     },
     {
       "features": "block+session",

@@ -53,10 +53,11 @@ on blocks that do not yet exist at the split, so the best possible split-time po
 4.1\% of it; the share stays at 92--99\% for every split from 0.3 to 0.7 and under tenfold
 changes to the latency and token weights. Inside that protocol a better ranker helps monotonically, but only over the
 sliver: the strongest model gains under 3\% of the oracle's advantage. Deciding at each block's arrival
-instead puts most of the advantage within reach: every arrival-time rule we test captures 45--85\% of it,
-and there the reuse a rule assumes for a block it has never seen moves the result by 30--39 points, while
-how it ranks those blocks moves it by about one. On Mooncake's synthetic control the margin over the
-split-time ceiling narrows and is not robust. Reactive tiering is consistent with this: LRU, LFU and a fill-once cache
+instead puts more within reach: under every modelling convention we tried, ranking new blocks at arrival
+captures at least three times what a clairvoyant split-time policy can. How a rule ranks them moves the
+result by at most 2.1 points; where it ranks them against blocks already seen, a decision a split-time
+evaluation never meets, moves it by 18--39. On Mooncake's synthetic control deciding at arrival does not
+reliably help. Reactive tiering is consistent with this: LRU, LFU and a fill-once cache
 reach 75--99\% and 40--94\% of Belady's hit rate, the best adaptive policy (ARC, LeCaR, CACHEUS) beats
 the best of those rules, each chosen per operating point, by at most 4.6 points, and a learned
 replacement policy (LRB) stays below ARC, because 76--78\% of blocks are never reused. We give a one-line
@@ -85,8 +86,9 @@ KV cache, memory tiering, cache replacement, evaluation methodology, LLM agents,
 used through the Claude Code agentic environment) was used extensively throughout this work. It wrote
 most of the code in the released artifact, designed and ran most of the experiments and analyses,
 drafted and revised most of the text, and generated the figures from the stored results; its contributions are recorded commit by commit in
-the artifact's history. The ``adversarial review'' and the audit referred to in \Cref{sec:protocol} were
-internal exercises in which AI agents were prompted to act as reviewers; neither was peer review, and one
+the artifact's history. The ``adversarial review'', the audit and the re-verification passes referred to in
+\Cref{sec:protocol} were internal exercises in which AI agents were prompted to act as reviewers; none
+was peer review, and one
 figure the review produced (a third LRB repair) is neither reproduced nor relied on here. Every number in this paper is
 re-derived from the released artifact by a checker shipped with it. The initial concept and research
 idea were proposed by the author. The author takes full responsibility for the content of this paper.

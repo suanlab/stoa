@@ -20,7 +20,7 @@ were replaced tomorrow.
 | Reuse distribution is extremely bimodal (Mooncake: ~78% of blocks touched once; a few touched thousands of times) | block-level counts | `mooncake.trace_summary` |
 | The two production sources occupy **different reuse regimes** (Mooncake ~78% one-time, mean reuse 1.9; kv-cache-tester ~7.5% one-time, mean reuse 25.6) | block-level counts | `kvct.wallclock_stats`, `mooncake.trace_summary` |
 | Agent traces re-send their prefix, so a request touches ~2.5k blocks vs ~17 in Mooncake | blocks per request | both adapters |
-| Binary reuse is barely predictable from block/session features (AUC 0.43–0.64, no transfer) | AUC (ranking only) | `scripts/train_session_features.py` |
+| ~~Binary reuse is barely predictable from block/session features (AUC 0.43–0.64, no transfer)~~ RETRACTED: a trace-length artifact; at matched length both sources reach 0.81–0.93 (REPRODUCIBILITY §3) | AUC (ranking only) | `scripts/train_session_features.py` |
 | Reactive tiering reaches 82–93% of Belady's **hit rate** on the agent trace, 37–45% on conversation | hit rate | `scripts/run_reactive_real.py` |
 | Belady > H2O/LFU > LRU ordering | hit rate | `eval/online.py` |
 | kv-cache-tester exposes wall-clock think time (p50 20 s, p90 131 s, median session span 42 min) | timestamps | `kvct.wallclock_stats` |
@@ -205,6 +205,9 @@ a `seed`) and reports mean ± 95% CI for the same pipeline that produced the ret
 |---|---|
 | 20 | **−541% ± 660** |
 | 40 | **−67% ± 126** |
+
+*(These half-widths use the normal quantile with σ estimated from four draws, which understates them;
+the t(3) half-widths are ±1,072 and ±205 (`sampling_study.json`). Kept as recorded.)*
 
 The interval is an order of magnitude wider than the effect. The original +66–88% was one draw from this
 distribution, taken as a sorted prefix. So the quantity was not merely mis-estimated — it was never
@@ -841,8 +844,9 @@ flips sign under an unstated convention is not yet a measurement. We report both
 > **SUPERSEDED by §AC (2026-08-26), then WITHDRAWN by §AP and §AQ (2026-10).** §AC's values (reachable
 > share 83.5% / 19.0%, FCFS at 87.4% / 50.2% of the ceiling, shuffling costs 3.3 / 14.1 points) came from
 > a design that leaked future information (§AP) and whose order arms also differed in magnitude (§AQ);
-> none of them is current. See §AQ for the current table. The second bullet below ("FCFS ordering contributes little") is
-> **falsified on toolagent**: arrival order is worth 14 points there. Left as recorded; do not cite.
+> none of them is current. See §AQ for the current table. §AC's verdict that the second bullet below
+> ("FCFS ordering contributes little") was falsified is itself withdrawn: with magnitudes held equal,
+> order moves the production result by about a point (§AQ). Left as recorded; do not cite.
 
 `scripts/run_arrival_admission.py`, `experiments/arrival_admission.json`, full traces. Blocks are placed
 at **first appearance** from request-level context (session age/rate/recency, position in request,
@@ -1037,7 +1041,8 @@ moved the headline table substantially.
   said it was not. The design implication narrows from "deciding at all is enough" to "decide early, and
   do not assume the order is incidental."
 - Also narrowed: the ladder's monotonicity now holds on **toolagent only**; on conversation the constant
-  belief (−46.1) beats log(count) (−70.7) despite carrying no information.
+  belief (−46.1) beats log(count) (−70.7) despite carrying no information. *(Superseded by §AP: on the
+  causal belief scale the ladder is monotone in AUC on both traces.)*
 
 ### AC.3 What the checker did and did not do
 
@@ -1088,7 +1093,8 @@ wrong anyway, and neither was in the checker's reach.
 
 **1. The repository's front page carried the falsified numbers.** `README.md` — the first file anyone
 opens on GitHub — still said the reachable share rises to *90%* and *53%* and that FCFS captures *93%*
-and *90%*. Those are the pre-§AC values; the true ones are 83.5 / 19.0 and 87.4 / 50.2. §AC corrected
+and *90%*. Those are the pre-§AC values; the values at the time were 83.5 / 19.0 and 87.4 / 50.2 (both pairs
+since withdrawn, §AP, §AQ). §AC corrected
 `paper/README.md` and `REPRODUCIBILITY.md` and never touched the root README, because the sweep that
 found the stale prose was written by listing the files I remembered editing.
 
@@ -1132,7 +1138,9 @@ pointer**: "Deciding on arrival attains 90.4% / 52.8% — 29x and 22x more", and
 > of the benefit is in **when** the decision is made, not in what it decides."
 
 That is precisely the claim §AC falsified: 14.1 points on toolagent. A reader landing on §V.2 — 150
-lines before the correction — reads a falsified conclusion as a finding.
+lines before the correction — reads a falsified conclusion as a finding. *(Later, §AQ found that the 14.1
+points were a magnitude difference, not an order effect; with magnitudes equal, order moves the result
+by about a point. The banner rule this section motivates still holds.)*
 
 A lab notebook must record superseded measurements; editing them out destroys the record's value, which
 is the whole reason this file exists. So the fix is a banner, not a rewrite: §V.1 and §V.2 now carry
@@ -1604,6 +1612,7 @@ headline fraction were measured from different references, which is §W in the o
 most. Consequences propagate: the split-instant reachable share was 4,996/160,200 = 3.1% rather than
 4,996/93,383 = 5.3%, and the timing multiplier the abstract quotes as 27x is **15.8x** — computed by
 dividing an arrival-time ceiling that *was* in the right frame by a split-instant share that was not.
+*(The multiplier itself was withdrawn with the leaky arrival design, §AP.)*
 
 The qualitative claim survives intact: ~95% of the gap is unreachable, so a policy confined to ~5%
 looks flat however well it ranks. The mechanism is unchanged. Only the numbers move, and they move
@@ -1768,6 +1777,10 @@ that commit was made, it was not; this subsection was written afterwards to make
 
 ## §AP — an audit of the arrival-time experiment: three leaks, a confound, and four withdrawn readings
 
+> **Partly superseded by §AQ and §AR.** This section's readings that FCFS's lead reflects exposure time
+> and that "the simplest arrival-time rule captures 75–85%" were withdrawn: the lead was a belief-magnitude
+> effect (§AQ), and part of every arrival arm's gain is a representation choice the cost model makes (§AR).
+
 On 2026-10-16 the author had an AI agent run a 24-item research-quality audit over the repository and
 the ICDE draft (saved locally as `AUDIT.md`, not part of the artifact). Every number check passed at the
 time. The audit's High findings, and what fixing them changed:
@@ -1850,12 +1863,12 @@ again.
 
 ### AP.2 Counts, defined once (audit M1)
 
-- **Tests:** 261 at the time (279 after §AQ), and `check_paper_numbers.py` now collects the suite and fails if README.md,
+- **Tests:** 261 at the time (287 after §AR), and `check_paper_numbers.py` now collects the suite and fails if README.md,
   REPRODUCIBILITY.md or the Makefile states another number (they said 173, 163 and 231).
 - **Retractions:** the paper counts **three** (the sampling headline §I, the decoupling result §T/§U,
   the LRB column §V). Five appear in REPRODUCIBILITY.md because two earlier ones ("Mooncake omits timing",
   "two AUC regimes") predate the paper's framing. The two §AC falsifications and two further readings
-  are **withdrawn** here, which the paper reports as "four readings".
+  are **withdrawn** here, which the paper reported as "four readings" (six after §AQ).
 - **Defects:** the paper's §5.8 catalogue counts twenty-four: reference-frame mismatches (6), retracted
   claims (3), free-parameter extrapolations (3), believing a report (1), derived surfaces (3), unchecked
   summaries (1), unverified interventions (1), emphasis without verification (1), and this section's
@@ -1962,5 +1975,77 @@ fonts in both embedded figures, which IEEE PDF eXpress rejects (`verify.type3_fo
 
 ### AQ.6 Counts
 
-Defects in the paper's catalogue: **twenty-five**. Withdrawn readings of the arrival experiment: **six**
+Defects in the paper's catalogue: **twenty-five**. (The notebook's running ordinals, e.g. "twenty-eighth"
+in §AN, count every defect it recorded, including ones the paper's catalogue groups or omits.) Withdrawn readings of the arrival experiment: **six**
 (four in §AP, two here). Paper-level retractions: still three.
+
+## §AR — the second re-verification pass: two conventions the arrival result rested on
+
+The second pass (2026-10-19) re-ran the fresh clone and three new reviewer agents on the §AQ state. The
+fresh clone now passed `make verify` (275 passed, 4 skipped, 88/88). The reviewers found that §AQ's
+numbers rested on two conventions the experiment fixed without stating, and the author chose to keep
+going rather than stop.
+
+### AR.1 The action space
+
+`place_with_beliefs` chooses a full action, representation × tier × timing, by the placeholder cost
+tables, and a belief of 0 versus ≥ 1 flips a block from PLAINTEXT/ONLINE to LATENT/SLEEP. The paper said
+the traces "exercise the tier axis only"; the simulator was exercising all three. `run_tier_only.py`
+reruns the split ceiling and every arrival arm with actions restricted to PLAINTEXT/ONLINE, so only the
+tier is chosen (`tier_only.json`). The split ceiling rises to 8.2 / 5.9%, every arm falls, and the
+constant-median arm falls to exactly 0: with new blocks behind, it reproduces the split baseline, so all
+of its earlier 45% was a representation change.
+
+### AR.2 The tie convention
+
+`place_with_beliefs` sorts stably and every pre-split item precedes every new one, so a new block whose
+belief ties a pre-split block's is always placed behind it. With three-quarters of the reference multiset
+at 1, that tie decided where most new blocks went. `run_arrival_admission.py` now reports both
+conventions ("new-behind", and "new-ahead" via a 1e-9 nudge asserted never to change an action).
+
+### AR.3 What survives all four configurations (production traces)
+
+| | split ceiling | order arms | constant mean | constant median |
+|---|---|---|---|---|
+| all actions, behind | 5.3 / 4.1 | 58.4–59.5 / 57.9–58.7 | 75.0 / 84.7 | 45.5 / 45.6 |
+| all actions, ahead | 5.3 / 4.1 | 76.5–77.3 / 78.1–78.6 | 75.0 / 84.7 | 75.0 / 76.2 |
+| tier only, behind | 8.2 / 5.9 | 24.7–26.9 / 23.7–25.4 | 56.7 / 75.2 | 0.0 / 0.0 |
+| tier only, ahead | 8.2 / 5.9 | 59.6–61.1 / 62.6–63.6 | 56.7 / 75.2 | 56.7 / 59.0 |
+
+- **Survives everywhere:** every order arm captures at least 3× the clairvoyant split-time ceiling; the
+  three order arms stay within 2.1 points of each other; the split protocol's unreachable share stays
+  above 91%.
+- **Dominant, and a convention:** where new blocks rank against equal-belief seen blocks moves the order
+  arms by 18–39 points; allowing representation choices adds 15–34. One arm moves by up to 76 points
+  across the four configurations.
+- **Withdrawn (from §AQ, never in a public version):** "every arrival rule captures 45–85%" and "the
+  magnitude convention moves the result 30–39 points". The mean/median gap was mostly the tie rule.
+- **Synthetic control:** with tier-only actions its split ceiling (52.1%) is above every arrival arm
+  (0.0–36.1%); deciding at arrival does not reliably help there.
+- **Static allocation, now stated:** the arms form beliefs causally but are allocated capacity in one
+  static assignment over the window, so they bound what an admission point could reach.
+
+This is the twenty-sixth catalogued defect (filed with the arrival experiment's others): conventions
+fixed without being stated, each producing a self-consistent number.
+
+### AR.4 The rest of the pass
+
+Fixed: `make reproduce-full` exited 1 on a correct run (figure PDFs embedded a timestamp, so their hash
+changed every run; figures are now byte-deterministic and both reproduce targets regenerate them);
+`make clean` deleted the tracked `.bbl`/`.blg`; the documented build order guaranteed a stale PDF; the
+lockfile lacked `setuptools`; `data/README.md` called kv-cache-tester optional; the checker required a
+superseded artifact and fell back silently to one without a producer; the reactive figure said
+"best-of-five" for a seven-policy envelope; several notebook sections stated withdrawn readings without a
+banner; the taint test missed billing, the magnitude constants, augmented/walrus/for bindings, and two
+record-only scripts that do leak (now listed explicitly and proven flagged); a generic checker needle
+("within 2.1 points") passed by matching an unrelated LRB sentence.
+
+Table 3's left column (the retracted sorted-prefix runs) had no 100-conversation artifact and printed
+the classifier's +87% at 70 beside regression values elsewhere. All four runs were regenerated with the
+current script; they reproduce the stored artifacts to within 0.01, the 70-conversation cell is now the
+regression value (+75%), and the checker asserts every cell.
+
+### AR.5 Counts
+
+Defects in the paper's catalogue: **twenty-six**. Withdrawn readings stated in the paper: six (the §AQ
+values were never public). Tests: 287.

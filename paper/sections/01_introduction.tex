@@ -60,13 +60,13 @@ result measured. We retract it.
 
 Moving the decision to each block's \emph{arrival}, placing it the moment it first appears from the
 session context available at that instant, changes what is within reach. Every arrival-time rule we test
-captures between \textbf{45\%} and \textbf{85\%} of the oracle's advantage on the production traces,
-where a policy placing only the blocks present at the split, even a clairvoyant one, cannot pass 5.3\%
-and 4.1\%. Within that range the order a rule ranks new blocks in hardly matters: arrival order, a
-learned ranker and a random order land within about a point of each other once their magnitudes are
-equal. What matters is the reuse a rule assumes for a block it has never seen, which moves the result by
-30 to 39 points. The design implication is to build an \textbf{admission point}, decide at arrival, and
-treat that assumption as the first-order design choice.
+captures, under every modelling convention we tried, at least three times what a policy placing only
+the blocks present at the split can reach even with clairvoyance (\textbf{5.3\%} and \textbf{4.1\%} of
+the oracle's advantage). The order a rule ranks new blocks in hardly matters: arrival order, a learned
+ranker and a random order land within 2.1 points of each other. What matters is where it ranks a block
+it has never seen against blocks already seen, which moves the result by 18 to 39 points. The design
+implication is to build an \textbf{admission point}, decide at arrival, and treat that placement of the
+unseen as the first-order design choice. A synthetic control does not follow this pattern.
 
 Reaction is competitive for a related reason. Tiering rules that forecast nothing at all --- LRU, LFU and
 a fill-once cache --- reach 75--99\% of Belady's hit rate on one Mooncake trace and 40--94\% on the other,
@@ -93,16 +93,17 @@ older than the program that wrote it.
 \begin{itemize}
   \item \textbf{(C1)} A frame, not an evaluated system: agent-memory placement as one budget-constrained
   MDP over representation $\times$ tier $\times$ timing with a serve-time $(L,C,B)$ knob
-  (\Cref{sec:formulation}), and a control-plane sketch for it (\Cref{sec:arch}). The production traces
-  exercise the tier axis only; we offer the formulation as the frame the measurements are read
-  against, and do not claim to have evaluated it.
+  (\Cref{sec:formulation}), and a control-plane sketch for it (\Cref{sec:arch}). The traces carry signal
+  for the tier axis only; the simulator also chooses representation and timing from placeholder cost
+  tables, so we report the arrival-time result with and without those choices, offer the formulation
+  as the frame the measurements are read against, and do not claim to have evaluated it.
   \item \textbf{(C2)} A timing result on production traces. A split-instant evaluation protocol
   makes 95\% of a hindsight oracle's advantage unreachable, because 45--46\% of blocks do not exist yet
   when it decides (\Cref{sec:reachable}); inside it, a better ranker helps monotonically but over a 5\%
-  sliver (\Cref{sec:capacity}). Deciding at each block's \emph{arrival} lets every rule we test capture 45--85\% of the
-  advantage, and separates the two parts of a belief: the order new blocks are ranked in moves the result
-  by about a point, the magnitude assumed for them by 30--39 (\Cref{sec:arrival}). On a synthetic control
-  the margin over the split-time ceiling is not robust.
+  sliver (\Cref{sec:capacity}). Deciding at each block's \emph{arrival} captures at least three times the
+  split-time ceiling under every tie convention and action space we tried; ranking among new blocks moves
+  the result by at most 2.1 points, where they rank against seen blocks by 18--39 (\Cref{sec:arrival}). On
+  a synthetic control deciding at arrival does not reliably help.
   \item \textbf{(C3)} Measurements of reactive tiering on both sources against the adaptive-replacement
   family (ARC, LeCaR, CACHEUS) and a reimplemented LRB --- the best of them beating the best plain rule by
   at most 4.6 points of Belady across eight operating points --- together with an eviction-signal inversion
@@ -110,7 +111,7 @@ older than the program that wrote it.
   traces are dominated by one-time blocks, which starve the ghost-hit channel the three adaptive
   policies run on and leave most of LRB's training labels censored
   (\Cref{sec:reaction}).
-  \item \textbf{(C4)} A reusable evaluation protocol: twenty-five measurement defects that each manufactured
+  \item \textbf{(C4)} A reusable evaluation protocol: twenty-six measurement defects that each manufactured
   a plausible result here, grouped into nine mechanisms, and the cheap controls that catch them ---
   including the rule that a null is reportable only alongside the sample size that would have resolved
   it, and the rule that every edge of the source $\rightarrow$ artifact $\rightarrow$ figure
