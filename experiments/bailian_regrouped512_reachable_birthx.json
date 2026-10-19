@@ -1,0 +1,924 @@
+{
+  "config": {
+    "source": "https://github.com/alibaba-edu/qwen-bailian-usagetraces-anon",
+    "license": "Apache-2.0 (upstream LICENSE and README); data not redistributed",
+    "citation": "Wang et al., KVCache Cache in the Wild, USENIX ATC'25",
+    "files": {
+      "traceA": {
+        "upstream": "qwen_traceA_blksz_16.jsonl",
+        "lfs_sha256": "07cedc9ed8aff301994ac68ed4aede8123b7603673575eeba9dd677de663db17"
+      },
+      "traceB": {
+        "upstream": "qwen_traceB_blksz_16.jsonl",
+        "lfs_sha256": "68e3f98e2d601d60d0abf4b89bc8a3654372abab7b1cde6373a13d0054379d59"
+      },
+      "coder": {
+        "upstream": "qwen_coder_blksz_16.jsonl",
+        "lfs_sha256": "3d74974cebb7bccb69b1ca6ea210a44d9a3033443c0271ed015327284dea1aff"
+      },
+      "thinking": {
+        "upstream": "qwen_thinking_blksz_16.jsonl",
+        "lfs_sha256": "41ac36d9d1b54d084eeb6b05e9d142ba9d02f8bf79cfc9fff418d8ab7cdee906"
+      }
+    },
+    "block_tokens": 512,
+    "regrouped": "32 consecutive 16-token ids per block, prefix-chained (sensitivity, not the replication)",
+    "block_size_in_cost_model": "size_bytes = 16 * BYTES_PER_TOKEN for every block; size enters only tier capacity (a fraction of total bytes), so capacity in blocks is invariant to the constant; per-access costs are per block, not per token",
+    "subsample": "none (full traces)",
+    "conversion": {
+      "traceA": {
+        "requests": 43058,
+        "first_timestamp": 0.0,
+        "last_timestamp": 7199.464,
+        "file": "data/bailian_traceA_g32_mooncake.jsonl"
+      },
+      "traceB": {
+        "requests": 172800,
+        "first_timestamp": 0.0,
+        "last_timestamp": 7199.97,
+        "file": "data/bailian_traceB_g32_mooncake.jsonl"
+      },
+      "coder": {
+        "requests": 43011,
+        "first_timestamp": 0.0,
+        "last_timestamp": 7198.879,
+        "file": "data/bailian_coder_g32_mooncake.jsonl"
+      },
+      "thinking": {
+        "requests": 10812,
+        "first_timestamp": 0.0,
+        "last_timestamp": 7191.734,
+        "file": "data/bailian_thinking_g32_mooncake.jsonl"
+      }
+    },
+    "structure": {
+      "traceA": {
+        "requests": 43058,
+        "blocks": 120177,
+        "accesses": 218859,
+        "singleton_block_frac": 0.6998,
+        "reused_access_frac": 0.4509,
+        "mean_accesses_per_block": 1.821,
+        "max_accesses_per_block": 14664,
+        "mean_blocks_per_request": 5.1,
+        "timestamp_span": 7199.464,
+        "post_split_new_blocks": {
+          "0.3": {
+            "new_blocks": 84079,
+            "never_reused_frac": 0.7055
+          },
+          "0.4": {
+            "new_blocks": 71568,
+            "never_reused_frac": 0.6949
+          },
+          "0.5": {
+            "new_blocks": 59299,
+            "never_reused_frac": 0.7055
+          },
+          "0.6": {
+            "new_blocks": 47158,
+            "never_reused_frac": 0.7176
+          },
+          "0.7": {
+            "new_blocks": 35030,
+            "never_reused_frac": 0.7358
+          }
+        }
+      },
+      "traceB": {
+        "requests": 172800,
+        "blocks": 290486,
+        "accesses": 401630,
+        "singleton_block_frac": 0.9847,
+        "reused_access_frac": 0.2767,
+        "mean_accesses_per_block": 1.383,
+        "max_accesses_per_block": 24534,
+        "mean_blocks_per_request": 2.3,
+        "timestamp_span": 7199.97,
+        "post_split_new_blocks": {
+          "0.3": {
+            "new_blocks": 202272,
+            "never_reused_frac": 0.9896
+          },
+          "0.4": {
+            "new_blocks": 174183,
+            "never_reused_frac": 0.9902
+          },
+          "0.5": {
+            "new_blocks": 144945,
+            "never_reused_frac": 0.9905
+          },
+          "0.6": {
+            "new_blocks": 115574,
+            "never_reused_frac": 0.9917
+          },
+          "0.7": {
+            "new_blocks": 85916,
+            "never_reused_frac": 0.9926
+          }
+        }
+      },
+      "coder": {
+        "requests": 43011,
+        "blocks": 199350,
+        "accesses": 505188,
+        "singleton_block_frac": 0.6909,
+        "reused_access_frac": 0.6054,
+        "mean_accesses_per_block": 2.534,
+        "max_accesses_per_block": 4941,
+        "mean_blocks_per_request": 11.7,
+        "timestamp_span": 7198.879,
+        "post_split_new_blocks": {
+          "0.3": {
+            "new_blocks": 134784,
+            "never_reused_frac": 0.7132
+          },
+          "0.4": {
+            "new_blocks": 115285,
+            "never_reused_frac": 0.7198
+          },
+          "0.5": {
+            "new_blocks": 95682,
+            "never_reused_frac": 0.7282
+          },
+          "0.6": {
+            "new_blocks": 76282,
+            "never_reused_frac": 0.7407
+          },
+          "0.7": {
+            "new_blocks": 56678,
+            "never_reused_frac": 0.7513
+          }
+        }
+      },
+      "thinking": {
+        "requests": 10812,
+        "blocks": 62077,
+        "accesses": 106500,
+        "singleton_block_frac": 0.8718,
+        "reused_access_frac": 0.4171,
+        "mean_accesses_per_block": 1.716,
+        "max_accesses_per_block": 2289,
+        "mean_blocks_per_request": 9.9,
+        "timestamp_span": 7191.734,
+        "post_split_new_blocks": {
+          "0.3": {
+            "new_blocks": 47177,
+            "never_reused_frac": 0.91
+          },
+          "0.4": {
+            "new_blocks": 42969,
+            "never_reused_frac": 0.9148
+          },
+          "0.5": {
+            "new_blocks": 38262,
+            "never_reused_frac": 0.927
+          },
+          "0.6": {
+            "new_blocks": 31926,
+            "never_reused_frac": 0.9315
+          },
+          "0.7": {
+            "new_blocks": 23789,
+            "never_reused_frac": 0.9337
+          }
+        }
+      }
+    },
+    "mooncake_structure_same_function": {
+      "conversation": {
+        "requests": 12031,
+        "blocks": 182790,
+        "accesses": 288500,
+        "singleton_block_frac": 0.7585,
+        "reused_access_frac": 0.3664,
+        "mean_accesses_per_block": 1.578,
+        "max_accesses_per_block": 12031,
+        "mean_blocks_per_request": 24.0,
+        "timestamp_span": 3536999,
+        "post_split_new_blocks": {
+          "0.3": {
+            "new_blocks": 117179,
+            "never_reused_frac": 0.7862
+          },
+          "0.4": {
+            "new_blocks": 99347,
+            "never_reused_frac": 0.7931
+          },
+          "0.5": {
+            "new_blocks": 82659,
+            "never_reused_frac": 0.7968
+          },
+          "0.6": {
+            "new_blocks": 65516,
+            "never_reused_frac": 0.7993
+          },
+          "0.7": {
+            "new_blocks": 49293,
+            "never_reused_frac": 0.8063
+          }
+        }
+      },
+      "toolagent": {
+        "requests": 23608,
+        "blocks": 183300,
+        "accesses": 409616,
+        "singleton_block_frac": 0.7846,
+        "reused_access_frac": 0.5525,
+        "mean_accesses_per_block": 2.235,
+        "max_accesses_per_block": 10938,
+        "mean_blocks_per_request": 17.4,
+        "timestamp_span": 3536999,
+        "post_split_new_blocks": {
+          "0.3": {
+            "new_blocks": 119268,
+            "never_reused_frac": 0.8067
+          },
+          "0.4": {
+            "new_blocks": 101899,
+            "never_reused_frac": 0.8111
+          },
+          "0.5": {
+            "new_blocks": 84465,
+            "never_reused_frac": 0.8117
+          },
+          "0.6": {
+            "new_blocks": 67368,
+            "never_reused_frac": 0.8157
+          },
+          "0.7": {
+            "new_blocks": 50384,
+            "never_reused_frac": 0.8191
+          }
+        }
+      },
+      "synthetic": {
+        "requests": 3993,
+        "blocks": 43924,
+        "accesses": 121877,
+        "singleton_block_frac": 0.5845,
+        "reused_access_frac": 0.6396,
+        "mean_accesses_per_block": 2.775,
+        "max_accesses_per_block": 24,
+        "mean_blocks_per_request": 30.5,
+        "timestamp_span": 1022025,
+        "post_split_new_blocks": {
+          "0.3": {
+            "new_blocks": 20886,
+            "never_reused_frac": 0.6403
+          },
+          "0.4": {
+            "new_blocks": 15787,
+            "never_reused_frac": 0.6514
+          },
+          "0.5": {
+            "new_blocks": 10793,
+            "never_reused_frac": 0.6699
+          },
+          "0.6": {
+            "new_blocks": 6405,
+            "never_reused_frac": 0.7112
+          },
+          "0.7": {
+            "new_blocks": 3519,
+            "never_reused_frac": 0.73
+          }
+        }
+      }
+    },
+    "action_spaces": {
+      "full": "Action.space() unmodified",
+      "tier_only": "run_tier_only.py's restriction (PLAINTEXT/ONLINE), imported"
+    },
+    "producers": [
+      "scripts/run_reachable_ceiling.py",
+      "scripts/run_arrival_admission.py"
+    ],
+    "session_proxy": "first block of a request (producer's parse_requests); chat_id unused",
+    "birth_access": "compulsory miss: excluded from future counts for blocks first seen at or after the split (\u00a7AS; patch identical to run_birth_excluded.py)",
+    "splits": [
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7
+    ],
+    "reference": "prefix_greedy"
+  },
+  "full": {
+    "traces": {
+      "traceA": {
+        "rows": [
+          {
+            "split_frac": 0.3,
+            "n_blocks": 120177,
+            "blocks_with_no_pre_split_access": 84079,
+            "no_pre_split_pct": 70.0,
+            "reference": "prefix_greedy",
+            "reference_cost": 55729.7,
+            "oracle_cost": 4653.4,
+            "attainable_ceiling_cost": 55280.7,
+            "full_hindsight_gap": 51076.3,
+            "attainable_gap": 449.0,
+            "unreachable_pct": 99.1,
+            "reachable_pct": 0.9
+          },
+          {
+            "split_frac": 0.4,
+            "n_blocks": 120177,
+            "blocks_with_no_pre_split_access": 71568,
+            "no_pre_split_pct": 59.6,
+            "reference": "prefix_greedy",
+            "reference_cost": 52408.5,
+            "oracle_cost": 3481.6,
+            "attainable_ceiling_cost": 51386.4,
+            "full_hindsight_gap": 48926.9,
+            "attainable_gap": 1022.1,
+            "unreachable_pct": 97.9,
+            "reachable_pct": 2.1
+          },
+          {
+            "split_frac": 0.5,
+            "n_blocks": 120177,
+            "blocks_with_no_pre_split_access": 59299,
+            "no_pre_split_pct": 49.3,
+            "reference": "prefix_greedy",
+            "reference_cost": 43985.4,
+            "oracle_cost": 2905.2,
+            "attainable_ceiling_cost": 40396.0,
+            "full_hindsight_gap": 41080.2,
+            "attainable_gap": 3589.4,
+            "unreachable_pct": 91.3,
+            "reachable_pct": 8.7
+          },
+          {
+            "split_frac": 0.6,
+            "n_blocks": 120177,
+            "blocks_with_no_pre_split_access": 47158,
+            "no_pre_split_pct": 39.2,
+            "reference": "prefix_greedy",
+            "reference_cost": 34545.5,
+            "oracle_cost": 2217.8,
+            "attainable_ceiling_cost": 30139.1,
+            "full_hindsight_gap": 32327.6,
+            "attainable_gap": 4406.4,
+            "unreachable_pct": 86.4,
+            "reachable_pct": 13.6
+          },
+          {
+            "split_frac": 0.7,
+            "n_blocks": 120177,
+            "blocks_with_no_pre_split_access": 35030,
+            "no_pre_split_pct": 29.1,
+            "reference": "prefix_greedy",
+            "reference_cost": 25736.9,
+            "oracle_cost": 1398.2,
+            "attainable_ceiling_cost": 21035.6,
+            "full_hindsight_gap": 24338.7,
+            "attainable_gap": 4701.3,
+            "unreachable_pct": 80.7,
+            "reachable_pct": 19.3
+          }
+        ],
+        "unreachable_min": 80.7,
+        "unreachable_max": 99.1
+      },
+      "traceB": {
+        "rows": [
+          {
+            "split_frac": 0.3,
+            "n_blocks": 290486,
+            "blocks_with_no_pre_split_access": 202272,
+            "no_pre_split_pct": 69.6,
+            "reference": "prefix_greedy",
+            "reference_cost": 7612.3,
+            "oracle_cost": 1582.1,
+            "attainable_ceiling_cost": 6966.3,
+            "full_hindsight_gap": 6030.2,
+            "attainable_gap": 646.0,
+            "unreachable_pct": 89.3,
+            "reachable_pct": 10.7
+          },
+          {
+            "split_frac": 0.4,
+            "n_blocks": 290486,
+            "blocks_with_no_pre_split_access": 174183,
+            "no_pre_split_pct": 60.0,
+            "reference": "prefix_greedy",
+            "reference_cost": 7027.1,
+            "oracle_cost": 1344.2,
+            "attainable_ceiling_cost": 6283.7,
+            "full_hindsight_gap": 5682.9,
+            "attainable_gap": 743.4,
+            "unreachable_pct": 86.9,
+            "reachable_pct": 13.1
+          },
+          {
+            "split_frac": 0.5,
+            "n_blocks": 290486,
+            "blocks_with_no_pre_split_access": 144945,
+            "no_pre_split_pct": 49.9,
+            "reference": "prefix_greedy",
+            "reference_cost": 6580.4,
+            "oracle_cost": 1123.5,
+            "attainable_ceiling_cost": 4986.7,
+            "full_hindsight_gap": 5456.9,
+            "attainable_gap": 1593.8,
+            "unreachable_pct": 70.8,
+            "reachable_pct": 29.2
+          },
+          {
+            "split_frac": 0.6,
+            "n_blocks": 290486,
+            "blocks_with_no_pre_split_access": 115574,
+            "no_pre_split_pct": 39.8,
+            "reference": "prefix_greedy",
+            "reference_cost": 6067.4,
+            "oracle_cost": 911.7,
+            "attainable_ceiling_cost": 3738.1,
+            "full_hindsight_gap": 5155.7,
+            "attainable_gap": 2329.3,
+            "unreachable_pct": 54.8,
+            "reachable_pct": 45.2
+          },
+          {
+            "split_frac": 0.7,
+            "n_blocks": 290486,
+            "blocks_with_no_pre_split_access": 85916,
+            "no_pre_split_pct": 29.6,
+            "reference": "prefix_greedy",
+            "reference_cost": 4580.5,
+            "oracle_cost": 660.2,
+            "attainable_ceiling_cost": 1505.7,
+            "full_hindsight_gap": 3920.3,
+            "attainable_gap": 3074.8,
+            "unreachable_pct": 21.6,
+            "reachable_pct": 78.4
+          }
+        ],
+        "unreachable_min": 21.6,
+        "unreachable_max": 89.3
+      },
+      "coder": {
+        "rows": [
+          {
+            "split_frac": 0.3,
+            "n_blocks": 199350,
+            "blocks_with_no_pre_split_access": 134784,
+            "no_pre_split_pct": 67.6,
+            "reference": "prefix_greedy",
+            "reference_cost": 102045.9,
+            "oracle_cost": 10820.4,
+            "attainable_ceiling_cost": 100017.3,
+            "full_hindsight_gap": 91225.6,
+            "attainable_gap": 2028.6,
+            "unreachable_pct": 97.8,
+            "reachable_pct": 2.2
+          },
+          {
+            "split_frac": 0.4,
+            "n_blocks": 199350,
+            "blocks_with_no_pre_split_access": 115285,
+            "no_pre_split_pct": 57.8,
+            "reference": "prefix_greedy",
+            "reference_cost": 89327.5,
+            "oracle_cost": 8496.9,
+            "attainable_ceiling_cost": 85780.5,
+            "full_hindsight_gap": 80830.6,
+            "attainable_gap": 3547.0,
+            "unreachable_pct": 95.6,
+            "reachable_pct": 4.4
+          },
+          {
+            "split_frac": 0.5,
+            "n_blocks": 199350,
+            "blocks_with_no_pre_split_access": 95682,
+            "no_pre_split_pct": 48.0,
+            "reference": "prefix_greedy",
+            "reference_cost": 73782.0,
+            "oracle_cost": 6185.8,
+            "attainable_ceiling_cost": 68325.3,
+            "full_hindsight_gap": 67596.1,
+            "attainable_gap": 5456.6,
+            "unreachable_pct": 91.9,
+            "reachable_pct": 8.1
+          },
+          {
+            "split_frac": 0.6,
+            "n_blocks": 199350,
+            "blocks_with_no_pre_split_access": 76282,
+            "no_pre_split_pct": 38.3,
+            "reference": "prefix_greedy",
+            "reference_cost": 55666.8,
+            "oracle_cost": 4344.3,
+            "attainable_ceiling_cost": 49346.9,
+            "full_hindsight_gap": 51322.5,
+            "attainable_gap": 6319.9,
+            "unreachable_pct": 87.7,
+            "reachable_pct": 12.3
+          },
+          {
+            "split_frac": 0.7,
+            "n_blocks": 199350,
+            "blocks_with_no_pre_split_access": 56678,
+            "no_pre_split_pct": 28.4,
+            "reference": "prefix_greedy",
+            "reference_cost": 41085.7,
+            "oracle_cost": 2524.1,
+            "attainable_ceiling_cost": 34418.4,
+            "full_hindsight_gap": 38561.6,
+            "attainable_gap": 6667.3,
+            "unreachable_pct": 82.7,
+            "reachable_pct": 17.3
+          }
+        ],
+        "unreachable_min": 82.7,
+        "unreachable_max": 97.8
+      },
+      "thinking": {
+        "rows": [
+          {
+            "split_frac": 0.3,
+            "n_blocks": 62077,
+            "blocks_with_no_pre_split_access": 47177,
+            "no_pre_split_pct": 76.0,
+            "reference": "prefix_greedy",
+            "reference_cost": 13730.3,
+            "oracle_cost": 685.6,
+            "attainable_ceiling_cost": 13545.6,
+            "full_hindsight_gap": 13044.6,
+            "attainable_gap": 184.7,
+            "unreachable_pct": 98.6,
+            "reachable_pct": 1.4
+          },
+          {
+            "split_frac": 0.4,
+            "n_blocks": 62077,
+            "blocks_with_no_pre_split_access": 42969,
+            "no_pre_split_pct": 69.2,
+            "reference": "prefix_greedy",
+            "reference_cost": 11916.0,
+            "oracle_cost": 547.5,
+            "attainable_ceiling_cost": 11723.1,
+            "full_hindsight_gap": 11368.5,
+            "attainable_gap": 192.9,
+            "unreachable_pct": 98.3,
+            "reachable_pct": 1.7
+          },
+          {
+            "split_frac": 0.5,
+            "n_blocks": 62077,
+            "blocks_with_no_pre_split_access": 38262,
+            "no_pre_split_pct": 61.6,
+            "reference": "prefix_greedy",
+            "reference_cost": 10509.4,
+            "oracle_cost": 441.3,
+            "attainable_ceiling_cost": 10254.2,
+            "full_hindsight_gap": 10068.1,
+            "attainable_gap": 255.2,
+            "unreachable_pct": 97.5,
+            "reachable_pct": 2.5
+          },
+          {
+            "split_frac": 0.6,
+            "n_blocks": 62077,
+            "blocks_with_no_pre_split_access": 31926,
+            "no_pre_split_pct": 51.4,
+            "reference": "prefix_greedy",
+            "reference_cost": 9223.6,
+            "oracle_cost": 334.9,
+            "attainable_ceiling_cost": 8773.5,
+            "full_hindsight_gap": 8888.7,
+            "attainable_gap": 450.1,
+            "unreachable_pct": 94.9,
+            "reachable_pct": 5.1
+          },
+          {
+            "split_frac": 0.7,
+            "n_blocks": 62077,
+            "blocks_with_no_pre_split_access": 23789,
+            "no_pre_split_pct": 38.3,
+            "reference": "prefix_greedy",
+            "reference_cost": 8334.6,
+            "oracle_cost": 262.4,
+            "attainable_ceiling_cost": 7199.8,
+            "full_hindsight_gap": 8072.2,
+            "attainable_gap": 1134.8,
+            "unreachable_pct": 85.9,
+            "reachable_pct": 14.1
+          }
+        ],
+        "unreachable_min": 85.9,
+        "unreachable_max": 98.6
+      }
+    }
+  },
+  "tier_only": {
+    "traces": {
+      "traceA": {
+        "rows": [
+          {
+            "split_frac": 0.3,
+            "n_blocks": 120177,
+            "blocks_with_no_pre_split_access": 84079,
+            "no_pre_split_pct": 70.0,
+            "reference": "prefix_greedy",
+            "reference_cost": 62332.0,
+            "oracle_cost": 34183.9,
+            "attainable_ceiling_cost": 62049.7,
+            "full_hindsight_gap": 28148.1,
+            "attainable_gap": 282.2,
+            "unreachable_pct": 99.0,
+            "reachable_pct": 1.0
+          },
+          {
+            "split_frac": 0.4,
+            "n_blocks": 120177,
+            "blocks_with_no_pre_split_access": 71568,
+            "no_pre_split_pct": 59.6,
+            "reference": "prefix_greedy",
+            "reference_cost": 58067.9,
+            "oracle_cost": 29711.0,
+            "attainable_ceiling_cost": 57291.9,
+            "full_hindsight_gap": 28356.8,
+            "attainable_gap": 776.0,
+            "unreachable_pct": 97.3,
+            "reachable_pct": 2.7
+          },
+          {
+            "split_frac": 0.5,
+            "n_blocks": 120177,
+            "blocks_with_no_pre_split_access": 59299,
+            "no_pre_split_pct": 49.3,
+            "reference": "prefix_greedy",
+            "reference_cost": 50680.0,
+            "oracle_cost": 26060.8,
+            "attainable_ceiling_cost": 47633.0,
+            "full_hindsight_gap": 24619.2,
+            "attainable_gap": 3047.0,
+            "unreachable_pct": 87.6,
+            "reachable_pct": 12.4
+          },
+          {
+            "split_frac": 0.6,
+            "n_blocks": 120177,
+            "blocks_with_no_pre_split_access": 47158,
+            "no_pre_split_pct": 39.2,
+            "reference": "prefix_greedy",
+            "reference_cost": 41334.6,
+            "oracle_cost": 21671.5,
+            "attainable_ceiling_cost": 37766.9,
+            "full_hindsight_gap": 19663.1,
+            "attainable_gap": 3567.7,
+            "unreachable_pct": 81.9,
+            "reachable_pct": 18.1
+          },
+          {
+            "split_frac": 0.7,
+            "n_blocks": 120177,
+            "blocks_with_no_pre_split_access": 35030,
+            "no_pre_split_pct": 29.1,
+            "reference": "prefix_greedy",
+            "reference_cost": 31656.4,
+            "oracle_cost": 16670.3,
+            "attainable_ceiling_cost": 28093.1,
+            "full_hindsight_gap": 14986.2,
+            "attainable_gap": 3563.3,
+            "unreachable_pct": 76.2,
+            "reachable_pct": 23.8
+          }
+        ],
+        "unreachable_min": 76.2,
+        "unreachable_max": 99.0
+      },
+      "traceB": {
+        "rows": [
+          {
+            "split_frac": 0.3,
+            "n_blocks": 290486,
+            "blocks_with_no_pre_split_access": 202272,
+            "no_pre_split_pct": 69.6,
+            "reference": "prefix_greedy",
+            "reference_cost": 36113.2,
+            "oracle_cost": 32832.2,
+            "attainable_ceiling_cost": 35900.1,
+            "full_hindsight_gap": 3281.0,
+            "attainable_gap": 213.1,
+            "unreachable_pct": 93.5,
+            "reachable_pct": 6.5
+          },
+          {
+            "split_frac": 0.4,
+            "n_blocks": 290486,
+            "blocks_with_no_pre_split_access": 174183,
+            "no_pre_split_pct": 60.0,
+            "reference": "prefix_greedy",
+            "reference_cost": 30967.8,
+            "oracle_cost": 27871.2,
+            "attainable_ceiling_cost": 30799.6,
+            "full_hindsight_gap": 3096.6,
+            "attainable_gap": 168.2,
+            "unreachable_pct": 94.6,
+            "reachable_pct": 5.4
+          },
+          {
+            "split_frac": 0.5,
+            "n_blocks": 290486,
+            "blocks_with_no_pre_split_access": 144945,
+            "no_pre_split_pct": 49.9,
+            "reference": "prefix_greedy",
+            "reference_cost": 25846.2,
+            "oracle_cost": 23268.0,
+            "attainable_ceiling_cost": 25558.4,
+            "full_hindsight_gap": 2578.2,
+            "attainable_gap": 287.8,
+            "unreachable_pct": 88.8,
+            "reachable_pct": 11.2
+          },
+          {
+            "split_frac": 0.6,
+            "n_blocks": 290486,
+            "blocks_with_no_pre_split_access": 115574,
+            "no_pre_split_pct": 39.8,
+            "reference": "prefix_greedy",
+            "reference_cost": 20831.3,
+            "oracle_cost": 18866.8,
+            "attainable_ceiling_cost": 20542.4,
+            "full_hindsight_gap": 1964.4,
+            "attainable_gap": 288.8,
+            "unreachable_pct": 85.3,
+            "reachable_pct": 14.7
+          },
+          {
+            "split_frac": 0.7,
+            "n_blocks": 290486,
+            "blocks_with_no_pre_split_access": 85916,
+            "no_pre_split_pct": 29.6,
+            "reference": "prefix_greedy",
+            "reference_cost": 14419.3,
+            "oracle_cost": 13624.4,
+            "attainable_ceiling_cost": 14126.7,
+            "full_hindsight_gap": 794.9,
+            "attainable_gap": 292.6,
+            "unreachable_pct": 63.2,
+            "reachable_pct": 36.8
+          }
+        ],
+        "unreachable_min": 63.2,
+        "unreachable_max": 94.6
+      },
+      "coder": {
+        "rows": [
+          {
+            "split_frac": 0.3,
+            "n_blocks": 199350,
+            "blocks_with_no_pre_split_access": 134784,
+            "no_pre_split_pct": 67.6,
+            "reference": "prefix_greedy",
+            "reference_cost": 147601.1,
+            "oracle_cost": 98164.9,
+            "attainable_ceiling_cost": 145849.5,
+            "full_hindsight_gap": 49436.2,
+            "attainable_gap": 1751.6,
+            "unreachable_pct": 96.5,
+            "reachable_pct": 3.5
+          },
+          {
+            "split_frac": 0.4,
+            "n_blocks": 199350,
+            "blocks_with_no_pre_split_access": 115285,
+            "no_pre_split_pct": 57.8,
+            "reference": "prefix_greedy",
+            "reference_cost": 129305.1,
+            "oracle_cost": 82253.2,
+            "attainable_ceiling_cost": 126215.6,
+            "full_hindsight_gap": 47051.9,
+            "attainable_gap": 3089.5,
+            "unreachable_pct": 93.4,
+            "reachable_pct": 6.6
+          },
+          {
+            "split_frac": 0.5,
+            "n_blocks": 199350,
+            "blocks_with_no_pre_split_access": 95682,
+            "no_pre_split_pct": 48.0,
+            "reference": "prefix_greedy",
+            "reference_cost": 107773.5,
+            "oracle_cost": 67603.3,
+            "attainable_ceiling_cost": 103262.8,
+            "full_hindsight_gap": 40170.1,
+            "attainable_gap": 4510.6,
+            "unreachable_pct": 88.8,
+            "reachable_pct": 11.2
+          },
+          {
+            "split_frac": 0.6,
+            "n_blocks": 199350,
+            "blocks_with_no_pre_split_access": 76282,
+            "no_pre_split_pct": 38.3,
+            "reference": "prefix_greedy",
+            "reference_cost": 83564.5,
+            "oracle_cost": 52706.3,
+            "attainable_ceiling_cost": 78676.6,
+            "full_hindsight_gap": 30858.3,
+            "attainable_gap": 4888.0,
+            "unreachable_pct": 84.2,
+            "reachable_pct": 15.8
+          },
+          {
+            "split_frac": 0.7,
+            "n_blocks": 199350,
+            "blocks_with_no_pre_split_access": 56678,
+            "no_pre_split_pct": 28.4,
+            "reference": "prefix_greedy",
+            "reference_cost": 61675.7,
+            "oracle_cost": 38266.9,
+            "attainable_ceiling_cost": 56934.1,
+            "full_hindsight_gap": 23408.8,
+            "attainable_gap": 4741.6,
+            "unreachable_pct": 79.7,
+            "reachable_pct": 20.3
+          }
+        ],
+        "unreachable_min": 79.7,
+        "unreachable_max": 96.5
+      },
+      "thinking": {
+        "rows": [
+          {
+            "split_frac": 0.3,
+            "n_blocks": 62077,
+            "blocks_with_no_pre_split_access": 47177,
+            "no_pre_split_pct": 76.0,
+            "reference": "prefix_greedy",
+            "reference_cost": 20661.4,
+            "oracle_cost": 13862.1,
+            "attainable_ceiling_cost": 20546.9,
+            "full_hindsight_gap": 6799.3,
+            "attainable_gap": 114.5,
+            "unreachable_pct": 98.3,
+            "reachable_pct": 1.7
+          },
+          {
+            "split_frac": 0.4,
+            "n_blocks": 62077,
+            "blocks_with_no_pre_split_access": 42969,
+            "no_pre_split_pct": 69.2,
+            "reference": "prefix_greedy",
+            "reference_cost": 17294.5,
+            "oracle_cost": 11032.1,
+            "attainable_ceiling_cost": 17193.3,
+            "full_hindsight_gap": 6262.3,
+            "attainable_gap": 101.2,
+            "unreachable_pct": 98.4,
+            "reachable_pct": 1.6
+          },
+          {
+            "split_frac": 0.5,
+            "n_blocks": 62077,
+            "blocks_with_no_pre_split_access": 38262,
+            "no_pre_split_pct": 61.6,
+            "reference": "prefix_greedy",
+            "reference_cost": 14756.3,
+            "oracle_cost": 8878.8,
+            "attainable_ceiling_cost": 14615.7,
+            "full_hindsight_gap": 5877.5,
+            "attainable_gap": 140.6,
+            "unreachable_pct": 97.6,
+            "reachable_pct": 2.4
+          },
+          {
+            "split_frac": 0.6,
+            "n_blocks": 62077,
+            "blocks_with_no_pre_split_access": 31926,
+            "no_pre_split_pct": 51.4,
+            "reference": "prefix_greedy",
+            "reference_cost": 11916.8,
+            "oracle_cost": 6719.2,
+            "attainable_ceiling_cost": 11719.9,
+            "full_hindsight_gap": 5197.7,
+            "attainable_gap": 196.9,
+            "unreachable_pct": 96.2,
+            "reachable_pct": 3.8
+          },
+          {
+            "split_frac": 0.7,
+            "n_blocks": 62077,
+            "blocks_with_no_pre_split_access": 23789,
+            "no_pre_split_pct": 38.3,
+            "reference": "prefix_greedy",
+            "reference_cost": 10028.0,
+            "oracle_cost": 5238.2,
+            "attainable_ceiling_cost": 9348.7,
+            "full_hindsight_gap": 4789.8,
+            "attainable_gap": 679.3,
+            "unreachable_pct": 85.8,
+            "reachable_pct": 14.2
+          }
+        ],
+        "unreachable_min": 85.8,
+        "unreachable_max": 98.4
+      }
+    }
+  }
+}

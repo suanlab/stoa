@@ -79,6 +79,13 @@ has a spread an order of magnitude wider than any effect), and the eviction-sign
 (`run_reactive_kvct.py`). `make reproduce-full` runs all three; `make verify` and `make reproduce-fast`
 run without it.
 
+## Alibaba Qwen Bailian KV traces (optional: an external replication, not cited by the paper)
+
+Four anonymized two-hour traces from `github.com/alibaba-edu/qwen-bailian-usagetraces-anon`
+(Wang et al., "KVCache Cache in the Wild", USENIX ATC'25), 16-token blocks, Apache-2.0. Not
+redistributed here. `python3 scripts/run_bailian.py --birthx` downloads them into `data/`, converts them
+to the Mooncake schema the loader checks, and writes `experiments/bailian_*_birthx.json`; see notebook §AT.
+
 ## Derived caches (never committed, rebuilt on demand)
 
 `data/emb_cache/` and `data/repr_cache.json` hold OpenAI embeddings and LLM rewrites of LoCoMo text.

@@ -1,0 +1,1304 @@
+{
+  "config": {
+    "source": "https://github.com/alibaba-edu/qwen-bailian-usagetraces-anon",
+    "license": "Apache-2.0 (upstream LICENSE and README); data not redistributed",
+    "citation": "Wang et al., KVCache Cache in the Wild, USENIX ATC'25",
+    "files": {
+      "traceA": {
+        "upstream": "qwen_traceA_blksz_16.jsonl",
+        "lfs_sha256": "07cedc9ed8aff301994ac68ed4aede8123b7603673575eeba9dd677de663db17"
+      },
+      "traceB": {
+        "upstream": "qwen_traceB_blksz_16.jsonl",
+        "lfs_sha256": "68e3f98e2d601d60d0abf4b89bc8a3654372abab7b1cde6373a13d0054379d59"
+      },
+      "coder": {
+        "upstream": "qwen_coder_blksz_16.jsonl",
+        "lfs_sha256": "3d74974cebb7bccb69b1ca6ea210a44d9a3033443c0271ed015327284dea1aff"
+      },
+      "thinking": {
+        "upstream": "qwen_thinking_blksz_16.jsonl",
+        "lfs_sha256": "41ac36d9d1b54d084eeb6b05e9d142ba9d02f8bf79cfc9fff418d8ab7cdee906"
+      }
+    },
+    "block_tokens": 512,
+    "regrouped": "32 consecutive 16-token ids per block, prefix-chained (sensitivity, not the replication)",
+    "block_size_in_cost_model": "size_bytes = 16 * BYTES_PER_TOKEN for every block; size enters only tier capacity (a fraction of total bytes), so capacity in blocks is invariant to the constant; per-access costs are per block, not per token",
+    "subsample": "none (full traces)",
+    "conversion": {
+      "traceA": {
+        "requests": 43058,
+        "first_timestamp": 0.0,
+        "last_timestamp": 7199.464,
+        "file": "data/bailian_traceA_g32_mooncake.jsonl"
+      },
+      "traceB": {
+        "requests": 172800,
+        "first_timestamp": 0.0,
+        "last_timestamp": 7199.97,
+        "file": "data/bailian_traceB_g32_mooncake.jsonl"
+      },
+      "coder": {
+        "requests": 43011,
+        "first_timestamp": 0.0,
+        "last_timestamp": 7198.879,
+        "file": "data/bailian_coder_g32_mooncake.jsonl"
+      },
+      "thinking": {
+        "requests": 10812,
+        "first_timestamp": 0.0,
+        "last_timestamp": 7191.734,
+        "file": "data/bailian_thinking_g32_mooncake.jsonl"
+      }
+    },
+    "structure": {
+      "traceA": {
+        "requests": 43058,
+        "blocks": 120177,
+        "accesses": 218859,
+        "singleton_block_frac": 0.6998,
+        "reused_access_frac": 0.4509,
+        "mean_accesses_per_block": 1.821,
+        "max_accesses_per_block": 14664,
+        "mean_blocks_per_request": 5.1,
+        "timestamp_span": 7199.464
+      },
+      "traceB": {
+        "requests": 172800,
+        "blocks": 290486,
+        "accesses": 401630,
+        "singleton_block_frac": 0.9847,
+        "reused_access_frac": 0.2767,
+        "mean_accesses_per_block": 1.383,
+        "max_accesses_per_block": 24534,
+        "mean_blocks_per_request": 2.3,
+        "timestamp_span": 7199.97
+      },
+      "coder": {
+        "requests": 43011,
+        "blocks": 199350,
+        "accesses": 505188,
+        "singleton_block_frac": 0.6909,
+        "reused_access_frac": 0.6054,
+        "mean_accesses_per_block": 2.534,
+        "max_accesses_per_block": 4941,
+        "mean_blocks_per_request": 11.7,
+        "timestamp_span": 7198.879
+      },
+      "thinking": {
+        "requests": 10812,
+        "blocks": 62077,
+        "accesses": 106500,
+        "singleton_block_frac": 0.8718,
+        "reused_access_frac": 0.4171,
+        "mean_accesses_per_block": 1.716,
+        "max_accesses_per_block": 2289,
+        "mean_blocks_per_request": 9.9,
+        "timestamp_span": 7191.734
+      }
+    },
+    "mooncake_structure_same_function": {
+      "conversation": {
+        "requests": 12031,
+        "blocks": 182790,
+        "accesses": 288500,
+        "singleton_block_frac": 0.7585,
+        "reused_access_frac": 0.3664,
+        "mean_accesses_per_block": 1.578,
+        "max_accesses_per_block": 12031,
+        "mean_blocks_per_request": 24.0,
+        "timestamp_span": 3536999
+      },
+      "toolagent": {
+        "requests": 23608,
+        "blocks": 183300,
+        "accesses": 409616,
+        "singleton_block_frac": 0.7846,
+        "reused_access_frac": 0.5525,
+        "mean_accesses_per_block": 2.235,
+        "max_accesses_per_block": 10938,
+        "mean_blocks_per_request": 17.4,
+        "timestamp_span": 3536999
+      },
+      "synthetic": {
+        "requests": 3993,
+        "blocks": 43924,
+        "accesses": 121877,
+        "singleton_block_frac": 0.5845,
+        "reused_access_frac": 0.6396,
+        "mean_accesses_per_block": 2.775,
+        "max_accesses_per_block": 24,
+        "mean_blocks_per_request": 30.5,
+        "timestamp_span": 1022025
+      }
+    },
+    "action_spaces": {
+      "full": "Action.space() unmodified",
+      "tier_only": "run_tier_only.py's restriction (PLAINTEXT/ONLINE), imported"
+    },
+    "producers": [
+      "scripts/run_reachable_ceiling.py",
+      "scripts/run_arrival_admission.py"
+    ],
+    "session_proxy": "first block of a request (producer's parse_requests); chat_id unused"
+  },
+  "full": {
+    "results": [
+      {
+        "trace": "traceA",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-arrival",
+        "auc": null,
+        "captured_pct": 61.54,
+        "captured_of_attainable_pct": 78.0,
+        "n_arrivals_scored": 59299
+      },
+      {
+        "trace": "traceA",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-learned",
+        "auc": 0.689,
+        "captured_pct": 62.54,
+        "captured_of_attainable_pct": 79.27,
+        "n_arrivals_scored": 59299
+      },
+      {
+        "trace": "traceA",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-shuffled",
+        "auc": null,
+        "captured_pct": 60.08,
+        "captured_of_attainable_pct": 76.15,
+        "n_arrivals_scored": 59299
+      },
+      {
+        "trace": "traceA",
+        "axis": "magnitude",
+        "tie": "new-behind",
+        "arm": "constant-mean",
+        "auc": null,
+        "new_block_belief": 1.6694,
+        "captured_pct": 72.52,
+        "captured_of_attainable_pct": 91.92,
+        "n_arrivals_scored": 59299
+      },
+      {
+        "trace": "traceA",
+        "axis": "magnitude",
+        "tie": "new-behind",
+        "arm": "constant-median",
+        "auc": null,
+        "new_block_belief": 1.0,
+        "captured_pct": 45.6,
+        "captured_of_attainable_pct": 57.8,
+        "n_arrivals_scored": 59299
+      },
+      {
+        "trace": "traceA",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-arrival",
+        "auc": null,
+        "captured_pct": 75.15,
+        "captured_of_attainable_pct": 95.25,
+        "n_arrivals_scored": 59299
+      },
+      {
+        "trace": "traceA",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-learned",
+        "auc": 0.689,
+        "captured_pct": 75.84,
+        "captured_of_attainable_pct": 96.12,
+        "n_arrivals_scored": 59299
+      },
+      {
+        "trace": "traceA",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-shuffled",
+        "auc": null,
+        "captured_pct": 74.0,
+        "captured_of_attainable_pct": 93.79,
+        "n_arrivals_scored": 59299
+      },
+      {
+        "trace": "traceA",
+        "axis": "magnitude",
+        "tie": "new-ahead",
+        "arm": "constant-mean",
+        "auc": null,
+        "new_block_belief": 1.6694,
+        "captured_pct": 72.52,
+        "captured_of_attainable_pct": 91.92,
+        "n_arrivals_scored": 59299
+      },
+      {
+        "trace": "traceA",
+        "axis": "magnitude",
+        "tie": "new-ahead",
+        "arm": "constant-median",
+        "auc": null,
+        "new_block_belief": 1.0,
+        "captured_pct": 72.52,
+        "captured_of_attainable_pct": 91.92,
+        "n_arrivals_scored": 59299
+      },
+      {
+        "trace": "traceA",
+        "axis": "diagnostic",
+        "arm": "arrival-ceiling",
+        "auc": 1.0,
+        "captured_pct": 78.9,
+        "captured_of_attainable_pct": 100.0,
+        "n_arrivals_scored": 59299
+      },
+      {
+        "trace": "traceB",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-arrival",
+        "auc": null,
+        "captured_pct": 50.81,
+        "captured_of_attainable_pct": 97.12,
+        "n_arrivals_scored": 144945
+      },
+      {
+        "trace": "traceB",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-learned",
+        "auc": 0.674,
+        "captured_pct": 51.0,
+        "captured_of_attainable_pct": 97.49,
+        "n_arrivals_scored": 144945
+      },
+      {
+        "trace": "traceB",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-shuffled",
+        "auc": null,
+        "captured_pct": 50.8,
+        "captured_of_attainable_pct": 97.09,
+        "n_arrivals_scored": 144945
+      },
+      {
+        "trace": "traceB",
+        "axis": "magnitude",
+        "tie": "new-behind",
+        "arm": "constant-mean",
+        "auc": null,
+        "new_block_belief": 1.3841,
+        "captured_pct": 95.34,
+        "captured_of_attainable_pct": 182.23,
+        "n_arrivals_scored": 144945
+      },
+      {
+        "trace": "traceB",
+        "axis": "magnitude",
+        "tie": "new-behind",
+        "arm": "constant-median",
+        "auc": null,
+        "new_block_belief": 1.0,
+        "captured_pct": 49.58,
+        "captured_of_attainable_pct": 94.77,
+        "n_arrivals_scored": 144945
+      },
+      {
+        "trace": "traceB",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-arrival",
+        "auc": null,
+        "captured_pct": 95.34,
+        "captured_of_attainable_pct": 182.23,
+        "n_arrivals_scored": 144945
+      },
+      {
+        "trace": "traceB",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-learned",
+        "auc": 0.674,
+        "captured_pct": 95.37,
+        "captured_of_attainable_pct": 182.29,
+        "n_arrivals_scored": 144945
+      },
+      {
+        "trace": "traceB",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-shuffled",
+        "auc": null,
+        "captured_pct": 95.33,
+        "captured_of_attainable_pct": 182.21,
+        "n_arrivals_scored": 144945
+      },
+      {
+        "trace": "traceB",
+        "axis": "magnitude",
+        "tie": "new-ahead",
+        "arm": "constant-mean",
+        "auc": null,
+        "new_block_belief": 1.3841,
+        "captured_pct": 95.34,
+        "captured_of_attainable_pct": 182.23,
+        "n_arrivals_scored": 144945
+      },
+      {
+        "trace": "traceB",
+        "axis": "magnitude",
+        "tie": "new-ahead",
+        "arm": "constant-median",
+        "auc": null,
+        "new_block_belief": 1.0,
+        "captured_pct": 95.34,
+        "captured_of_attainable_pct": 182.23,
+        "n_arrivals_scored": 144945
+      },
+      {
+        "trace": "traceB",
+        "axis": "diagnostic",
+        "arm": "arrival-ceiling",
+        "auc": 1.0,
+        "captured_pct": 52.32,
+        "captured_of_attainable_pct": 100.0,
+        "n_arrivals_scored": 144945
+      },
+      {
+        "trace": "coder",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-arrival",
+        "auc": null,
+        "captured_pct": 63.54,
+        "captured_of_attainable_pct": 80.16,
+        "n_arrivals_scored": 95682
+      },
+      {
+        "trace": "coder",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-learned",
+        "auc": 0.5849,
+        "captured_pct": 61.29,
+        "captured_of_attainable_pct": 77.32,
+        "n_arrivals_scored": 95682
+      },
+      {
+        "trace": "coder",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-shuffled",
+        "auc": null,
+        "captured_pct": 61.61,
+        "captured_of_attainable_pct": 77.73,
+        "n_arrivals_scored": 95682
+      },
+      {
+        "trace": "coder",
+        "axis": "magnitude",
+        "tie": "new-behind",
+        "arm": "constant-mean",
+        "auc": null,
+        "new_block_belief": 2.4706,
+        "captured_pct": 77.39,
+        "captured_of_attainable_pct": 97.63,
+        "n_arrivals_scored": 95682
+      },
+      {
+        "trace": "coder",
+        "axis": "magnitude",
+        "tie": "new-behind",
+        "arm": "constant-median",
+        "auc": null,
+        "new_block_belief": 1.0,
+        "captured_pct": 46.16,
+        "captured_of_attainable_pct": 58.23,
+        "n_arrivals_scored": 95682
+      },
+      {
+        "trace": "coder",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-arrival",
+        "auc": null,
+        "captured_pct": 73.21,
+        "captured_of_attainable_pct": 92.36,
+        "n_arrivals_scored": 95682
+      },
+      {
+        "trace": "coder",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-learned",
+        "auc": 0.5849,
+        "captured_pct": 72.07,
+        "captured_of_attainable_pct": 90.92,
+        "n_arrivals_scored": 95682
+      },
+      {
+        "trace": "coder",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-shuffled",
+        "auc": null,
+        "captured_pct": 72.25,
+        "captured_of_attainable_pct": 91.14,
+        "n_arrivals_scored": 95682
+      },
+      {
+        "trace": "coder",
+        "axis": "magnitude",
+        "tie": "new-ahead",
+        "arm": "constant-mean",
+        "auc": null,
+        "new_block_belief": 2.4706,
+        "captured_pct": 77.39,
+        "captured_of_attainable_pct": 97.63,
+        "n_arrivals_scored": 95682
+      },
+      {
+        "trace": "coder",
+        "axis": "magnitude",
+        "tie": "new-ahead",
+        "arm": "constant-median",
+        "auc": null,
+        "new_block_belief": 1.0,
+        "captured_pct": 71.34,
+        "captured_of_attainable_pct": 90.0,
+        "n_arrivals_scored": 95682
+      },
+      {
+        "trace": "coder",
+        "axis": "diagnostic",
+        "arm": "arrival-ceiling",
+        "auc": 1.0,
+        "captured_pct": 79.27,
+        "captured_of_attainable_pct": 100.0,
+        "n_arrivals_scored": 95682
+      },
+      {
+        "trace": "thinking",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-arrival",
+        "auc": null,
+        "captured_pct": 62.93,
+        "captured_of_attainable_pct": 88.73,
+        "n_arrivals_scored": 38262
+      },
+      {
+        "trace": "thinking",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-learned",
+        "auc": 0.5878,
+        "captured_pct": 64.42,
+        "captured_of_attainable_pct": 90.83,
+        "n_arrivals_scored": 38262
+      },
+      {
+        "trace": "thinking",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-shuffled",
+        "auc": null,
+        "captured_pct": 63.46,
+        "captured_of_attainable_pct": 89.47,
+        "n_arrivals_scored": 38262
+      },
+      {
+        "trace": "thinking",
+        "axis": "magnitude",
+        "tie": "new-behind",
+        "arm": "constant-mean",
+        "auc": null,
+        "new_block_belief": 1.9702,
+        "captured_pct": 79.86,
+        "captured_of_attainable_pct": 112.59,
+        "n_arrivals_scored": 38262
+      },
+      {
+        "trace": "thinking",
+        "axis": "magnitude",
+        "tie": "new-behind",
+        "arm": "constant-median",
+        "auc": null,
+        "new_block_belief": 1.0,
+        "captured_pct": 52.69,
+        "captured_of_attainable_pct": 74.28,
+        "n_arrivals_scored": 38262
+      },
+      {
+        "trace": "thinking",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-arrival",
+        "auc": null,
+        "captured_pct": 81.07,
+        "captured_of_attainable_pct": 114.3,
+        "n_arrivals_scored": 38262
+      },
+      {
+        "trace": "thinking",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-learned",
+        "auc": 0.5878,
+        "captured_pct": 82.18,
+        "captured_of_attainable_pct": 115.86,
+        "n_arrivals_scored": 38262
+      },
+      {
+        "trace": "thinking",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-shuffled",
+        "auc": null,
+        "captured_pct": 82.07,
+        "captured_of_attainable_pct": 115.71,
+        "n_arrivals_scored": 38262
+      },
+      {
+        "trace": "thinking",
+        "axis": "magnitude",
+        "tie": "new-ahead",
+        "arm": "constant-mean",
+        "auc": null,
+        "new_block_belief": 1.9702,
+        "captured_pct": 79.86,
+        "captured_of_attainable_pct": 112.59,
+        "n_arrivals_scored": 38262
+      },
+      {
+        "trace": "thinking",
+        "axis": "magnitude",
+        "tie": "new-ahead",
+        "arm": "constant-median",
+        "auc": null,
+        "new_block_belief": 1.0,
+        "captured_pct": 79.86,
+        "captured_of_attainable_pct": 112.59,
+        "n_arrivals_scored": 38262
+      },
+      {
+        "trace": "thinking",
+        "axis": "diagnostic",
+        "arm": "arrival-ceiling",
+        "auc": 1.0,
+        "captured_pct": 70.93,
+        "captured_of_attainable_pct": 100.0,
+        "n_arrivals_scored": 38262
+      }
+    ],
+    "producer_config": {
+      "requests": "full",
+      "protocol": "blocks placed at first appearance from request-level context; train/eval cut = billing split = time_split(0.5); training labels windowed to end before the split; belief magnitudes from the pre-split analogue population; order arms share one magnitude multiset, magnitude arms share arrival order",
+      "why": "the split-instant protocol leaves ~95% of the hindsight gap unreachable; this targets it, causally (\u00a7AP)"
+    }
+  },
+  "tier_only": {
+    "results": [
+      {
+        "trace": "traceA",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-arrival",
+        "auc": null,
+        "captured_pct": 30.25,
+        "captured_of_attainable_pct": 47.86,
+        "n_arrivals_scored": 59299
+      },
+      {
+        "trace": "traceA",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-learned",
+        "auc": 0.689,
+        "captured_pct": 32.15,
+        "captured_of_attainable_pct": 50.88,
+        "n_arrivals_scored": 59299
+      },
+      {
+        "trace": "traceA",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-shuffled",
+        "auc": null,
+        "captured_pct": 27.48,
+        "captured_of_attainable_pct": 43.49,
+        "n_arrivals_scored": 59299
+      },
+      {
+        "trace": "traceA",
+        "axis": "magnitude",
+        "tie": "new-behind",
+        "arm": "constant-mean",
+        "auc": null,
+        "new_block_belief": 1.6694,
+        "captured_pct": 51.09,
+        "captured_of_attainable_pct": 80.85,
+        "n_arrivals_scored": 59299
+      },
+      {
+        "trace": "traceA",
+        "axis": "magnitude",
+        "tie": "new-behind",
+        "arm": "constant-median",
+        "auc": null,
+        "new_block_belief": 1.0,
+        "captured_pct": 0.0,
+        "captured_of_attainable_pct": 0.0,
+        "n_arrivals_scored": 59299
+      },
+      {
+        "trace": "traceA",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-arrival",
+        "auc": null,
+        "captured_pct": 56.08,
+        "captured_of_attainable_pct": 88.74,
+        "n_arrivals_scored": 59299
+      },
+      {
+        "trace": "traceA",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-learned",
+        "auc": 0.689,
+        "captured_pct": 57.38,
+        "captured_of_attainable_pct": 90.8,
+        "n_arrivals_scored": 59299
+      },
+      {
+        "trace": "traceA",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-shuffled",
+        "auc": null,
+        "captured_pct": 53.9,
+        "captured_of_attainable_pct": 85.3,
+        "n_arrivals_scored": 59299
+      },
+      {
+        "trace": "traceA",
+        "axis": "magnitude",
+        "tie": "new-ahead",
+        "arm": "constant-mean",
+        "auc": null,
+        "new_block_belief": 1.6694,
+        "captured_pct": 51.09,
+        "captured_of_attainable_pct": 80.85,
+        "n_arrivals_scored": 59299
+      },
+      {
+        "trace": "traceA",
+        "axis": "magnitude",
+        "tie": "new-ahead",
+        "arm": "constant-median",
+        "auc": null,
+        "new_block_belief": 1.0,
+        "captured_pct": 51.09,
+        "captured_of_attainable_pct": 80.85,
+        "n_arrivals_scored": 59299
+      },
+      {
+        "trace": "traceA",
+        "axis": "diagnostic",
+        "arm": "arrival-ceiling",
+        "auc": 1.0,
+        "captured_pct": 63.19,
+        "captured_of_attainable_pct": 100.0,
+        "n_arrivals_scored": 59299
+      },
+      {
+        "trace": "traceB",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-arrival",
+        "auc": null,
+        "captured_pct": 2.6,
+        "captured_of_attainable_pct": 44.86,
+        "n_arrivals_scored": 144945
+      },
+      {
+        "trace": "traceB",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-learned",
+        "auc": 0.674,
+        "captured_pct": 3.01,
+        "captured_of_attainable_pct": 51.94,
+        "n_arrivals_scored": 144945
+      },
+      {
+        "trace": "traceB",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-shuffled",
+        "auc": null,
+        "captured_pct": 2.57,
+        "captured_of_attainable_pct": 44.41,
+        "n_arrivals_scored": 144945
+      },
+      {
+        "trace": "traceB",
+        "axis": "magnitude",
+        "tie": "new-behind",
+        "arm": "constant-mean",
+        "auc": null,
+        "new_block_belief": 1.3841,
+        "captured_pct": 96.88,
+        "captured_of_attainable_pct": 1672.94,
+        "n_arrivals_scored": 144945
+      },
+      {
+        "trace": "traceB",
+        "axis": "magnitude",
+        "tie": "new-behind",
+        "arm": "constant-median",
+        "auc": null,
+        "new_block_belief": 1.0,
+        "captured_pct": -0.0,
+        "captured_of_attainable_pct": -0.0,
+        "n_arrivals_scored": 144945
+      },
+      {
+        "trace": "traceB",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-arrival",
+        "auc": null,
+        "captured_pct": 96.88,
+        "captured_of_attainable_pct": 1672.94,
+        "n_arrivals_scored": 144945
+      },
+      {
+        "trace": "traceB",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-learned",
+        "auc": 0.674,
+        "captured_pct": 96.94,
+        "captured_of_attainable_pct": 1674.05,
+        "n_arrivals_scored": 144945
+      },
+      {
+        "trace": "traceB",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-shuffled",
+        "auc": null,
+        "captured_pct": 96.85,
+        "captured_of_attainable_pct": 1672.5,
+        "n_arrivals_scored": 144945
+      },
+      {
+        "trace": "traceB",
+        "axis": "magnitude",
+        "tie": "new-ahead",
+        "arm": "constant-mean",
+        "auc": null,
+        "new_block_belief": 1.3841,
+        "captured_pct": 96.88,
+        "captured_of_attainable_pct": 1672.94,
+        "n_arrivals_scored": 144945
+      },
+      {
+        "trace": "traceB",
+        "axis": "magnitude",
+        "tie": "new-ahead",
+        "arm": "constant-median",
+        "auc": null,
+        "new_block_belief": 1.0,
+        "captured_pct": 96.88,
+        "captured_of_attainable_pct": 1672.94,
+        "n_arrivals_scored": 144945
+      },
+      {
+        "trace": "traceB",
+        "axis": "diagnostic",
+        "arm": "arrival-ceiling",
+        "auc": 1.0,
+        "captured_pct": 5.79,
+        "captured_of_attainable_pct": 100.0,
+        "n_arrivals_scored": 144945
+      },
+      {
+        "trace": "coder",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-arrival",
+        "auc": null,
+        "captured_pct": 33.34,
+        "captured_of_attainable_pct": 52.49,
+        "n_arrivals_scored": 95682
+      },
+      {
+        "trace": "coder",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-learned",
+        "auc": 0.5849,
+        "captured_pct": 29.03,
+        "captured_of_attainable_pct": 45.69,
+        "n_arrivals_scored": 95682
+      },
+      {
+        "trace": "coder",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-shuffled",
+        "auc": null,
+        "captured_pct": 29.65,
+        "captured_of_attainable_pct": 46.68,
+        "n_arrivals_scored": 95682
+      },
+      {
+        "trace": "coder",
+        "axis": "magnitude",
+        "tie": "new-behind",
+        "arm": "constant-mean",
+        "auc": null,
+        "new_block_belief": 2.4706,
+        "captured_pct": 59.92,
+        "captured_of_attainable_pct": 94.32,
+        "n_arrivals_scored": 95682
+      },
+      {
+        "trace": "coder",
+        "axis": "magnitude",
+        "tie": "new-behind",
+        "arm": "constant-median",
+        "auc": null,
+        "new_block_belief": 1.0,
+        "captured_pct": 0.0,
+        "captured_of_attainable_pct": 0.0,
+        "n_arrivals_scored": 95682
+      },
+      {
+        "trace": "coder",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-arrival",
+        "auc": null,
+        "captured_pct": 51.9,
+        "captured_of_attainable_pct": 81.7,
+        "n_arrivals_scored": 95682
+      },
+      {
+        "trace": "coder",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-learned",
+        "auc": 0.5849,
+        "captured_pct": 49.71,
+        "captured_of_attainable_pct": 78.26,
+        "n_arrivals_scored": 95682
+      },
+      {
+        "trace": "coder",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-shuffled",
+        "auc": null,
+        "captured_pct": 50.06,
+        "captured_of_attainable_pct": 78.8,
+        "n_arrivals_scored": 95682
+      },
+      {
+        "trace": "coder",
+        "axis": "magnitude",
+        "tie": "new-ahead",
+        "arm": "constant-mean",
+        "auc": null,
+        "new_block_belief": 2.4706,
+        "captured_pct": 59.92,
+        "captured_of_attainable_pct": 94.32,
+        "n_arrivals_scored": 95682
+      },
+      {
+        "trace": "coder",
+        "axis": "magnitude",
+        "tie": "new-ahead",
+        "arm": "constant-median",
+        "auc": null,
+        "new_block_belief": 1.0,
+        "captured_pct": 48.31,
+        "captured_of_attainable_pct": 76.05,
+        "n_arrivals_scored": 95682
+      },
+      {
+        "trace": "coder",
+        "axis": "diagnostic",
+        "arm": "arrival-ceiling",
+        "auc": 1.0,
+        "captured_pct": 63.53,
+        "captured_of_attainable_pct": 100.0,
+        "n_arrivals_scored": 95682
+      },
+      {
+        "trace": "thinking",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-arrival",
+        "auc": null,
+        "captured_pct": 22.43,
+        "captured_of_attainable_pct": 56.16,
+        "n_arrivals_scored": 38262
+      },
+      {
+        "trace": "thinking",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-learned",
+        "auc": 0.5878,
+        "captured_pct": 25.69,
+        "captured_of_attainable_pct": 64.34,
+        "n_arrivals_scored": 38262
+      },
+      {
+        "trace": "thinking",
+        "axis": "order",
+        "tie": "new-behind",
+        "arm": "order-shuffled",
+        "auc": null,
+        "captured_pct": 23.58,
+        "captured_of_attainable_pct": 59.05,
+        "n_arrivals_scored": 38262
+      },
+      {
+        "trace": "thinking",
+        "axis": "magnitude",
+        "tie": "new-behind",
+        "arm": "constant-mean",
+        "auc": null,
+        "new_block_belief": 1.9702,
+        "captured_pct": 59.49,
+        "captured_of_attainable_pct": 148.97,
+        "n_arrivals_scored": 38262
+      },
+      {
+        "trace": "thinking",
+        "axis": "magnitude",
+        "tie": "new-behind",
+        "arm": "constant-median",
+        "auc": null,
+        "new_block_belief": 1.0,
+        "captured_pct": -0.0,
+        "captured_of_attainable_pct": -0.0,
+        "n_arrivals_scored": 38262
+      },
+      {
+        "trace": "thinking",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-arrival",
+        "auc": null,
+        "captured_pct": 62.14,
+        "captured_of_attainable_pct": 155.61,
+        "n_arrivals_scored": 38262
+      },
+      {
+        "trace": "thinking",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-learned",
+        "auc": 0.5878,
+        "captured_pct": 64.56,
+        "captured_of_attainable_pct": 161.68,
+        "n_arrivals_scored": 38262
+      },
+      {
+        "trace": "thinking",
+        "axis": "order",
+        "tie": "new-ahead",
+        "arm": "order-shuffled",
+        "auc": null,
+        "captured_pct": 64.33,
+        "captured_of_attainable_pct": 161.1,
+        "n_arrivals_scored": 38262
+      },
+      {
+        "trace": "thinking",
+        "axis": "magnitude",
+        "tie": "new-ahead",
+        "arm": "constant-mean",
+        "auc": null,
+        "new_block_belief": 1.9702,
+        "captured_pct": 59.49,
+        "captured_of_attainable_pct": 148.97,
+        "n_arrivals_scored": 38262
+      },
+      {
+        "trace": "thinking",
+        "axis": "magnitude",
+        "tie": "new-ahead",
+        "arm": "constant-median",
+        "auc": null,
+        "new_block_belief": 1.0,
+        "captured_pct": 59.49,
+        "captured_of_attainable_pct": 148.97,
+        "n_arrivals_scored": 38262
+      },
+      {
+        "trace": "thinking",
+        "axis": "diagnostic",
+        "arm": "arrival-ceiling",
+        "auc": 1.0,
+        "captured_pct": 39.93,
+        "captured_of_attainable_pct": 100.0,
+        "n_arrivals_scored": 38262
+      }
+    ],
+    "producer_config": {
+      "requests": "full",
+      "protocol": "blocks placed at first appearance from request-level context; train/eval cut = billing split = time_split(0.5); training labels windowed to end before the split; belief magnitudes from the pre-split analogue population; order arms share one magnitude multiset, magnitude arms share arrival order",
+      "why": "the split-instant protocol leaves ~95% of the hindsight gap unreachable; this targets it, causally (\u00a7AP)"
+    }
+  },
+  "frame_check": {
+    "traceA/full": {
+      "reach_reference_cost": 103285.0,
+      "arrival_prefix_greedy_cost": 103285.0,
+      "agree_to_0.1": true
+    },
+    "traceB/full": {
+      "reach_reference_cost": 151526.6,
+      "arrival_prefix_greedy_cost": 151526.6,
+      "agree_to_0.1": true
+    },
+    "coder/full": {
+      "reach_reference_cost": 169464.0,
+      "arrival_prefix_greedy_cost": 169464.0,
+      "agree_to_0.1": true
+    },
+    "thinking/full": {
+      "reach_reference_cost": 48366.0,
+      "arrival_prefix_greedy_cost": 48366.0,
+      "agree_to_0.1": true
+    },
+    "traceA/tier_only": {
+      "reach_reference_cost": 109979.6,
+      "arrival_prefix_greedy_cost": 109979.6,
+      "agree_to_0.1": true
+    },
+    "traceB/tier_only": {
+      "reach_reference_cost": 170792.4,
+      "arrival_prefix_greedy_cost": 170792.4,
+      "agree_to_0.1": true
+    },
+    "coder/tier_only": {
+      "reach_reference_cost": 203455.5,
+      "arrival_prefix_greedy_cost": 203455.5,
+      "agree_to_0.1": true
+    },
+    "thinking/tier_only": {
+      "reach_reference_cost": 52612.9,
+      "arrival_prefix_greedy_cost": 52612.9,
+      "agree_to_0.1": true
+    }
+  },
+  "h7": {
+    "criterion": "per trace: split-0.5 unreachable share > 85% under both action spaces AND min over the three order arms >= 3x the split-time ceiling (reachable_pct at 0.5) under all four space x tie configurations; H7 holds if >= 3 of 4 traces pass",
+    "traces_passing": 4,
+    "h7": "holds",
+    "per_trace": {
+      "traceA": {
+        "configs": {
+          "full/new-behind": {
+            "split_ceiling_pct": 4.3,
+            "unreachable_pct": 95.7,
+            "order_arms_min": 60.08,
+            "order_arms_max": 62.54,
+            "constant_mean": 72.52,
+            "constant_median": 45.6,
+            "min_order_over_ceiling": 13.97,
+            "order_ge_3x_ceiling": true
+          },
+          "full/new-ahead": {
+            "split_ceiling_pct": 4.3,
+            "unreachable_pct": 95.7,
+            "order_arms_min": 74.0,
+            "order_arms_max": 75.84,
+            "constant_mean": 72.52,
+            "constant_median": 72.52,
+            "min_order_over_ceiling": 17.21,
+            "order_ge_3x_ceiling": true
+          },
+          "tier_only/new-behind": {
+            "split_ceiling_pct": 6.9,
+            "unreachable_pct": 93.1,
+            "order_arms_min": 27.48,
+            "order_arms_max": 32.15,
+            "constant_mean": 51.09,
+            "constant_median": 0.0,
+            "min_order_over_ceiling": 3.98,
+            "order_ge_3x_ceiling": true
+          },
+          "tier_only/new-ahead": {
+            "split_ceiling_pct": 6.9,
+            "unreachable_pct": 93.1,
+            "order_arms_min": 53.9,
+            "order_arms_max": 57.38,
+            "constant_mean": 51.09,
+            "constant_median": 51.09,
+            "min_order_over_ceiling": 7.81,
+            "order_ge_3x_ceiling": true
+          }
+        },
+        "unreachable_gt_85_both_spaces": true,
+        "order_ge_3x_ceiling_all_configs": true,
+        "h7_holds_on_trace": true
+      },
+      "traceB": {
+        "configs": {
+          "full/new-behind": {
+            "split_ceiling_pct": 1.4,
+            "unreachable_pct": 98.6,
+            "order_arms_min": 50.8,
+            "order_arms_max": 51.0,
+            "constant_mean": 95.34,
+            "constant_median": 49.58,
+            "min_order_over_ceiling": 36.29,
+            "order_ge_3x_ceiling": true
+          },
+          "full/new-ahead": {
+            "split_ceiling_pct": 1.4,
+            "unreachable_pct": 98.6,
+            "order_arms_min": 95.33,
+            "order_arms_max": 95.37,
+            "constant_mean": 95.34,
+            "constant_median": 95.34,
+            "min_order_over_ceiling": 68.09,
+            "order_ge_3x_ceiling": true
+          },
+          "tier_only/new-behind": {
+            "split_ceiling_pct": 0.5,
+            "unreachable_pct": 99.5,
+            "order_arms_min": 2.57,
+            "order_arms_max": 3.01,
+            "constant_mean": 96.88,
+            "constant_median": -0.0,
+            "min_order_over_ceiling": 5.14,
+            "order_ge_3x_ceiling": true
+          },
+          "tier_only/new-ahead": {
+            "split_ceiling_pct": 0.5,
+            "unreachable_pct": 99.5,
+            "order_arms_min": 96.85,
+            "order_arms_max": 96.94,
+            "constant_mean": 96.88,
+            "constant_median": 96.88,
+            "min_order_over_ceiling": 193.7,
+            "order_ge_3x_ceiling": true
+          }
+        },
+        "unreachable_gt_85_both_spaces": true,
+        "order_ge_3x_ceiling_all_configs": true,
+        "h7_holds_on_trace": true
+      },
+      "coder": {
+        "configs": {
+          "full/new-behind": {
+            "split_ceiling_pct": 4.0,
+            "unreachable_pct": 96.0,
+            "order_arms_min": 61.29,
+            "order_arms_max": 63.54,
+            "constant_mean": 77.39,
+            "constant_median": 46.16,
+            "min_order_over_ceiling": 15.32,
+            "order_ge_3x_ceiling": true
+          },
+          "full/new-ahead": {
+            "split_ceiling_pct": 4.0,
+            "unreachable_pct": 96.0,
+            "order_arms_min": 72.07,
+            "order_arms_max": 73.21,
+            "constant_mean": 77.39,
+            "constant_median": 71.34,
+            "min_order_over_ceiling": 18.02,
+            "order_ge_3x_ceiling": true
+          },
+          "tier_only/new-behind": {
+            "split_ceiling_pct": 6.4,
+            "unreachable_pct": 93.6,
+            "order_arms_min": 29.03,
+            "order_arms_max": 33.34,
+            "constant_mean": 59.92,
+            "constant_median": 0.0,
+            "min_order_over_ceiling": 4.54,
+            "order_ge_3x_ceiling": true
+          },
+          "tier_only/new-ahead": {
+            "split_ceiling_pct": 6.4,
+            "unreachable_pct": 93.6,
+            "order_arms_min": 49.71,
+            "order_arms_max": 51.9,
+            "constant_mean": 59.92,
+            "constant_median": 48.31,
+            "min_order_over_ceiling": 7.77,
+            "order_ge_3x_ceiling": true
+          }
+        },
+        "unreachable_gt_85_both_spaces": true,
+        "order_ge_3x_ceiling_all_configs": true,
+        "h7_holds_on_trace": true
+      },
+      "thinking": {
+        "configs": {
+          "full/new-behind": {
+            "split_ceiling_pct": 0.7,
+            "unreachable_pct": 99.3,
+            "order_arms_min": 62.93,
+            "order_arms_max": 64.42,
+            "constant_mean": 79.86,
+            "constant_median": 52.69,
+            "min_order_over_ceiling": 89.9,
+            "order_ge_3x_ceiling": true
+          },
+          "full/new-ahead": {
+            "split_ceiling_pct": 0.7,
+            "unreachable_pct": 99.3,
+            "order_arms_min": 81.07,
+            "order_arms_max": 82.18,
+            "constant_mean": 79.86,
+            "constant_median": 79.86,
+            "min_order_over_ceiling": 115.81,
+            "order_ge_3x_ceiling": true
+          },
+          "tier_only/new-behind": {
+            "split_ceiling_pct": 0.9,
+            "unreachable_pct": 99.1,
+            "order_arms_min": 22.43,
+            "order_arms_max": 25.69,
+            "constant_mean": 59.49,
+            "constant_median": -0.0,
+            "min_order_over_ceiling": 24.92,
+            "order_ge_3x_ceiling": true
+          },
+          "tier_only/new-ahead": {
+            "split_ceiling_pct": 0.9,
+            "unreachable_pct": 99.1,
+            "order_arms_min": 62.14,
+            "order_arms_max": 64.56,
+            "constant_mean": 59.49,
+            "constant_median": 59.49,
+            "min_order_over_ceiling": 69.04,
+            "order_ge_3x_ceiling": true
+          }
+        },
+        "unreachable_gt_85_both_spaces": true,
+        "order_ge_3x_ceiling_all_configs": true,
+        "h7_holds_on_trace": true
+      }
+    }
+  }
+}
