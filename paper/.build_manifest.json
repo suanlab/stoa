@@ -1,5 +1,5 @@
 {
-  "pdf": "6f7a3e994e635bc742cec0f5ab751098c2b96406708d51a51701d87483933ac1",
+  "pdf": "34a62dcd92efdc71b077e29bc72cc2da954a3705fcebcab336bc8a8dc60f95e1",
   "sources": {
     "../docs/references.bib": "77bf0d94e55c9a2b6ccc7aa53cc08267fb555d6af3552e46c8167a3040f28d3a",
     "figs/fig_architecture.pdf": "5da04c218947e652d37ca346c665992d5038ebdc8b0b52e8240a04e17095a36d",
@@ -13,17 +13,17 @@
     "figs/fig_reactive.pdf": "f1b62a82732caad95f9ff59dce6809d838c1ace7a3b5cb34012692b25a1fb8b0",
     "figs/fig_sequential.pdf": "271b849d4e46ea2911eecba5ad5713610b959f5264e359ce5b66ed861397648c",
     "figs/fig_tier_ablation.pdf": "0f65332c927650cbf531f1d522dcdea453e8b70007d75341f61d29fcf0d18ae7",
-    "main.tex": "3ac2bbca128d747b33427347747f91791e9e829ffa98ab11f4ff3007a7a24dd7",
-    "sections/01_introduction.tex": "b4639991965ad9b2b9f237a8f92116de7520953e0465860bd92b887362b81cfc",
+    "main.tex": "b5708808a4c6b44e59c78dbe52a12668d94907b293575f3bcfc61441e7ca8ef1",
+    "sections/01_introduction.tex": "bb93e37071bb31723128262f40088909b4efea12f098709d68d63a218ad3cca1",
     "sections/02_motivation.tex": "3b8f229e1fe9fcaa210946e1615df04f0e7eeb5e72981c799959f15b24f834da",
     "sections/03_formulation.tex": "42650df8c04fd629afe1534f4393c0381526a5affcd0963954d2f2e520237d90",
-    "sections/04_architecture.tex": "78fedbe4aefdcba219a9521389cc3e5b65f64beaf0f53922574dd65f67af36da",
-    "sections/05_evidence.tex": "c2de235a12e4b335ff2a71939fafb1fa82bd2c4505f1baf89c59cee8f61b1cf6",
-    "sections/06_openproblems.tex": "04a982e8b1ba0d1926f8d044d2d117e7bebb6211693ccc69a37c29e358c05c80",
+    "sections/04_architecture.tex": "224087f6238e089a1b6a4f8ca3f5765de370772e21d4ded09a278cbdf7c014b5",
+    "sections/05_evidence.tex": "c1fdf4c713b46a4c00a970753471be63a3fd8a8e6596a9881819a530778ac71e",
+    "sections/06_openproblems.tex": "b017422dfea9dd2332167507fe634c5c8bbe3b8698b94ed4748d3dc0a43edf45",
     "sections/07_related.tex": "c901f0dcc1d14cd478b5a0a084d7f91d8f46d664c7fc17f11b8652482e57f666",
-    "sections/08_conclusion.tex": "2928b0824bc3ac029e1f948f1a1824f1464de95657ca887e8d9f67e69f95adce",
+    "sections/08_conclusion.tex": "218e1544c1f499e15feb2770bb4dec29aa2cf65b27a3f2cc0283dfccb3ba6893",
     "sections/table1_positioning.tex": "dd940ed27d37788f88dd9b058e1dadebd8e3790700e751a1c83d98985f7e4108",
-    "sections/table2_regimes.tex": "ddfec16d163941137885e9162793eadfa100a2fa77002ea6d15fbed3f561b491",
-    "sections/table3_kvct.tex": "918cd06d84111e053cdad3b2be57119006966080dc1f96549955d5bad2fdf0b4"
+    "sections/table2_regimes.tex": "605357e51143145f72542b464e831c3b0a3e65d7afa5e4fd626a4da87a444493",
+    "sections/table3_kvct.tex": "916b2e21c5d0574551bebc163a1f7452252bc91155061bbfca2378701697be3d"
   }
 }
