@@ -12,16 +12,16 @@
     {
       "trace": "conversation",
       "rung": "linear",
-      "native_of_full_gap": 3.97,
+      "native_of_full_gap": 11.57,
       "native_of_attainable": 74.12,
-      "common_scale_of_full_gap": 2.71,
+      "common_scale_of_full_gap": 7.92,
       "common_scale_of_attainable": 50.73,
       "magnitude_contribution": 23.39
     },
     {
       "trace": "conversation",
       "rung": "count",
-      "native_of_full_gap": -2.18,
+      "native_of_full_gap": -6.35,
       "native_of_attainable": -40.7,
       "common_scale_of_full_gap": 0.0,
       "common_scale_of_attainable": 0.0,
@@ -30,34 +30,34 @@
     {
       "trace": "conversation",
       "rung": "random",
-      "native_of_full_gap": -4.52,
+      "native_of_full_gap": -13.2,
       "native_of_attainable": -84.53,
-      "common_scale_of_full_gap": -3.36,
+      "common_scale_of_full_gap": -9.79,
       "common_scale_of_attainable": -62.71,
       "magnitude_contribution": -21.81
     },
     {
       "trace": "conversation",
       "rung": "ceiling",
-      "native_of_full_gap": 5.35,
+      "native_of_full_gap": 15.61,
       "native_of_attainable": 100.0,
-      "common_scale_of_full_gap": 5.35,
+      "common_scale_of_full_gap": 15.61,
       "common_scale_of_attainable": 100.0,
       "magnitude_contribution": 0.0
     },
     {
       "trace": "toolagent",
       "rung": "linear",
-      "native_of_full_gap": 3.62,
+      "native_of_full_gap": 10.88,
       "native_of_attainable": 87.79,
-      "common_scale_of_full_gap": 2.27,
+      "common_scale_of_full_gap": 6.82,
       "common_scale_of_attainable": 55.05,
       "magnitude_contribution": 32.74
     },
     {
       "trace": "toolagent",
       "rung": "count",
-      "native_of_full_gap": -1.04,
+      "native_of_full_gap": -3.12,
       "native_of_attainable": -25.2,
       "common_scale_of_full_gap": 0.0,
       "common_scale_of_attainable": 0.0,
@@ -66,18 +66,18 @@
     {
       "trace": "toolagent",
       "rung": "random",
-      "native_of_full_gap": -27.4,
+      "native_of_full_gap": -82.43,
       "native_of_attainable": -665.43,
-      "common_scale_of_full_gap": -11.69,
+      "common_scale_of_full_gap": -35.18,
       "common_scale_of_attainable": -283.96,
       "magnitude_contribution": -381.46
     },
     {
       "trace": "toolagent",
       "rung": "ceiling",
-      "native_of_full_gap": 4.12,
+      "native_of_full_gap": 12.39,
       "native_of_attainable": 100.0,
-      "common_scale_of_full_gap": 4.12,
+      "common_scale_of_full_gap": 12.39,
       "common_scale_of_attainable": 100.0,
       "magnitude_contribution": 0.0
     }

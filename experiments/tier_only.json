@@ -27,17 +27,17 @@
             "blocks_with_no_pre_split_access": 82659,
             "no_pre_split_pct": 45.2,
             "reference": "prefix_greedy",
-            "reference_cost": 125489.7,
-            "oracle_cost": 76906.5,
-            "attainable_ceiling_cost": 121498.5,
-            "full_hindsight_gap": 48583.2,
+            "reference_cost": 42830.7,
+            "oracle_cost": 23230.4,
+            "attainable_ceiling_cost": 38839.5,
+            "full_hindsight_gap": 19600.2,
             "attainable_gap": 3991.1,
-            "unreachable_pct": 91.8,
-            "reachable_pct": 8.2
+            "unreachable_pct": 79.6,
+            "reachable_pct": 20.4
           }
         ],
-        "unreachable_min": 91.8,
-        "unreachable_max": 91.8
+        "unreachable_min": 79.6,
+        "unreachable_max": 79.6
       },
       "toolagent": {
         "rows": [
@@ -47,17 +47,17 @@
             "blocks_with_no_pre_split_access": 84465,
             "no_pre_split_pct": 46.1,
             "reference": "prefix_greedy",
-            "reference_cost": 151360.3,
-            "oracle_cost": 102142.2,
-            "attainable_ceiling_cost": 148440.0,
-            "full_hindsight_gap": 49218.1,
+            "reference_cost": 66895.3,
+            "oracle_cost": 47784.4,
+            "attainable_ceiling_cost": 63975.0,
+            "full_hindsight_gap": 19110.9,
             "attainable_gap": 2920.3,
-            "unreachable_pct": 94.1,
-            "reachable_pct": 5.9
+            "unreachable_pct": 84.7,
+            "reachable_pct": 15.3
           }
         ],
-        "unreachable_min": 94.1,
-        "unreachable_max": 94.1
+        "unreachable_min": 84.7,
+        "unreachable_max": 84.7
       },
       "synthetic": {
         "rows": [
@@ -67,17 +67,17 @@
             "blocks_with_no_pre_split_access": 10793,
             "no_pre_split_pct": 24.6,
             "reference": "prefix_greedy",
-            "reference_cost": 58081.7,
-            "oracle_cost": 38921.8,
-            "attainable_ceiling_cost": 48107.1,
-            "full_hindsight_gap": 19159.9,
+            "reference_cost": 47288.1,
+            "oracle_cost": 30717.4,
+            "attainable_ceiling_cost": 37313.5,
+            "full_hindsight_gap": 16570.7,
             "attainable_gap": 9974.6,
-            "unreachable_pct": 47.9,
-            "reachable_pct": 52.1
+            "unreachable_pct": 39.8,
+            "reachable_pct": 60.2
           }
         ],
-        "unreachable_min": 47.9,
-        "unreachable_max": 47.9
+        "unreachable_min": 39.8,
+        "unreachable_max": 39.8
       }
     }
   },
@@ -94,8 +94,8 @@
         "tie": "new-behind",
         "arm": "order-arrival",
         "auc": null,
-        "captured_pct": 25.95,
-        "captured_of_attainable_pct": 56.73,
+        "captured_pct": 17.33,
+        "captured_of_attainable_pct": 37.24,
         "n_arrivals_scored": 82659
       },
       {
@@ -104,8 +104,8 @@
         "tie": "new-behind",
         "arm": "order-learned",
         "auc": 0.5649,
-        "captured_pct": 26.88,
-        "captured_of_attainable_pct": 58.77,
+        "captured_pct": 19.64,
+        "captured_of_attainable_pct": 42.2,
         "n_arrivals_scored": 82659
       },
       {
@@ -114,8 +114,8 @@
         "tie": "new-behind",
         "arm": "order-shuffled",
         "auc": null,
-        "captured_pct": 24.73,
-        "captured_of_attainable_pct": 54.07,
+        "captured_pct": 14.31,
+        "captured_of_attainable_pct": 30.75,
         "n_arrivals_scored": 82659
       },
       {
@@ -125,8 +125,8 @@
         "arm": "constant-mean",
         "auc": null,
         "new_block_belief": 1.5407,
-        "captured_pct": 56.73,
-        "captured_of_attainable_pct": 124.03,
+        "captured_pct": 39.18,
+        "captured_of_attainable_pct": 84.2,
         "n_arrivals_scored": 82659
       },
       {
@@ -146,8 +146,8 @@
         "tie": "new-ahead",
         "arm": "order-arrival",
         "auc": null,
-        "captured_pct": 60.86,
-        "captured_of_attainable_pct": 133.07,
+        "captured_pct": 41.78,
+        "captured_of_attainable_pct": 89.78,
         "n_arrivals_scored": 82659
       },
       {
@@ -156,8 +156,8 @@
         "tie": "new-ahead",
         "arm": "order-learned",
         "auc": 0.5649,
-        "captured_pct": 61.07,
-        "captured_of_attainable_pct": 133.53,
+        "captured_pct": 42.3,
+        "captured_of_attainable_pct": 90.89,
         "n_arrivals_scored": 82659
       },
       {
@@ -166,8 +166,8 @@
         "tie": "new-ahead",
         "arm": "order-shuffled",
         "auc": null,
-        "captured_pct": 59.61,
-        "captured_of_attainable_pct": 130.33,
+        "captured_pct": 38.67,
+        "captured_of_attainable_pct": 83.1,
         "n_arrivals_scored": 82659
       },
       {
@@ -177,8 +177,8 @@
         "arm": "constant-mean",
         "auc": null,
         "new_block_belief": 1.5407,
-        "captured_pct": 56.73,
-        "captured_of_attainable_pct": 124.03,
+        "captured_pct": 39.18,
+        "captured_of_attainable_pct": 84.2,
         "n_arrivals_scored": 82659
       },
       {
@@ -188,8 +188,8 @@
         "arm": "constant-median",
         "auc": null,
         "new_block_belief": 1.0,
-        "captured_pct": 56.73,
-        "captured_of_attainable_pct": 124.03,
+        "captured_pct": 39.18,
+        "captured_of_attainable_pct": 84.2,
         "n_arrivals_scored": 82659
       },
       {
@@ -197,7 +197,7 @@
         "axis": "diagnostic",
         "arm": "arrival-ceiling",
         "auc": 1.0,
-        "captured_pct": 45.74,
+        "captured_pct": 46.54,
         "captured_of_attainable_pct": 100.0,
         "n_arrivals_scored": 82659
       },
@@ -207,8 +207,8 @@
         "tie": "new-behind",
         "arm": "order-arrival",
         "auc": null,
-        "captured_pct": 25.36,
-        "captured_of_attainable_pct": 56.02,
+        "captured_pct": 19.37,
+        "captured_of_attainable_pct": 37.8,
         "n_arrivals_scored": 84465
       },
       {
@@ -217,8 +217,8 @@
         "tie": "new-behind",
         "arm": "order-learned",
         "auc": 0.6098,
-        "captured_pct": 25.29,
-        "captured_of_attainable_pct": 55.87,
+        "captured_pct": 19.19,
+        "captured_of_attainable_pct": 37.46,
         "n_arrivals_scored": 84465
       },
       {
@@ -227,8 +227,8 @@
         "tie": "new-behind",
         "arm": "order-shuffled",
         "auc": null,
-        "captured_pct": 23.69,
-        "captured_of_attainable_pct": 52.34,
+        "captured_pct": 15.07,
+        "captured_of_attainable_pct": 29.42,
         "n_arrivals_scored": 84465
       },
       {
@@ -238,8 +238,8 @@
         "arm": "constant-mean",
         "auc": null,
         "new_block_belief": 2.1391,
-        "captured_pct": 75.23,
-        "captured_of_attainable_pct": 166.2,
+        "captured_pct": 51.74,
+        "captured_of_attainable_pct": 101.01,
         "n_arrivals_scored": 84465
       },
       {
@@ -259,8 +259,8 @@
         "tie": "new-ahead",
         "arm": "order-arrival",
         "auc": null,
-        "captured_pct": 63.57,
-        "captured_of_attainable_pct": 140.44,
+        "captured_pct": 46.76,
+        "captured_of_attainable_pct": 91.27,
         "n_arrivals_scored": 84465
       },
       {
@@ -269,8 +269,8 @@
         "tie": "new-ahead",
         "arm": "order-learned",
         "auc": 0.6098,
-        "captured_pct": 63.18,
-        "captured_of_attainable_pct": 139.58,
+        "captured_pct": 45.75,
+        "captured_of_attainable_pct": 89.31,
         "n_arrivals_scored": 84465
       },
       {
@@ -279,8 +279,8 @@
         "tie": "new-ahead",
         "arm": "order-shuffled",
         "auc": null,
-        "captured_pct": 62.62,
-        "captured_of_attainable_pct": 138.34,
+        "captured_pct": 44.31,
+        "captured_of_attainable_pct": 86.49,
         "n_arrivals_scored": 84465
       },
       {
@@ -290,8 +290,8 @@
         "arm": "constant-mean",
         "auc": null,
         "new_block_belief": 2.1391,
-        "captured_pct": 75.23,
-        "captured_of_attainable_pct": 166.2,
+        "captured_pct": 51.74,
+        "captured_of_attainable_pct": 101.01,
         "n_arrivals_scored": 84465
       },
       {
@@ -301,8 +301,8 @@
         "arm": "constant-median",
         "auc": null,
         "new_block_belief": 1.0,
-        "captured_pct": 58.98,
-        "captured_of_attainable_pct": 130.3,
+        "captured_pct": 43.29,
+        "captured_of_attainable_pct": 84.5,
         "n_arrivals_scored": 84465
       },
       {
@@ -310,7 +310,7 @@
         "axis": "diagnostic",
         "arm": "arrival-ceiling",
         "auc": 1.0,
-        "captured_pct": 45.27,
+        "captured_pct": 51.23,
         "captured_of_attainable_pct": 100.0,
         "n_arrivals_scored": 84465
       },
@@ -320,8 +320,8 @@
         "tie": "new-behind",
         "arm": "order-arrival",
         "auc": null,
-        "captured_pct": 16.15,
-        "captured_of_attainable_pct": 35.92,
+        "captured_pct": 10.42,
+        "captured_of_attainable_pct": 26.49,
         "n_arrivals_scored": 10793
       },
       {
@@ -330,8 +330,8 @@
         "tie": "new-behind",
         "arm": "order-learned",
         "auc": 0.7516,
-        "captured_pct": 26.12,
-        "captured_of_attainable_pct": 58.09,
+        "captured_pct": 21.94,
+        "captured_of_attainable_pct": 55.8,
         "n_arrivals_scored": 10793
       },
       {
@@ -340,8 +340,8 @@
         "tie": "new-behind",
         "arm": "order-shuffled",
         "auc": null,
-        "captured_pct": 14.08,
-        "captured_of_attainable_pct": 31.3,
+        "captured_pct": 8.01,
+        "captured_of_attainable_pct": 20.38,
         "n_arrivals_scored": 10793
       },
       {
@@ -351,8 +351,8 @@
         "arm": "constant-mean",
         "auc": null,
         "new_block_belief": 1.4911,
-        "captured_pct": 29.45,
-        "captured_of_attainable_pct": 65.5,
+        "captured_pct": 15.4,
+        "captured_of_attainable_pct": 39.15,
         "n_arrivals_scored": 10793
       },
       {
@@ -372,8 +372,8 @@
         "tie": "new-ahead",
         "arm": "order-arrival",
         "auc": null,
-        "captured_pct": 30.35,
-        "captured_of_attainable_pct": 67.49,
+        "captured_pct": 14.86,
+        "captured_of_attainable_pct": 37.79,
         "n_arrivals_scored": 10793
       },
       {
@@ -382,8 +382,8 @@
         "tie": "new-ahead",
         "arm": "order-learned",
         "auc": 0.7516,
-        "captured_pct": 36.1,
-        "captured_of_attainable_pct": 80.27,
+        "captured_pct": 21.51,
+        "captured_of_attainable_pct": 54.69,
         "n_arrivals_scored": 10793
       },
       {
@@ -392,8 +392,8 @@
         "tie": "new-ahead",
         "arm": "order-shuffled",
         "auc": null,
-        "captured_pct": 28.61,
-        "captured_of_attainable_pct": 63.63,
+        "captured_pct": 12.85,
+        "captured_of_attainable_pct": 32.69,
         "n_arrivals_scored": 10793
       },
       {
@@ -403,8 +403,8 @@
         "arm": "constant-mean",
         "auc": null,
         "new_block_belief": 1.4911,
-        "captured_pct": 29.45,
-        "captured_of_attainable_pct": 65.5,
+        "captured_pct": 15.4,
+        "captured_of_attainable_pct": 39.15,
         "n_arrivals_scored": 10793
       },
       {
@@ -414,8 +414,8 @@
         "arm": "constant-median",
         "auc": null,
         "new_block_belief": 1.0,
-        "captured_pct": 29.45,
-        "captured_of_attainable_pct": 65.5,
+        "captured_pct": 15.4,
+        "captured_of_attainable_pct": 39.15,
         "n_arrivals_scored": 10793
       },
       {
@@ -423,7 +423,7 @@
         "axis": "diagnostic",
         "arm": "arrival-ceiling",
         "auc": 1.0,
-        "captured_pct": 44.97,
+        "captured_pct": 39.33,
         "captured_of_attainable_pct": 100.0,
         "n_arrivals_scored": 10793
       }

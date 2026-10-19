@@ -4,24 +4,26 @@ Reproducibility package for **"Decide on Arrival: Placement Timing Beats Placeme
 Production KV Traces"** (prepared for ICDE 2027, Experiment, Analysis & Benchmark category).
 
 The paper asks what a KV-block placement policy has to get right, and answers that it has to decide
-*early* rather than *well*. The short version:
+*early*, and has to *estimate* how far to trust a block it has never seen. The short version:
 
 - **Split-instant evaluation understates placement.** On the two production traces we use, 45–46% of
-  blocks have no access before the split, and they carry **94.7% and 95.9%** of a hindsight oracle's
-  advantage, so the best possible split-time policy reaches **5.3% and 4.1%** of it. The share stays at
-  92–99% for every split from 0.3 to 0.7 and under order-of-magnitude changes to the cost weights.
-  Inside that protocol a better ranker helps monotonically, but the strongest model gains under 3% of
-  the advantage. The diagnostic is one extra placement pass (`stoa.sequential.attainable_ceiling`); we
-  recommend reporting the reachable share alongside any "fraction of headroom captured".
-- **Deciding at each block's arrival puts more within reach, by a margin that depends on conventions.**
-  Under every tie convention and action space we tried, ranking new blocks at arrival captures **at least
-  three times** what a clairvoyant split-time policy can (23.7–78.6% of the oracle's advantage against
-  4.1–8.2%). How a rule ranks new blocks among themselves moves the result by at most **2.1 points**; where
-  it ranks them against blocks already seen moves it by **18–39 points**, and letting placement also choose
-  a representation (as the placeholder cost model allows) adds 15–34 more. On Mooncake's synthetic control
-  deciding at arrival does not reliably help. Earlier versions of this experiment leaked future
-  information, compared order arms that also differed in magnitude, and fixed both conventions without
-  saying so; the paper's §V-C and the notebook's §AP–§AR say how.
+  blocks have no access before the split, and they carry **84.4% and 87.6%** of a hindsight oracle's
+  advantage, so the best possible split-time policy reaches **15.6% and 12.4%** of it. The share stays at
+  75–97% for every split from 0.3 to 0.7 and under tenfold changes to the cost weights, but it is a
+  long-horizon effect: on the first 1,500 requests of conversation 38.0% is reachable. A block's creation
+  (its KV is computed) is a compulsory miss and is not billed; billing it as a cache read, as earlier
+  versions did, inflated the oracle's advantage about 3x (notebook §AS). The diagnostic is one extra
+  placement pass (`stoa.sequential.attainable_ceiling`); we recommend reporting the reachable share
+  alongside any "fraction of headroom captured".
+- **Deciding at arrival helps only if the trust in unseen blocks is estimated.** Where a never-seen block
+  ranks against blocks seen once moves arrival-time placement by 14–29 points; fixed by convention, it can
+  leave arrival-time placement at the split-time ceiling. Estimated from the prefix (a new block's expected
+  reuse exceeds a seen-once block's), arrival-time placement captures **2.3–4.9x** what a clairvoyant
+  split-time policy can, under every tie convention and action space, in a static analysis. Replayed
+  online, the gain survives free migration but not migration priced at one read plus one write. On Mooncake's synthetic control it
+  does not help. Earlier versions of this experiment leaked future information, compared order arms that
+  also differed in magnitude, fixed two conventions without saying so, and billed creations as reads; the
+  paper's §V-C and the notebook's §AP–§AS say how.
 - **Reaction is competitive.** Rules that forecast nothing reach 75–99% of Belady on toolagent and 40–94% on conversation, and the
   adaptive family (ARC, LeCaR, CACHEUS) beats the best of them by at most 4.6 points.
 
@@ -34,7 +36,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-lock.txt      # exact versions the paper's numbers came from, FIRST
 pip install -e . --no-deps                # then the package itself, without re-resolving them
 
-pytest -q                                  # 287 tests, ~3 min
+pytest -q                                  # 312 tests, ~3 min
 python3 scripts/check_paper_numbers.py     # every paper number vs its artifact
 ```
 
@@ -57,7 +59,7 @@ claim to a command and an artifact.
 | `paper/` | LaTeX source (IEEE format for ICDE; the PVLDB version is `main_pvldb.tex`) |
 | `docs/CONVENTIONS.md` | architecture, commands, and the conventions the codebase holds itself to |
 | `docs/claims_dependency.md` | the lab notebook: every claim, what it depends on, and what was retracted |
-| `tests/` | 287 tests, most of which pin a specific defect we hit |
+| `tests/` | 312 tests, most of which pin a specific defect we hit |
 
 ## What is hand-rolled, and why it matters
 

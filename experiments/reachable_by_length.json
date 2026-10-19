@@ -1,0 +1,48 @@
+{
+  "config": {
+    "split": 0.5,
+    "bill": "creation accesses are compulsory misses"
+  },
+  "rows": [
+    {
+      "trace": "conversation",
+      "requests": 1500,
+      "reachable_pct": 38.0
+    },
+    {
+      "trace": "conversation",
+      "requests": 3000,
+      "reachable_pct": 32.1
+    },
+    {
+      "trace": "conversation",
+      "requests": 6000,
+      "reachable_pct": 25.6
+    },
+    {
+      "trace": "conversation",
+      "requests": "full",
+      "reachable_pct": 15.6
+    },
+    {
+      "trace": "toolagent",
+      "requests": 1500,
+      "reachable_pct": 57.7
+    },
+    {
+      "trace": "toolagent",
+      "requests": 3000,
+      "reachable_pct": 38.3
+    },
+    {
+      "trace": "toolagent",
+      "requests": 6000,
+      "reachable_pct": 29.4
+    },
+    {
+      "trace": "toolagent",
+      "requests": "full",
+      "reachable_pct": 12.4
+    }
+  ]
+}

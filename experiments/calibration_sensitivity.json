@@ -5,12 +5,12 @@
     "note": "derived from declared model/device profiles, NOT measured"
   },
   "summary": {
-    "headroom_min": 59.61,
-    "headroom_max": 82.91,
-    "captured_min": 2.03,
-    "captured_max": 5.92,
-    "handwritten_captured": 3.62,
-    "handwritten_headroom": 79.76,
+    "headroom_min": 54.92,
+    "headroom_max": 97.75,
+    "captured_min": 7.05,
+    "captured_max": 13.25,
+    "handwritten_captured": 10.88,
+    "handwritten_headroom": 91.82,
     "n_models": 3,
     "n_devices": 5,
     "non_monotonic": [
@@ -32,8 +32,8 @@
         "disk": 60.0,
         "remote_rdma": 30.0
       },
-      "headroom_pct": 79.76,
-      "captured_pct": 3.62,
+      "headroom_pct": 91.82,
+      "captured_pct": 10.88,
       "monotonic": true
     },
     {
@@ -52,8 +52,8 @@
         "disk": 336.31,
         "remote_rdma": 101.49
       },
-      "headroom_pct": 75.13,
-      "captured_pct": 3.68,
+      "headroom_pct": 95.35,
+      "captured_pct": 10.3,
       "monotonic": true
     },
     {
@@ -72,8 +72,8 @@
         "disk": 336.31,
         "remote_rdma": 681.57
       },
-      "headroom_pct": 80.92,
-      "captured_pct": 4.05,
+      "headroom_pct": 97.75,
+      "captured_pct": 11.89,
       "monotonic": false
     },
     {
@@ -92,8 +92,8 @@
         "disk": 143.45,
         "remote_rdma": 101.49
       },
-      "headroom_pct": 75.13,
-      "captured_pct": 3.68,
+      "headroom_pct": 95.35,
+      "captured_pct": 10.3,
       "monotonic": true
     },
     {
@@ -112,8 +112,8 @@
         "disk": 336.31,
         "remote_rdma": 101.49
       },
-      "headroom_pct": 78.51,
-      "captured_pct": 3.72,
+      "headroom_pct": 96.02,
+      "captured_pct": 11.02,
       "monotonic": false
     },
     {
@@ -132,8 +132,8 @@
         "disk": 4.0,
         "remote_rdma": 2.5
       },
-      "headroom_pct": 82.91,
-      "captured_pct": 2.03,
+      "headroom_pct": 77.94,
+      "captured_pct": 7.05,
       "monotonic": true
     },
     {
@@ -152,8 +152,8 @@
         "disk": 334.53,
         "remote_rdma": 100.6
       },
-      "headroom_pct": 64.2,
-      "captured_pct": 5.15,
+      "headroom_pct": 93.65,
+      "captured_pct": 12.28,
       "monotonic": true
     },
     {
@@ -172,8 +172,8 @@
         "disk": 334.53,
         "remote_rdma": 672.63
       },
-      "headroom_pct": 77.72,
-      "captured_pct": 4.6,
+      "headroom_pct": 97.49,
+      "captured_pct": 12.93,
       "monotonic": false
     },
     {
@@ -192,8 +192,8 @@
         "disk": 143.1,
         "remote_rdma": 100.6
       },
-      "headroom_pct": 64.2,
-      "captured_pct": 5.15,
+      "headroom_pct": 93.65,
+      "captured_pct": 12.28,
       "monotonic": true
     },
     {
@@ -212,8 +212,8 @@
         "disk": 334.53,
         "remote_rdma": 100.6
       },
-      "headroom_pct": 73.48,
-      "captured_pct": 3.5,
+      "headroom_pct": 95.15,
+      "captured_pct": 9.92,
       "monotonic": false
     },
     {
@@ -232,8 +232,8 @@
         "disk": 4.0,
         "remote_rdma": 2.5
       },
-      "headroom_pct": 69.14,
-      "captured_pct": 2.52,
+      "headroom_pct": 62.81,
+      "captured_pct": 8.22,
       "monotonic": true
     },
     {
@@ -252,8 +252,8 @@
         "disk": 334.08,
         "remote_rdma": 100.37
       },
-      "headroom_pct": 59.61,
-      "captured_pct": 5.92,
+      "headroom_pct": 92.95,
+      "captured_pct": 13.11,
       "monotonic": true
     },
     {
@@ -272,8 +272,8 @@
         "disk": 334.08,
         "remote_rdma": 670.39
       },
-      "headroom_pct": 76.72,
-      "captured_pct": 4.79,
+      "headroom_pct": 97.42,
+      "captured_pct": 13.25,
       "monotonic": false
     },
     {
@@ -292,8 +292,8 @@
         "disk": 143.01,
         "remote_rdma": 100.37
       },
-      "headroom_pct": 59.61,
-      "captured_pct": 5.92,
+      "headroom_pct": 92.95,
+      "captured_pct": 13.11,
       "monotonic": true
     },
     {
@@ -312,8 +312,8 @@
         "disk": 334.08,
         "remote_rdma": 100.37
       },
-      "headroom_pct": 71.72,
-      "captured_pct": 3.42,
+      "headroom_pct": 94.84,
+      "captured_pct": 9.53,
       "monotonic": false
     },
     {
@@ -332,8 +332,8 @@
         "disk": 4.0,
         "remote_rdma": 2.5
       },
-      "headroom_pct": 60.75,
-      "captured_pct": 2.93,
+      "headroom_pct": 54.92,
+      "captured_pct": 9.08,
       "monotonic": true
     }
   ]

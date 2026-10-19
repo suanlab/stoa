@@ -19,7 +19,7 @@ SHELL := /bin/bash
 .PHONY: help verify reproduce-fast reproduce-full reproduce-llm figures paper clean data-check
 
 help:
-	@echo "make verify          — 287 tests + every paper number against its artifact (no data needed)"
+	@echo "make verify          — 312 tests + every paper number against its artifact (no data needed)"
 	@echo "make data-check      — are the traces present and the right length?"
 	@echo "make reproduce-fast  — regenerate the central claims from the Mooncake traces (~40 min)"
 	@echo "make reproduce-full  — the above plus the LRB hyperparameter sweep (~6 h)"
@@ -60,6 +60,17 @@ reproduce-fast: data-check
 	$(PY) scripts/run_calibration_sensitivity.py
 	$(PY) scripts/run_weight_sensitivity.py
 	$(PY) scripts/run_tier_only.py
+	$(PY) scripts/run_arrival_admission.py --ref-scale reuse --out experiments/arrival_admission_reuse.json
+	$(PY) scripts/run_tier_only.py --ref-scale reuse
+	# The estimated prior for unseen blocks (V-C), equal-exposure diagnostics, the length dependence
+	# of the reachable share (V-B); notebook AS.
+	$(PY) scripts/run_hazard_prior.py
+	$(PY) scripts/run_hazard_prior.py --tier-only
+	$(PY) scripts/run_hazard_prior.py --rescale-cstar
+	$(PY) scripts/run_hazard_prior.py --rescale-cstar --tier-only
+	$(PY) scripts/run_online_admission.py
+	$(PY) scripts/run_equal_horizon.py
+	$(PY) scripts/run_reachable_by_length.py
 	# Figures are byte-deterministic, so regenerating them from reproduced artifacts leaves the
 	# committed PDF build manifest valid; without this step the figure guard reports them stale.
 	$(PY) scripts/make_figures.py

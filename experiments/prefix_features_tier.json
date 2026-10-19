@@ -1,0 +1,43 @@
+{
+  "config": {
+    "features": "base + parent prior count, parent-new, parent children, parent count>=2"
+  },
+  "rows": [
+    {
+      "trace": "conversation",
+      "actions": "tier",
+      "auc_base": 0.565,
+      "auc_prefix": 0.576,
+      "captured_base_new-behind": 19.64,
+      "captured_prefix_new-behind": 21.62,
+      "captured_arrival_new-behind": 17.33,
+      "captured_base_new-ahead": 42.3,
+      "captured_prefix_new-ahead": 43.24,
+      "captured_arrival_new-ahead": 41.78
+    },
+    {
+      "trace": "toolagent",
+      "actions": "tier",
+      "auc_base": 0.61,
+      "auc_prefix": 0.616,
+      "captured_base_new-behind": 19.19,
+      "captured_prefix_new-behind": 19.79,
+      "captured_arrival_new-behind": 19.37,
+      "captured_base_new-ahead": 45.75,
+      "captured_prefix_new-ahead": 46.27,
+      "captured_arrival_new-ahead": 46.76
+    },
+    {
+      "trace": "synthetic",
+      "actions": "tier",
+      "auc_base": 0.752,
+      "auc_prefix": 0.751,
+      "captured_base_new-behind": 21.94,
+      "captured_prefix_new-behind": 21.92,
+      "captured_arrival_new-behind": 10.42,
+      "captured_base_new-ahead": 21.51,
+      "captured_prefix_new-ahead": 21.48,
+      "captured_arrival_new-ahead": 14.86
+    }
+  ]
+}

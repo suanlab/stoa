@@ -1,0 +1,183 @@
+{
+  "config": {
+    "pseudo_split": "split // 2",
+    "count_bins": [
+      1,
+      2,
+      3,
+      5,
+      9
+    ],
+    "age": "quartiles within count bin",
+    "actions": "tier"
+  },
+  "estimates": {
+    "conversation": {
+      "pseudo_split": 3007,
+      "scale": 2.0,
+      "h_new": 0.5248,
+      "m_by_count_bin": [
+        0.3046,
+        0.4394,
+        0.9925,
+        3.8467,
+        91.8158
+      ],
+      "c_star": 4.3094
+    },
+    "toolagent": {
+      "pseudo_split": 5901,
+      "scale": 2.0,
+      "h_new": 0.4846,
+      "m_by_count_bin": [
+        0.2664,
+        0.379,
+        1.0588,
+        4.0022,
+        754.9242
+      ],
+      "c_star": 4.3111
+    },
+    "synthetic": {
+      "pseudo_split": 998,
+      "scale": 2.001,
+      "h_new": 0.4762,
+      "m_by_count_bin": [
+        0.761,
+        1.6804,
+        1.5423,
+        1.5423,
+        1.5423
+      ],
+      "c_star": 1.2516
+    }
+  },
+  "rows": [
+    {
+      "trace": "conversation",
+      "actions": "tier",
+      "tie": "new-behind",
+      "arm": "hazard-new",
+      "captured_pct": 46.5
+    },
+    {
+      "trace": "conversation",
+      "actions": "tier",
+      "tie": "new-behind",
+      "arm": "hazard-all",
+      "captured_pct": 56.86
+    },
+    {
+      "trace": "conversation",
+      "actions": "tier",
+      "tie": "new-behind",
+      "arm": "hazard-old",
+      "captured_pct": 13.96
+    },
+    {
+      "trace": "conversation",
+      "actions": "tier",
+      "tie": "new-ahead",
+      "arm": "hazard-new",
+      "captured_pct": 46.5
+    },
+    {
+      "trace": "conversation",
+      "actions": "tier",
+      "tie": "new-ahead",
+      "arm": "hazard-all",
+      "captured_pct": 56.86
+    },
+    {
+      "trace": "conversation",
+      "actions": "tier",
+      "tie": "new-ahead",
+      "arm": "hazard-old",
+      "captured_pct": 13.96
+    },
+    {
+      "trace": "toolagent",
+      "actions": "tier",
+      "tie": "new-behind",
+      "arm": "hazard-new",
+      "captured_pct": 52.35
+    },
+    {
+      "trace": "toolagent",
+      "actions": "tier",
+      "tie": "new-behind",
+      "arm": "hazard-all",
+      "captured_pct": 54.75
+    },
+    {
+      "trace": "toolagent",
+      "actions": "tier",
+      "tie": "new-behind",
+      "arm": "hazard-old",
+      "captured_pct": 12.37
+    },
+    {
+      "trace": "toolagent",
+      "actions": "tier",
+      "tie": "new-ahead",
+      "arm": "hazard-new",
+      "captured_pct": 52.35
+    },
+    {
+      "trace": "toolagent",
+      "actions": "tier",
+      "tie": "new-ahead",
+      "arm": "hazard-all",
+      "captured_pct": 54.75
+    },
+    {
+      "trace": "toolagent",
+      "actions": "tier",
+      "tie": "new-ahead",
+      "arm": "hazard-old",
+      "captured_pct": 12.37
+    },
+    {
+      "trace": "synthetic",
+      "actions": "tier",
+      "tie": "new-behind",
+      "arm": "hazard-new",
+      "captured_pct": 15.4
+    },
+    {
+      "trace": "synthetic",
+      "actions": "tier",
+      "tie": "new-behind",
+      "arm": "hazard-all",
+      "captured_pct": 5.33
+    },
+    {
+      "trace": "synthetic",
+      "actions": "tier",
+      "tie": "new-behind",
+      "arm": "hazard-old",
+      "captured_pct": 5.34
+    },
+    {
+      "trace": "synthetic",
+      "actions": "tier",
+      "tie": "new-ahead",
+      "arm": "hazard-new",
+      "captured_pct": 15.4
+    },
+    {
+      "trace": "synthetic",
+      "actions": "tier",
+      "tie": "new-ahead",
+      "arm": "hazard-all",
+      "captured_pct": 5.33
+    },
+    {
+      "trace": "synthetic",
+      "actions": "tier",
+      "tie": "new-ahead",
+      "arm": "hazard-old",
+      "captured_pct": 5.34
+    }
+  ]
+}

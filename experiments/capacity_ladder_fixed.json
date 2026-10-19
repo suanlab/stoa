@@ -10,7 +10,7 @@
       "train": "toolagent",
       "rung": "constant",
       "auc_cross_trace": 0.5,
-      "captured_pct": -2.6,
+      "captured_pct": -7.58,
       "captured_of_attainable_pct": -48.58,
       "auc_in_trace": null
     },
@@ -19,7 +19,7 @@
       "train": "toolagent",
       "rung": "random",
       "auc_cross_trace": 0.4931,
-      "captured_pct": -3.36,
+      "captured_pct": -9.79,
       "captured_of_attainable_pct": -62.71,
       "auc_in_trace": null
     },
@@ -37,7 +37,7 @@
       "train": "toolagent",
       "rung": "linear",
       "auc_cross_trace": 0.8116,
-      "captured_pct": 2.71,
+      "captured_pct": 7.92,
       "captured_of_attainable_pct": 50.73,
       "auc_in_trace": 0.8145
     },
@@ -46,7 +46,7 @@
       "train": "toolagent",
       "rung": "gbdt",
       "auc_cross_trace": 0.8039,
-      "captured_pct": 2.55,
+      "captured_pct": 7.43,
       "captured_of_attainable_pct": 47.57,
       "auc_in_trace": 0.9342
     },
@@ -55,7 +55,7 @@
       "train": "toolagent",
       "rung": "mlp",
       "auc_cross_trace": 0.8192,
-      "captured_pct": 2.82,
+      "captured_pct": 8.22,
       "captured_of_attainable_pct": 52.65,
       "auc_in_trace": 0.8509
     },
@@ -64,7 +64,7 @@
       "train": "\u2014",
       "rung": "ceiling",
       "auc_cross_trace": 1.0,
-      "captured_pct": 5.35,
+      "captured_pct": 15.61,
       "captured_of_attainable_pct": 100.0,
       "auc_in_trace": 1.0
     },
@@ -82,7 +82,7 @@
       "train": "conversation",
       "rung": "constant",
       "auc_cross_trace": 0.5,
-      "captured_pct": -2.5,
+      "captured_pct": -7.51,
       "captured_of_attainable_pct": -60.64,
       "auc_in_trace": null
     },
@@ -91,7 +91,7 @@
       "train": "conversation",
       "rung": "random",
       "auc_cross_trace": 0.4967,
-      "captured_pct": -11.69,
+      "captured_pct": -35.18,
       "captured_of_attainable_pct": -283.96,
       "auc_in_trace": null
     },
@@ -109,7 +109,7 @@
       "train": "conversation",
       "rung": "linear",
       "auc_cross_trace": 0.9255,
-      "captured_pct": 2.27,
+      "captured_pct": 6.82,
       "captured_of_attainable_pct": 55.05,
       "auc_in_trace": 0.9285
     },
@@ -118,7 +118,7 @@
       "train": "conversation",
       "rung": "gbdt",
       "auc_cross_trace": 0.9116,
-      "captured_pct": 1.85,
+      "captured_pct": 5.57,
       "captured_of_attainable_pct": 44.94,
       "auc_in_trace": 0.9665
     },
@@ -127,7 +127,7 @@
       "train": "conversation",
       "rung": "mlp",
       "auc_cross_trace": 0.9306,
-      "captured_pct": 2.45,
+      "captured_pct": 7.37,
       "captured_of_attainable_pct": 59.53,
       "auc_in_trace": 0.9466
     },
@@ -136,7 +136,7 @@
       "train": "\u2014",
       "rung": "ceiling",
       "auc_cross_trace": 1.0,
-      "captured_pct": 4.12,
+      "captured_pct": 12.39,
       "captured_of_attainable_pct": 100.0,
       "auc_in_trace": 1.0
     },

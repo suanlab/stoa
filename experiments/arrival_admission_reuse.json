@@ -1,0 +1,348 @@
+{
+  "config": {
+    "requests": "full",
+    "protocol": "blocks placed at first appearance from request-level context; train/eval cut = billing split = time_split(0.5); training labels windowed to end before the split; belief magnitudes from the pre-split analogue population (reuse scale); order arms share one magnitude multiset, magnitude arms share arrival order",
+    "why": "the split-instant protocol leaves ~95% of the hindsight gap unreachable; this targets it, causally (\u00a7AP)"
+  },
+  "results": [
+    {
+      "trace": "conversation",
+      "axis": "order",
+      "tie": "new-behind",
+      "arm": "order-arrival",
+      "auc": null,
+      "captured_pct": 12.35,
+      "captured_of_attainable_pct": 19.58,
+      "n_arrivals_scored": 82659
+    },
+    {
+      "trace": "conversation",
+      "axis": "order",
+      "tie": "new-behind",
+      "arm": "order-learned",
+      "auc": 0.5649,
+      "captured_pct": 15.26,
+      "captured_of_attainable_pct": 24.2,
+      "n_arrivals_scored": 82659
+    },
+    {
+      "trace": "conversation",
+      "axis": "order",
+      "tie": "new-behind",
+      "arm": "order-shuffled",
+      "auc": null,
+      "captured_pct": 10.52,
+      "captured_of_attainable_pct": 16.68,
+      "n_arrivals_scored": 82659
+    },
+    {
+      "trace": "conversation",
+      "axis": "magnitude",
+      "tie": "new-behind",
+      "arm": "constant-mean",
+      "auc": null,
+      "new_block_belief": 0.5407,
+      "captured_pct": 29.42,
+      "captured_of_attainable_pct": 46.65,
+      "n_arrivals_scored": 82659
+    },
+    {
+      "trace": "conversation",
+      "axis": "magnitude",
+      "tie": "new-behind",
+      "arm": "constant-median",
+      "auc": null,
+      "new_block_belief": 0.0,
+      "captured_pct": 0.0,
+      "captured_of_attainable_pct": 0.0,
+      "n_arrivals_scored": 82659
+    },
+    {
+      "trace": "conversation",
+      "axis": "order",
+      "tie": "new-ahead",
+      "arm": "order-arrival",
+      "auc": null,
+      "captured_pct": 19.05,
+      "captured_of_attainable_pct": 30.2,
+      "n_arrivals_scored": 82659
+    },
+    {
+      "trace": "conversation",
+      "axis": "order",
+      "tie": "new-ahead",
+      "arm": "order-learned",
+      "auc": 0.5649,
+      "captured_pct": 21.2,
+      "captured_of_attainable_pct": 33.61,
+      "n_arrivals_scored": 82659
+    },
+    {
+      "trace": "conversation",
+      "axis": "order",
+      "tie": "new-ahead",
+      "arm": "order-shuffled",
+      "auc": null,
+      "captured_pct": 15.48,
+      "captured_of_attainable_pct": 24.55,
+      "n_arrivals_scored": 82659
+    },
+    {
+      "trace": "conversation",
+      "axis": "magnitude",
+      "tie": "new-ahead",
+      "arm": "constant-mean",
+      "auc": null,
+      "new_block_belief": 0.5407,
+      "captured_pct": 29.42,
+      "captured_of_attainable_pct": 46.65,
+      "n_arrivals_scored": 82659
+    },
+    {
+      "trace": "conversation",
+      "axis": "magnitude",
+      "tie": "new-ahead",
+      "arm": "constant-median",
+      "auc": null,
+      "new_block_belief": 0.0,
+      "captured_pct": 0.0,
+      "captured_of_attainable_pct": 0.0,
+      "n_arrivals_scored": 82659
+    },
+    {
+      "trace": "conversation",
+      "axis": "diagnostic",
+      "arm": "arrival-ceiling",
+      "auc": 1.0,
+      "captured_pct": 63.07,
+      "captured_of_attainable_pct": 100.0,
+      "n_arrivals_scored": 82659
+    },
+    {
+      "trace": "toolagent",
+      "axis": "order",
+      "tie": "new-behind",
+      "arm": "order-arrival",
+      "auc": null,
+      "captured_pct": 13.93,
+      "captured_of_attainable_pct": 21.02,
+      "n_arrivals_scored": 84465
+    },
+    {
+      "trace": "toolagent",
+      "axis": "order",
+      "tie": "new-behind",
+      "arm": "order-learned",
+      "auc": 0.6098,
+      "captured_pct": 13.6,
+      "captured_of_attainable_pct": 20.52,
+      "n_arrivals_scored": 84465
+    },
+    {
+      "trace": "toolagent",
+      "axis": "order",
+      "tie": "new-behind",
+      "arm": "order-shuffled",
+      "auc": null,
+      "captured_pct": 10.63,
+      "captured_of_attainable_pct": 16.03,
+      "n_arrivals_scored": 84465
+    },
+    {
+      "trace": "toolagent",
+      "axis": "magnitude",
+      "tie": "new-behind",
+      "arm": "constant-mean",
+      "auc": null,
+      "new_block_belief": 1.1391,
+      "captured_pct": 56.01,
+      "captured_of_attainable_pct": 84.51,
+      "n_arrivals_scored": 84465
+    },
+    {
+      "trace": "toolagent",
+      "axis": "magnitude",
+      "tie": "new-behind",
+      "arm": "constant-median",
+      "auc": null,
+      "new_block_belief": 0.0,
+      "captured_pct": 0.0,
+      "captured_of_attainable_pct": 0.0,
+      "n_arrivals_scored": 84465
+    },
+    {
+      "trace": "toolagent",
+      "axis": "order",
+      "tie": "new-ahead",
+      "arm": "order-arrival",
+      "auc": null,
+      "captured_pct": 20.36,
+      "captured_of_attainable_pct": 30.73,
+      "n_arrivals_scored": 84465
+    },
+    {
+      "trace": "toolagent",
+      "axis": "order",
+      "tie": "new-ahead",
+      "arm": "order-learned",
+      "auc": 0.6098,
+      "captured_pct": 20.31,
+      "captured_of_attainable_pct": 30.64,
+      "n_arrivals_scored": 84465
+    },
+    {
+      "trace": "toolagent",
+      "axis": "order",
+      "tie": "new-ahead",
+      "arm": "order-shuffled",
+      "auc": null,
+      "captured_pct": 15.59,
+      "captured_of_attainable_pct": 23.53,
+      "n_arrivals_scored": 84465
+    },
+    {
+      "trace": "toolagent",
+      "axis": "magnitude",
+      "tie": "new-ahead",
+      "arm": "constant-mean",
+      "auc": null,
+      "new_block_belief": 1.1391,
+      "captured_pct": 56.01,
+      "captured_of_attainable_pct": 84.51,
+      "n_arrivals_scored": 84465
+    },
+    {
+      "trace": "toolagent",
+      "axis": "magnitude",
+      "tie": "new-ahead",
+      "arm": "constant-median",
+      "auc": null,
+      "new_block_belief": 0.0,
+      "captured_pct": 0.0,
+      "captured_of_attainable_pct": 0.0,
+      "n_arrivals_scored": 84465
+    },
+    {
+      "trace": "toolagent",
+      "axis": "diagnostic",
+      "arm": "arrival-ceiling",
+      "auc": 1.0,
+      "captured_pct": 66.27,
+      "captured_of_attainable_pct": 100.0,
+      "n_arrivals_scored": 84465
+    },
+    {
+      "trace": "synthetic",
+      "axis": "order",
+      "tie": "new-behind",
+      "arm": "order-arrival",
+      "auc": null,
+      "captured_pct": 15.23,
+      "captured_of_attainable_pct": 28.23,
+      "n_arrivals_scored": 10793
+    },
+    {
+      "trace": "synthetic",
+      "axis": "order",
+      "tie": "new-behind",
+      "arm": "order-learned",
+      "auc": 0.7516,
+      "captured_pct": 26.68,
+      "captured_of_attainable_pct": 49.45,
+      "n_arrivals_scored": 10793
+    },
+    {
+      "trace": "synthetic",
+      "axis": "order",
+      "tie": "new-behind",
+      "arm": "order-shuffled",
+      "auc": null,
+      "captured_pct": 9.85,
+      "captured_of_attainable_pct": 18.26,
+      "n_arrivals_scored": 10793
+    },
+    {
+      "trace": "synthetic",
+      "axis": "magnitude",
+      "tie": "new-behind",
+      "arm": "constant-mean",
+      "auc": null,
+      "new_block_belief": 0.4911,
+      "captured_pct": 24.71,
+      "captured_of_attainable_pct": 45.8,
+      "n_arrivals_scored": 10793
+    },
+    {
+      "trace": "synthetic",
+      "axis": "magnitude",
+      "tie": "new-behind",
+      "arm": "constant-median",
+      "auc": null,
+      "new_block_belief": 0.0,
+      "captured_pct": 0.0,
+      "captured_of_attainable_pct": 0.0,
+      "n_arrivals_scored": 10793
+    },
+    {
+      "trace": "synthetic",
+      "axis": "order",
+      "tie": "new-ahead",
+      "arm": "order-arrival",
+      "auc": null,
+      "captured_pct": 16.63,
+      "captured_of_attainable_pct": 30.83,
+      "n_arrivals_scored": 10793
+    },
+    {
+      "trace": "synthetic",
+      "axis": "order",
+      "tie": "new-ahead",
+      "arm": "order-learned",
+      "auc": 0.7516,
+      "captured_pct": 31.72,
+      "captured_of_attainable_pct": 58.78,
+      "n_arrivals_scored": 10793
+    },
+    {
+      "trace": "synthetic",
+      "axis": "order",
+      "tie": "new-ahead",
+      "arm": "order-shuffled",
+      "auc": null,
+      "captured_pct": 13.38,
+      "captured_of_attainable_pct": 24.79,
+      "n_arrivals_scored": 10793
+    },
+    {
+      "trace": "synthetic",
+      "axis": "magnitude",
+      "tie": "new-ahead",
+      "arm": "constant-mean",
+      "auc": null,
+      "new_block_belief": 0.4911,
+      "captured_pct": 24.71,
+      "captured_of_attainable_pct": 45.8,
+      "n_arrivals_scored": 10793
+    },
+    {
+      "trace": "synthetic",
+      "axis": "magnitude",
+      "tie": "new-ahead",
+      "arm": "constant-median",
+      "auc": null,
+      "new_block_belief": 0.0,
+      "captured_pct": 0.0,
+      "captured_of_attainable_pct": 0.0,
+      "n_arrivals_scored": 10793
+    },
+    {
+      "trace": "synthetic",
+      "axis": "diagnostic",
+      "arm": "arrival-ceiling",
+      "auc": 1.0,
+      "captured_pct": 53.96,
+      "captured_of_attainable_pct": 100.0,
+      "n_arrivals_scored": 10793
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "config": {
+    "split": "time_split(0.5)",
+    "horizon": "half the evaluation period",
+    "scored": "blocks born in [split, end - H]"
+  },
+  "rows": [
+    {
+      "trace": "conversation",
+      "horizon_steps": 3008,
+      "scored_blocks": 41864,
+      "auc_order_equal_horizon": 0.46,
+      "auc_order_finite_window": 0.466,
+      "auc_learned_equal_horizon": 0.561,
+      "auc_learned_finite_window": 0.56,
+      "first_over_last_equal_horizon": 0.71,
+      "reuse_rate_equal_horizon": 0.217
+    },
+    {
+      "trace": "toolagent",
+      "horizon_steps": 5902,
+      "scored_blocks": 42556,
+      "auc_order_equal_horizon": 0.482,
+      "auc_order_finite_window": 0.483,
+      "auc_learned_equal_horizon": 0.615,
+      "auc_learned_finite_window": 0.615,
+      "first_over_last_equal_horizon": 0.77,
+      "reuse_rate_equal_horizon": 0.204
+    },
+    {
+      "trace": "synthetic",
+      "horizon_steps": 998,
+      "scored_blocks": 8256,
+      "auc_order_equal_horizon": 0.56,
+      "auc_order_finite_window": 0.559,
+      "auc_learned_equal_horizon": 0.748,
+      "auc_learned_finite_window": 0.744,
+      "first_over_last_equal_horizon": 0.86,
+      "reuse_rate_equal_horizon": 0.355
+    }
+  ]
+}

@@ -48,16 +48,17 @@ ORCID 0000-0002-3047-1167}}
 A natural way to evaluate how a memory system for LLM agents should place KV-cache blocks across
 storage tiers, and the one we used for three revisions of this work, is at a split instant: observe a
 prefix, place the blocks that exist, and bill the result against a hindsight oracle. On two production
-Mooncake traces this protocol measures almost nothing. Of the oracle's advantage, 94.7\% and 95.9\% sits
-on blocks that do not yet exist at the split, so the best possible split-time policy reaches 5.3\% and
-4.1\% of it; the share stays at 92--99\% for every split from 0.3 to 0.7 and under tenfold
-changes to the latency and token weights. Inside that protocol a better ranker helps monotonically, but only over the
-sliver: the strongest model gains under 3\% of the oracle's advantage. Deciding at each block's arrival
-instead puts more within reach: under every modelling convention we tried, ranking new blocks at arrival
-captures at least three times what a clairvoyant split-time policy can. How a rule ranks them moves the
-result by at most 2.1 points; where it ranks them against blocks already seen, a decision a split-time
-evaluation never meets, moves it by 18--39. On Mooncake's synthetic control deciding at arrival does not
-reliably help. Reactive tiering is consistent with this: LRU, LFU and a fill-once cache
+Mooncake traces this protocol measures little. Of the oracle's advantage, 84.4\% and 87.6\% sits on
+blocks that do not yet exist at the split, so the best possible split-time policy reaches 15.6\% and
+12.4\% of it; the share stays at 75--97\% for every split from 0.3 to 0.7 and under tenfold changes to
+the latency and token weights, though on short traces much more is reachable. Inside that protocol a
+better ranker helps monotonically, but only over that sliver. In a static analysis, deciding at each
+block's arrival puts more within reach, but how much turns on a decision a split-time evaluation never
+meets: where a block never seen ranks against blocks seen once. The prefix says above them (a new
+block's expected reuse is 0.52 against 0.30), and ranking it there captures 2.3--4.9 times what a
+clairvoyant split-time policy can; ranking it behind them can leave arrival-time placement at that
+ceiling. Replayed online, the gain survives free migration but not migration priced at one read and one
+write. On Mooncake's synthetic control deciding at arrival does not help. Reactive tiering is consistent with this: LRU, LFU and a fill-once cache
 reach 75--99\% and 40--94\% of Belady's hit rate, the best adaptive policy (ARC, LeCaR, CACHEUS) beats
 the best of those rules, each chosen per operating point, by at most 4.6 points, and a learned
 replacement policy (LRB) stays below ARC, because 76--78\% of blocks are never reused. We give a one-line

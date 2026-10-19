@@ -12,7 +12,7 @@
       "features": "block",
       "auc": 0.27,
       "classifier_headroom_pct": -5.23,
-      "regression_headroom_pct": -129.3
+      "regression_headroom_pct": -55.18
     },
     {
       "features": "block+session",

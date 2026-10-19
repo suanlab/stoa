@@ -38,7 +38,7 @@ if str(_SRC) not in sys.path:
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from stoa.mooncake import load_mooncake  # noqa: E402
-from stoa.causal import (analogue_magnitudes, split_by_arrival,  # noqa: E402
+from stoa.causal import (analogue_magnitudes, resample_to, split_by_arrival,  # noqa: E402
                          windowed_training_labels)
 from stoa.sequential import (attainable_ceiling, place_with_beliefs,  # noqa: E402
                              prefix_greedy_cost, quantile_match)
@@ -112,6 +112,10 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Arrival-time admission placement")
     ap.add_argument("--requests", type=int, default=0, help="0 = full trace")
     ap.add_argument("--out", type=str, default="experiments/arrival_admission.json")
+    # The reference multiset is itself a convention (re-verification of 2026-10-20): "count" uses the
+    # pre-split blocks' access counts, creation included (the original); "reuse" subtracts the creation
+    # access, the scale the corrected bill and the hazard estimate use (notebook AS, AT).
+    ap.add_argument("--ref-scale", choices=("count", "reuse"), default="count")
     args = ap.parse_args()
     n_req = args.requests or 10 ** 9
 
@@ -156,7 +160,10 @@ def main() -> None:
         # evaluation population -- blocks first seen before the split, counted up to it, i.e.
         # their prefix counts. These used to be the evaluation blocks' TRUE future counts.
         pre = wl.prefix_stats(st)
-        ref = analogue_magnitudes((v["count"] for v in pre.values()), len(ev_ids))
+        if args.ref_scale == "reuse":
+            ref = resample_to([v["count"] - 1 for v in pre.values() if v["count"] > 0], len(ev_ids))
+        else:
+            ref = analogue_magnitudes((v["count"] for v in pre.values()), len(ev_ids))
 
         c_pref = prefix_greedy_cost(wl)
         c_orac = place_with_beliefs(
@@ -261,7 +268,7 @@ def main() -> None:
                     "protocol": ("blocks placed at first appearance from request-level "
                                  "context; train/eval cut = billing split = time_split(0.5); "
                                  "training labels windowed to end before the split; belief "
-                                 "magnitudes from the pre-split analogue population; order arms share "
+                                 f"magnitudes from the pre-split analogue population ({args.ref_scale} scale); order arms share "
                                  "one magnitude multiset, magnitude arms share arrival order"),
                     "why": ("the split-instant protocol leaves ~95% of the hindsight gap "
                             "unreachable; this targets it, causally (§AP)")},

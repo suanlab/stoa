@@ -3,11 +3,12 @@
 **Target (2026-10-02): ICDE 2027, research track, Experiment, Analysis & Benchmark (EAB), round 2 —
 deadline 2026-11-11, 5 PM PT.** Title: *[Experiment, Analysis, and Benchmark] Decide on Arrival:
 Placement Timing Beats Placement Prediction on Production KV Traces.* The paper reports what production
-traces say about KV-block placement: split-instant evaluation leaves 94.7% and 95.9% of a hindsight
-oracle's advantage on blocks that do not yet exist, so the best split-time policy reaches 5.3%
-(conversation) and 4.1% (toolagent) of it. Deciding at each block's arrival instead captures at
-least three times as much under every convention tried (tie rule, tier-only or full action space); ranking
-among new blocks moves the result by at most 2.1 points, ranking them against seen blocks by 18–39.
+traces say about KV-block placement: split-instant evaluation leaves 84.4% and 87.6% of a hindsight
+oracle's advantage on blocks that do not yet exist, so the best split-time policy reaches 15.6%
+(conversation) and 12.4% (toolagent) of it. Deciding at each block's arrival captures 2.3–4.9x as much
+when the trust placed in an unseen block is estimated from the prefix; fixed by convention, that decision
+moves the result by 14–29 points and can leave it at the split-time ceiling. This is a static analysis;
+replayed online, the gain survives free migration but not migration priced at one read plus one write.
 
 The PVLDB-formatted version is `main_pvldb.tex`; its exact last revision is git tag
 `pvldb-final-2026-09`. It was never submitted. The ICDE version drops the two LLM-dependent sections
@@ -86,9 +87,9 @@ is still the open gate (`docs/claims_dependency.md` §B, §P).
 
 ## Figures
 
-Generated into `figs/` from `experiments/*.json` by `../scripts/make_figures.py`. **Two are embedded:**
-`fig_reactive.pdf` (reactive envelope, ARC and LRB) and `fig_architecture.pdf` (the control-plane
-schematic, which plots no data). The other nine are produced for a longer version and are *not* in the
+Generated into `figs/` from `experiments/*.json` by `../scripts/make_figures.py`. **One is embedded:**
+`fig_reactive.pdf` (reactive envelope, ARC and LRB). The control-plane schematic `fig_architecture.pdf`
+was dropped with §IV's compression (2026-10-20). The other ten are produced for a longer version and are *not* in the
 paper — notably `fig_locomo_baselines.pdf` (leak-free LoCoMo: per-query retrieval dominates any
 query-agnostic placement) and `fig_capacity_ladder.pdf`.
 
@@ -112,9 +113,9 @@ paper reads — an earlier revision had two such files diverge silently.
 | §V-D capacity ladder | linear / GBDT / MLP / oracle, full traces |
 | §V-F reaction | full traces; ARC, LeCaR, CACHEUS + LRB, with ghost-hit and censoring diagnostics |
 | placement vs retrieval, representation axis | **omitted from the ICDE version** (LLM-dependent; in `main_pvldb.tex`) |
-| §V-B synthetic control | Mooncake's third workload; unreachable share 45.3–83.5%; arrival-time arms do not reliably beat the split ceiling |
-| §V-C arrival-time admission | causal (§AP); order vs magnitude (§AQ); tie convention × action space (§AR): ≥3× the split ceiling everywhere on production |
-| §V-G protocol | twenty-five defects + the controls that catch them |
+| §V-B synthetic control | Mooncake's third workload; unreachable share 29.4–77.9%; no arrival-time arm beats the split ceiling |
+| §V-C arrival-time admission | causal (§AP); conventions vs an estimated prior for unseen blocks (§AQ–§AS): estimated, 2.3–4.9x the split ceiling (static; needs free migration online) |
+| §V-G protocol | twenty-seven defects + the controls that catch them |
 
 Every number in the paper is asserted against its artifact by `../scripts/check_paper_numbers.py`; run it
 after regenerating any experiment.

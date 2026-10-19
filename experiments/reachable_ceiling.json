@@ -20,13 +20,13 @@
           "blocks_with_no_pre_split_access": 117179,
           "no_pre_split_pct": 64.1,
           "reference": "prefix_greedy",
-          "reference_cost": 162001.1,
-          "oracle_cost": 47031.6,
-          "attainable_ceiling_cost": 160134.0,
-          "full_hindsight_gap": 114969.5,
+          "reference_cost": 47824.1,
+          "oracle_cost": 4205.4,
+          "attainable_ceiling_cost": 45957.0,
+          "full_hindsight_gap": 43618.7,
           "attainable_gap": 1867.0,
-          "unreachable_pct": 98.4,
-          "reachable_pct": 1.6
+          "unreachable_pct": 95.7,
+          "reachable_pct": 4.3
         },
         {
           "split_frac": 0.4,
@@ -34,13 +34,13 @@
           "blocks_with_no_pre_split_access": 99347,
           "no_pre_split_pct": 54.4,
           "reference": "prefix_greedy",
-          "reference_cost": 140529.6,
-          "oracle_cost": 34683.0,
-          "attainable_ceiling_cost": 137389.4,
-          "full_hindsight_gap": 105846.6,
+          "reference_cost": 41182.6,
+          "oracle_cost": 3116.6,
+          "attainable_ceiling_cost": 38042.4,
+          "full_hindsight_gap": 38066.0,
           "attainable_gap": 3140.2,
-          "unreachable_pct": 97.0,
-          "reachable_pct": 3.0
+          "unreachable_pct": 91.8,
+          "reachable_pct": 8.2
         },
         {
           "split_frac": 0.5,
@@ -48,13 +48,13 @@
           "blocks_with_no_pre_split_access": 82659,
           "no_pre_split_pct": 45.2,
           "reference": "prefix_greedy",
-          "reference_cost": 116875.8,
-          "oracle_cost": 23492.7,
-          "attainable_ceiling_cost": 111880.0,
-          "full_hindsight_gap": 93383.2,
+          "reference_cost": 34216.8,
+          "oracle_cost": 2215.1,
+          "attainable_ceiling_cost": 29221.0,
+          "full_hindsight_gap": 32001.7,
           "attainable_gap": 4995.8,
-          "unreachable_pct": 94.7,
-          "reachable_pct": 5.3
+          "unreachable_pct": 84.4,
+          "reachable_pct": 15.6
         },
         {
           "split_frac": 0.6,
@@ -62,13 +62,13 @@
           "blocks_with_no_pre_split_access": 65516,
           "no_pre_split_pct": 35.8,
           "reference": "prefix_greedy",
-          "reference_cost": 92486.3,
-          "oracle_cost": 12361.2,
-          "attainable_ceiling_cost": 87590.0,
-          "full_hindsight_gap": 80125.1,
+          "reference_cost": 26970.3,
+          "oracle_cost": 1363.6,
+          "attainable_ceiling_cost": 22074.0,
+          "full_hindsight_gap": 25606.8,
           "attainable_gap": 4896.3,
-          "unreachable_pct": 93.9,
-          "reachable_pct": 6.1
+          "unreachable_pct": 80.9,
+          "reachable_pct": 19.1
         },
         {
           "split_frac": 0.7,
@@ -76,17 +76,17 @@
           "blocks_with_no_pre_split_access": 49293,
           "no_pre_split_pct": 27.0,
           "reference": "prefix_greedy",
-          "reference_cost": 70163.8,
-          "oracle_cost": 8799.8,
-          "attainable_ceiling_cost": 65130.8,
-          "full_hindsight_gap": 61364.0,
+          "reference_cost": 20870.8,
+          "oracle_cost": 744.6,
+          "attainable_ceiling_cost": 15837.8,
+          "full_hindsight_gap": 20126.2,
           "attainable_gap": 5033.0,
-          "unreachable_pct": 91.8,
-          "reachable_pct": 8.2
+          "unreachable_pct": 75.0,
+          "reachable_pct": 25.0
         }
       ],
-      "unreachable_min": 91.8,
-      "unreachable_max": 98.4
+      "unreachable_min": 75.0,
+      "unreachable_max": 95.7
     },
     "toolagent": {
       "rows": [
@@ -96,13 +96,13 @@
           "blocks_with_no_pre_split_access": 119268,
           "no_pre_split_pct": 65.1,
           "reference": "prefix_greedy",
-          "reference_cost": 162399.6,
-          "oracle_cost": 48157.2,
-          "attainable_ceiling_cost": 160973.2,
-          "full_hindsight_gap": 114242.3,
+          "reference_cost": 46846.8,
+          "oracle_cost": 5096.6,
+          "attainable_ceiling_cost": 45420.4,
+          "full_hindsight_gap": 41750.2,
           "attainable_gap": 1426.4,
-          "unreachable_pct": 98.8,
-          "reachable_pct": 1.2
+          "unreachable_pct": 96.6,
+          "reachable_pct": 3.4
         },
         {
           "split_frac": 0.4,
@@ -110,13 +110,13 @@
           "blocks_with_no_pre_split_access": 101899,
           "no_pre_split_pct": 55.6,
           "reference": "prefix_greedy",
-          "reference_cost": 142526.6,
-          "oracle_cost": 36024.9,
-          "attainable_ceiling_cost": 140260.6,
-          "full_hindsight_gap": 106501.8,
+          "reference_cost": 40627.6,
+          "oracle_cost": 3912.5,
+          "attainable_ceiling_cost": 38361.6,
+          "full_hindsight_gap": 36715.1,
           "attainable_gap": 2266.0,
-          "unreachable_pct": 97.9,
-          "reachable_pct": 2.1
+          "unreachable_pct": 93.8,
+          "reachable_pct": 6.2
         },
         {
           "split_frac": 0.5,
@@ -124,13 +124,13 @@
           "blocks_with_no_pre_split_access": 84465,
           "no_pre_split_pct": 46.1,
           "reference": "prefix_greedy",
-          "reference_cost": 118752.4,
-          "oracle_cost": 24038.8,
-          "attainable_ceiling_cost": 114852.1,
-          "full_hindsight_gap": 94713.6,
+          "reference_cost": 34287.4,
+          "oracle_cost": 2803.2,
+          "attainable_ceiling_cost": 30387.1,
+          "full_hindsight_gap": 31484.2,
           "attainable_gap": 3900.3,
-          "unreachable_pct": 95.9,
-          "reachable_pct": 4.1
+          "unreachable_pct": 87.6,
+          "reachable_pct": 12.4
         },
         {
           "split_frac": 0.6,
@@ -138,13 +138,13 @@
           "blocks_with_no_pre_split_access": 67368,
           "no_pre_split_pct": 36.8,
           "reference": "prefix_greedy",
-          "reference_cost": 93923.7,
-          "oracle_cost": 13310.1,
-          "attainable_ceiling_cost": 89814.8,
-          "full_hindsight_gap": 80613.6,
+          "reference_cost": 26555.7,
+          "oracle_cost": 1898.5,
+          "attainable_ceiling_cost": 22446.8,
+          "full_hindsight_gap": 24657.2,
           "attainable_gap": 4108.9,
-          "unreachable_pct": 94.9,
-          "reachable_pct": 5.1
+          "unreachable_pct": 83.3,
+          "reachable_pct": 16.7
         },
         {
           "split_frac": 0.7,
@@ -152,17 +152,17 @@
           "blocks_with_no_pre_split_access": 50384,
           "no_pre_split_pct": 27.5,
           "reference": "prefix_greedy",
-          "reference_cost": 71072.9,
-          "oracle_cost": 9383.4,
-          "attainable_ceiling_cost": 66724.9,
-          "full_hindsight_gap": 61689.5,
+          "reference_cost": 20688.9,
+          "oracle_cost": 1451.2,
+          "attainable_ceiling_cost": 16340.9,
+          "full_hindsight_gap": 19237.6,
           "attainable_gap": 4348.0,
-          "unreachable_pct": 93.0,
-          "reachable_pct": 7.0
+          "unreachable_pct": 77.4,
+          "reachable_pct": 22.6
         }
       ],
-      "unreachable_min": 93.0,
-      "unreachable_max": 98.8
+      "unreachable_min": 77.4,
+      "unreachable_max": 96.6
     },
     "synthetic": {
       "rows": [
@@ -172,13 +172,13 @@
           "blocks_with_no_pre_split_access": 20886,
           "no_pre_split_pct": 47.6,
           "reference": "prefix_greedy",
-          "reference_cost": 62948.0,
-          "oracle_cost": 17174.0,
-          "attainable_ceiling_cost": 55374.9,
-          "full_hindsight_gap": 45774.1,
+          "reference_cost": 42061.4,
+          "oracle_cost": 7828.9,
+          "attainable_ceiling_cost": 34488.3,
+          "full_hindsight_gap": 34232.5,
           "attainable_gap": 7573.1,
-          "unreachable_pct": 83.5,
-          "reachable_pct": 16.5
+          "unreachable_pct": 77.9,
+          "reachable_pct": 22.1
         },
         {
           "split_frac": 0.4,
@@ -186,13 +186,13 @@
           "blocks_with_no_pre_split_access": 15787,
           "no_pre_split_pct": 35.9,
           "reference": "prefix_greedy",
-          "reference_cost": 52100.1,
-          "oracle_cost": 13843.7,
-          "attainable_ceiling_cost": 41373.8,
-          "full_hindsight_gap": 38256.5,
+          "reference_cost": 36312.5,
+          "oracle_cost": 7082.5,
+          "attainable_ceiling_cost": 25586.2,
+          "full_hindsight_gap": 29230.1,
           "attainable_gap": 10726.3,
-          "unreachable_pct": 72.0,
-          "reachable_pct": 28.0
+          "unreachable_pct": 63.3,
+          "reachable_pct": 36.7
         },
         {
           "split_frac": 0.5,
@@ -200,13 +200,13 @@
           "blocks_with_no_pre_split_access": 10793,
           "no_pre_split_pct": 24.6,
           "reference": "prefix_greedy",
-          "reference_cost": 39814.6,
-          "oracle_cost": 10144.6,
-          "attainable_ceiling_cost": 29422.0,
-          "full_hindsight_gap": 29670.0,
+          "reference_cost": 29021.0,
+          "oracle_cost": 6120.9,
+          "attainable_ceiling_cost": 18628.4,
+          "full_hindsight_gap": 22900.0,
           "attainable_gap": 10392.6,
-          "unreachable_pct": 65.0,
-          "reachable_pct": 35.0
+          "unreachable_pct": 54.6,
+          "reachable_pct": 45.4
         },
         {
           "split_frac": 0.6,
@@ -214,13 +214,13 @@
           "blocks_with_no_pre_split_access": 6405,
           "no_pre_split_pct": 14.6,
           "reference": "prefix_greedy",
-          "reference_cost": 26412.6,
-          "oracle_cost": 6807.6,
-          "attainable_ceiling_cost": 17041.6,
-          "full_hindsight_gap": 19605.0,
+          "reference_cost": 20007.0,
+          "oracle_cost": 5108.9,
+          "attainable_ceiling_cost": 10636.0,
+          "full_hindsight_gap": 14898.0,
           "attainable_gap": 9371.0,
-          "unreachable_pct": 52.2,
-          "reachable_pct": 47.8
+          "unreachable_pct": 37.1,
+          "reachable_pct": 62.9
         },
         {
           "split_frac": 0.7,
@@ -228,17 +228,17 @@
           "blocks_with_no_pre_split_access": 3519,
           "no_pre_split_pct": 8.0,
           "reference": "prefix_greedy",
-          "reference_cost": 17067.0,
-          "oracle_cost": 4308.9,
-          "attainable_ceiling_cost": 10088.7,
-          "full_hindsight_gap": 12758.1,
+          "reference_cost": 13547.4,
+          "oracle_cost": 3659.2,
+          "attainable_ceiling_cost": 6569.1,
+          "full_hindsight_gap": 9888.2,
           "attainable_gap": 6978.3,
-          "unreachable_pct": 45.3,
-          "reachable_pct": 54.7
+          "unreachable_pct": 29.4,
+          "reachable_pct": 70.6
         }
       ],
-      "unreachable_min": 45.3,
-      "unreachable_max": 83.5
+      "unreachable_min": 29.4,
+      "unreachable_max": 77.9
     }
   }
 }

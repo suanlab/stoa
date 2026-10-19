@@ -194,13 +194,17 @@ def place_with_beliefs_at(wl, belief, split):
     for it in sorted(wl.items, key=lambda i: belief.get(i.item_id, 0.0), reverse=True):
         n_hat = belief.get(it.item_id, 0.0)
         n_true = future.get(it.item_id, 0)
-        best, best_c = None, float("inf")
+        # Ties broken by tier speed, as in sequential.place_with_beliefs (notebook W). This copy kept
+        # `if c < best_c`, so zero-belief blocks landed on DISK while REMOTE_RDMA had room; found by the
+        # 2026-10-20 re-verification and fixed here.
+        best, best_key = None, None
         for a in LEGAL_ACTIONS:
             if remaining[a.tier] < it.size_bytes:
                 continue
-            c = weighted_cost(sim.cost_of_placement(a, n_hat, it.representation), w)
-            if c < best_c:
-                best, best_c = a, c
+            key = (weighted_cost(sim.cost_of_placement(a, n_hat, it.representation), w),
+                   sim.read_latency(a.tier))
+            if best_key is None or key < best_key:
+                best, best_key = a, key
         if best is None:
             continue
         remaining[best.tier] -= it.size_bytes

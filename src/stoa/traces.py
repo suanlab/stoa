@@ -107,7 +107,28 @@ class Workload:
         return out
 
     def future_counts(self, split_step: int) -> dict[str, int]:
-        """Per-item accesses AFTER `split_step` — the oracle quantity Belady needs."""
+        """Per-item accesses at or after `split_step` that a placement could SERVE.
+
+        A block first seen at or after the split is created at its first access: its KV is
+        computed (prefill), a compulsory miss no tier can serve. That access is therefore not
+        counted. Counting it -- as this method did until 2026-10-19 -- billed every new block's
+        creation as a read from its tier, credited the oracle, the split ceiling and every
+        arrival arm with a saving that does not exist (about 80% of new blocks are never reused
+        after birth), and inflated the full hindsight gap about 2.5x (notebook section AS).
+        `all_future_accesses` keeps the raw count for anything that needs it.
+        """
+        out = {}
+        for i, tr in self.traces.items():
+            n = sum(1 for s in tr.access_steps if s >= split_step)
+            if n and tr.access_steps[0] >= split_step:
+                n -= 1                                   # the creation access: a compulsory miss
+            out[i] = n
+        return out
+
+    future_counts._birth_excluded = True                 # scripts that once patched this check it
+
+    def all_future_accesses(self, split_step: int) -> dict[str, int]:
+        """Every access at or after `split_step`, creation accesses included (not for billing)."""
         return {i: sum(1 for s in tr.access_steps if s >= split_step)
                 for i, tr in self.traces.items()}
 

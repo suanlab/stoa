@@ -83,24 +83,29 @@ def test_the_ceiling_equals_the_oracle_when_everything_is_visible():
     assert attainable_ceiling(wl, all_ids) == pytest.approx(c_orac)
 
 
-def test_on_a_real_trace_most_of_the_hindsight_gap_is_unreachable():
-    """The finding that retracted C2. Recorded as a test so the paper cannot quietly go back
-    to normalizing by the full gap."""
-    path = "data/mooncake_toolagent_trace.jsonl"
-    pytest.importorskip("json")
+def test_on_a_real_trace_the_reachable_share_shrinks_with_trace_length():
+    """The finding that retracted C2, under the corrected bill (creation accesses are compulsory
+    misses, notebook AS). It is a long-horizon effect: on toolagent the reachable share is 57.7%
+    at 1,500 requests, 29.4% at 6,000 and 12.4% on the full trace (reachable_ceiling.json, which
+    the checker asserts). The test pins the trend cheaply; the full-trace value is the artifact's."""
     import os
+    path = "data/mooncake_toolagent_trace.jsonl"
     if not os.path.exists(path):
         pytest.skip("Mooncake trace not present")
-    wl = load_mooncake(path, max_requests=1500)
-    st = max(1, wl.time_split(0.5))
-    stats = wl.prefix_stats(st)
-    visible = [i.item_id for i in wl.items if stats[i.item_id]["count"] > 0]
-    fut = wl.future_counts(st)
-    c_pref = prefix_greedy_cost(wl)
-    c_orac = place_with_beliefs(wl, {i.item_id: float(fut.get(i.item_id, 0)) for i in wl.items})
-    c_ceil = attainable_ceiling(wl, visible)
-    reachable = (c_pref - c_ceil) / (c_pref - c_orac)
-    assert reachable < 0.5, f"reachable share is {reachable:.1%}; the paper's framing assumes it is small"
+
+    def reachable(n):
+        wl = load_mooncake(path, max_requests=n)
+        st = max(1, wl.time_split(0.5))
+        stats = wl.prefix_stats(st)
+        visible = [i.item_id for i in wl.items if stats[i.item_id]["count"] > 0]
+        fut = wl.future_counts(st)
+        c_pref = prefix_greedy_cost(wl)
+        c_orac = place_with_beliefs(wl, {i.item_id: float(fut.get(i.item_id, 0)) for i in wl.items})
+        return (c_pref - attainable_ceiling(wl, visible)) / (c_pref - c_orac)
+
+    short, longer = reachable(1500), reachable(4000)
+    assert longer < short, f"reachable share did not shrink with length ({short:.1%} -> {longer:.1%})"
+    assert longer < 0.5, f"reachable share at 4,000 requests is {longer:.1%}"
 
 
 def test_the_two_baseline_routines_agree():

@@ -1,0 +1,43 @@
+{
+  "config": {
+    "features": "base + parent prior count, parent-new, parent children, parent count>=2"
+  },
+  "rows": [
+    {
+      "trace": "conversation",
+      "actions": "all",
+      "auc_base": 0.565,
+      "auc_prefix": 0.576,
+      "captured_base_new-behind": 41.45,
+      "captured_prefix_new-behind": 42.66,
+      "captured_arrival_new-behind": 40.03,
+      "captured_base_new-ahead": 55.32,
+      "captured_prefix_new-ahead": 55.9,
+      "captured_arrival_new-ahead": 55.01
+    },
+    {
+      "trace": "toolagent",
+      "actions": "all",
+      "auc_base": 0.61,
+      "auc_prefix": 0.616,
+      "captured_base_new-behind": 41.38,
+      "captured_prefix_new-behind": 41.75,
+      "captured_arrival_new-behind": 41.49,
+      "captured_base_new-ahead": 57.5,
+      "captured_prefix_new-ahead": 57.82,
+      "captured_arrival_new-ahead": 58.11
+    },
+    {
+      "trace": "synthetic",
+      "actions": "all",
+      "auc_base": 0.752,
+      "auc_prefix": 0.751,
+      "captured_base_new-behind": 40.59,
+      "captured_prefix_new-behind": 40.57,
+      "captured_arrival_new-behind": 32.25,
+      "captured_base_new-ahead": 40.28,
+      "captured_prefix_new-ahead": 40.25,
+      "captured_arrival_new-ahead": 35.47
+    }
+  ]
+}

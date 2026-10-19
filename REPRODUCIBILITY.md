@@ -22,7 +22,7 @@ simulator or a trace, never against an LLM.
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements-lock.txt   # every package pinned, transitive ones included
 pip install -e . --no-deps             # the package itself, without re-resolving the pins
-pytest -q                    # 287 tests, ~3 min; torch-gated tests skip cleanly without torch
+pytest -q                    # 312 tests, ~3 min; torch-gated tests skip cleanly without torch
 
 # Or, without the lock (looser, not the reference versions):
 #   pip install -e ".[dev,rl,eval,figures]"
@@ -95,11 +95,15 @@ mean pre-split reuse while the learned and shuffled arms used the spread distrib
 comparison was mostly a magnitude comparison; "FCFS leads the ranker by 2–26 points" and its exposure-time
 explanation are withdrawn too.
 
-Anything in `experiments/` predating 2026-10-19 should be read against §I, §T–§V, §AC, §AP, §AQ and §AR before
-use. What survives: the best split-time policy reaches **5.3% / 4.1%** of the oracle's advantage, while
-ranking new blocks at arrival captures at least three times as much under every tie convention and action
-space tried (23.7–78.6%); ranking among new blocks moves the result by at most 2.1 points, ranking them
-against seen blocks by 18–39.
+Then the online-admission experiment (2026-10-19, §AS) found that every version billed a new block's
+creation, a compulsory miss no tier can serve, as a read from its tier. `Workload.future_counts` now
+excludes it and every artifact was regenerated; the oracle's advantage was inflated about 3x.
+
+Anything in `experiments/` predating 2026-10-20 should be read against §I, §T–§V, §AC and §AP–§AS before
+use. What survives: the best split-time policy reaches **15.6% / 12.4%** of the oracle's advantage (75–97%
+unreachable across splits). In a static analysis, arrival-time placement captures 2.3–4.9x that when the trust placed in an
+unseen block is estimated from the prefix (`run_hazard_prior.py`); fixed by convention, the same decision
+moves it by 14–29 points and can leave it at the split-time ceiling.
 
 ## 3b. Environment, and what is hand-rolled
 
@@ -148,28 +152,30 @@ Checking while logged in tests your own access, not a reviewer's.
 | Paper claim | Command | Artifact |
 |---|---|---|
 | **Table 2, both sources**: requests, one-time share (75.8 / 78.5% Mooncake, 15% agentic at 40 conversations), mean reuse, blocks per request; the agentic one-time share across 20–200 conversations (7.5–21%) | `python3 scripts/run_source_stats.py` (needs the kv-cache-tester download) | `experiments/source_stats.json` |
-| Headroom by trace length: 70.4% / 72.2% at 1,500 requests → **79.9% / 79.8%** at full length (conversation / toolagent). An earlier row said 81% → 87%, values from before the §W fix that also disagreed with the paper's own 80% (§AO.3) | `python3 scripts/run_headroom_by_length.py` | `experiments/headroom_by_length.json` |
+| Headroom by trace length: 82.9% / 86.4% at 1,500 requests → **93.5% / 91.8%** at full length (conversation / toolagent), creation accesses unbilled (§AS) | `python3 scripts/run_headroom_by_length.py` | `experiments/headroom_by_length.json` |
 | **RETRACTED (§T, §U)** — decoupling grid: AUC 0.57→0.93 while captured stays in [+0.8%, +2.9%]. The denominator was an unreachable oracle; see the arrival rows below | `for n in 1500 6000 12031 23608; do python3 scripts/train_session_features.py --requests $n --out experiments/superseded/mooncake_session_rq2_full$n.json; done` (record only) | `experiments/mooncake_length_sweep.json`, `mooncake_session_rq2_full{12031,23608}.json` |
 | **RETRACTED** — kvct think-time capture; sign reverses with sample size (Table 3, left column: +88 / +75 / −9 / −48% at 40 / 70 / 100 / 150 conversations) | `python3 scripts/train_kvct_placement.py --convs 40 --out experiments/kvct_placement_fixed.json`, then the same with `--convs 70`, `100` and `150` writing `experiments/kvct_placement_n70.json`, `experiments/kvct_placement_n100.json` and `experiments/kvct_placement_n150.json` | `kvct_placement_n150.json` (−48%) vs `kvct_placement_fixed.json` (+88%) |
 | Reactive tiering on Mooncake, full traces (75–99% of Belady on toolagent, 40–94% on conversation) | `python3 scripts/run_reactive_real.py` (defaults to the full trace) | `experiments/reactive_real_full.json` |
 | ARC meets the envelope at 5%/10% tiers only; adapts on 3.5–7.3% of misses | same run — `arc`, `arc_over_belady`, `arc_ghost_hit_rate_of_misses` columns | `experiments/reactive_real_full.json` |
 | **RETRACTED (§V)** — "LRB below ARC at all 8 operating points": the training buffer was truncated to its tail, so labels were constant and eviction was random. Fixed (sliding window + uniform subsample, hard failure on zero label variance) and re-run | `python3 scripts/run_reactive_real.py --lrb` (~35 min) | `experiments/reactive_real_full_lrb.json` |
-| **Arrival-time admission** (§V-C; §AP–§AR): order arms (arrival, learned, random) on one magnitude multiset and magnitude arms (constant mean, median), under both tie conventions (new blocks behind or ahead of equal-belief seen blocks), full action space. Production: order arms 58.4–59.5 / 57.9–58.7% (behind) and 76.5–77.3 / 78.1–78.6% (ahead) against a 5.3 / 4.1% split ceiling | `python3 scripts/run_arrival_admission.py` | `experiments/arrival_admission.json` |
-| **Tier-only control** (§V-C, §AR): the same ceiling and arms with placement restricted to the tier (plaintext, online). Split ceiling 8.2 / 5.9%; order arms 23.7–26.9% (behind) and 59.6–63.6% (ahead); median arm 0.0 (behind). Synthetic: ceiling 52.1% above every arm | `python3 scripts/run_tier_only.py` | `experiments/tier_only.json` |
+| **Arrival-time admission** (§V-C; §AP–§AS): order arms on one magnitude multiset and magnitude arms (constant mean, median), both tie conventions, full action space. Production order arms: 38.2–41.5 / 38.9–41.5% (behind), 53.1–55.3 / 56.6–58.1% (ahead), against a 15.6 / 12.4% split ceiling | `python3 scripts/run_arrival_admission.py` | `experiments/arrival_admission.json` |
+| **Tier-only control** (§V-C, §AR): the same ceiling and arms with placement restricted to the tier. Split ceiling 20.4 / 15.3%; order arms 14.3–19.6 / 15.1–19.4% (behind), 38.7–42.3 / 44.3–46.8% (ahead); median arm 0.0 (behind) | `python3 scripts/run_tier_only.py` | `experiments/tier_only.json` |
+| **Estimated prior for unseen blocks** (§V-C, §AS): a new block's expected reuse vs a seen-once block's, from a pseudo-split in the prefix; tie-invariant. Hazard-new / hazard-all: 58.2 / 69.7% (conversation), 61.1 / 68.8% (toolagent); tier-only 47.0 / 56.9% and 51.7 / 54.8% | `python3 scripts/run_hazard_prior.py [--tier-only]` | `experiments/hazard_prior.json`, `hazard_prior_tier.json` |
 | **Exposure confound**: blocks arriving in the first quarter see 2.3–4.6x the future reuse of the last quarter; arrival order alone predicts reuse at AUC 0.55–0.58; the leaky design's training labels had 34.3% / 46.3% of their mass after the cut | `python3 scripts/run_arrival_diagnostics.py` | `experiments/arrival_diagnostics.json` |
-| **Cost-weight sensitivity**: unreachable share 91.8–99.2% across order-of-magnitude changes to each λ | `python3 scripts/run_weight_sensitivity.py` | `experiments/weight_sensitivity.json` |
+| **Cost-weight sensitivity**: unreachable share 79.3–97.1% under tenfold changes to λ_L and λ_B, one at a time | `python3 scripts/run_weight_sensitivity.py` | `experiments/weight_sensitivity.json` |
 | **Belief controls**: a constant score must not beat a learned one (it did, until `quantile_match` was given mid-rank tie handling) | `python3 scripts/run_belief_controls.py` | `experiments/belief_controls.json` |
 | **Capacity ladder, repaired metric** (supersedes `capacity_ladder.json`: all three placement routines now break ties by tier speed, not enum order) | `python3 scripts/run_capacity_ladder.py --out experiments/capacity_ladder_fixed.json` (an earlier revision of this row gave a `--fixed` flag the script has never had) | `experiments/capacity_ladder_fixed.json` |
 | **Length attribution** (separates train length from eval length; AUC rises 38 points with the model held fixed) | `python3 scripts/train_session_features.py --train-requests N --requests M --out experiments/mooncake_attribution_sweep.json` (one row per run) | `experiments/mooncake_attribution_sweep.json` |
 | **Censoring sweep**: 83–88% of LRB's training rows are right-censored at the default window, 88–91% at a shorter one, across 12 configurations on both traces. (The earlier row claimed "LRB spans 55–66% of Belady across its grid" from the **broken** implementation; the repaired grid spans 41.9–86.4%, so no point estimate there is citable and the claim is retired. That artifact is kept at `experiments/superseded/lrb_sweep.json`.) | `python3 scripts/run_lrb_sweep.py` (~2.5 h) | `experiments/lrb_sweep.json` |
 | **LRB retraction, regenerated from code**: the retracted column (`tail_truncation`) and both repairs at all eight operating points; reproduces the stored table in all 32 cells (§AO.3) | `python3 scripts/run_lrb_retraction.py` | `experiments/lrb_retraction.json` |
-| **Reachable ceiling, one frame, split-swept, with the synthetic control**: 94.7% / 95.9% unreachable at the midpoint (91.8–98.8% across splits) on production; 65.0% (45.3–83.5%) on the synthetic control | `python3 scripts/run_reachable_ceiling.py` | `experiments/reachable_ceiling.json` |
+| **Reachable ceiling, one frame, split-swept, with the synthetic control**: 84.4% / 87.6% unreachable at the midpoint (75.0–95.7% / 77.4–96.6% across splits) on production; 54.6% (29.4–77.9%) on the synthetic control | `python3 scripts/run_reachable_ceiling.py` | `experiments/reachable_ceiling.json` |
+| **Reachable share by trace length** (§V-B, §AS): long-horizon effect | `python3 scripts/run_reachable_by_length.py` | `experiments/reachable_by_length.json` |
 | **Split-instant sensitivity** (not cited by the ICDE paper; kept as a robustness record): linear ≈ GBDT to within 0.4 pts at all 10 configurations; captured in [+0.4%, +6.0%] of the full gap; oracle gap 70–87%. (Regenerated 2026-10-16. The earlier artifact gave 81–92% because it predated the 512-token block-size fix, not because of the belief scale; it was missing from `DEPENDS_ON`, so the staleness guard never saw it.) | `python3 scripts/run_split_sensitivity.py` | `experiments/split_sensitivity.json` |
 | **Reactive tiering on the agentic source** (§V-F): working-set threshold (35% of Belady at a 1% tier → 99% at 10%) and the eviction-signal inversion (LRU 0.83–0.96 of Belady at 5%, LFU 0.29–0.31) | `python3 scripts/run_reactive_kvct.py` | `experiments/reactive_kvct_sweep.json` |
-| **Sampling study** (Table 3, §V-E; Table 2's agentic headroom 68–73%): four randomized draws at 20 and 40 conversations; observed captured ranges [−1207, +78] and [−234, +66] | `python3 scripts/run_sampling_study.py --sizes 20,40 --draws 4` | `experiments/sampling_study.json` |
+| **Sampling study** (Table 3, §V-E; Table 2's agentic headroom 68–73%): four randomized draws at 20 and 40 conversations; observed captured ranges [−858, +78] and [−166, +66] (tier-speed tie-break restored, 2026-10-20) | `python3 scripts/run_sampling_study.py --sizes 20,40 --draws 4` | `experiments/sampling_study.json` |
 | *(PVLDB version only)* LoCoMo: retrieval dominates placement | `python3 scripts/run_locomo_baselines.py` (needs `OPENAI_API_KEY`) | `experiments/eval_locomo_leakfree.json` |
 | **Capacity ladder** (superseded by `capacity_ladder_fixed.json` — kept for the diff): linear / GBDT / MLP agree on placement to within 0.4 pts despite a 29-pt AUC spread | `python3 scripts/run_capacity_ladder.py` | `experiments/capacity_ladder.json` |
-| **Cost model derived from hardware, swept over 3 attention shapes × 5 device classes: headroom 60–83%, hand-written table 80%, 6/15 hierarchies non-monotonic** | `python3 scripts/run_calibration_sensitivity.py` | `experiments/calibration_sensitivity.json` |
+| **Cost model derived from hardware, swept over 3 attention shapes × 5 device classes: headroom 54.9–97.8%, hand-written table 91.8%, 6/15 hierarchies non-monotonic** | `python3 scripts/run_calibration_sensitivity.py` | `experiments/calibration_sensitivity.json` |
 | LeCaR + CACHEUS on both full traces | `python3 scripts/run_reactive_real.py --lrb` | `experiments/reactive_real_full_lrb.json` |
 | *(PVLDB version only)* **LoCoMo at adequate scale**: 10 dialogues, 300 questions/arm, paired McNemar + per-dialogue sign test | `python3 scripts/run_locomo_powered.py --judge` (needs `OPENAI_API_KEY`, ~2.5 h) | `experiments/eval_locomo_powered.json` |
 | *(PVLDB version only)* **Representation axis measured** (plaintext / summary / extract at equal token budget) | `python3 scripts/run_representation_axis.py --judge` | `experiments/representation_axis.json` |
@@ -222,14 +228,14 @@ not just in prose:
 | Retracted values must not appear outside a retracting paragraph | `stoa.verify.unmarked_superseded(scope="paragraph")` — the 68 numeric checks are *presence* tests; with 90% and 53% injected into the abstract every one still passed (§AH) |
 | **Every guard above is itself tested**, in both directions | `tests/test_verify.py`, 73 tests, mutation-checked — four guards had lived in a script with no tests, where a refactor could delete one silently (§AG) |
 
-`pytest -q` runs all **287** tests, including the leakage guards and the fast/reference equivalence
+`pytest -q` runs all **312** tests, including the leakage guards and the fast/reference equivalence
 check, in about 2 min 45 s.
 
 ## 7. Known limitations
 
 - Cost tables are uncalibrated (see §4); no real-system deployment was performed. The hardware-derived
-  sweep (`run_calibration_sensitivity.py`) puts headroom at 59.6–82.9%, and the cost-weight sweep
-  (`run_weight_sensitivity.py`) keeps the unreachable share at 91.8–99.2%.
+  sweep (`run_calibration_sensitivity.py`) puts headroom at 54.9–97.8%, and the cost-weight sweep
+  (`run_weight_sensitivity.py`) keeps the unreachable share at 79.3–97.1%.
 - kv-cache-tester reactive results now sweep tier size over 20 and 40 pooled conversations (up to 7.9M
   accesses), made affordable by the heap-based simulator.
 - Two trace sources, both KV-block level. No workload here exercises representation or timing choice.
@@ -246,7 +252,7 @@ The claim table above is complete but not ordered by cost. These four commands a
 cheapest first. The first needs no data, no network and no credentials.
 
 ```bash
-make verify           # ~4 min   287 tests + every paper number against its artifact
+make verify           # ~4 min   312 tests + every paper number against its artifact
 make data-check       # instant  are the traces present and the right length?
 make reproduce-fast   # ~40 min  the central claims, regenerated from the Mooncake traces
 make reproduce-full   # ~6 h     the above plus the LRB hyperparameter sweep

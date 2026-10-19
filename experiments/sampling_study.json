@@ -2,45 +2,44 @@
   "config": {
     "draws": 4,
     "features": "block+session+think",
-    "sampling": "random by seed, conversation-disjoint fit/eval",
-    "interval_note": "t(n-1) half-widths; with 4 draws quote the observed range. An earlier revision used the normal quantile 1.96 with an estimated sigma, understating the half-width by 62%."
+    "sampling": "random by seed, conversation-disjoint fit/eval"
   },
   "rows": [
     {
       "convs": 20,
       "draws": 4,
       "headroom_mean": 68.06,
+      "headroom_ci95_t": 37.03,
       "auc_mean": 0.6613,
-      "captured_mean": -541.31,
+      "auc_ci95_t": 0.5433,
+      "captured_mean": -337.94,
+      "captured_ci95_t": 718.0,
+      "captured_observed_min": -857.86,
+      "captured_observed_max": 78.08,
       "per_draw_captured": [
         78.08,
         -1.34,
-        -1034.78,
-        -1207.2
-      ],
-      "captured_ci95_t": 1072.2,
-      "captured_observed_min": -1207.2,
-      "captured_observed_max": 78.08,
-      "headroom_ci95_t": 37.036,
-      "auc_ci95_t": 0.5433
+        -570.65,
+        -857.86
+      ]
     },
     {
       "convs": 40,
       "draws": 4,
       "headroom_mean": 73.29,
+      "headroom_ci95_t": 26.4,
       "auc_mean": 0.7997,
-      "captured_mean": -66.74,
-      "per_draw_captured": [
-        -91.45,
-        -234.45,
-        65.96,
-        -7.03
-      ],
-      "captured_ci95_t": 205.24,
-      "captured_observed_min": -234.45,
+      "auc_ci95_t": 0.2123,
+      "captured_mean": -43.92,
+      "captured_ci95_t": 165.97,
+      "captured_observed_min": -165.87,
       "captured_observed_max": 65.96,
-      "headroom_ci95_t": 26.4009,
-      "auc_ci95_t": 0.2124
+      "per_draw_captured": [
+        -90.9,
+        -165.87,
+        65.96,
+        15.12
+      ]
     }
   ]
 }

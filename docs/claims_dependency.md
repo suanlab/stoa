@@ -1863,7 +1863,7 @@ again.
 
 ### AP.2 Counts, defined once (audit M1)
 
-- **Tests:** 261 at the time (287 after §AR), and `check_paper_numbers.py` now collects the suite and fails if README.md,
+- **Tests:** 261 at the time (312 after §AS), and `check_paper_numbers.py` now collects the suite and fails if README.md,
   REPRODUCIBILITY.md or the Makefile states another number (they said 173, 163 and 231).
 - **Retractions:** the paper counts **three** (the sampling headline §I, the decoupling result §T/§U,
   the LRB column §V). Five appear in REPRODUCIBILITY.md because two earlier ones ("Mooncake omits timing",
@@ -2049,3 +2049,71 @@ regression value (+75%), and the checker asserts every cell.
 
 Defects in the paper's catalogue: **twenty-six**. Withdrawn readings stated in the paper: six (the §AQ
 values were never public). Tests: 287.
+
+## §AS — every new block's creation was billed as a cache read
+
+**Found 2026-10-19, by the online-admission experiment (H6), not by any check.** `Workload.future_counts
+(split)` counted every access at or after the split. For a block first seen after the split that includes
+its first access: the moment the block is created, when its KV is computed (prefill). No placement can
+serve that access from a tier. The placement code billed it as a read from the block's tier anyway, so
+the oracle, the split ceiling and every arrival arm were credited with saving latency on creation. About
+80% of new blocks are never reused after creation (65,861 of 82,659 on conversation), so most of what the
+oracle "won" on new blocks was this phantom saving.
+
+**Fix (library).** `future_counts` now drops a post-split block's creation access (`traces.py`; the raw
+count is `all_future_accesses`). `traces.py` was in no `DEPENDS_ON` entry, so the staleness guard could
+not have seen this change; every trace-based artifact now lists it, and all were regenerated. The
+interim script-level patches (`run_birth_excluded.py`, a `--exclude-birth` flag) were removed.
+
+**What it changed (probe numbers, same semantics as the fix; split 0.5).**
+
+| | birth billed | corrected |
+|---|---|---|
+| full hindsight gap, conversation (all actions) | 93,383 | 32,002 |
+| unreachable share, conversation / toolagent (all actions) | 94.7 / 95.9% | 84.4 / 87.6% |
+| unreachable share, conversation / toolagent (tier only) | 91.8 / 94.1% | 79.6 / 84.7% |
+| unreachable share, synthetic (all / tier) | 65.0 / 47.9% | 54.6 / 39.8% |
+
+- **Survives:** the split protocol still leaves most of the advantage out of reach on production
+  traces, now 80–88% rather than 92–96%.
+- **New, and a caveat:** the effect is long-horizon. On toolagent the reachable share is 57.7% at 1,500
+  requests, 29.4% at 6,000 and 12.4% on the full trace.
+- **Changes:** every arrival-arm number. Under the "new behind" convention with tier-only actions the
+  order arms now fall below the split ceiling; the data-estimated prior (H1) is what keeps arrival-time
+  placement ahead (2.3–4.9× the ceiling in a static analysis; see §AT for what survives online); "order moves the result by at most 2.1 points" no longer holds
+  (up to 5.3).
+- **Unaffected:** every reactive and hit-rate result (`simulate_fast` always counted a block's first
+  access as a miss), the admission-filter result (H2), and the AUC diagnostics (H3, H4).
+
+**Why nothing caught it.** Every check compared a number with its artifact, and the artifact was
+computed correctly from a wrong definition. The definition of a billable access had never been written
+down. It is now in `future_counts`'s docstring, and tests pin it (`test_bailian_loader.py`,
+`test_online_admission.py`, and the length trend in `test_metric_fixes.py`).
+
+This is the twenty-seventh catalogued defect, and the fourth to change the headline numbers.
+
+## §AT — seven hypotheses tested against the arrival result, and what survives online
+
+On 2026-10-19 the author asked for an advisor-style analysis (a shared document, not part of the
+artifact) and for every proposed experiment to be run. Each hypothesis was stated with a falsification
+condition before it ran. Numbers below are on the corrected bill (§AS) unless noted.
+
+| | hypothesis | outcome | artifact |
+|---|---|---|---|
+| H1 | an age-conditioned prior for unseen blocks, estimated from the prefix, removes the tie convention's effect and stays within 2 points of the better convention | **partly.** Tie-invariant by construction; places new blocks between count 2 and 3. Beats the better constant arm by 7.8 points on conversation tier-only (outside the predicted ±2, in the favourable direction) and equals the mean arm on toolagent | `hazard_prior*.json` |
+| H2 | cache-on-second-hit admission beats always-admit LRU by ≥5 points of Belady at the 2% tier | **holds.** 25.0 → 45.6% (conversation), 68.9 → 78.1% (toolagent); reverses at ≥10% | `admission_filter.json` |
+| H3 | under an equal post-arrival horizon, arrival order's AUC falls to ≤0.52 | **holds on production** (0.46 / 0.48), not on synthetic (0.56); the learned ranker's AUC is unchanged | `equal_horizon.json` |
+| H4 | prefix-chain features lift arrival AUC to ≥0.70 | **falsified.** 0.565 → 0.576, 0.610 → 0.616 | `prefix_features*.json` |
+| H5 | the unreachable share follows from the birth rate and a mean cumulative reuse function within ±3 points | **falsified** (max error 58.8 points on the corrected bill, which also drops creation accesses from the access share) | `unreachability_law.json` |
+| H6 | online admission keeps ≥70% of the static arms' gain and ≥3× the split ceiling | **mixed, and decisive for the paper.** With free migration online beats static; once a move costs one read plus one write, no production arm beats the frequency heuristic | `online_admission.json` |
+| H7 | the protocol finding replicates on Alibaba's Bailian traces | in progress (`run_bailian.py`); a 512-token regrouping sensitivity replicates the unreachable share (87.6–97.6% tier-only) | `bailian_*.json` |
+
+**What the paper now says because of these.** The arrival-time advantage is stated as a static analysis
+whose gain needs nearly free migration to survive online (H6), not as a bound on admission. The estimated
+prior (H1) replaces the tie convention in §V-C; its own conventions (one pseudo-split, count bins, age
+quartiles, a half-prefix count scale whose rescaling moves it by at most 0.6 points on production) are
+stated. H2 is not yet in the paper. A re-verification review of the rewrite found the conclusion's
+"four-fifths, for every split" (false: 75.0% at split 0.7), the "bound" sentence, a 2.3–5.6 ratio that
+mixed in old-block re-estimation (2.3–4.9 for the unseen-block arm alone), a ceiling quoted from the wrong
+action space, and a withdrawn reading reasserted without saying the corrected bill had made it true again.
+All are fixed.

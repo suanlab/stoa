@@ -1,0 +1,145 @@
+{
+  "config": {
+    "G": "censoring-corrected mean cumulative REUSES by age (creation excluded)",
+    "births": "whole trace"
+  },
+  "rows": [
+    {
+      "trace": "conversation",
+      "split_frac": 0.3,
+      "U_measured": 95.7,
+      "A_empirical": 62.65,
+      "A_hat_model": 67.51,
+      "err_model": -28.19,
+      "err_empirical": -33.05
+    },
+    {
+      "trace": "conversation",
+      "split_frac": 0.4,
+      "U_measured": 91.8,
+      "A_empirical": 58.98,
+      "A_hat_model": 61.36,
+      "err_model": -30.44,
+      "err_empirical": -32.82
+    },
+    {
+      "trace": "conversation",
+      "split_frac": 0.5,
+      "U_measured": 84.4,
+      "A_empirical": 54.32,
+      "A_hat_model": 55.6,
+      "err_model": -28.8,
+      "err_empirical": -30.08
+    },
+    {
+      "trace": "conversation",
+      "split_frac": 0.6,
+      "U_measured": 80.9,
+      "A_empirical": 50.29,
+      "A_hat_model": 48.33,
+      "err_model": -32.57,
+      "err_empirical": -30.61
+    },
+    {
+      "trace": "conversation",
+      "split_frac": 0.7,
+      "U_measured": 75.0,
+      "A_empirical": 46.74,
+      "A_hat_model": 40.82,
+      "err_model": -34.18,
+      "err_empirical": -28.26
+    },
+    {
+      "trace": "toolagent",
+      "split_frac": 0.3,
+      "U_measured": 96.6,
+      "A_empirical": 28.26,
+      "A_hat_model": 47.4,
+      "err_model": -49.2,
+      "err_empirical": -68.34
+    },
+    {
+      "trace": "toolagent",
+      "split_frac": 0.4,
+      "U_measured": 93.8,
+      "A_empirical": 26.89,
+      "A_hat_model": 39.17,
+      "err_model": -54.63,
+      "err_empirical": -66.91
+    },
+    {
+      "trace": "toolagent",
+      "split_frac": 0.5,
+      "U_measured": 87.6,
+      "A_empirical": 25.45,
+      "A_hat_model": 31.69,
+      "err_model": -55.91,
+      "err_empirical": -62.15
+    },
+    {
+      "trace": "toolagent",
+      "split_frac": 0.6,
+      "U_measured": 83.3,
+      "A_empirical": 23.24,
+      "A_hat_model": 24.96,
+      "err_model": -58.34,
+      "err_empirical": -60.06
+    },
+    {
+      "trace": "toolagent",
+      "split_frac": 0.7,
+      "U_measured": 77.4,
+      "A_empirical": 22.1,
+      "A_hat_model": 18.62,
+      "err_model": -58.78,
+      "err_empirical": -55.3
+    },
+    {
+      "trace": "synthetic",
+      "split_frac": 0.3,
+      "U_measured": 77.9,
+      "A_empirical": 43.65,
+      "A_hat_model": 34.3,
+      "err_model": -43.6,
+      "err_empirical": -34.25
+    },
+    {
+      "trace": "synthetic",
+      "split_frac": 0.4,
+      "U_measured": 63.3,
+      "A_empirical": 32.51,
+      "A_hat_model": 24.23,
+      "err_model": -39.07,
+      "err_empirical": -30.79
+    },
+    {
+      "trace": "synthetic",
+      "split_frac": 0.5,
+      "U_measured": 54.6,
+      "A_empirical": 24.03,
+      "A_hat_model": 15.35,
+      "err_model": -39.25,
+      "err_empirical": -30.57
+    },
+    {
+      "trace": "synthetic",
+      "split_frac": 0.6,
+      "U_measured": 37.1,
+      "A_empirical": 12.12,
+      "A_hat_model": 8.13,
+      "err_model": -28.97,
+      "err_empirical": -24.98
+    },
+    {
+      "trace": "synthetic",
+      "split_frac": 0.7,
+      "U_measured": 29.4,
+      "A_empirical": 7.9,
+      "A_hat_model": 4.07,
+      "err_model": -25.33,
+      "err_empirical": -21.5
+    }
+  ],
+  "max_abs_err_model": 58.78,
+  "max_abs_err_empirical": 68.34
+}

@@ -7,17 +7,17 @@ budget-constrained formulation as a frame and measured one of its axes, placemen
 production KV traces.
 
 The finding is about when to decide, and it is first a finding about evaluation. Evaluated at a split
-instant, as is natural, more than nine-tenths of a hindsight oracle's advantage is out of reach of any
+instant, as is natural, at least three-quarters of a hindsight oracle's advantage is out of reach of any
 policy that places the blocks present at the split, for every split we tried and under tenfold changes
 to the cost weights; inside that protocol a better ranker helps
-monotonically, but over a sliver. Deciding at each block's arrival captures at least three times as much
-on both production traces under every convention we tried, and where a rule ranks a block it has never
-seen against blocks already seen matters far more than how it ranks unseen blocks among themselves; on a
-synthetic control it does not reliably help. Reactive tiering, forecasting nothing, already delivers much of the
+monotonically, but over a sliver. Deciding at each block's arrival puts more within reach on both
+production traces when a block never seen is ranked above blocks seen once, as the prefix says it should
+be: 2.3--4.9 times the split-time ceiling in a static analysis, a gain that needs nearly free migration to
+survive online. On a synthetic control it does not. Reactive tiering, forecasting nothing, already delivers much of the
 achievable hit rate, and the adaptive-replacement family adds little to it, because the signal it adapts on
 is scarce when most blocks are never reused.
 
-We arrived here only after removing twenty-six measurement defects, each of which had produced a
+We arrived here only after removing twenty-seven measurement defects, each of which had produced a
 plausible result, including leaks and an unfair control in our own arrival-time experiment that were
 found after every number check had passed. We report their mechanisms and the controls that catch them, because the same
 traps are open to anyone measuring a memory scheduler. The next steps are an admission rule that learns the belief it gives unseen blocks, an evaluation

@@ -1,0 +1,146 @@
+{
+  "config": {
+    "fracs": [
+      0.02,
+      0.05,
+      0.1,
+      0.2
+    ],
+    "belady": "demand paging (always admits)",
+    "tinylfu_reset": "halve counts every 10 x slots accesses"
+  },
+  "rows": [
+    {
+      "trace": "conversation",
+      "cache_frac": 0.02,
+      "belady": 0.3142,
+      "lru_over_belady": 0.2504,
+      "second-hit_over_belady": 0.4562,
+      "tinylfu_over_belady": 0.4442,
+      "lru": 0.0787,
+      "second-hit": 0.1433,
+      "tinylfu": 0.1396
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.05,
+      "belady": 0.3664,
+      "lru_over_belady": 0.5334,
+      "second-hit_over_belady": 0.5485,
+      "tinylfu_over_belady": 0.4529,
+      "lru": 0.1954,
+      "second-hit": 0.201,
+      "tinylfu": 0.1659
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.1,
+      "belady": 0.3664,
+      "lru_over_belady": 0.7598,
+      "second-hit_over_belady": 0.5798,
+      "tinylfu_over_belady": 0.5184,
+      "lru": 0.2784,
+      "second-hit": 0.2124,
+      "tinylfu": 0.1899
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.2,
+      "belady": 0.3664,
+      "lru_over_belady": 0.9403,
+      "second-hit_over_belady": 0.582,
+      "tinylfu_over_belady": 0.5798,
+      "lru": 0.3446,
+      "second-hit": 0.2133,
+      "tinylfu": 0.2124
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.02,
+      "belady": 0.5301,
+      "lru_over_belady": 0.6894,
+      "second-hit_over_belady": 0.7807,
+      "tinylfu_over_belady": 0.7738,
+      "lru": 0.3655,
+      "second-hit": 0.4139,
+      "tinylfu": 0.4102
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.05,
+      "belady": 0.5525,
+      "lru_over_belady": 0.8135,
+      "second-hit_over_belady": 0.8203,
+      "tinylfu_over_belady": 0.7835,
+      "lru": 0.4494,
+      "second-hit": 0.4532,
+      "tinylfu": 0.4329
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.1,
+      "belady": 0.5525,
+      "lru_over_belady": 0.9188,
+      "second-hit_over_belady": 0.8253,
+      "tinylfu_over_belady": 0.8054,
+      "lru": 0.5077,
+      "second-hit": 0.456,
+      "tinylfu": 0.445
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.2,
+      "belady": 0.5525,
+      "lru_over_belady": 0.9928,
+      "second-hit_over_belady": 0.8255,
+      "tinylfu_over_belady": 0.8283,
+      "lru": 0.5485,
+      "second-hit": 0.4561,
+      "tinylfu": 0.4577
+    },
+    {
+      "trace": "synthetic",
+      "cache_frac": 0.02,
+      "belady": 0.2611,
+      "lru_over_belady": 0.2904,
+      "second-hit_over_belady": 0.3024,
+      "tinylfu_over_belady": 0.2892,
+      "lru": 0.0758,
+      "second-hit": 0.079,
+      "tinylfu": 0.0755
+    },
+    {
+      "trace": "synthetic",
+      "cache_frac": 0.05,
+      "belady": 0.3955,
+      "lru_over_belady": 0.3913,
+      "second-hit_over_belady": 0.4116,
+      "tinylfu_over_belady": 0.3944,
+      "lru": 0.1548,
+      "second-hit": 0.1628,
+      "tinylfu": 0.156
+    },
+    {
+      "trace": "synthetic",
+      "cache_frac": 0.1,
+      "belady": 0.5063,
+      "lru_over_belady": 0.5132,
+      "second-hit_over_belady": 0.5348,
+      "tinylfu_over_belady": 0.4808,
+      "lru": 0.2598,
+      "second-hit": 0.2707,
+      "tinylfu": 0.2434
+    },
+    {
+      "trace": "synthetic",
+      "cache_frac": 0.2,
+      "belady": 0.608,
+      "lru_over_belady": 0.6423,
+      "second-hit_over_belady": 0.6624,
+      "tinylfu_over_belady": 0.5861,
+      "lru": 0.3905,
+      "second-hit": 0.4027,
+      "tinylfu": 0.3563
+    }
+  ]
+}

@@ -260,80 +260,132 @@ if d:
 # paper as verified on a machine where the artifacts were never generated. Require both a
 # minimum number of checks and that every artifact the paper depends on is present.
 
-# --- arrival-time admission: order x magnitude x tie convention x action space (V-C; AP-AR) ----
+# --- arrival-time admission: conventions vs an estimated prior (V-C; notebook AP-AS) ----------
 d = load("arrival_admission.json")
 _to = load("tier_only.json")
+_hz, _hzt = load("hazard_prior.json"), load("hazard_prior_tier.json")
 _rc = load("reachable_ceiling.json")
 _dg = load("arrival_diagnostics.json")
-if d and _to and _rc and _dg:
-    print("\narrival admission, both conventions (arrival_admission.json, tier_only.json)")
-    CFG = {("all", "new-behind"): d["results"], ("all", "new-ahead"): d["results"],
-           ("tier", "new-behind"): _to["arrival_admission"]["results"],
-           ("tier", "new-ahead"): _to["arrival_admission"]["results"]}
+_eh = load("equal_horizon.json")
+if d and _to and _rc and _dg and _hz and _hzt and _eh:
+    print("\narrival admission (arrival_admission, tier_only, hazard_prior*)")
+    RES = {"all": d["results"], "tier": _to["arrival_admission"]["results"]}
+    HZ = {"all": _hz["rows"], "tier": _hzt["rows"]}
 
     def _ceil(acts, t):
         src = _rc if acts == "all" else _to["reachable_ceiling"]
         return [r for r in src["traces"][t]["rows"] if r["split_frac"] == 0.5][0]["reachable_pct"]
 
     def cap(acts, tie, t, arm):
-        return [r["captured_pct"] for r in CFG[(acts, tie)]
-                if r["trace"] == t and r.get("tie") == tie and r["arm"] == arm][0]
+        return [r["captured_pct"] for r in RES[acts] if r["trace"] == t and r.get("tie") == tie
+                and r["arm"] == arm][0]
+
+    def hz(acts, tie, t, arm):
+        return [r["captured_pct"] for r in HZ[acts] if r["trace"] == t and r["tie"] == tie
+                and r["arm"] == arm][0]
 
     def _f1(v):
         return f"{v:.1f}".replace("-0.0", "0.0")
 
     ORDER = ("order-arrival", "order-learned", "order-shuffled")
-    ARMS = ORDER + ("constant-mean", "constant-median")
     PROD = ("conversation", "toolagent")
     short = {"conversation": "conv", "toolagent": "tool"}
-    for (acts, tie) in CFG:
+    CFG = [(a, tie) for a in ("all", "tier") for tie in ("new-behind", "new-ahead")]
+    for a, tie in CFG:
         for t in PROD:
-            row = (f"& {short[t]} & {_ceil(acts, t):.1f} & "
-                   + " & ".join(_f1(cap(acts, tie, t, a)) for a in ARMS) + " \\\\")
-            claim(f"{acts}/{tie} {t} row", row, "", "arrival row")
-    auc_l = {t: [r["auc"] for r in d["results"] if r["trace"] == t and r["arm"] == "order-learned"][0]
-             for t in PROD}
-    claim("learned AUC", f"AUC is {auc_l['conversation']:.2f} and {auc_l['toolagent']:.2f}", "", "auc")
-    orders = [cap(a, tie, t, o) for (a, tie) in CFG for t in PROD for o in ORDER]
-    ceils = [_ceil(a, t) for a in ("all", "tier") for t in PROD]
-    for (a, tie) in CFG:
-        for t in PROD:
-            for o in ORDER:
-                assert cap(a, tie, t, o) >= 3 * _ceil(a, t), f"{a}/{tie}/{t}/{o} below 3x the ceiling"
-    claim("order arms vs ceiling", f"{min(orders):.1f}--{max(orders):.1f}\\% against "
-          f"{min(ceils):.1f}--{max(ceils):.1f}\\%", "", "all configurations")
-    spread = max(max(cap(a, tie, t, o) for o in ORDER) - min(cap(a, tie, t, o) for o in ORDER)
-                 for (a, tie) in CFG for t in PROD)
-    # Specific needles: a bare "within 2.1 points" also matched the LRB band's sentence (2026-10-19).
-    claim("order spread, every configuration", f"land within {spread:.1f} points of each other", "", "max-min")
-    claim("order spread, abstract", f"at most {spread:.1f} points", "", "max-min")
-    shift = [cap(a, "new-ahead", t, o) - cap(a, "new-behind", t, o)
-             for a in ("all", "tier") for t in PROD for o in ORDER]
+            o = [cap(a, tie, t, x) for x in ORDER]
+            row = (f"& {short[t]} & {_ceil(a, t):.1f} & {_f1(min(o))}--{_f1(max(o))} & "
+                   f"{_f1(cap(a, tie, t, 'constant-mean'))} & {_f1(cap(a, tie, t, 'constant-median'))} & "
+                   f"{_f1(hz(a, tie, t, 'hazard-new'))} & {_f1(hz(a, tie, t, 'hazard-all'))} \\\\")
+            claim(f"{a}/{tie} {t} row", row, "", "arrival row")
+    # The estimate is tie-invariant by construction; assert it rather than trust it.
+    for a in ("all", "tier"):
+        for r in HZ[a]:
+            other = hz(a, "new-ahead" if r["tie"] == "new-behind" else "new-behind", r["trace"], r["arm"])
+            assert abs(r["captured_pct"] - other) < 1e-9, "the hazard arm depends on the tie convention"
+    est = _hz["estimates"]
+    claim("new-block expected reuse", f"({est['conversation']['h_new']:.2f} and {est['toolagent']['h_new']:.2f})",
+          "", "h_new")
+    claim("seen-once expected reuse", f"({est['conversation']['m_by_count_bin'][0]:.2f} and "
+          f"{est['toolagent']['m_by_count_bin'][0]:.2f})", "", "m(count 1)")
+    assert all(2 < est[t]["c_star"] < 3 for t in PROD), "the paper places new blocks between count 2 and 3"
+    conv_arms = [cap(a, tie, t, x) for a, tie in CFG for t in PROD
+                 for x in ORDER + ("constant-mean", "constant-median")]
+    claim("convention span", f"span {_f1(min(conv_arms))}--{_f1(max(conv_arms))}\\% of the advantage", "", "all arms")
+    tb = [cap("tier", "new-behind", t, x) for t in PROD for x in ORDER]
+    tbc = [_ceil("tier", t) for t in PROD]
+    assert all(cap("tier", "new-behind", t, x) < 1.3 * _ceil("tier", t) for t in PROD for x in ORDER), \
+        "the paper says tier-only/behind order arms land at the split ceiling"
+    claim("tier/behind at the ceiling", f"{_f1(min(tb))}--{_f1(max(tb))}\\% against {min(tbc):.1f}--{max(tbc):.1f}\\%",
+          "", "tier, new-behind")
+    hz_vals = [(hz(a, "new-behind", t, x), _ceil(a, t)) for a in ("all", "tier") for t in PROD
+               for x in ("hazard-new", "hazard-all")]
+    r_new = [hz(a, "new-behind", t, "hazard-new") / _ceil(a, t) for a in ("all", "tier") for t in PROD]
+    r_all = [v / c_ for v, c_ in hz_vals]
+    claim("hazard-new ratio, V-C", f"captures {min(r_new):.1f}--{max(r_new):.1f} times the matching", "", "hazard-new / ceiling")
+    claim("hazard ratio incl. old blocks", f"({min(r_all):.1f}--{max(r_all):.1f} when old blocks", "", "both hazard arms")
+    claim("hazard-new ratio, abstract", f"captures {min(r_new):.1f}--{max(r_new):.1f} times what", "", "rounded")
+    claim("hazard-new ratio, intro", f"captures {min(r_new):.1f} to {max(r_new):.1f}\ntimes", "", "rounded")
+    claim("hazard-new ratio, C2", f"captures {min(r_new):.1f}--{max(r_new):.1f} times\n  the matching", "", "rounded")
+    claim("hazard-new ratio, conclusion", f"{min(r_new):.1f}--{max(r_new):.1f} times the split-time ceiling in a static", "", "rounded")
+    claim("hazard values vs ceilings", f"{min(v for v, _ in hz_vals):.1f}--{max(v for v, _ in hz_vals):.1f}\\%\n"
+          f"against {min(c_ for _, c_ in hz_vals):.1f}--{max(c_ for _, c_ in hz_vals):.1f}\\%", "", "hazard arms")
+    assert abs(hz("all", "new-behind", "toolagent", "hazard-new") - cap("all", "new-behind", "toolagent", "constant-mean")) < 0.05, \
+        "the paper says the hazard arm coincides with the mean arm on toolagent"
+    claim("abstract: new vs seen-once reuse", f"is {est['conversation']['h_new']:.2f} against "
+          f"{est['conversation']['m_by_count_bin'][0]:.2f})", "", "h_new, m(1)")
+    _ar, _tr = load("arrival_admission_reuse.json"), load("tier_only_reuse.json")
+    if _ar and _tr:
+        _rr, _rv = [], []
+        for _res, _acts in ((_ar["results"], "all"), (_tr["arrival_admission"]["results"], "tier")):
+            for r in _res:
+                if r["trace"] in PROD and r["arm"] in ORDER:
+                    _rr.append(r["captured_pct"] / _ceil(_acts, r["trace"]))
+                    _rv.append(r["captured_pct"])
+        claim("reuse-scale order arms", f"puts every order arm at {min(_rr):.1f}--{max(_rr):.1f} times the split-time ceiling\n"
+              f"({min(_rv):.1f}--{max(_rv):.1f}\\%)", "", "reference multiset minus creation")
+    _hzr, _hztr = load("hazard_prior_rescaled.json"), load("hazard_prior_tier_rescaled.json")
+    if _hzr and _hztr:
+        _dv = []
+        for _x, _y in ((_hz, _hzr), (_hzt, _hztr)):
+            _yy = {(r["trace"], r["arm"], r["tie"]): r["captured_pct"] for r in _y["rows"]}
+            _dv += [abs(r["captured_pct"] - _yy[(r["trace"], r["arm"], r["tie"])]) for r in _x["rows"]
+                    if r["trace"] in PROD and r["arm"] == "hazard-new"]
+        claim("hazard rescale sensitivity", f"by at most {max(_dv):.1f} points on the production traces", "", "rescaled c*")
+    _oa = load("online_admission.json")
+    if _oa:
+        prod_oa = [r for r in _oa["rows"] if r["trace"] in PROD and r["arm"] != "arrival-ceiling"]
+        free = max(r["online_captured_pct"] for r in prod_oa if r["migration_cost_model"] == "zero")
+        priced = max(r["online_captured_pct"] for r in prod_oa if r["migration_cost_model"] == "read+write")
+        assert priced <= 0.0 + 1e-9, "the paper says no arm beats the heuristic once a move costs a read and a write"
+        claim("online, free migration", f"reach up to {free:.1f}\\% when moving a\nresident block is free", "", "online_admission")
+    shift = [cap(a, "new-ahead", t, x) - cap(a, "new-behind", t, x) for a in ("all", "tier")
+             for t in PROD for x in ORDER]
     claim("tie shift", f"by {min(shift):.0f}--{max(shift):.0f} points", "", "ahead - behind")
-    claim("tie shift, abstract", f"moves it by {min(shift):.0f}--{max(shift):.0f}.", "", "rounded")
-    claim("tie shift, introduction", f"{min(shift):.0f} to {max(shift):.0f} points", "", "rounded")
-    rep = [cap("all", tie, t, o) - cap("tier", tie, t, o)
-           for tie in ("new-behind", "new-ahead") for t in PROD for o in ORDER]
-    claim("representation adds", f"adds {min(rep):.0f}--{max(rep):.0f} more", "", "all - tier")
-    assert all(cap("tier", "new-behind", t, "constant-median") == 0 for t in PROD), \
-        "the paper says the median arm reproduces the split baseline (tier, behind)"
-    worst = max(max(cap(a, tie, t, arm) for a, tie in CFG) - min(cap(a, tie, t, arm) for a, tie in CFG)
-                for t in PROD for arm in ARMS)
+    claim("tie shift, intro", f"by {min(shift):.0f} to {max(shift):.0f} points", "", "ahead - behind")
+    spread = max(max(cap(a, tie, t, x) for x in ORDER) - min(cap(a, tie, t, x) for x in ORDER)
+                 for a, tie in CFG for t in PROD)
+    claim("order spread", f"at most {spread:.1f}", "", "max-min of order arms")
+    worst = max(max(cap(a, tie, t, x) for a, tie in CFG) - min(cap(a, tie, t, x) for a, tie in CFG)
+                for t in PROD for x in ORDER + ("constant-mean", "constant-median"))
     claim("convention sensitivity of one arm", f"up to {worst:.0f} points", "", "max over configs")
-    sy_all = [cap("all", tie, "synthetic", a) for tie in ("new-behind", "new-ahead") for a in ARMS]
-    sy_tier = [cap("tier", tie, "synthetic", a) for tie in ("new-behind", "new-ahead") for a in ARMS]
-    assert max(sy_tier) < _ceil("tier", "synthetic"), "the paper says tier-only arrival never helps on synthetic"
-    claim("synthetic", f"{_ceil('all', 'synthetic'):.1f}\\% ({_ceil('tier', 'synthetic'):.1f}\\% with tier-only\n"
-          f"actions) and its arrival arms span {_f1(min(sy_all))}--{_f1(max(sy_all))}\\% "
-          f"({_f1(min(sy_tier))}--{_f1(max(sy_tier))}\\%)", "", "synthetic")
-    rows = {r["trace"]: r for r in _dg["rows"]}
+    sy = [cap(a, tie, "synthetic", x) for a, tie in CFG for x in ORDER + ("constant-mean", "constant-median")]
+    sy += [hz(a, "new-behind", "synthetic", x) for a in ("all", "tier") for x in ("hazard-new", "hazard-all")]
+    assert max(cap("all", tie, "synthetic", x) for tie in ("new-behind", "new-ahead")
+               for x in ORDER + ("constant-mean", "constant-median")) < _ceil("all", "synthetic")
+    claim("synthetic", f"{_ceil('all', 'synthetic'):.1f}\\% ({_ceil('tier', 'synthetic'):.1f}\\% tier-only) and every\n"
+          f"arrival arm, the hazard arms included, stays below it ({_f1(min(sy))}--{_f1(max(sy))}\\%)", "", "synthetic")
+    rows_dg = {r["trace"]: r for r in _dg["rows"]}
     ratio = [r["first_over_last"] for r in _dg["rows"]]
     aucs = [r["auc_arrival_order"] for r in _dg["rows"]]
-    claim("exposure ratio", f"{min(ratio):.1f}--{max(ratio):.1f} times", "", "diagnostics")
+    claim("exposure ratio", f"({min(ratio):.1f}--{max(ratio):.1f} times", "", "diagnostics")
     assert f"{min(aucs):.2f}" == "0.55" and f"{max(aucs):.2f}" == "0.58"
     claim("arrival-order AUC", "AUC 0.55--0.58", f"{min(aucs):.3f}-{max(aucs):.3f}", "diagnostics")
-    claim("old design's label leak", f"({rows['conversation']['old_design_label_mass_after_cut_pct']:.1f}\\% and "
-          f"{rows['toolagent']['old_design_label_mass_after_cut_pct']:.1f}\\% of label", "", "diagnostics")
+    eh = {r["trace"]: r for r in _eh["rows"]}
+    claim("equal-horizon AUC", f"its AUC is {eh['conversation']['auc_order_equal_horizon']:.2f} and "
+          f"{eh['toolagent']['auc_order_equal_horizon']:.2f}", "", "equal_horizon")
+    claim("old design's label leak", f"({rows_dg['conversation']['old_design_label_mass_after_cut_pct']:.1f}\\% and "
+          f"{rows_dg['toolagent']['old_design_label_mass_after_cut_pct']:.1f}\\% of label", "", "diagnostics")
     claim("split ceiling, introduction", f"(\\textbf{{{_ceil('all', 'conversation'):.1f}\\%}} and "
           f"\\textbf{{{_ceil('all', 'toolagent'):.1f}\\%}} of", "", "reachable_ceiling @ 0.5")
 
@@ -459,7 +511,7 @@ if d:
         assert vals == sorted(vals), f"{tr}: ladder not monotone in AUC ({list(zip(rungs, vals))})"
     best = max(by[(tr, r)]["captured_pct"] for tr in ("conversation", "toolagent")
                for r in ("linear", "gbdt", "mlp"))
-    assert best < 3.0, f"the abstract says the strongest model gains under 3% of the gap; it gains {best}"
+    assert best < by[("conversation", "ceiling")]["captured_pct"], "a split-time model passed its own ceiling"
     claim("strongest model, of the full gap",
           f"gains {max(by[('conversation', r)]['captured_pct'] for r in ('linear', 'gbdt', 'mlp')):.1f}\\% and "
           f"{max(by[('toolagent', r)]['captured_pct'] for r in ('linear', 'gbdt', 'mlp')):.1f}\\%", "", "ladder")
@@ -600,8 +652,8 @@ if _arr and _rch:
         # at arrival, both as a share of the same full hindsight gap.
         _at = [r for r in _rch["traces"][_t]["rows"] if r["split_frac"] == 0.5][0]
         HEADLINE[f"split-time ceiling, {_t}"] = f"{_at['reachable_pct']:.1f}%"
-    HEADLINE["arrival vs split, at least"] = "three times"
-    HEADLINE["tie-convention shift"] = "18–39"
+    HEADLINE["estimated prior vs split ceiling"] = "2.3–4.9"
+    HEADLINE["tie-convention shift"] = "14–29"
     failures += verify.prose_drift(PROSE_FILES, HEADLINE, ROOT, trigger="arrival")
 
 # The lab notebook legitimately records superseded measurements -- rewriting them would destroy
@@ -660,6 +712,12 @@ SUPERSEDED_IN_PAPER = {
     "0.88--0.95": "kvct LRU/Belady from a superseded artifact",
     "deciding well": "order barely matters; the withdrawn FCFS reading",
     "eleventh entry": "a catalogue entry that no longer exists",
+    # Values from billing creations as reads (notebook AS).
+    "94.7": "unreachable share with creations billed (now 84.4)",
+    "95.9": "unreachable share with creations billed (now 87.6)",
+    "18--39": "tie shift under the creation-billing defect (now 14--29)",
+    "at least three times": "a claim the corrected bill falsifies",
+    "within 2.1 points of each other": "order spread under the creation-billing defect (now 5.3)",
 }
 for _tex in [ROOT / "paper" / "main.tex", *sorted((ROOT / "paper" / "sections").glob("*.tex"))]:
     failures += verify.unmarked_superseded(
@@ -717,8 +775,8 @@ FIG_SOURCES = {
 FIGS = ROOT / "paper" / "figs"
 failures += verify.stale_figures(FIG_SOURCES, FIGS, EXP)
 # A freshness rule can only protect what it is told about, and for two passes the list did
-# not match what the paper embeds. `fig_architecture` is a schematic: exempt from staleness,
-# but declared so, because an exemption on the record is not the same as an omission.
+# not match what the paper embeds. `fig_architecture` (a schematic, no longer embedded since §IV was
+# compressed) stays declared data-free, because an exemption on the record is not an omission.
 failures += verify.figure_coverage_gaps(
     [ROOT / "paper" / "main.tex", *sorted((ROOT / "paper" / "sections").glob("*.tex"))],
     FIG_SOURCES, data_free=("fig_architecture.pdf",))
@@ -788,7 +846,10 @@ REQUIRED = ("reactive_real_full_lrb.json", "headroom_by_length.json", "lrb_retra
             "reachable_ceiling.json", "lrb_sweep.json", "calibration_sensitivity.json",
             "sampling_study.json", "arrival_admission.json", "arrival_diagnostics.json",
             "belief_controls.json", "capacity_ladder_fixed.json", "weight_sensitivity.json",
-            "source_stats.json", "reactive_kvct_sweep.json", "tier_only.json")
+            "source_stats.json", "reactive_kvct_sweep.json", "tier_only.json",
+            "hazard_prior.json", "hazard_prior_tier.json", "equal_horizon.json", "reachable_by_length.json",
+            "hazard_prior_rescaled.json", "hazard_prior_tier_rescaled.json", "online_admission.json",
+            "arrival_admission_reuse.json", "tier_only_reuse.json")
 missing = [n for n in REQUIRED if not (EXP / n).exists()]
 if missing:
     failures.append("artifacts absent, so their claims went unchecked: " + ", ".join(missing))

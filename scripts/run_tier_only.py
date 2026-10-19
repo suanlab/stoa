@@ -27,6 +27,9 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from stoa.environment import Action, Representation, Timing  # noqa: E402
 
+# Read before any producer runs: _run() overwrites sys.argv.
+REUSE = "--ref-scale" in sys.argv[1:] and sys.argv[sys.argv.index("--ref-scale") + 1] == "reuse"
+
 _FULL = Action.space()
 TIER_ONLY = [a for a in _FULL if a.representation == Representation.PLAINTEXT
              and a.timing == Timing.ONLINE]
@@ -49,8 +52,9 @@ def main() -> int:
     import stoa.gnn  # noqa: F401  (imported after the patch, so LEGAL_ACTIONS is tier-only)
     assert len(stoa.gnn.LEGAL_ACTIONS) == len(TIER_ONLY), "the patch did not reach LEGAL_ACTIONS"
     reach = _run("run_reachable_ceiling.py", "--splits", "0.5")
-    arrival = _run("run_arrival_admission.py")
-    dest = ROOT / "experiments" / "tier_only.json"
+    reuse = REUSE
+    arrival = _run("run_arrival_admission.py", *(["--ref-scale", "reuse"] if reuse else []))
+    dest = ROOT / "experiments" / ("tier_only_reuse.json" if reuse else "tier_only.json")
     dest.write_text(json.dumps({
         "config": {"actions": [a.tier.value for a in TIER_ONLY],
                    "representation": "plaintext", "timing": "online"},

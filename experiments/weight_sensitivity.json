@@ -15,8 +15,8 @@
     ]
   },
   "summary": {
-    "unreachable_min": 91.8,
-    "unreachable_max": 99.2
+    "unreachable_min": 79.3,
+    "unreachable_max": 97.1
   },
   "rows": [
     {
@@ -27,8 +27,8 @@
         "lambda_cost": 1.0,
         "lambda_tokens": 0.0005
       },
-      "unreachable_pct": 94.7,
-      "full_hindsight_gap": 93383.2
+      "unreachable_pct": 84.4,
+      "full_hindsight_gap": 32001.7
     },
     {
       "trace": "conversation",
@@ -38,8 +38,8 @@
         "lambda_cost": 1.0,
         "lambda_tokens": 0.0005
       },
-      "unreachable_pct": 97.2,
-      "full_hindsight_gap": 49658.3
+      "unreachable_pct": 90.2,
+      "full_hindsight_gap": 14361.5
     },
     {
       "trace": "conversation",
@@ -49,8 +49,8 @@
         "lambda_cost": 1.0,
         "lambda_tokens": 0.0005
       },
-      "unreachable_pct": 92.3,
-      "full_hindsight_gap": 530631.6
+      "unreachable_pct": 80.4,
+      "full_hindsight_gap": 208403.7
     },
     {
       "trace": "conversation",
@@ -60,8 +60,8 @@
         "lambda_cost": 1.0,
         "lambda_tokens": 5e-05
       },
-      "unreachable_pct": 91.8,
-      "full_hindsight_gap": 52974.6
+      "unreachable_pct": 79.3,
+      "full_hindsight_gap": 21035.6
     },
     {
       "trace": "conversation",
@@ -71,8 +71,8 @@
         "lambda_cost": 1.0,
         "lambda_tokens": 0.005
       },
-      "unreachable_pct": 99.0,
-      "full_hindsight_gap": 494282.8
+      "unreachable_pct": 96.3,
+      "full_hindsight_gap": 135328.9
     },
     {
       "trace": "toolagent",
@@ -82,8 +82,8 @@
         "lambda_cost": 1.0,
         "lambda_tokens": 0.0005
       },
-      "unreachable_pct": 95.9,
-      "full_hindsight_gap": 94713.6
+      "unreachable_pct": 87.6,
+      "full_hindsight_gap": 31484.2
     },
     {
       "trace": "toolagent",
@@ -93,8 +93,8 @@
         "lambda_cost": 1.0,
         "lambda_tokens": 0.0005
       },
-      "unreachable_pct": 97.5,
-      "full_hindsight_gap": 50417.3
+      "unreachable_pct": 91.1,
+      "full_hindsight_gap": 14284.4
     },
     {
       "trace": "toolagent",
@@ -104,8 +104,8 @@
         "lambda_cost": 1.0,
         "lambda_tokens": 0.0005
       },
-      "unreachable_pct": 94.4,
-      "full_hindsight_gap": 537676.5
+      "unreachable_pct": 85.2,
+      "full_hindsight_gap": 203482.3
     },
     {
       "trace": "toolagent",
@@ -115,8 +115,8 @@
         "lambda_cost": 1.0,
         "lambda_tokens": 5e-05
       },
-      "unreachable_pct": 93.9,
-      "full_hindsight_gap": 53676.8
+      "unreachable_pct": 84.0,
+      "full_hindsight_gap": 20553.9
     },
     {
       "trace": "toolagent",
@@ -126,8 +126,8 @@
         "lambda_cost": 1.0,
         "lambda_tokens": 0.005
       },
-      "unreachable_pct": 99.2,
-      "full_hindsight_gap": 502042.8
+      "unreachable_pct": 97.1,
+      "full_hindsight_gap": 134739.4
     }
   ]
 }
