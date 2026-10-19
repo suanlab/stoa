@@ -61,6 +61,9 @@ J.~Fang \emph{et~al.}, ``{LightMem}: Lightweight and efficient memory-augmented 
 R.~Qin, Z.~Li, W.~He, M.~Zhang, Y.~Wu, W.~Zheng, and X.~Xu, ``Mooncake: Trading more storage for less computation --- a kvcache-centric architecture for serving llm chatbot,'' in \emph{23rd USENIX Conference on File and Storage Technologies (FAST)}, 2025, traces: github.com/kvcache-ai/Mooncake, FAST25-release. [Online]. Available: \url{https://www.usenix.org/conference/fast25/presentation/qin}
 \BIBentrySTDinterwordspacing
 
+\bibitem{wang2025kvcachewild}
+J.~Wang, J.~Han, X.~Wei, S.~Shen, D.~Zhang, C.~Fang, R.~Chen, W.~Yu, and H.~Chen, ``{KVCache} cache in the wild: Characterizing and optimizing {KVCache} cache at a large cloud provider,'' in \emph{USENIX Annual Technical Conference (ATC)}, 2025.
+
 \bibitem{S12_wong2024baleen}
 \BIBentryALTinterwordspacing
 D.~L.-K. Wong, H.~Wu, C.~Molder, S.~Gunasekar, J.~Lu, S.~Khandkar, A.~Sharma, D.~S. Berger, N.~Beckmann, and G.~R. Ganger, ``Baleen: {ML} admission and prefetching for flash caches,'' in \emph{22nd {USENIX} Conference on File and Storage Technologies ({FAST} 24)}.\hskip 1em plus 0.5em minus 0.4em\relax Santa Clara, CA: {USENIX} Association, Feb. 2024, pp. 347--371. [Online]. Available: \url{https://www.usenix.org/conference/fast24/presentation/wong}

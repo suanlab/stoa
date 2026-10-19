@@ -21,7 +21,8 @@ The paper asks what a KV-block placement policy has to get right, and answers th
   reuse exceeds a seen-once block's), arrival-time placement captures **2.3–4.9x** what a clairvoyant
   split-time policy can, under every tie convention and action space, in a static analysis. Replayed
   online, the gain survives free migration but not migration priced at one read plus one write. On Mooncake's synthetic control it
-  does not help. Earlier versions of this experiment leaked future information, compared order arms that
+  does not help, and on one of Alibaba's four Bailian traces the prefix points the wrong way
+  (`make reproduce-external`). Earlier versions of this experiment leaked future information, compared order arms that
   also differed in magnitude, fixed two conventions without saying so, and billed creations as reads; the
   paper's §V-C and the notebook's §AP–§AS say how.
 - **Reaction is competitive.** Rules that forecast nothing reach 75–99% of Belady on toolagent and 40–94% on conversation, and the

@@ -2117,3 +2117,21 @@ stated. H2 is not yet in the paper. A re-verification review of the rewrite foun
 mixed in old-block re-estimation (2.3–4.9 for the unseen-block arm alone), a ceiling quoted from the wrong
 action space, and a withdrawn reading reasserted without saying the corrected bill had made it true again.
 All are fixed.
+
+## §AU — the estimated prior on four external traces
+
+The paper's arrival claim (§V-C) rests on the hazard arm, so it was run on Alibaba's four Bailian traces
+(`run_bailian_hazard.py`, corrected bill, full length). Split-time ceiling / hazard-new captured share:
+
+| trace | unreachable (all actions) | all actions | tier only | new vs seen-once expected reuse |
+|---|---|---|---|---|
+| traceA | 91.0% | 9.0 / 70.0% (7.8×) | 13.8 / 54.3% (3.9×) | 1.17 vs 0.46 |
+| traceB | 80.6% | 19.4 / 28.6% (1.5×) | 18.3 / 34.2% (1.9×) | 0.11 vs 0.10 |
+| coder | 91.3% | 8.7 / 64.3% (7.4×) | 12.9 / 45.9% (3.6×) | 1.63 vs 0.42 |
+| thinking | 97.7% | 2.3 / 35.0% (15.2×) | 2.3 / -0.0% (-0.0×) | 0.97 vs 2.36 |
+
+The direction the prefix gives (rank unseen blocks above seen-once ones) holds on three traces and
+reverses on thinking, where seen-once blocks are reused more than new ones in the prefix; there, with
+tier-only actions, the hazard arm ranks new blocks behind and gains nothing, while every arm that ranks
+them ahead gains about 25 points. With all actions the representation change still pays (15.2×). The
+paper reports this in §V-C as a regularity of these workloads, not a law.

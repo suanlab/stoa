@@ -158,6 +158,13 @@ post-arrival horizon, its AUC is 0.46 and 0.48, while the learned ranker's is un
 \emph{The synthetic control does not follow.} Its split-time ceiling is 45.4\% (60.2\% tier-only) and every
 arrival arm, the hazard arms included, stays below it (0.0--40.6\%).
 
+\emph{Four external traces agree only in part.} On Alibaba's Qwen serving traces~\cite{wang2025kvcachewild}
+(four workloads, 16-token blocks) the split protocol leaves 80.6--97.7\% of the advantage
+unreachable, and the hazard arm reaches 1.5--15.2 times the split-time ceiling with all
+actions. With tier-only actions it reaches 1.9--3.9 times on three and nothing on the
+fourth (thinking), where the prefix rates seen-once blocks above new ones. The direction the prefix gives is
+a regularity of these workloads, not a law.
+
 \emph{Earlier versions of this experiment were wrong five times, and six of their readings are
 withdrawn.} The first leaked: training labels counted post-split accesses (34.3\% and 46.3\% of label
 mass), its train/eval cut differed from its billing split, and its magnitudes were the evaluation blocks'

@@ -389,6 +389,21 @@ if d and _to and _rc and _dg and _hz and _hzt and _eh:
     claim("split ceiling, introduction", f"(\\textbf{{{_ceil('all', 'conversation'):.1f}\\%}} and "
           f"\\textbf{{{_ceil('all', 'toolagent'):.1f}\\%}} of", "", "reachable_ceiling @ 0.5")
 
+# External replication on Alibaba's Bailian traces (V-C; notebook AT, AU).
+_bR, _bH = load("bailian_reachable_birthx.json"), load("bailian_hazard_birthx.json")
+if _bR and _bH:
+    print("\nexternal traces (bailian_reachable_birthx.json, bailian_hazard_birthx.json)")
+    _BT = ("traceA", "traceB", "coder", "thinking")
+    _un = [[r["unreachable_pct"] for r in _bR["full"]["traces"][t]["rows"] if r["split_frac"] == 0.5][0] for t in _BT]
+    _rt = {sp: {r["trace"]: r["captured_pct"] / r["split_ceiling_pct"] for r in _bH["rows"]
+                if r["actions"] == sp and r["arm"] == "hazard-new" and r["tie"] == "new-behind"} for sp in ("full", "tier_only")}
+    _tpos = [v for v in _rt["tier_only"].values() if v > 0.01]
+    assert sum(1 for v in _rt["tier_only"].values() if v <= 0.01) == 1 and _rt["tier_only"]["thinking"] <= 0.01, \
+        "the paper says tier-only hazard gains nothing on exactly one trace, thinking"
+    claim("external unreachable", f"split protocol leaves {min(_un):.1f}--{max(_un):.1f}\\% of the advantage", "", "bailian @ 0.5")
+    claim("external hazard, all actions", f"reaches {min(_rt['full'].values()):.1f}--{max(_rt['full'].values()):.1f} times the split-time ceiling with all", "", "bailian hazard")
+    claim("external hazard, tier only", f"it reaches {min(_tpos):.1f}--{max(_tpos):.1f} times on three", "", "bailian hazard")
+
 # Table 2 (audit pass 2026-10-19): every cell from a producer.
 _ss = load("source_stats.json")
 _sm = load("sampling_study.json")
@@ -849,7 +864,8 @@ REQUIRED = ("reactive_real_full_lrb.json", "headroom_by_length.json", "lrb_retra
             "source_stats.json", "reactive_kvct_sweep.json", "tier_only.json",
             "hazard_prior.json", "hazard_prior_tier.json", "equal_horizon.json", "reachable_by_length.json",
             "hazard_prior_rescaled.json", "hazard_prior_tier_rescaled.json", "online_admission.json",
-            "arrival_admission_reuse.json", "tier_only_reuse.json")
+            "arrival_admission_reuse.json", "tier_only_reuse.json",
+            "bailian_reachable_birthx.json", "bailian_hazard_birthx.json")
 missing = [n for n in REQUIRED if not (EXP / n).exists()]
 if missing:
     failures.append("artifacts absent, so their claims went unchecked: " + ", ".join(missing))

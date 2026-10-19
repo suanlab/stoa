@@ -1,7 +1,7 @@
 {
-  "pdf": "34a62dcd92efdc71b077e29bc72cc2da954a3705fcebcab336bc8a8dc60f95e1",
+  "pdf": "35e2077b71109068ca9a04f6a38dee4964be1c7e5df544ca5d930b0869f2473d",
   "sources": {
-    "../docs/references.bib": "77bf0d94e55c9a2b6ccc7aa53cc08267fb555d6af3552e46c8167a3040f28d3a",
+    "../docs/references.bib": "71ef6e14b0a6ae202a413e2fc9b1cadbee51a1a70ba712366bcde7b0a49393d6",
     "figs/fig_architecture.pdf": "5da04c218947e652d37ca346c665992d5038ebdc8b0b52e8240a04e17095a36d",
     "figs/fig_budget_frontier.pdf": "79b9eaceeddc60ca48baaac04a5988f39cf849ad0f80ab4060116671f2b76683",
     "figs/fig_capacity_ladder.pdf": "d7fefb6279c90373e0753aeb96bf38620c4ef21c760afb3256dfd95634230789",
@@ -18,7 +18,7 @@
     "sections/02_motivation.tex": "3b8f229e1fe9fcaa210946e1615df04f0e7eeb5e72981c799959f15b24f834da",
     "sections/03_formulation.tex": "42650df8c04fd629afe1534f4393c0381526a5affcd0963954d2f2e520237d90",
     "sections/04_architecture.tex": "224087f6238e089a1b6a4f8ca3f5765de370772e21d4ded09a278cbdf7c014b5",
-    "sections/05_evidence.tex": "c1fdf4c713b46a4c00a970753471be63a3fd8a8e6596a9881819a530778ac71e",
+    "sections/05_evidence.tex": "9b519d3126df7052e9b2b9be34eaaa919ff21aa1cd0e85a35f3f5b5167c77ec8",
     "sections/06_openproblems.tex": "b017422dfea9dd2332167507fe634c5c8bbe3b8698b94ed4748d3dc0a43edf45",
     "sections/07_related.tex": "c901f0dcc1d14cd478b5a0a084d7f91d8f46d664c7fc17f11b8652482e57f666",
     "sections/08_conclusion.tex": "218e1544c1f499e15feb2770bb4dec29aa2cf65b27a3f2cc0283dfccb3ba6893",

@@ -1,0 +1,447 @@
+{
+  "config": {
+    "source": "experiments/bailian_reachable_birthx.json traces",
+    "producer": "scripts/run_hazard_prior.py via run_bailian.py --worker",
+    "bill": "creation accesses are compulsory misses"
+  },
+  "estimates": {
+    "traceA": {
+      "pseudo_split": 10764,
+      "scale": 2.0,
+      "h_new": 1.165,
+      "m_by_count_bin": [
+        0.4555,
+        0.5452,
+        0.8658,
+        1.7523,
+        114.1833
+      ],
+      "c_star": 3.6749
+    },
+    "traceB": {
+      "pseudo_split": 43199,
+      "scale": 2.0,
+      "h_new": 0.1083,
+      "m_by_count_bin": [
+        0.0973,
+        1.935,
+        4.9277,
+        11.2445,
+        165.9507
+      ],
+      "c_star": 1.006
+    },
+    "coder": {
+      "pseudo_split": 10752,
+      "scale": 2.0,
+      "h_new": 1.6328,
+      "m_by_count_bin": [
+        0.4221,
+        0.9781,
+        1.3176,
+        1.7462,
+        83.1563
+      ],
+      "c_star": 4.4711
+    },
+    "thinking": {
+      "pseudo_split": 2702,
+      "scale": 2.0,
+      "h_new": 0.9718,
+      "m_by_count_bin": [
+        2.3623,
+        0.3795,
+        0.6329,
+        1.4621,
+        10.377
+      ],
+      "c_star": 0.4114
+    }
+  },
+  "rows": [
+    {
+      "trace": "traceA",
+      "actions": "full",
+      "tie": "new-behind",
+      "arm": "hazard-new",
+      "captured_pct": 70.03,
+      "split_ceiling_pct": 9.0
+    },
+    {
+      "trace": "traceA",
+      "actions": "full",
+      "tie": "new-behind",
+      "arm": "hazard-all",
+      "captured_pct": 73.47,
+      "split_ceiling_pct": 9.0
+    },
+    {
+      "trace": "traceA",
+      "actions": "full",
+      "tie": "new-behind",
+      "arm": "hazard-old",
+      "captured_pct": 6.13,
+      "split_ceiling_pct": 9.0
+    },
+    {
+      "trace": "traceA",
+      "actions": "full",
+      "tie": "new-ahead",
+      "arm": "hazard-new",
+      "captured_pct": 70.03,
+      "split_ceiling_pct": 9.0
+    },
+    {
+      "trace": "traceA",
+      "actions": "full",
+      "tie": "new-ahead",
+      "arm": "hazard-all",
+      "captured_pct": 73.47,
+      "split_ceiling_pct": 9.0
+    },
+    {
+      "trace": "traceA",
+      "actions": "full",
+      "tie": "new-ahead",
+      "arm": "hazard-old",
+      "captured_pct": 6.13,
+      "split_ceiling_pct": 9.0
+    },
+    {
+      "trace": "traceA",
+      "actions": "tier_only",
+      "tie": "new-behind",
+      "arm": "hazard-new",
+      "captured_pct": 54.31,
+      "split_ceiling_pct": 13.8
+    },
+    {
+      "trace": "traceA",
+      "actions": "tier_only",
+      "tie": "new-behind",
+      "arm": "hazard-all",
+      "captured_pct": 58.03,
+      "split_ceiling_pct": 13.8
+    },
+    {
+      "trace": "traceA",
+      "actions": "tier_only",
+      "tie": "new-behind",
+      "arm": "hazard-old",
+      "captured_pct": 9.66,
+      "split_ceiling_pct": 13.8
+    },
+    {
+      "trace": "traceA",
+      "actions": "tier_only",
+      "tie": "new-ahead",
+      "arm": "hazard-new",
+      "captured_pct": 54.31,
+      "split_ceiling_pct": 13.8
+    },
+    {
+      "trace": "traceA",
+      "actions": "tier_only",
+      "tie": "new-ahead",
+      "arm": "hazard-all",
+      "captured_pct": 58.03,
+      "split_ceiling_pct": 13.8
+    },
+    {
+      "trace": "traceA",
+      "actions": "tier_only",
+      "tie": "new-ahead",
+      "arm": "hazard-old",
+      "captured_pct": 9.66,
+      "split_ceiling_pct": 13.8
+    },
+    {
+      "trace": "traceB",
+      "actions": "full",
+      "tie": "new-behind",
+      "arm": "hazard-new",
+      "captured_pct": 28.64,
+      "split_ceiling_pct": 19.4
+    },
+    {
+      "trace": "traceB",
+      "actions": "full",
+      "tie": "new-behind",
+      "arm": "hazard-all",
+      "captured_pct": 53.1,
+      "split_ceiling_pct": 19.4
+    },
+    {
+      "trace": "traceB",
+      "actions": "full",
+      "tie": "new-behind",
+      "arm": "hazard-old",
+      "captured_pct": 4.42,
+      "split_ceiling_pct": 19.4
+    },
+    {
+      "trace": "traceB",
+      "actions": "full",
+      "tie": "new-ahead",
+      "arm": "hazard-new",
+      "captured_pct": 28.64,
+      "split_ceiling_pct": 19.4
+    },
+    {
+      "trace": "traceB",
+      "actions": "full",
+      "tie": "new-ahead",
+      "arm": "hazard-all",
+      "captured_pct": 53.1,
+      "split_ceiling_pct": 19.4
+    },
+    {
+      "trace": "traceB",
+      "actions": "full",
+      "tie": "new-ahead",
+      "arm": "hazard-old",
+      "captured_pct": 4.42,
+      "split_ceiling_pct": 19.4
+    },
+    {
+      "trace": "traceB",
+      "actions": "tier_only",
+      "tie": "new-behind",
+      "arm": "hazard-new",
+      "captured_pct": 34.19,
+      "split_ceiling_pct": 18.3
+    },
+    {
+      "trace": "traceB",
+      "actions": "tier_only",
+      "tie": "new-behind",
+      "arm": "hazard-all",
+      "captured_pct": 31.14,
+      "split_ceiling_pct": 18.3
+    },
+    {
+      "trace": "traceB",
+      "actions": "tier_only",
+      "tie": "new-behind",
+      "arm": "hazard-old",
+      "captured_pct": 0.03,
+      "split_ceiling_pct": 18.3
+    },
+    {
+      "trace": "traceB",
+      "actions": "tier_only",
+      "tie": "new-ahead",
+      "arm": "hazard-new",
+      "captured_pct": 34.19,
+      "split_ceiling_pct": 18.3
+    },
+    {
+      "trace": "traceB",
+      "actions": "tier_only",
+      "tie": "new-ahead",
+      "arm": "hazard-all",
+      "captured_pct": 31.14,
+      "split_ceiling_pct": 18.3
+    },
+    {
+      "trace": "traceB",
+      "actions": "tier_only",
+      "tie": "new-ahead",
+      "arm": "hazard-old",
+      "captured_pct": 0.03,
+      "split_ceiling_pct": 18.3
+    },
+    {
+      "trace": "coder",
+      "actions": "full",
+      "tie": "new-behind",
+      "arm": "hazard-new",
+      "captured_pct": 64.29,
+      "split_ceiling_pct": 8.7
+    },
+    {
+      "trace": "coder",
+      "actions": "full",
+      "tie": "new-behind",
+      "arm": "hazard-all",
+      "captured_pct": 64.95,
+      "split_ceiling_pct": 8.7
+    },
+    {
+      "trace": "coder",
+      "actions": "full",
+      "tie": "new-behind",
+      "arm": "hazard-old",
+      "captured_pct": 3.36,
+      "split_ceiling_pct": 8.7
+    },
+    {
+      "trace": "coder",
+      "actions": "full",
+      "tie": "new-ahead",
+      "arm": "hazard-new",
+      "captured_pct": 64.29,
+      "split_ceiling_pct": 8.7
+    },
+    {
+      "trace": "coder",
+      "actions": "full",
+      "tie": "new-ahead",
+      "arm": "hazard-all",
+      "captured_pct": 64.95,
+      "split_ceiling_pct": 8.7
+    },
+    {
+      "trace": "coder",
+      "actions": "full",
+      "tie": "new-ahead",
+      "arm": "hazard-old",
+      "captured_pct": 3.36,
+      "split_ceiling_pct": 8.7
+    },
+    {
+      "trace": "coder",
+      "actions": "tier_only",
+      "tie": "new-behind",
+      "arm": "hazard-new",
+      "captured_pct": 45.94,
+      "split_ceiling_pct": 12.9
+    },
+    {
+      "trace": "coder",
+      "actions": "tier_only",
+      "tie": "new-behind",
+      "arm": "hazard-all",
+      "captured_pct": 45.0,
+      "split_ceiling_pct": 12.9
+    },
+    {
+      "trace": "coder",
+      "actions": "tier_only",
+      "tie": "new-behind",
+      "arm": "hazard-old",
+      "captured_pct": 4.72,
+      "split_ceiling_pct": 12.9
+    },
+    {
+      "trace": "coder",
+      "actions": "tier_only",
+      "tie": "new-ahead",
+      "arm": "hazard-new",
+      "captured_pct": 45.94,
+      "split_ceiling_pct": 12.9
+    },
+    {
+      "trace": "coder",
+      "actions": "tier_only",
+      "tie": "new-ahead",
+      "arm": "hazard-all",
+      "captured_pct": 45.0,
+      "split_ceiling_pct": 12.9
+    },
+    {
+      "trace": "coder",
+      "actions": "tier_only",
+      "tie": "new-ahead",
+      "arm": "hazard-old",
+      "captured_pct": 4.72,
+      "split_ceiling_pct": 12.9
+    },
+    {
+      "trace": "thinking",
+      "actions": "full",
+      "tie": "new-behind",
+      "arm": "hazard-new",
+      "captured_pct": 35.05,
+      "split_ceiling_pct": 2.3
+    },
+    {
+      "trace": "thinking",
+      "actions": "full",
+      "tie": "new-behind",
+      "arm": "hazard-all",
+      "captured_pct": 51.05,
+      "split_ceiling_pct": 2.3
+    },
+    {
+      "trace": "thinking",
+      "actions": "full",
+      "tie": "new-behind",
+      "arm": "hazard-old",
+      "captured_pct": 0.83,
+      "split_ceiling_pct": 2.3
+    },
+    {
+      "trace": "thinking",
+      "actions": "full",
+      "tie": "new-ahead",
+      "arm": "hazard-new",
+      "captured_pct": 35.05,
+      "split_ceiling_pct": 2.3
+    },
+    {
+      "trace": "thinking",
+      "actions": "full",
+      "tie": "new-ahead",
+      "arm": "hazard-all",
+      "captured_pct": 51.05,
+      "split_ceiling_pct": 2.3
+    },
+    {
+      "trace": "thinking",
+      "actions": "full",
+      "tie": "new-ahead",
+      "arm": "hazard-old",
+      "captured_pct": 0.83,
+      "split_ceiling_pct": 2.3
+    },
+    {
+      "trace": "thinking",
+      "actions": "tier_only",
+      "tie": "new-behind",
+      "arm": "hazard-new",
+      "captured_pct": -0.0,
+      "split_ceiling_pct": 2.3
+    },
+    {
+      "trace": "thinking",
+      "actions": "tier_only",
+      "tie": "new-behind",
+      "arm": "hazard-all",
+      "captured_pct": 24.71,
+      "split_ceiling_pct": 2.3
+    },
+    {
+      "trace": "thinking",
+      "actions": "tier_only",
+      "tie": "new-behind",
+      "arm": "hazard-old",
+      "captured_pct": 0.75,
+      "split_ceiling_pct": 2.3
+    },
+    {
+      "trace": "thinking",
+      "actions": "tier_only",
+      "tie": "new-ahead",
+      "arm": "hazard-new",
+      "captured_pct": -0.0,
+      "split_ceiling_pct": 2.3
+    },
+    {
+      "trace": "thinking",
+      "actions": "tier_only",
+      "tie": "new-ahead",
+      "arm": "hazard-all",
+      "captured_pct": 24.71,
+      "split_ceiling_pct": 2.3
+    },
+    {
+      "trace": "thinking",
+      "actions": "tier_only",
+      "tie": "new-ahead",
+      "arm": "hazard-old",
+      "captured_pct": 0.75,
+      "split_ceiling_pct": 2.3
+    }
+  ]
+}

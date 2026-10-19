@@ -45,6 +45,8 @@ DEPENDS_ON = {
     "hazard_prior_tier.json": ("traces.py", "sequential.py", "mooncake.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py", "environment.py"),
     "arrival_admission_reuse.json": ("traces.py", "sequential.py", "mooncake.py", "causal.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py"),
     "tier_only_reuse.json": ("traces.py", "sequential.py", "mooncake.py", "causal.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py", "environment.py"),
+    "bailian_reachable_birthx.json": ("traces.py", "sequential.py", "mooncake.py", "simulator.py", "environment.py"),
+    "bailian_hazard_birthx.json": ("traces.py", "sequential.py", "mooncake.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py", "environment.py"),
     "hazard_prior_rescaled.json": ("traces.py", "sequential.py", "mooncake.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py"),
     "hazard_prior_tier_rescaled.json": ("traces.py", "sequential.py", "mooncake.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py", "environment.py"),
     "prefix_features.json": ("traces.py", "sequential.py", "mooncake.py", "causal.py", "simulator.py"),

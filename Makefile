@@ -16,7 +16,7 @@
 PY ?= python3
 SHELL := /bin/bash
 
-.PHONY: help verify reproduce-fast reproduce-full reproduce-llm figures paper clean data-check
+.PHONY: reproduce-external help verify reproduce-fast reproduce-full reproduce-llm figures paper clean data-check
 
 help:
 	@echo "make verify          — 312 tests + every paper number against its artifact (no data needed)"
@@ -92,6 +92,12 @@ reproduce-full: reproduce-fast
 	for n in 70 100 150; do $(PY) scripts/train_kvct_placement.py --convs $$n --out experiments/kvct_placement_n$$n.json; done
 	$(PY) scripts/run_locomo_power.py
 	$(PY) scripts/make_figures.py
+	$(PY) scripts/check_paper_numbers.py
+
+# --- external replication: Alibaba's Bailian traces (several GB download; cited in V-C) -------
+reproduce-external:
+	$(PY) scripts/run_bailian.py --birthx
+	$(PY) scripts/run_bailian_hazard.py
 	$(PY) scripts/check_paper_numbers.py
 
 # --- tier 3: the two claims that need a paid third-party API --------------------------------

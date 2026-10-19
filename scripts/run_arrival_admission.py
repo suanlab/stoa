@@ -270,8 +270,8 @@ def main() -> None:
                                  "training labels windowed to end before the split; belief "
                                  f"magnitudes from the pre-split analogue population ({args.ref_scale} scale); order arms share "
                                  "one magnitude multiset, magnitude arms share arrival order"),
-                    "why": ("the split-instant protocol leaves ~95% of the hindsight gap "
-                            "unreachable; this targets it, causally (§AP)")},
+                    "why": ("the split-instant protocol leaves most of the hindsight gap "
+                            "unreachable (84-88% on production, notebook AS); this targets it, causally")},
          "results": rows}, indent=2))
     print(f"\nwrote {out}")
 

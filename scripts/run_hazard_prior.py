@@ -153,11 +153,13 @@ def main() -> int:
                 print(f"{name:<13} {tie:<10} {arm:<12} {g:7.2f}%")
         print(name, estimates[name])
     dest = ROOT / "experiments" / f"hazard_prior{'_tier' if TIER_ONLY else ''}{'_rescaled' if RESCALE else ''}.json"
+    if "--out" in sys.argv:                       # used by run_bailian.py's workers
+        dest = Path(sys.argv[sys.argv.index("--out") + 1]).resolve()
     dest.write_text(json.dumps({"config": {"pseudo_split": "split // 2", "count_bins": list(COUNT_BINS[:-1]),
                                            "age": "quartiles within count bin",
                                            "actions": "tier" if TIER_ONLY else "all"},
                                 "estimates": estimates, "rows": out_rows}, indent=2) + "\n")
-    print(f"wrote {dest.relative_to(ROOT)}")
+    print(f"wrote {dest}")
     return 0
 
 
