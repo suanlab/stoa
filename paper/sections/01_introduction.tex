@@ -59,14 +59,14 @@ however well it ranks, which is precisely what our earlier ``ranking does not co
 result measured. We retract it.
 
 Moving the decision to each block's \emph{arrival}, placing it the moment it first appears from the
-session context available at that instant, changes what is within reach. Even first-come-first-served
-admission captures \textbf{75.0\%} of the oracle's advantage on one trace and \textbf{84.7\%} on the
-other, where no split-time policy, even a clairvoyant one, can pass 5.3\% and 4.1\%. A learned
-arrival-time ranker does no better than arrival order, but we do not read that as a verdict on
-prediction: within a finite trace, blocks that arrive early see 2.3 to 4.6 times the future reuse of
-blocks that arrive late, so arrival order is entangled with exposure time. The design implication we can
-support is the coarse one: build an \textbf{admission point}, decide at arrival, and compare admission
-rules only under equal exposure.
+session context available at that instant, changes what is within reach. Every arrival-time rule we test
+captures between \textbf{45\%} and \textbf{85\%} of the oracle's advantage on the production traces,
+where a policy placing only the blocks present at the split, even a clairvoyant one, cannot pass 5.3\%
+and 4.1\%. Within that range the order a rule ranks new blocks in hardly matters: arrival order, a
+learned ranker and a random order land within about a point of each other once their magnitudes are
+equal. What matters is the reuse a rule assumes for a block it has never seen, which moves the result by
+30 to 39 points. The design implication is to build an \textbf{admission point}, decide at arrival, and
+treat that assumption as the first-order design choice.
 
 Reaction is competitive for a related reason. Tiering rules that forecast nothing at all --- LRU, LFU and
 a fill-once cache --- reach 75--99\% of Belady's hit rate on one Mooncake trace and 40--94\% on the other,
@@ -83,7 +83,8 @@ showed had never been measurable, the decoupling result above, and an LRB column
 measure random eviction because a training buffer was truncated to its tail. Later still, after every
 number check passed, an audit of our own arrival-time experiment found that its training labels, its
 split and its belief magnitudes all used information a deployed policy would not have; correcting them
-withdrew four readings this paper used to make. In every case
+withdrew four readings this paper used to make, and a later re-verification found that its order
+comparison had been a magnitude comparison, withdrawing two more. In every case
 the aggregate looked reasonable, which is the point --- none of our checks asked whether a reported
 quantity was arithmetically able to be what it claimed, and none asked whether a stored result was
 older than the program that wrote it.
@@ -98,17 +99,18 @@ older than the program that wrote it.
   \item \textbf{(C2)} A timing result on production traces. A split-instant evaluation protocol
   makes 95\% of a hindsight oracle's advantage unreachable, because 45--46\% of blocks do not exist yet
   when it decides (\Cref{sec:reachable}); inside it, a better ranker helps monotonically but over a 5\%
-  sliver (\Cref{sec:capacity}). Deciding at each block's \emph{arrival} lets even first-come-first-served
-  admission capture 75.0\% and 84.7\% of the advantage, and 52.6\% on a synthetic control, beyond the
-  split-time ceiling in every case (\Cref{sec:arrival}). Which arrival-time rule is best is entangled with
-  exposure time in a finite trace, and we leave it open.
+  sliver (\Cref{sec:capacity}). Deciding at each block's \emph{arrival} lets every rule we test capture 45--85\% of the
+  advantage, and separates the two parts of a belief: the order new blocks are ranked in moves the result
+  by about a point, the magnitude assumed for them by 30--39 (\Cref{sec:arrival}). On a synthetic control
+  the margin over the split-time ceiling is not robust.
   \item \textbf{(C3)} Measurements of reactive tiering on both sources against the adaptive-replacement
   family (ARC, LeCaR, CACHEUS) and a reimplemented LRB --- the best of them beating the best plain rule by
   at most 4.6 points of Belady across eight operating points --- together with an eviction-signal inversion
   that makes a policy tuned on one source a poor default for the other, and a measured explanation: KV
-  traces are dominated by one-time blocks, which starve the ghost-hit channel all four adapt on
+  traces are dominated by one-time blocks, which starve the ghost-hit channel the three adaptive
+  policies run on and leave most of LRB's training labels censored
   (\Cref{sec:reaction}).
-  \item \textbf{(C4)} A reusable evaluation protocol: twenty-four measurement defects that each manufactured
+  \item \textbf{(C4)} A reusable evaluation protocol: twenty-five measurement defects that each manufactured
   a plausible result here, grouped into nine mechanisms, and the cheap controls that catch them ---
   including the rule that a null is reportable only alongside the sample size that would have resolved
   it, and the rule that every edge of the source $\rightarrow$ artifact $\rightarrow$ figure

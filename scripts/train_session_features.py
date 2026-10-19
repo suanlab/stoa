@@ -61,14 +61,14 @@ def build_features(path: str, max_requests: int, split_frac: float = 0.5):
     split = int(split_frac * t_max)
 
     blk_steps: dict[str, list[int]] = defaultdict(list)
-    blk_pos: dict[str, list[int]] = defaultdict(list)
+    blk_pos: dict[str, list[tuple[int, int]]] = defaultdict(list)
     blk_session: dict[str, str] = {}
     sess_steps: dict[str, list[int]] = defaultdict(list)
     for t, sid, blocks in reqs:
         sess_steps[sid].append(t)
         for pos, b in enumerate(blocks):
             blk_steps[b].append(t)
-            blk_pos[b].append(pos)
+            blk_pos[b].append((t, pos))
             blk_session.setdefault(b, sid)
 
     X_blk, X_ses, y, ids = [], [], [], []
@@ -79,7 +79,11 @@ def build_features(path: str, max_requests: int, split_frac: float = 0.5):
         cnt = len(past)
         recency = split - past[-1]
         age = split - past[0]
-        pos = sum(blk_pos[b]) / len(blk_pos[b])
+        # Positions from PAST accesses only. This averaged every access, after the split
+        # included; Mooncake's prefix-chained hashes put each block at one position, so no
+        # reported number moved, but on another trace it would read the future (§AQ).
+        past_pos = [p for s, p in blk_pos[b] if s < split]
+        pos = sum(past_pos) / len(past_pos)
         blk = [1.0, math.log1p(cnt), recency / max(split, 1), age / max(split, 1),
                (age / cnt) / max(split, 1), math.log1p(pos)]
         # --- session state: is the conversation this block belongs to still alive? ---

@@ -7,11 +7,15 @@ from stoa.eval.memqa import _priority, evaluate, select_context
 
 locomo = pytest.importorskip("stoa.eval.locomo")
 
+# Skip per test, not per module: a module-level skip removes these tests from collection, so the
+# suite's size depended on whether the LoCoMo file had been fetched, and the stated test count
+# failed on a fresh clone (2026-10-19 re-verification pass).
 try:
     TASKS = locomo.load_locomo(download=False)          # use cached data/locomo10.json
 except FileNotFoundError:
-    pytest.skip("data/locomo10.json not present; run the LoCoMo loader once to fetch it",
-                allow_module_level=True)
+    TASKS = None
+pytestmark = pytest.mark.skipif(
+    TASKS is None, reason="data/locomo10.json not present; run the LoCoMo loader once to fetch it")
 
 
 def mock_reader(prompt: str) -> str:

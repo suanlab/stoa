@@ -260,57 +260,99 @@ if d:
 # paper as verified on a machine where the artifacts were never generated. Require both a
 # minimum number of checks and that every artifact the paper depends on is present.
 
-# --- arrival-time admission, causal design (section 5.4, audit H2) ------------------------------
+# --- arrival-time admission: order and magnitude separated (section V-C, notebook AP, AQ) -------
 d = load("arrival_admission.json")
 _rc = load("reachable_ceiling.json")
 _dg = load("arrival_diagnostics.json")
 if d and _rc and _dg:
-    print("\narrival admission, causal (experiments/arrival_admission.json)")
+    print("\narrival admission, order vs magnitude (experiments/arrival_admission.json)")
     by = {(r["trace"], r["arm"]): r for r in d["results"]}
+    cap = {k: v["captured_pct"] for k, v in by.items()}
     split_ceiling = {t: [r for r in v["rows"] if r["split_frac"] == 0.5][0]["reachable_pct"]
                      for t, v in _rc["traces"].items()}
-    fcfs, learned, shuf, auc_l = {}, {}, {}, {}
+    ORDER = ("order-arrival", "order-learned", "order-shuffled")
+    MAG = ("constant-mean", "constant-median")
     for t in ("conversation", "toolagent", "synthetic"):
-        fcfs[t] = by[(t, "arrival-fcfs")]["captured_pct"]
-        learned[t] = by[(t, "arrival-learned")]["captured_pct"]
-        shuf[t] = by[(t, "arrival-shuffled")]["captured_pct"]
-        auc_l[t] = by[(t, "arrival-learned")]["auc"]
-        claim(f"{t}: table row (split ceiling, FCFS, learned (AUC), shuffled)",
-              f"{t} & {split_ceiling[t]:.1f} & \\textbf{{{fcfs[t]:.1f}}} & "
-              f"{learned[t]:.1f} ({auc_l[t]:.2f}) & {shuf[t]:.1f}",
-              f"{fcfs[t]:.1f}", "arrival row, % of full gap")
-        assert fcfs[t] > split_ceiling[t], (
-            f"{t}: a causal arrival rule no longer beats the split-time ceiling; the paper says it does")
-    claim("FCFS, production, in text", f"captures {fcfs['conversation']:.1f}\\% and "
-          f"{fcfs['toolagent']:.1f}\\% of the oracle's advantage", "", "arrival text")
-    claim("split ceiling, production, in text",
-          f"can exceed {split_ceiling['conversation']:.1f}\\% and {split_ceiling['toolagent']:.1f}\\%",
-          "", "reachable_ceiling @ 0.5")
-    claim("synthetic margin", f"{fcfs['synthetic']:.1f}\\% against\n{split_ceiling['synthetic']:.1f}\\%",
-          "", "arrival vs split, synthetic")
-    lead_l = [fcfs[t] - learned[t] for t in fcfs]
-    lead_s = [fcfs[t] - shuf[t] for t in fcfs]
-    claim("FCFS leads, ranges", f"leads the learned ranker by {min(lead_l):.0f}--{max(lead_l):.0f}\n"
-          f"points and a shuffled order by {min(lead_s):.0f}--{max(lead_s):.0f}",
-          f"{lead_l} / {lead_s}", "fcfs - learned / shuffled")
-    claim("learned ranker AUC range", f"the learned ranker's {min(auc_l.values()):.2f}--"
-          f"{max(auc_l.values()):.2f}", "", "arrival-learned auc")
+        a = by[(t, "order-learned")]["auc"]
+        claim(f"{t}: table row", f"{t} & {split_ceiling[t]:.1f} & {cap[(t, 'order-arrival')]:.1f} & "
+              f"{cap[(t, 'order-learned')]:.1f} ({a:.2f}) & {cap[(t, 'order-shuffled')]:.1f} & "
+              f"{cap[(t, 'constant-mean')]:.1f} & {cap[(t, 'constant-median')]:.1f}",
+              "", "arrival row, % of full gap")
+    prod = ("conversation", "toolagent")
+    arms = [cap[(t, a)] for t in prod for a in ORDER + MAG]
+    assert min(arms) > max(split_ceiling[t] for t in prod), \
+        "an arrival-time arm no longer beats the split ceiling on production; the paper says all do"
+    claim("production range of every arrival arm", f"{min(arms):.0f}--{max(arms):.0f}\\%", "",
+          "all arms, production")
+    claim("split ceiling, production", f"cannot exceed {split_ceiling['conversation']:.1f}\\% and "
+          f"{split_ceiling['toolagent']:.1f}\\%", "", "reachable_ceiling @ 0.5")
+    sy = [cap[("synthetic", a)] for a in ORDER + MAG]
+    assert min(sy) < split_ceiling["synthetic"] < max(sy), \
+        "the paper says the synthetic margin is not robust (one arm below the split ceiling)"
+    claim("synthetic span vs ceiling", f"span {min(sy):.1f}--{max(sy):.1f}\\% against a "
+          f"{split_ceiling['synthetic']:.1f}\\% ceiling", "", "synthetic arms")
+    spread = {t: max(cap[(t, a)] for a in ORDER) - min(cap[(t, a)] for a in ORDER)
+              for t in ("conversation", "toolagent", "synthetic")}
+    claim("order spread, production", f"within {spread['conversation']:.1f} and "
+          f"{spread['toolagent']:.1f} points", "", "max-min of order arms")
+    lead = cap[("synthetic", "order-learned")] - cap[("synthetic", "order-arrival")]
+    assert all(cap[("synthetic", "order-learned")] >= cap[("synthetic", a)] for a in ORDER)
+    claim("synthetic ranker lead", f"ranker lead, by {lead:.1f} points", "", "learned - arrival")
+    gap = {t: cap[(t, "constant-mean")] - cap[(t, "constant-median")] for t in spread}
+    claim("magnitude gap, production", f"by {gap['conversation']:.1f} and {gap['toolagent']:.1f}\npoints",
+          "", "mean - median")
+    claim("magnitude gap, abstract/intro", f"{gap['conversation']:.0f}--{gap['toolagent']:.0f} points",
+          "", "rounded")
+    claim("magnitude gap, introduction", f"{gap['conversation']:.0f} to {gap['toolagent']:.0f} points",
+          "", "rounded")
+    mean_b = {t: by[(t, "constant-mean")]["new_block_belief"] for t in prod}
+    med_b = {t: by[(t, "constant-median")]["new_block_belief"] for t in prod}
+    assert med_b == {"conversation": 1.0, "toolagent": 1.0}, med_b
+    claim("constant beliefs", f"(1.0 to {mean_b['conversation']:.2f} and {mean_b['toolagent']:.2f})",
+          "", "new_block_belief")
+    assert max(spread["conversation"], spread["toolagent"]) < 2.0 < min(gap.values()), \
+        "the paper says order moves production results by about a point and magnitude by far more"
     rows = {r["trace"]: r for r in _dg["rows"]}
     ratio = [r["first_over_last"] for r in _dg["rows"]]
     aucs = [r["auc_arrival_order"] for r in _dg["rows"]]
-    claim("exposure ratio (section 5.4)", f"{min(ratio):.1f}--{max(ratio):.1f} times", "", "diagnostics")
-    claim("exposure ratio (introduction)", f"{min(ratio):.1f} to {max(ratio):.1f} times", "", "diagnostics")
-    claim("arrival-order AUC", f"AUC {min(aucs):.2f}--{max(aucs):.2f}", "", "diagnostics")
+    claim("exposure ratio", f"{min(ratio):.1f}--{max(ratio):.1f} times", "", "diagnostics")
+    claim("arrival-order AUC", f"AUC 0.55--0.58", f"{min(aucs):.3f}-{max(aucs):.3f}", "diagnostics")
+    assert f"{min(aucs):.2f}" == "0.55" and f"{max(aucs):.2f}" == "0.58"
     claim("old design's label leak", f"{rows['conversation']['old_design_label_mass_after_cut_pct']:.1f}\\% and "
           f"{rows['toolagent']['old_design_label_mass_after_cut_pct']:.1f}\\% of training-label",
           "", "diagnostics")
-    # Abstract, rounded.
-    claim("abstract: split ceiling", f"reaches {split_ceiling['conversation']:.1f}\\% and\n"
-          f"{split_ceiling['toolagent']:.1f}\\% of it", "", "abstract")
-    claim("abstract: FCFS", f"captures {fcfs['conversation']:.0f}\\%\nand {fcfs['toolagent']:.0f}\\% of it, "
-          f"and {fcfs['synthetic']:.0f}\\% on", "", "abstract")
-    claim("introduction: FCFS", f"\\textbf{{{fcfs['conversation']:.1f}\\%}} of the oracle's advantage on one "
-          f"trace and \\textbf{{{fcfs['toolagent']:.1f}\\%}}", "", "introduction")
+
+# Table 2 (audit pass 2026-10-19): every cell from a producer.
+_ss = load("source_stats.json")
+_sm = load("sampling_study.json")
+_hb = load("headroom_by_length.json")
+if _ss and _sm and _hb:
+    print("\nTable 2 (experiments/source_stats.json, sampling_study.json)")
+    mc, kv = _ss["mooncake"], _ss["kvct"]["40"]
+    claim("Table 2 one-time", f"{100*mc['conversation']['one_time_frac']:.1f} / "
+          f"{100*mc['toolagent']['one_time_frac']:.1f}\\% & {100*kv['one_time_frac']:.0f}\\%", "", "source_stats")
+    claim("Table 2 mean reuse", f"{mc['conversation']['mean_reuse']:.1f} / {mc['toolagent']['mean_reuse']:.1f} & "
+          f"{kv['mean_reuse']:.0f}", "", "source_stats")
+    claim("Table 2 blocks/request", f"{mc['conversation']['blocks_per_request']:.0f} / "
+          f"{mc['toolagent']['blocks_per_request']:.0f} & $\\sim${round(kv['blocks_per_request'], -2):,.0f}"
+          .replace(",", "{,}"), "", "source_stats")
+    assert kv["requests"] == 4215
+    hs = sorted(r["headroom_mean"] for r in _sm["rows"])
+    claim("Table 2 agentic headroom", f"& {hs[0]:.0f}--{hs[-1]:.0f}\\% \\\\", "", "sampling_study means")
+    ot = [v["one_time_frac"] * 100 for v in _ss["kvct"].values()]
+    claim("agentic one-time range", f"ranges {min(ot):.1f}--{max(ot):.0f}\\% over 20--200", "", "kvct sizes")
+    full = {r["trace"]: r["headroom_pct"] for r in _hb["rows"] if r["full_trace"]}
+    claim("Table 2 Mooncake headroom pair", f"({full['conversation']:.1f}\\% and {full['toolagent']:.1f}\\%)",
+          "", "headroom_by_length")
+
+# The eviction-signal inversion (section V-F): it quoted a superseded artifact until 2026-10-19.
+_kv = load("reactive_kvct_sweep.json")
+if _kv:
+    at5 = [r for r in _kv["rows"] if r["cache_frac"] == 0.05]
+    lru = [r["lru"] / r["belady"] for r in at5]
+    lfu = [r["h2o"] / r["belady"] for r in at5]
+    claim("kvct LRU / LFU at 5%", f"LRU reaches {min(lru):.2f}--{max(lru):.2f} of Belady at a 5\\%\ntier "
+          f"while LFU stays near {min(lfu):.2f}--{max(lfu):.2f}", "", "reactive_kvct_sweep @ 5%")
 
 # --- the retracted claims must not reappear ----------------------------------------
 RETRACTED = [
@@ -344,10 +386,19 @@ if d:
 d = load("lrb_retraction.json")
 if d:
     print("\nLRB band (experiments/lrb_retraction.json)")
+    # ARC from the reactive artifact's raw hit rates, the same source as the reactive table:
+    # lrb_retraction.json stores ARC/Belady pre-rounded to 4 places, so 0.96253 became 0.9625
+    # and printed as 96.2 here and 96.3 there -- one quantity, two values (2026-10-19 pass).
+    _rx = load("reactive_real_full_lrb.json")
+    _arc = {(t, r["cache_frac"]): r["arc"] / r["belady"]
+            for t, v in _rx["traces"].items() for r in v["rows"]}
     for r in d["rows"]:
         lo = min(r["lrb_repair_all_history"], r["lrb_repair_sliding_window"])
         hi = max(r["lrb_repair_all_history"], r["lrb_repair_sliding_window"])
-        row = f"{100*lo:.1f}--{100*hi:.1f} & {100*r['arc']:.1f}"
+        # The stored ratio was rounded once, the hit rates twice; they may differ by the component
+        # rounding (<2e-4), never by more.
+        assert abs(_arc[(r["trace"], r["cache_frac"])] - r["arc"]) < 2e-4, "two ARC sources disagree"
+        row = f"{100*lo:.1f}--{100*hi:.1f} & {100*_arc[(r['trace'], r['cache_frac'])]:.1f}"
         claim(f"{r['trace']} {r['cache_frac']:.0%} LRB band", row, row, "lrb repairs")
     assert all(x["below_arc_under_all_repairs"] for x in d["rows"]), (
         "LRB is no longer below ARC everywhere; the paper's only surviving LRB claim is void")
@@ -523,8 +574,11 @@ if _arr and _rch:
         # at arrival, both as a share of the same full hindsight gap.
         _at = [r for r in _rch["traces"][_t]["rows"] if r["split_frac"] == 0.5][0]
         HEADLINE[f"split-time ceiling, {_t}"] = f"{_at['reachable_pct']:.1f}%"
-        HEADLINE[f"FCFS of the full gap, {_t}"] = f"{_by[(_t, 'arrival-fcfs')]['captured_pct']:.1f}%"
-    failures += verify.prose_drift(PROSE_FILES, HEADLINE, ROOT, trigger="first-come-first-served")
+    # Every arrival arm on production, as a range, and the mean/median magnitude gap (notebook AQ).
+    _arms = [r["captured_pct"] for r in _arr["results"]
+             if r["trace"] in ("conversation", "toolagent") and r.get("axis") in ("order", "magnitude")]
+    HEADLINE["arrival range, production"] = f"{min(_arms):.0f}–{max(_arms):.0f}%"
+    failures += verify.prose_drift(PROSE_FILES, HEADLINE, ROOT, trigger="arrival")
 
 # The lab notebook legitimately records superseded measurements -- rewriting them would destroy
 # the record. But an unmarked one reads as current: §V.2 stated "shuffling the arrival order
@@ -575,6 +629,13 @@ SUPERSEDED_IN_PAPER = {
     "worth 14 points": "arrival order's value, from the leaky arrival design",
     "timing multiplier": "arrival ceiling / split ceiling, from the leaky arrival design",
     "of what is reachable": "FCFS against a mixed-scale ceiling that is not an upper bound",
+    # The unfair order comparison (notebook AQ) and residue found on the 2026-10-19 pass.
+    "2--26": "FCFS lead over the ranker, a magnitude difference read as order",
+    "10--27": "FCFS lead over a shuffled order, a magnitude difference read as order",
+    "81--94": "agentic headroom from nested-prefix samples",
+    "0.88--0.95": "kvct LRU/Belady from a superseded artifact",
+    "deciding well": "order barely matters; the withdrawn FCFS reading",
+    "eleventh entry": "a catalogue entry that no longer exists",
 }
 for _tex in [ROOT / "paper" / "main.tex", *sorted((ROOT / "paper" / "sections").glob("*.tex"))]:
     failures += verify.unmarked_superseded(
@@ -656,15 +717,18 @@ failures += verify.page_limit_violation(_paper / "main.pdf", limit=12,
 failures += verify.bibtex_problems(_paper / "main.blg")
 failures += verify.author_block_problems(_paper / "main.tex")
 failures += verify.leaked_annotations(_paper / "main.pdf")
+failures += verify.type3_fonts(_paper / "main.pdf")
 _cited = set()
 for _t in [_paper / "main.tex", *sorted((_paper / "sections").glob("*.tex"))]:
     for _m in re.findall(r"\\cite[a-z]*\{([^}]*)\}", _t.read_text()):
         _cited |= {k.strip() for k in _m.split(",")}
 failures += verify.citation_hygiene((ROOT / "docs" / "references.bib").read_text(), _cited)
+PDF_SOURCES = [_paper / "main.tex", *sorted((_paper / "sections").glob("*.tex")),
+               *[FIGS / f for f in FIG_SOURCES], ROOT / "docs" / "references.bib"]
+_pdf_manifest = _paper / ".build_manifest.json"
 failures += verify.stale_paper_pdf(
-    _paper / "main.pdf",
-    [_paper / "main.tex", *sorted((_paper / "sections").glob("*.tex")),
-     *[FIGS / f for f in FIG_SOURCES], ROOT / "docs" / "references.bib"])
+    _paper / "main.pdf", PDF_SOURCES,
+    json.loads(_pdf_manifest.read_text()) if _pdf_manifest.exists() else None)
 
 # Which emphasised numbers is nothing watching? MIN_CHECKS below guarantees the checker does a
 # certain AMOUNT of work; this guarantees it works on the right things. Twelve passes guarded

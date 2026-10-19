@@ -9,7 +9,9 @@
 #   make reproduce-full  ~6 h,    + the LRB sweep       -- everything CPU-only
 #   make reproduce-llm   ~3 h,    + OPENAI_API_KEY, ~$5 -- the two claims that cannot be free
 #
-# `verify` is the one to run first and the one that fails loudest. It needs nothing but Python.
+# `verify` is the one to run first and the one that fails loudest. It needs Python and poppler-utils
+# (pdftotext, pdfinfo, pdffonts: the checker reads the built PDF a reviewer reads; without them those
+# checks report UNCHECKED and fail rather than pass).
 
 PY ?= python3
 SHELL := /bin/bash
@@ -17,7 +19,7 @@ SHELL := /bin/bash
 .PHONY: help verify reproduce-fast reproduce-full reproduce-llm figures paper clean data-check
 
 help:
-	@echo "make verify          — 261 tests + every paper number against its artifact (no data needed)"
+	@echo "make verify          — 279 tests + every paper number against its artifact (no data needed)"
 	@echo "make data-check      — are the traces present and the right length?"
 	@echo "make reproduce-fast  — regenerate the central claims from the Mooncake traces (~40 min)"
 	@echo "make reproduce-full  — the above plus the LRB hyperparameter sweep (~6 h)"
@@ -65,6 +67,11 @@ reproduce-full: reproduce-fast
 	$(PY) scripts/run_lrb_retraction.py
 	$(PY) scripts/run_lrb_sweep.py
 	$(PY) scripts/run_split_sensitivity.py
+	# The agentic source (kv-cache-tester; download per data/README.md): Table 2, Table 3, and the
+	# eviction-signal inversion. None of these had a target until the 2026-10-19 pass.
+	$(PY) scripts/run_source_stats.py
+	$(PY) scripts/run_reactive_kvct.py
+	$(PY) scripts/run_sampling_study.py --sizes 20,40 --draws 4
 	$(PY) scripts/run_locomo_power.py
 	$(PY) scripts/check_paper_numbers.py
 
@@ -76,7 +83,7 @@ reproduce-llm:
 	  echo "OPENAI_API_KEY is unset."; \
 	  echo "These two results call a hosted model at temperature=0 and cost about \$$5 total."; \
 	  echo "They cannot be bit-reproduced even with a key: the served weights are not pinned."; \
-	  echo "The shipped artifacts record every prompt and response id."; exit 1; fi
+	  echo "The shipped artifacts hold aggregates only; the ICDE paper does not cite them."; exit 1; fi
 	$(PY) scripts/run_locomo_powered.py --judge
 	$(PY) scripts/run_representation_axis.py --judge
 
@@ -86,6 +93,7 @@ figures:
 paper: figures
 	cd paper && pdflatex -interaction=nonstopmode main && bibtex main \
 	  && pdflatex -interaction=nonstopmode main && pdflatex -interaction=nonstopmode main
+	$(PY) scripts/record_pdf_build.py
 	$(PY) scripts/check_paper_numbers.py
 
 clean:

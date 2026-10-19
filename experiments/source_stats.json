@@ -1,0 +1,73 @@
+{
+  "config": {
+    "kvct_sample": "first N conversation files"
+  },
+  "mooncake": {
+    "conversation": {
+      "requests": 12031,
+      "blocks": 182790,
+      "accesses": 288500,
+      "one_time_frac": 0.7585,
+      "mean_reuse": 1.578,
+      "blocks_per_request": 24.0
+    },
+    "toolagent": {
+      "requests": 23608,
+      "blocks": 183300,
+      "accesses": 409616,
+      "one_time_frac": 0.7846,
+      "mean_reuse": 2.235,
+      "blocks_per_request": 17.4
+    }
+  },
+  "kvct": {
+    "20": {
+      "requests": 2807,
+      "blocks": 185772,
+      "accesses": 4479326,
+      "one_time_frac": 0.2085,
+      "mean_reuse": 24.112,
+      "blocks_per_request": 1595.8
+    },
+    "40": {
+      "requests": 4215,
+      "blocks": 304629,
+      "accesses": 7889747,
+      "one_time_frac": 0.1527,
+      "mean_reuse": 25.9,
+      "blocks_per_request": 1871.8
+    },
+    "80": {
+      "requests": 5926,
+      "blocks": 525562,
+      "accesses": 12384595,
+      "one_time_frac": 0.1138,
+      "mean_reuse": 23.564,
+      "blocks_per_request": 2089.9
+    },
+    "120": {
+      "requests": 7294,
+      "blocks": 679303,
+      "accesses": 16405296,
+      "one_time_frac": 0.0958,
+      "mean_reuse": 24.15,
+      "blocks_per_request": 2249.1
+    },
+    "150": {
+      "requests": 8454,
+      "blocks": 825933,
+      "accesses": 20095105,
+      "one_time_frac": 0.0842,
+      "mean_reuse": 24.33,
+      "blocks_per_request": 2377.0
+    },
+    "200": {
+      "requests": 11071,
+      "blocks": 1075759,
+      "accesses": 27543891,
+      "one_time_frac": 0.0752,
+      "mean_reuse": 25.604,
+      "blocks_per_request": 2487.9
+    }
+  }
+}

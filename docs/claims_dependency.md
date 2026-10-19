@@ -809,9 +809,10 @@ All four metric defects from §T/§U are fixed in `src/stoa/sequential.py`, pinn
 
 ### V.1 The capacity ladder under the fixed metric: monotone in AUC, and all of it negative
 
-> **SUPERSEDED by §AC (2026-08-26).** The artifact behind this table predated the tie-break fix of §W
-> reaching all three placement routines. `constant` is −46.1 / −60.6, not −154.5 / −825.7, and
-> monotonicity in AUC holds on toolagent only. The numbers below are left as recorded; do not cite them.
+> **SUPERSEDED by §AC (2026-08-26), and again by §AP (2026-10-16).** §AC's values (−46.1 / −60.6,
+> monotone on toolagent only) were themselves measured on a belief scale taken from the evaluation
+> blocks' future counts. On the causal scale `constant` is −48.6 / −60.6 and the ladder is monotone in
+> AUC on **both** traces. The numbers below are left as recorded; do not cite them.
 
 `experiments/capacity_ladder_fixed.json`, full traces:
 
@@ -837,10 +838,10 @@ flips sign under an unstated convention is not yet a measurement. We report both
 
 ### V.2 The arrival experiment: the headroom is real, and prediction is not what captures it
 
-> **SUPERSEDED by §AC (2026-08-26).** Same cause: the artifact predated the §W fix to the routines that
-> produce the *denominator*. Current values are reachable share **83.5% / 19.0%** (27× and 8×, not 29×
-> and 22×), FCFS at **87.4% / 50.2%** of the ceiling, and shuffling the arrival order costs **3.3 /
-> 14.1** points — not 1.8 / 3.0. The second bullet below ("FCFS ordering contributes little") is
+> **SUPERSEDED by §AC (2026-08-26), then WITHDRAWN by §AP and §AQ (2026-10).** §AC's values (reachable
+> share 83.5% / 19.0%, FCFS at 87.4% / 50.2% of the ceiling, shuffling costs 3.3 / 14.1 points) came from
+> a design that leaked future information (§AP) and whose order arms also differed in magnitude (§AQ);
+> none of them is current. See §AQ for the current table. The second bullet below ("FCFS ordering contributes little") is
 > **falsified on toolagent**: arrival order is worth 14 points there. Left as recorded; do not cite.
 
 `scripts/run_arrival_admission.py`, `experiments/arrival_admission.json`, full traces. Blocks are placed
@@ -1023,10 +1024,13 @@ moved the headline table substantially.
 
 ### AC.2 Two claims falsified, two survive
 
-- **Survives** — *timing recovers the benefit*: 3.1% → 83.5% and 2.4% → 19.0%, i.e. 27× and 8×. The
-  toolagent factor was reported as 22×; it is 8×.
-- **Survives** — *learning on top adds nothing*: FCFS beats the learned arm on both traces
-  (87.4 vs 84.5, 50.2 vs 47.2). This is the only claim that has survived every correction to the metric.
+> **WITHDRAWN (§AP, §AQ, 2026-10).** Both "survives" bullets below were measured on the leaky arrival
+> design. The ratios (27×, 8×) and the FCFS-beats-learned comparison are not current; with order and
+> magnitude separated, ranking moves the production result by about a point (§AQ).
+
+- **Survived at the time** — *timing recovers the benefit*: 3.1% → 83.5% and 2.4% → 19.0%, i.e. 27× and 8×.
+- **Survived at the time** — *learning on top adds nothing*: FCFS beat the learned arm on both traces
+  (87.4 vs 84.5, 50.2 vs 47.2).
 - **FALSIFIED** — *"FCFS captures ~90% of what is reachable"*. On toolagent it captures **50.2%**.
 - **FALSIFIED** — *"shuffling the arrival order costs under three points"*. It costs 3.3 on conversation
   and **14.1 on toolagent**. First-come-first-served is doing real work there, and the paper explicitly
@@ -1813,8 +1817,9 @@ The capacity ladder and belief controls were rerun on the causal scale. The ladd
 AUC on both traces** (it was non-monotone on conversation), the strongest model gains under 3% of the
 full gap, and the scale choice moves a result by 22 to 381 points. The paper's earlier sentence that the
 ladder "never helps" is withdrawn. `split_sensitivity.json` moved most: its oracle-gap range went from
-81–92% to 70–87%, and captured from [+0.2, +3.6] to [+0.4, +6.0]; the paper does not cite it, and
-REPRODUCIBILITY.md now does with the new values.
+81–92% to 70–87%, and captured from [+0.2, +3.6] to [+0.4, +6.0]. *Correction (§AQ):* the oracle gap does
+not depend on beliefs, so that move was not the causal rescale; the old artifact predated the 512-token
+block-size fix and was missing from `DEPENDS_ON`. The paper does not cite it.
 
 **The other High findings.** H1: the conclusion still stated the retracted decoupling result as the
 contribution; rewritten. H4: §5.4 now states the label horizon, the split and the magnitude scale. H5:
@@ -1833,8 +1838,9 @@ again.
   and the conclusion were rewritten, §6's first paragraph still said FCFS "captures 87.4% of the
   reachable benefit on conversation but only 50.2% on toolagent" and that order was "worth 14 points".
   No guard listed those values as superseded, because the values they replaced had been listed and these
-  had not. They are now in `SUPERSEDED_IN_PAPER`, mutation-checked (injecting "50.2" into the abstract
-  fails the checker).
+  had not. "50.2" and "worth 14 points" are now in `SUPERSEDED_IN_PAPER`, mutation-checked (injecting
+  "50.2" into the abstract fails the checker). 87.4 is not: it appears legitimately in the reactive and
+  LRB tables (*correction, §AQ*: an earlier wording here said all three were listed).
 - **Rewriting the checker deleted checks.** Replacing the arrival block by span also removed the
   reachable-ceiling, headroom-by-length and synthetic-control claims that sat between the old markers.
   The emphasis-coverage guard (§AN) caught it at once: eight emphasised numbers suddenly had no
@@ -1844,7 +1850,7 @@ again.
 
 ### AP.2 Counts, defined once (audit M1)
 
-- **Tests:** 261, and `check_paper_numbers.py` now collects the suite and fails if README.md,
+- **Tests:** 261 at the time (279 after §AQ), and `check_paper_numbers.py` now collects the suite and fails if README.md,
   REPRODUCIBILITY.md or the Makefile states another number (they said 173, 163 and 231).
 - **Retractions:** the paper counts **three** (the sampling headline §I, the decoupling result §T/§U,
   the LRB column §V). Five appear in REPRODUCIBILITY.md because two earlier ones ("Mooncake omits timing",
@@ -1859,3 +1865,102 @@ again.
 Deferred, with reason: audit L8 (shortening defect narratives in code docstrings) touches every module
 for no change in behaviour and would invalidate the provenance hashes of every artifact; it is left for
 after submission.
+
+## §AQ — re-verifying the audit fixes: an order control that was a magnitude control, and a release that failed on a fresh clone
+
+On 2026-10-19 the author asked for another re-verification pass. It ran two tracks: a fresh `git clone`
+of the public repository followed by `make data-check && make verify && make reproduce-fast`, and
+three AI reviewer agents (paper claims, leak-freedom of the code, release documents), each read-only.
+Both tracks found blockers. The author chose to fix everything and run another full pass before
+submitting, rather than skip the ICDE round under §AB's rule.
+
+### AQ.1 The §V-C order comparison compared magnitudes
+
+`quantile_match` gives tied scores the mean of their rank block. The first-come-first-served arm scored
+every new block 0.5, so every new block received the **mean** pre-split reuse (1.54 / 2.14 / 1.49). The
+learned and shuffled arms had distinct scores and received the spread multiset, in which 77–78% of
+values are 1.0, and a new block at 1.0 ties with, and is placed behind, every pre-split block seen once.
+So FCFS and its "order-only" controls differed in magnitude as well as order. The code reviewer's probe,
+reproduced exactly here (% of full gap, conversation / toolagent / synthetic):
+
+| new-block belief, order | conv | tool | synth |
+|---|---|---|---|
+| constant mean, arrival order (the reported "FCFS") | 75.0 | 84.65 | 52.64 |
+| constant mean, random order | 73.6 | 83.11 | 51.35 |
+| constant mean, reverse arrival order | 72.9 | 81.95 | 49.9 |
+| spread multiset, arrival order | 58.99 | 58.73 | 44.06 |
+| spread multiset, random order (the reported "shuffled") | 58.35 | 57.87 | 42.72 |
+| constant 1.0, arrival order | 45.49 | 45.56 | 33.63 |
+
+The redesign varies the two parts of a belief separately: three **order** arms (arrival, learned,
+random) on one magnitude multiset with strict ranks, and two **magnitude** arms (constant mean, constant
+median) in arrival order. Production: order arms within 1.1 / 0.9 points; mean vs median 29.5 / 39.1
+points; every arm 45–85% against a 5.3 / 4.1% split ceiling. Synthetic: the ranker leads by 6.4, and the
+median arm (33.6%) falls below the 35.0% ceiling, so the margin there is not robust.
+
+**Withdrawn (two more, six in all with §AP):** that FCFS leads the ranker by 2–26 points and a shuffled
+order by 10–27; and that this lead reflects exposure time. The exposure diagnostics themselves stand
+(arrival order AUC 0.55–0.58, 2.3–4.6× more reuse for early arrivals) but now explain only differences
+of about a point. **Survives, unchanged:** no policy that places only the blocks present at the split
+can pass 5.3% / 4.1%. **New, and consistent with §V-D:** the belief an admission point assigns an unseen
+block is the first-order design choice; the magnitude convention moves the result more than ranking.
+
+This is the twenty-fifth defect in the paper's catalogue, filed with the arrival experiment's other five.
+It was not a leak and no number check could see it: every number matched its artifact.
+
+### AQ.2 `make verify` failed on a fresh clone
+
+The command the artifact committee runs first passed 81/81 in the working tree and failed 73/81 on a
+clean clone, for three reasons none of which a working tree can show:
+
+- **Test count depended on local data.** `tests/test_locomo.py` skipped at module level when
+  `data/locomo10.json` was absent, removing four tests from collection. It now skips per test.
+- **`main.blg` was git-ignored**, so the BibTeX-log check had nothing to read. `main.bbl` and `main.blg`
+  are now tracked.
+- **The PDF staleness check trusted file times**, which `git clone` writes in arbitrary order.
+  `verify.stale_paper_pdf` now accepts a committed build manifest (`paper/.build_manifest.json`, written
+  by `scripts/record_pdf_build.py` from `make paper`) and clears a source only if both its content and
+  the PDF's match what was recorded at build time.
+
+The checker also needs poppler-utils, which no install step mentioned; README, REPRODUCIBILITY and the
+Makefile now say so.
+
+### AQ.3 Artifacts without producers, and a table built on a retracted protocol
+
+- `reactive_kvct_sweep.json` was cited by the paper and had no script; `run_reactive_kvct.py` now
+  produces it and reproduces the stored file exactly.
+- Table 2 had no producer for any cell. `run_source_stats.py` now writes `source_stats.json`. Two cells
+  were wrong: the agentic mean reuse was the 20-conversation value (24) beside 40-conversation
+  neighbours (26), and the agentic headroom (81–94%) came from the nested-prefix placement runs that
+  §V-E retracts; it is now the randomized sampling study's 68–73%. The caption also called single
+  values "conversation / toolagent" pairs; they are now pairs.
+- `sampling_study.json` had no Makefile target. `reproduce-full` now runs all three agentic producers.
+
+### AQ.4 Paper residue the checker could not see
+
+A sentence quoting a superseded artifact (LRU 0.88–0.95 / LFU 0.23–0.27 of Belady; current 0.83–0.96 /
+0.29–0.31); a "random-replacement control within 1.5 points" with no artifact behind it (removed);
+"converts non-monotonically on toolagent" against a ladder now monotone on both; "deciding early rather
+than deciding well"; a per-tier winner list true only for conversation; one ARC value printed as 96.2
+and 96.3 (two derivations; now one); "1:80 to 1:250" omitting the flat device class (1:2); "6 of the 15
+device classes" (configurations); "the eleventh entry" of a catalogue that no longer had it; "whatever
+the cost weights" when λ_C was never varied; an undisclosed cross-trace ladder; LRB counted among the
+ghost-hit adapters; a related-work sentence still describing a "negative placement result"; and Type 3
+fonts in both embedded figures, which IEEE PDF eXpress rejects (`verify.type3_fonts` now fails on them).
+
+### AQ.5 Code
+
+- `train_session_features.build_features` averaged a block's position over all accesses, post-split
+  included. No reported number moved (each Mooncake block sits at one position), but it read the future;
+  it now uses past positions only, and the four producers it feeds were regenerated identically.
+- The structural leak test matched one spelling of the original leak. It is now an AST taint analysis
+  (sources: the evaluation future; sinks: belief references, training labels) with eight mutation tests,
+  including a direct `future_counts` call, a multi-line call, an alias, annotated and tuple assignment,
+  and truth inlined into `quantile_match`; it also covers `run_arrival_diagnostics.py`.
+- The lockfile pinned five direct dependencies and let 27 transitive ones float; all 32 are now pinned at
+  the reference environment's versions, and a clean install passes `pip check`.
+
+### AQ.6 Counts
+
+Defects in the paper's catalogue: **twenty-five**. Withdrawn readings of the arrival experiment: **six**
+(four in §AP, two here). Paper-level retractions: still three.

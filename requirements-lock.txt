@@ -4,7 +4,10 @@
 # this file is what a reproducer should use to match our numbers bit-for-bit. The two are
 # not in conflict -- one is a compatibility statement, the other a provenance record.
 #
-# Reproduce with:   pip install -r requirements-lock.txt
+# Reproduce with:   pip install -r requirements-lock.txt && pip install -e . --no-deps
+#
+# Every package is pinned, transitive ones included, at the version in the reference environment.
+# Pinning only the five direct dependencies let the other 27 float (2026-10-19 pass).
 # Python 3.10.12 (any 3.10+ works for the code; the numbers were produced on 3.10)
 #
 # NOTE on determinism: torch is used only for the MLP rung of the capacity ladder and for
@@ -21,8 +24,37 @@
 # `+cpu` file, so without the line below `pip install -r` fails with "no matching distribution".
 # Verified 2026-10-16 against both indexes (audit M3).
 --extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.13.0+cpu
-numpy==2.2.6
+# direct
 httpx==0.28.1
-pytest==9.1.1
 matplotlib==3.10.9
+numpy==2.2.6
+pytest==9.1.1
+torch==2.13.0+cpu
+# transitive
+anyio==4.14.2
+certifi==2026.6.17
+contourpy==1.3.2
+cycler==0.12.1
+exceptiongroup==1.3.1
+filelock==3.29.0
+fonttools==4.63.0
+fsspec==2026.4.0
+h11==0.16.0
+httpcore==1.0.9
+idna==3.3
+iniconfig==2.3.0
+Jinja2==3.1.6
+kiwisolver==1.5.0
+MarkupSafe==3.0.3
+mpmath==1.3.0
+networkx==3.4.2
+packaging==26.2
+pillow==12.3.0
+pluggy==1.6.0
+Pygments==2.20.0
+pyparsing==3.3.2
+python-dateutil==2.8.1
+six==1.16.0
+sympy==1.14.0
+tomli==2.4.1
+typing_extensions==4.16.0

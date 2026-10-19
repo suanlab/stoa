@@ -3,17 +3,17 @@
 
 Our result closes one question and sharpens several others.
 
-\paragraph{Which admission rule, and what lies beyond admission?}
-\Cref{sec:arrival} shows that deciding at arrival puts most of the oracle's advantage within reach:
-first-come-first-served admission alone leaves about a quarter of it unclaimed on conversation and a
-sixth on toolagent. It cannot say which arrival-time rule is best. In a finite trace a block that arrives
-early has more time to be reused than one that arrives late, so first-come-first-served admission
-inherits an advantage from the evaluation window itself. Comparing admission rules needs an evaluation
-that gives every block the same exposure, a rolling window or a fixed post-arrival horizon, before any
-rule can be called better. Whatever such an evaluation leaves unclaimed has to come from something the
-per-item formulation does not express: admission under contention, coordinated eviction across
-concurrently-live sessions, or migration timed against idle windows. That is a scheduling question
-rather than a modelling one.
+\paragraph{What should an admission point believe about a block it has never seen?}
+\Cref{sec:arrival} shows that deciding at arrival puts most of the oracle's advantage within reach, and
+that the result then turns on one number: the reuse assumed for a new block relative to a block seen
+once. We set it by hand, to the mean or the median of the previous period; learning it per session or per
+request, causally, is the obvious next model, and the one that would turn the 45--85\% range into a
+point. Ranking new blocks against each other is a second-order question, and comparing rules on it needs
+an evaluation that gives every block the same exposure, a rolling window or a fixed post-arrival horizon,
+because in a finite trace early arrivals have more time to be reused. Whatever such an evaluation leaves
+unclaimed has to come from something the per-item formulation does not express: admission under
+contention, coordinated eviction across concurrently-live sessions, or migration timed against idle
+windows.
 
 \paragraph{Calibration, and what a mis-specified cost model hides.}
 Our tables are placeholders, and we saw concretely how misleading that is: under them the per-item optimal

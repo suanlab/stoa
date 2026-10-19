@@ -132,6 +132,35 @@ def test_fresh_pdf_is_silent(tmp_path):
     assert verify.stale_paper_pdf(pdf, [tex]) == []
 
 
+
+def test_manifest_clears_a_pdf_that_only_looks_stale(tmp_path):
+    """A fresh clone: sources written after the PDF, contents unchanged since the build."""
+    tex = _write(tmp_path / "s.tex", "body", age=OLD)
+    pdf = _write(tmp_path / "main.pdf", "pdf", age=NOW)
+    man = verify.pdf_build_manifest(pdf, [tex])
+    import os
+    os.utime(tex, (NOW + 10, NOW + 10))                  # clone order: source lands later
+    assert verify.stale_paper_pdf(pdf, [tex], man) == []
+
+
+def test_manifest_does_not_clear_a_real_edit(tmp_path):
+    tex = _write(tmp_path / "s.tex", "body", age=OLD)
+    pdf = _write(tmp_path / "main.pdf", "pdf", age=NOW)
+    man = verify.pdf_build_manifest(pdf, [tex])
+    _write(tex, "edited body", age=NOW + 10)
+    out = verify.stale_paper_pdf(pdf, [tex], man)
+    assert len(out) == 1 and "s.tex" in out[0]
+
+
+def test_manifest_for_another_pdf_clears_nothing(tmp_path):
+    tex = _write(tmp_path / "s.tex", "body", age=OLD)
+    pdf = _write(tmp_path / "main.pdf", "pdf", age=NOW)
+    man = verify.pdf_build_manifest(pdf, [tex])
+    _write(pdf, "a different build", age=NOW)
+    import os
+    os.utime(tex, (NOW + 10, NOW + 10))
+    assert len(verify.stale_paper_pdf(pdf, [tex], man)) == 1
+
 # --- prose_drift: released assertions ----------------------------------------------------
 
 HEAD = {"reachable share, conversation": "83.5", "FCFS, toolagent": "50.2"}
@@ -540,3 +569,44 @@ def test_cited_entry_without_an_identifier_is_reported():
 def test_complete_cited_entry_is_clean():
     bib = "@inproceedings{k3,\n  author={Song, Zhenyu and Lloyd, Wyatt},\n  url={https://x}\n}\n"
     assert verify.citation_hygiene(bib, ["k3"]) == []
+
+
+# --- fonts: what PDF eXpress reads, which no other check did -----------------------------
+
+_FONT_HEAD = ("name                                 type              encoding         emb sub uni object ID\n"
+              "------------------------------------ ----------------- ---------------- --- --- --- ---------\n")
+
+
+def _fake_pdffonts(monkeypatch, body):
+    import subprocess
+    monkeypatch.setattr("shutil.which", lambda _: "/usr/bin/pdffonts")
+    monkeypatch.setattr("subprocess.run", lambda cmd, **kw: subprocess.CompletedProcess(
+        cmd, 0, stdout=_FONT_HEAD + body, stderr=""))
+
+
+def test_type3_font_is_reported(tmp_path, monkeypatch):
+    pdf = _write(tmp_path / "main.pdf")
+    _fake_pdffonts(monkeypatch, "BXGEVL+DejaVuSerif                   Type 3            Custom           yes yes no     209  0\n")
+    out = verify.type3_fonts(pdf)
+    assert len(out) == 1 and "Type 3" in out[0] and "DejaVuSerif" in out[0]
+
+
+def test_embedded_truetype_and_type1_pass(tmp_path, monkeypatch):
+    pdf = _write(tmp_path / "main.pdf")
+    _fake_pdffonts(monkeypatch,
+                   "BXGEVL+DejaVuSerif                   CID TrueType      Identity-H       yes yes yes     19  0\n"
+                   "ABCDEF+NimbusRomNo9L-Regu            Type 1            Custom           yes yes no      12  0\n")
+    assert verify.type3_fonts(pdf) == []
+
+
+def test_unembedded_font_is_reported(tmp_path, monkeypatch):
+    pdf = _write(tmp_path / "main.pdf")
+    _fake_pdffonts(monkeypatch, "Helvetica                            Type 1            Standard         no  no  no       7  0\n")
+    out = verify.type3_fonts(pdf)
+    assert len(out) == 1 and "unembedded" in out[0]
+
+
+def test_font_check_refuses_to_pass_when_it_cannot_run(tmp_path, monkeypatch):
+    monkeypatch.setattr("shutil.which", lambda _: None)
+    out = verify.type3_fonts(_write(tmp_path / "main.pdf"))
+    assert len(out) == 1 and "UNCHECKED" in out[0]

@@ -33,6 +33,9 @@ mpl.rcParams.update({
     "axes.edgecolor": MUTED, "text.color": INK, "axes.labelcolor": INK, "xtick.color": MUTED,
     "ytick.color": MUTED, "grid.color": "#DDDDDD", "grid.linewidth": 0.6, "legend.frameon": False,
     "axes.axisbelow": True,   # gridlines behind bars/marks, never showing through
+    # TrueType, not matplotlib's default Type 3: IEEE PDF eXpress rejects Type 3 fonts, and the
+    # checker now fails on any in main.pdf.
+    "pdf.fonttype": 42, "ps.fonttype": 42,
 })
 
 

@@ -56,7 +56,8 @@ SUPERSESSION_MARKERS = ("SUPERSEDED", "RETRACTED", "FALSIFIED", "do not cite", "
 # The paper cites superseded numbers legitimately, but only where it is retracting them. These
 # are the phrases it uses to do that; anything else quoting a retracted figure is a leak.
 PAPER_MARKERS = ("retract", "earlier draft", "earlier revision", "previously said", "superseded",
-                 "falsified", "we withhold", "was false", "is neither quantity", "an earlier version")
+                 "falsified", "we withhold", "was false", "is neither quantity", "an earlier version",
+                 "earlier versions of this")
 # Markers must be specific phrases. "is neither" and "wrong" were here, added to let one §5.8
 # sentence through, and "is neither" then silenced the guard on the conclusion's "The answer is
 # neither yes nor no but a decoupling" -- a retracted claim stated as the contribution (audit H6).
@@ -156,15 +157,41 @@ def stale_figures(fig_sources: Mapping[str, Sequence[str]], figs: Path, exp: Pat
     return out
 
 
-def stale_paper_pdf(pdf: Path, sources: Iterable[Path]) -> list[str]:
+def pdf_build_manifest(pdf: Path, sources: Iterable[Path]) -> dict:
+    """Content digests of a built PDF and of every source it was built from.
+
+    Written right after a build (`scripts/record_pdf_build.py`) and committed, so a fresh clone
+    can tell a current PDF from a stale one without trusting file times.
+    """
+    import os
+
+    return {"pdf": module_digest(pdf),
+            "sources": {os.path.relpath(s, pdf.parent): module_digest(s)
+                        for s in sources if s.exists()}}
+
+
+def stale_paper_pdf(pdf: Path, sources: Iterable[Path],
+                    manifest: Mapping | None = None) -> list[str]:
     """The built PDF older than any source it is built from.
 
     The last edge of the chain. A correction landing in the .tex is not a correction until the
     PDF is rebuilt, and the PDF is what gets attached to a submission.
+
+    Times alone are not evidence: `git clone` writes files in an arbitrary order, so on a fresh
+    clone the committed, current PDF looked older than its sources and `make verify` failed --
+    the first command an artifact committee runs (2026-10-19 pass). When a build `manifest` is
+    given, a source that only LOOKS newer is cleared if its content and the PDF's both match
+    what the manifest recorded at build time; a real edit still fails.
     """
+    import os
+
     if not pdf.exists():
         return []
     behind = sorted(str(s) for s in sources if s.exists() and _mtime(s) > _mtime(pdf))
+    if behind and manifest and manifest.get("pdf") == module_digest(pdf):
+        recorded = manifest.get("sources", {})
+        behind = [s for s in behind
+                  if recorded.get(os.path.relpath(s, pdf.parent)) != module_digest(Path(s))]
     if not behind:
         return []
     return [f"STALE PDF: {pdf.name} predates {', '.join(behind)}. Rebuild before submitting; "
@@ -638,6 +665,35 @@ def leaked_annotations(pdf: Path,
     if hangul:
         out.append(f"the rendered PDF contains Hangul ({', '.join(sorted(set(hangul))[:5])}); in an "
                    "English-language paper that is a leaked internal note.")
+    return out
+
+
+def type3_fonts(pdf: Path) -> list[str]:
+    """Type 3 or unembedded fonts in the PDF a reviewer receives.
+
+    matplotlib writes Type 3 fonts by default, and both figures the paper embeds carried them
+    (DejaVu Serif and Sans, five font objects). IEEE PDF eXpress rejects Type 3 fonts, and nothing
+    read the font table: every check read the source, the numbers, or the text. Found on the
+    2026-10-19 re-verification pass; `make_figures.py` now writes TrueType.
+    """
+    import shutil
+    import subprocess
+
+    if not pdf.exists():
+        return [f"{pdf} is missing; build it before checking its fonts."]
+    if shutil.which("pdffonts") is None:
+        return ["pdffonts is unavailable, so the PDF's fonts are UNCHECKED; do not treat this as "
+                "a pass."]
+    lines = subprocess.run(["pdffonts", str(pdf)], capture_output=True, text=True,
+                           check=True).stdout.splitlines()[2:]
+    out = []
+    for ln in lines:
+        cols = ln.split()
+        if "Type 3" in ln:
+            out.append(f"Type 3 font in {pdf.name}: {cols[0]} (IEEE PDF eXpress rejects these; "
+                       "write figures with pdf.fonttype 42).")
+        elif len(cols) >= 5 and cols[-5] != "yes":
+            out.append(f"unembedded font in {pdf.name}: {cols[0]}.")
     return out
 
 

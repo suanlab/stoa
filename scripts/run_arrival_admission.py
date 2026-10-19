@@ -1,36 +1,25 @@
 #!/usr/bin/env python3
-"""Place blocks when they ARRIVE, not at a split instant. The decisive experiment.
+"""Place blocks when they ARRIVE, not at a split instant.
 
-Every placement result in this project so far fixes a split instant, builds features from
-the prefix, and places the blocks that already exist. That protocol makes 97% of the
-hindsight oracle's advantage unreachable by construction: 45-46% of blocks have no
-pre-split access at all, and they carry the overwhelming majority of the gap. A policy that
-cannot express an opinion about them cannot compete for their benefit, so a flat "captured"
-number says more about the protocol than about learnability.
+A split-instant policy can only place blocks that exist at the split, and on these traces those
+carry ~5% of the hindsight oracle's advantage (§5.2). Here every block appearing for the FIRST
+time after the split is placed at that instant, from request-level context available then
+(session request count, rate and recency; position in the request; request length; distinct
+blocks seen so far). No feature reads the future.
 
-This script targets exactly that 97%. At each request, every block appearing for the FIRST
-time is placed immediately, from request-level context available at that instant:
+Blocks that exist at the split keep the frequency heuristic's belief in every arm; only the new
+blocks' beliefs differ. A belief has two parts, and the arms vary them separately (§AQ):
 
-  * the shared-prefix session id (first block hash of the request) and how much that session
-    has been seen so far -- its request count, rate and recency
-  * the block's position within the request, and the request's length
-  * wall-clock inter-arrival time for the session (Mooncake carries real timestamps)
-  * how many distinct blocks have been seen so far -- a proxy for warm-up
+  ORDER, on one common magnitude multiset (the pre-split analogue, quantile-matched):
+    order-arrival    earliest arrival highest (first-come-first-served)
+    order-learned    a logistic model trained on windowed pre-split labels
+    order-shuffled   a seeded random order
+  MAGNITUDE, in arrival order (a constant belief; the stable sort keeps arrival order):
+    constant-mean    every new block at the mean pre-split reuse
+    constant-median  every new block at the median pre-split reuse
 
-No feature reads the future. The model is fitted on the FIRST HALF of the trace, in arrival
-order, with labels supplied by what the second half turns out to contain; it then places
-the second half's arrivals online. Cost is billed at the true future with the same weighted
-cost function every other experiment uses, so the numbers are directly comparable.
-
-Three arms, identical placement machinery:
-  arrival-learned  logistic model over the features above, decided at arrival
-  arrival-constant no model: every arrival gets the same belief (the do-nothing control)
-  split-oracle     the clairvoyant belief restricted to split-visible blocks -- the ceiling
-                   the previous protocol could reach
-
-If the learned arm captures a meaningful share of the gap the split protocol could not
-touch, the decoupling result is overturned. If it does not, the negative result becomes far
-stronger, because it then holds in the regime where the headroom actually lives.
+An earlier version compared a constant-mean FCFS arm against learned and shuffled arms on the
+spread multiset, so its "order" comparison was mostly a magnitude comparison (§AQ).
 
 CPU, a few minutes per trace. Usage: python3 scripts/run_arrival_admission.py
 """
@@ -182,33 +171,56 @@ def main() -> None:
         c_ceil = place_with_beliefs(wl, with_new({i: float(fut.get(i, 0)) for i in ev_ids}))
         span, reach = c_pref - c_orac, c_pref - c_ceil
 
-        def score(vals):
-            belief = with_new(dict(zip(ev_ids, quantile_match(list(vals), ref))))
-            c = place_with_beliefs(wl, belief)
+        def bill(belief_for_new):
+            c = place_with_beliefs(wl, with_new(belief_for_new))
             return (100.0 * (c_pref - c) / span if span > 0 else 0.0,
                     100.0 * (c_pref - c) / reach if reach > 0 else 0.0)
 
-        # The constant arm is NOT "no policy": quantile matching gives every block the same
-        # magnitude, and the stable sort then places them in ARRIVAL order, so it is
-        # first-come-first-served admission with a fixed action. The shuffled arm isolates
-        # how much of its benefit comes from that ordering rather than from the fixed action.
+        # ORDER arms: every arm's scores are quantile-matched onto the SAME multiset, so the only
+        # thing that differs between them is which new block receives which magnitude. Strict
+        # scores throughout -- a tied score would receive the tie block's mean and smuggle a
+        # magnitude difference back in, which is exactly the defect §AQ records.
         import random as _r
-        _rng = _r.Random(17)
-        shuffled = list(range(len(ev_idx)))
-        _rng.shuffle(shuffled)
-        arms = {"arrival-learned": (a_auc, scores),
-                "arrival-fcfs": (0.5, [0.5] * len(ev_idx)),
-                "arrival-shuffled": (0.5, [float(v) for v in shuffled])}
-        for arm, (au, vals) in arms.items():
-            g, r = score(vals)
-            print(f"{name:<13} | {arm:<17} | {au:6.3f} | {g:7.1f}% | {r:8.1f}%")
-            rows.append({"trace": name, "arm": arm, "auc": round(au, 4),
+        import statistics as _st
+        perm = list(range(len(ev_idx)))
+        _r.Random(17).shuffle(perm)
+        assert all(arrival[ev_idx[k]] <= arrival[ev_idx[k + 1]] for k in range(len(ev_idx) - 1)), \
+            "evaluation blocks are not in arrival order"
+        # Learned scores can tie (identical feature vectors); rank them with arrival as the
+        # tie-break so every arm hands out the multiset one value per block.
+        _ord = sorted(range(len(ev_idx)), key=lambda k: (scores[k], -k))
+        learned_rank = [0.0] * len(ev_idx)
+        for rnk, k in enumerate(_ord):
+            learned_rank[k] = float(rnk)
+        order_arms = {
+            "order-arrival": (None, [-float(k) for k in range(len(ev_idx))]),  # ev_idx is in arrival order
+            "order-learned": (a_auc, learned_rank),
+            "order-shuffled": (None, [float(v) for v in perm]),
+        }
+        # MAGNITUDE arms: one constant belief for every new block. place_with_beliefs sorts
+        # stably, so equal beliefs are taken in item order, i.e. arrival order.
+        mag_arms = {"constant-mean": _st.mean(ref), "constant-median": _st.median(ref)}
+
+        for arm, (au, vals) in order_arms.items():
+            g, r = bill(dict(zip(ev_ids, quantile_match(list(vals), ref))))
+            print(f"{name:<13} | {arm:<17} | {au if au is not None else float('nan'):6.3f} | "
+                  f"{g:7.1f}% | {r:8.1f}%")
+            rows.append({"trace": name, "axis": "order", "arm": arm,
+                         "auc": round(au, 4) if au is not None else None,
+                         "captured_pct": round(g, 2),
+                         "captured_of_attainable_pct": round(r, 2),
+                         "n_arrivals_scored": len(ev_idx)})
+        for arm, m in mag_arms.items():
+            g, r = bill({i: m for i in ev_ids})
+            print(f"{name:<13} | {arm:<17} | {'':>6} | {g:7.1f}% | {r:8.1f}%   (belief {m:.2f})")
+            rows.append({"trace": name, "axis": "magnitude", "arm": arm, "auc": None,
+                         "new_block_belief": round(m, 4),
                          "captured_pct": round(g, 2),
                          "captured_of_attainable_pct": round(r, 2),
                          "n_arrivals_scored": len(ev_idx)})
         ceil_g = 100.0 * reach / span if span > 0 else 0.0
         print(f"{name:<13} | {'arrival-ceiling':<17} | {1.0:6.3f} | {ceil_g:7.1f}% | {100.0:8.1f}%")
-        rows.append({"trace": name, "arm": "arrival-ceiling", "auc": 1.0,
+        rows.append({"trace": name, "axis": "diagnostic", "arm": "arrival-ceiling", "auc": 1.0,
                      "captured_pct": round(ceil_g, 2),
                      "captured_of_attainable_pct": 100.0,
                      "n_arrivals_scored": len(ev_idx)})
@@ -220,7 +232,8 @@ def main() -> None:
                     "protocol": ("blocks placed at first appearance from request-level "
                                  "context; train/eval cut = billing split = time_split(0.5); "
                                  "training labels windowed to end before the split; belief "
-                                 "magnitudes from the pre-split analogue population"),
+                                 "magnitudes from the pre-split analogue population; order arms share "
+                                 "one magnitude multiset, magnitude arms share arrival order"),
                     "why": ("the split-instant protocol leaves ~95% of the hindsight gap "
                             "unreachable; this targets it, causally (§AP)")},
          "results": rows}, indent=2))

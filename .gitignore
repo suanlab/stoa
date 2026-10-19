@@ -23,8 +23,6 @@ data/repr_cache.json
 
 # --- build products ----------------------------------------------------------------
 paper/*.aux
-paper/*.bbl
-paper/*.blg
 paper/*.log
 paper/*.out
 paper/*.synctex.gz
@@ -43,3 +41,9 @@ dist/
 # Local session pointer, not part of the published artifact.
 CLAUDE.md
 !data/SHA256SUMS
+
+# The bibliography build outputs are tracked: the checker reads main.blg for BibTeX warnings,
+# and a fresh clone without them failed `make verify` (2026-10-19 pass).
+
+# Local audit notes; not part of the published artifact.
+AUDIT.md

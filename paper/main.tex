@@ -18,6 +18,8 @@
 \usepackage{makecell}
 \usepackage{multirow}
 \usepackage[hidelinks]{hyperref}
+\hypersetup{pdftitle={Decide on Arrival: Placement Timing Beats Placement Prediction on Production KV Traces},
+  pdfauthor={Suan Lee}}
 \usepackage{url}
 \usepackage{cleveref}
 \graphicspath{{figs/}}
@@ -48,13 +50,13 @@ storage tiers, and the one we used for three revisions of this work, is at a spl
 prefix, place the blocks that exist, and bill the result against a hindsight oracle. On two production
 Mooncake traces this protocol measures almost nothing. Of the oracle's advantage, 94.7\% and 95.9\% sits
 on blocks that do not yet exist at the split, so the best possible split-time policy reaches 5.3\% and
-4.1\% of it; the share stays at 92--99\% for every split from 0.3 to 0.7 and under order-of-magnitude
-changes to the cost weights. Inside that protocol a better ranker helps monotonically, but only over the
+4.1\% of it; the share stays at 92--99\% for every split from 0.3 to 0.7 and under tenfold
+changes to the latency and token weights. Inside that protocol a better ranker helps monotonically, but only over the
 sliver: the strongest model gains under 3\% of the oracle's advantage. Deciding at each block's arrival
-instead puts most of the advantage within reach. Even first-come-first-served admission captures 75\%
-and 85\% of it, and 53\% on Mooncake's synthetic control, more than any split-time policy could. Which
-arrival-time rule is best this evaluation cannot settle, because within a finite trace earlier arrivals
-have more time to be reused. Reactive tiering is consistent with this: LRU, LFU and a fill-once cache
+instead puts most of the advantage within reach: every arrival-time rule we test captures 45--85\% of it,
+and there the reuse a rule assumes for a block it has never seen moves the result by 30--39 points, while
+how it ranks those blocks moves it by about one. On Mooncake's synthetic control the margin over the
+split-time ceiling narrows and is not robust. Reactive tiering is consistent with this: LRU, LFU and a fill-once cache
 reach 75--99\% and 40--94\% of Belady's hit rate, the best adaptive policy (ARC, LeCaR, CACHEUS) beats
 the best of those rules, each chosen per operating point, by at most 4.6 points, and a learned
 replacement policy (LRB) stays below ARC, because 76--78\% of blocks are never reused. We give a one-line

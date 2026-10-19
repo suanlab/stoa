@@ -5,10 +5,9 @@ deadline 2026-11-11, 5 PM PT.** Title: *[Experiment, Analysis, and Benchmark] De
 Placement Timing Beats Placement Prediction on Production KV Traces.* The paper reports what production
 traces say about KV-block placement: split-instant evaluation leaves 94.7% and 95.9% of a hindsight
 oracle's advantage on blocks that do not yet exist, so the best split-time policy reaches 5.3%
-(conversation) and 4.1% (toolagent) of it. Deciding at each block's arrival instead, even
-first-come-first-served admission captures 75.0% and 84.7%, and 52.6% on Mooncake's synthetic control.
-Which arrival-time rule is best the evaluation cannot settle, because within a finite trace earlier
-arrivals have more time to be reused.
+(conversation) and 4.1% (toolagent) of it. Deciding at each block's arrival instead, every
+rule tested captures 45–85% on production, and the reuse a rule assumes for an unseen block moves the
+result by 29.5 / 39.1 points while the order it ranks such blocks in moves it by about one.
 
 The PVLDB-formatted version is `main_pvldb.tex`; its exact last revision is git tag
 `pvldb-final-2026-09`. It was never submitted. The ICDE version drops the two LLM-dependent sections
@@ -30,7 +29,7 @@ before any of these experiments ran; read it for what we intended to measure, no
 IEEE conference format (`IEEEtran.cls`, `IEEEtran.bst`, both from the local TeX installation).
 
 ```bash
-export PATH="$HOME/.TinyTeX/bin/x86_64-linux:$PATH"   # userspace TeX already installed here
+# any TeX Live with IEEEtran; or simply `make paper` from the repository root
 pdflatex main && bibtex main && pdflatex main && pdflatex main   # -> main.pdf
 python3 ../scripts/make_figures.py                     # regenerate figs/ from experiments/*.json
 python3 ../scripts/check_paper_numbers.py              # every number, guard and requirement below
@@ -78,7 +77,7 @@ Reproducibility package: `../REPRODUCIBILITY.md` and `make verify`.
 
 ## Length
 
-Body ends partway down page 12 under the ICDE rule; the PDF is 12 pages including references. Additions
+Body ends partway down page 12 under the ICDE rule; the PDF is 13 pages including references and the acknowledgment. Additions
 now cost space directly. Measure the body, not the file: `stoa.verify.body_pages` with the ICDE end
 headings is the quantity the venue constrains. A calibration pass against a live vLLM+LMCache deployment
 is still the open gate (`docs/claims_dependency.md` §B, §P).
@@ -87,7 +86,7 @@ is still the open gate (`docs/claims_dependency.md` §B, §P).
 
 Generated into `figs/` from `experiments/*.json` by `../scripts/make_figures.py`. **Two are embedded:**
 `fig_reactive.pdf` (reactive envelope, ARC and LRB) and `fig_architecture.pdf` (the control-plane
-schematic, which plots no data). The other six are produced for a longer version and are *not* in the
+schematic, which plots no data). The other nine are produced for a longer version and are *not* in the
 paper — notably `fig_locomo_baselines.pdf` (leak-free LoCoMo: per-query retrieval dominates any
 query-agnostic placement) and `fig_capacity_ladder.pdf`.
 
@@ -107,13 +106,13 @@ paper reads — an earlier revision had two such files diverge silently.
 |---|---|
 | Abstract, §1–§8 | complete prose, aligned to the arrival-timing framing |
 | Table 1 (positioning) | complete |
-| §5.2 length sweep | both traces run to exhaustion |
-| §5.3 capacity ladder | linear / GBDT / MLP / oracle, full traces |
-| §5.5 reaction | full traces; ARC, LeCaR, CACHEUS + LRB, with ghost-hit and censoring diagnostics |
+| §V-B length sweep | both traces run to exhaustion |
+| §V-D capacity ladder | linear / GBDT / MLP / oracle, full traces |
+| §V-F reaction | full traces; ARC, LeCaR, CACHEUS + LRB, with ghost-hit and censoring diagnostics |
 | placement vs retrieval, representation axis | **omitted from the ICDE version** (LLM-dependent; in `main_pvldb.tex`) |
-| §5.2 synthetic control | Mooncake's third workload; unreachable share 45.3–83.5%; arrival-time margin narrows (52.6% vs 35.0%) |
-| §5.4 arrival-time admission | causal design (§AP): FCFS 75.0 / 84.7 / 52.6% of the full gap; rule ranking left open (exposure confound) |
-| §5.8 protocol | twenty-four defects + the controls that catch them |
+| §V-B synthetic control | Mooncake's third workload; unreachable share 45.3–83.5%; arrival-time margin not robust (33.6–52.6% vs 35.0%) |
+| §V-C arrival-time admission | causal (§AP), order and magnitude separated (§AQ): 45–85% on production; order ≈1 point, magnitude 29.5 / 39.1 |
+| §V-G protocol | twenty-five defects + the controls that catch them |
 
 Every number in the paper is asserted against its artifact by `../scripts/check_paper_numbers.py`; run it
 after regenerating any experiment.

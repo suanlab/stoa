@@ -7,18 +7,19 @@ budget-constrained formulation as a frame and measured one of its axes, placemen
 production KV traces.
 
 The finding is about when to decide, and it is first a finding about evaluation. Evaluated at a split
-instant, as is natural, more than nine-tenths of a hindsight oracle's advantage is out of any policy's
-reach, whatever the split and whatever the cost weights; inside that protocol a better ranker helps
+instant, as is natural, more than nine-tenths of a hindsight oracle's advantage is out of reach of any
+policy that places the blocks present at the split, for every split we tried and under tenfold changes
+to the cost weights; inside that protocol a better ranker helps
 monotonically, but over a sliver. Deciding at each block's arrival puts most of the advantage within
-reach: even first-come-first-served admission captures three-quarters or more of it on both production
-traces. Which arrival-time rule is best we cannot yet say, because in a finite evaluation window arrival
-order is entangled with exposure time. Reactive tiering, forecasting nothing, already delivers much of the
+reach: every arrival-time rule we test captures 45--85\% of it on both production traces, and the
+reuse a rule assumes for a block it has never seen matters far more than the order it ranks such blocks
+in. Reactive tiering, forecasting nothing, already delivers much of the
 achievable hit rate, and the adaptive-replacement family adds little to it, because the signal it adapts on
 is scarce when most blocks are never reused.
 
-We arrived here only after removing twenty-four measurement defects, each of which had produced a
-plausible result, including leaks in our own arrival-time experiment that an audit found after every
-number check had passed. We report their mechanisms and the controls that catch them, because the same
-traps are open to anyone measuring a memory scheduler. The next steps are an evaluation with equal
-exposure per block, a cost model calibrated against real tiers, and the habit of asking what a reported
+We arrived here only after removing twenty-five measurement defects, each of which had produced a
+plausible result, including leaks and an unfair control in our own arrival-time experiment that were
+found after every number check had passed. We report their mechanisms and the controls that catch them, because the same
+traps are open to anyone measuring a memory scheduler. The next steps are an admission rule that learns the belief it gives unseen blocks, an evaluation
+with equal exposure per block, a cost model calibrated against real tiers, and the habit of asking what a reported
 fraction's denominator could have been.

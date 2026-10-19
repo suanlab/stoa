@@ -39,10 +39,9 @@ budget-aware timing decision---the third axis STOA learns.
 Two lines bear directly on our results and we position against them explicitly, because our findings
 reproduce rather than extend them. \textbf{LRB}~\cite{S6_song2020lrb} learns a relaxed-Belady objective
 for CDN caching from a feature vector built out of the deltas between an object's past request
-times --- the same family as the think-time features we tried here. Timing as a cache-scheduler input is
-therefore established practice, not a new interface insight, and our (negative) placement result should
-be read as a report that this family does not transfer to KV-block \emph{placement} under our cost model,
-not as a novel signal. \textbf{ARC}~\cite{S7_megiddo2003arc} adaptively balances recency against
+times --- the same family as the session recency and rate features our arrival-time ranker uses. Timing as a
+cache-scheduler input is therefore established practice; what we add is evidence about \emph{when} a
+placement decision is taken, not a new signal to take it with. \textbf{ARC}~\cite{S7_megiddo2003arc} adaptively balances recency against
 frequency precisely because neither dominates across workloads; the recency-versus-frequency inversion we
 measure between our two sources (\Cref{sec:reaction}) is that observation restated on KV blocks, and an
 adaptive policy of the ARC family is the baseline a deployment should reach for rather than either pure
