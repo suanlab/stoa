@@ -610,3 +610,21 @@ def test_font_check_refuses_to_pass_when_it_cannot_run(tmp_path, monkeypatch):
     monkeypatch.setattr("shutil.which", lambda _: None)
     out = verify.type3_fonts(_write(tmp_path / "main.pdf"))
     assert len(out) == 1 and "UNCHECKED" in out[0]
+
+
+def test_pvldb_template_placeholders_are_not_leaked_notes(tmp_path, monkeypatch):
+    """The PVLDB reference block renders `doi:XX.XX/XXX.XX` and pages `XXX-XXX` at submission;
+    the template's README calls them fine for submission. They are exempt by exact string, so
+    any other "XXX" in the PDF still fails."""
+    import shutil
+    import subprocess
+
+    pdf = _write(tmp_path / "main.pdf")
+    text = {"v": ""}
+    monkeypatch.setattr(shutil, "which", lambda name: "/usr/bin/" + name)
+    monkeypatch.setattr("subprocess.run", lambda cmd, **kw: subprocess.CompletedProcess(
+        cmd, 0, stdout=text["v"], stderr=""))
+    text["v"] = "PVLDB, 20(1): XXX-XXX, 2027.\ndoi:XX.XX/XXX.XX\nbody"
+    assert verify.leaked_annotations(pdf) == []
+    text["v"] += "\nXXX check this number"
+    assert any("XXX" in m for m in verify.leaked_annotations(pdf))

@@ -1,5 +1,5 @@
 """PVLDB version only: backs the LLM-dependent LoCoMo and representation results, which the
-ICDE paper omits because they need a paid hosted model (audit L1, section AO.7).
+paper omits because they need a paid hosted model (audit L1, section AO.7).
 
 LoCoMo benchmark adapter (Maharana et al., 2024; arXiv:2402.17753).
 

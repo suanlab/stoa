@@ -1,48 +1,52 @@
-% STOA @ ICDE 2027, research track, Experiment, Analysis & Benchmark (EAB) category, round 2.
-% Call verified 2026-10-02 (icde2027.github.io/cf-research-papers.html):
-%   deadline 2026-11-11 5 PM PT, single deadline (no separate abstract) | single-blind
-%   12 pages EXCLUDING references and the AI-generated content acknowledgement | IEEE format
-%   no appendix | EAB titles start with "[Experiment, Analysis, and Benchmark]" (removed at CR)
-%   EAB "MUST provide all artifacts necessary to reproduce the results. No exceptions."
-%   AI-generated content "shall be disclosed in the acknowledgments section".
+% STOA @ PVLDB Volume 20 (VLDB 2027), research track, Experiment, Analysis & Benchmark (EA&B).
+% Guidelines verified 2026-10-20 (vldb.org/2027/submission-guidelines.html):
+%   deadline 1st of each month 5 PM PT; abstract mandatory by the 25th of the previous month
+%   single-blind (names and affiliations on page 1) | 12 pages EXCLUDING references only:
+%   appendices and acknowledgements count | EA&B title suffix "[Experiment, Analysis & Benchmark]"
+%   in the paper and the CMT title (dropped at camera-ready)
+%   EA&B: "required to make available all experimental data and related software (there are no
+%   excuses)"; the initial submission links the full reproducibility package
+% Template: the official VLDB-Template bundle (github.com/vldbproceedings/VLDB-Template, commit
+%   39c95f5), acmart.cls v2.19 + pvldb.sty, vendored here byte-identical to upstream.
 % Build: pdflatex main && bibtex main && pdflatex main && pdflatex main
-% The PVLDB-formatted version is preserved as main_pvldb.tex; the exact last PVLDB revision is
-% git tag pvldb-final-2026-09.
-\documentclass[conference]{IEEEtran}
-\IEEEoverridecommandlockouts
+% The ICDE-formatted version is preserved as main_icde.tex; earlier PVLDB and CIDR versions as
+% main_pvldb.tex and main_cidr.tex (git tag pvldb-final-2026-09).
+\documentclass[sigconf, nonacm]{acmart}
 
-\usepackage{cite}
-\usepackage{amsmath,amssymb}
-\usepackage{graphicx}
-\usepackage{booktabs}
+%%% do not modify the following VLDB block %%
+%%% VLDB block start %%%
+\usepackage{pvldb}% VLDB/PVLDB formatting overrides, see pvldb.sty for details.
+%%% VLDB block end %%%
+
+\renewcommand\vldbdoi{XX.XX/XXX.XX}
+\renewcommand\vldbpages{XXX-XXX}
+% The reproducibility package. check_paper_numbers.py reads this macro, rejects a placeholder,
+% and with STOA_CHECK_URL=1 fetches it with no credentials.
+\renewcommand\vldbavailabilityurl{https://github.com/suanlab/stoa}
+\newcommand\artifacturl{\vldbavailabilityurl}   % the sections cite the package by this name
+
+\let\Bbbk\relax        % acmart's newtxmath already defines \Bbbk
+\usepackage{amssymb}
 \usepackage{makecell}
 \usepackage{multirow}
-\usepackage[hidelinks]{hyperref}
-\hypersetup{pdftitle={The Unseen Block: What Split-Instant Evaluation Hides in KV-Cache Placement},
-  pdfauthor={Suan Lee}}
-\usepackage{url}
 \usepackage{cleveref}
 \graphicspath{{figs/}}
 
-% The reproducibility package. check_paper_numbers.py reads this macro, rejects a placeholder,
-% and with STOA_CHECK_URL=1 fetches it with no credentials.
-\newcommand\artifacturl{https://github.com/suanlab/stoa}
-
 \begin{document}
 
-\title{[Experiment, Analysis, and Benchmark] The Unseen Block: What Split-Instant Evaluation
-Hides in KV-Cache Placement}
+\title[The Unseen Block: What Split-Instant Evaluation Hides in KV-Cache Placement]{The Unseen
+Block: What Split-Instant Evaluation Hides in KV-Cache Placement [Experiment, Analysis \& Benchmark]}
 
 % Single-blind: names and affiliations are required. check_paper_numbers.py refuses the
-% placeholder below, and refused "STOA Project" -- the git user name that sat here unnoticed
-% through every PVLDB pass -- so this cannot ship unfilled.
-\author{\IEEEauthorblockN{Suan Lee}
-\IEEEauthorblockA{Semyung University\\
-Jecheon, Republic of Korea\\
-suanlee@semyung.ac.kr\\
-ORCID 0000-0002-3047-1167}}
-
-\maketitle
+% placeholder "STOA Project" -- the git user name that sat here unnoticed through every earlier
+% PVLDB pass -- so this cannot ship unfilled.
+\author{Suan Lee}
+\orcid{0000-0002-3047-1167}
+\affiliation{%
+  \institution{Semyung University}
+  \city{Jecheon}
+  \country{Republic of Korea}}
+\email{suanlee@semyung.ac.kr}
 
 \begin{abstract}
 A natural way to evaluate how a memory system for LLM agents should place KV-cache blocks across
@@ -69,9 +73,12 @@ catalogue the measurement defects we made and caught, including leaks in our own
 that survived every number check.
 \end{abstract}
 
-\begin{IEEEkeywords}
-KV cache, memory tiering, cache replacement, evaluation methodology, LLM agents, reproducibility
-\end{IEEEkeywords}
+\maketitle
+
+%%% do not modify the following VLDB block %%
+%%% VLDB block start %%%
+\vldbtopmatter
+%%% VLDB block end %%%
 
 \input{sections/01_introduction}
 \input{sections/02_motivation}
@@ -82,9 +89,9 @@ KV cache, memory tiering, cache replacement, evaluation methodology, LLM agents,
 \input{sections/07_related}
 \input{sections/08_conclusion}
 
-% Required by ICDE 2027 and excluded from the page limit. Written to be checkable: every claim
-% about what the AI did is visible in the artifact's commit history (Co-Authored-By trailers).
-\section*{Acknowledgment}
+% Counts toward PVLDB's 12 pages (only references are excluded). Written to be checkable: every
+% claim about what the AI did is visible in the artifact's commit history (Co-Authored-By trailers).
+\begin{acks}
 \textbf{Use of AI-generated content.} An AI assistant (Anthropic's Claude, Opus~5 and Opus~5.5 models,
 used through the Claude Code agentic environment) was used extensively throughout this work. It wrote
 most of the code in the released artifact, designed and ran most of the experiments and analyses,
@@ -96,8 +103,9 @@ figure the review produced (a third LRB repair) is neither reproduced nor relied
 re-derived from the released artifact by a checker shipped with it; a few historical figures (what an
 earlier version reported) come from the artifact's lab notebook. The initial concept and research
 idea were proposed by the author. The author takes full responsibility for the content of this paper.
+\end{acks}
 
-\bibliographystyle{IEEEtran}
+\bibliographystyle{ACM-Reference-Format}
 \bibliography{../docs/references}
 
 \end{document}

@@ -1,56 +1,105 @@
 This is BibTeX, Version 0.99e (TeX Live 2026)
 Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: main.aux
-The style file: IEEEtran.bst
-Reallocated singl_function (elt_size=4) to 100 items from 50.
+The style file: ACM-Reference-Format.bst
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
-Reallocated singl_function (elt_size=4) to 100 items from 50.
 Database file #1: ../docs/references.bib
--- IEEEtran.bst version 1.14 (2015/08/26) by Michael Shell.
--- http://www.michaelshell.org/tex/ieeetran/bibtex/
--- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
-
-Done.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated glb_str_ptr (elt_size=4) to 20 items from 10.
+Reallocated global_strs (elt_size=200001) to 20 items from 10.
+Reallocated glb_str_end (elt_size=4) to 20 items from 10.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Warning--no number and no volume in F5_liu2025lmcache
+Warning--page numbers missing in both pages and numpages fields in F5_liu2025lmcache
+Warning--no number and no volume in F4_fang2025lightmem
+Warning--page numbers missing in both pages and numpages fields in F4_fang2025lightmem
+Warning--empty publisher in gao2024cachedattention
+Warning--empty address in gao2024cachedattention
+Warning--page numbers missing in both pages and numpages fields in gao2024cachedattention
+Warning--no number and no volume in S4_coldrl2025
+Warning--page numbers missing in both pages and numpages fields in S4_coldrl2025
+Warning--empty address in S10_jain2016hawkeye
+Warning--empty publisher in kwon2023pagedattention
+Warning--empty address in kwon2023pagedattention
+Warning--page numbers missing in both pages and numpages fields in kwon2023pagedattention
+Warning--no number and no volume in F1_li2025memos
+Warning--page numbers missing in both pages and numpages fields in F1_li2025memos
+Warning--no number and no volume in F3_lin2025sleeptime
+Warning--page numbers missing in both pages and numpages fields in F3_lin2025sleeptime
+Warning--no number and no volume in S2_liu2020parrot
+Warning--page numbers missing in both pages and numpages fields in S2_liu2020parrot
+Warning--no number and no volume in S5_mao2019decima
+Warning--page numbers missing in both pages and numpages fields in S5_mao2019decima
+Warning--empty publisher in S7_megiddo2003arc
+Warning--empty address in S7_megiddo2003arc
+Warning--page numbers missing in both pages and numpages fields in S7_megiddo2003arc
+Warning--no number and no volume in P14_packer2023memgpt
+Warning--page numbers missing in both pages and numpages fields in P14_packer2023memgpt
+Warning--empty publisher in qin2024mooncake
+Warning--empty address in qin2024mooncake
+Warning--page numbers missing in both pages and numpages fields in qin2024mooncake
+Warning--empty address in S9_rodriguez2021cacheus
+Warning--empty address in S11_shah2022mockingjay
+Warning--empty publisher in S6_song2020lrb
+Warning--empty address in S6_song2020lrb
+Warning--page numbers missing in both pages and numpages fields in S8_vietri2018lecar
+Warning--empty publisher in wang2025kvcachewild
+Warning--empty address in wang2025kvcachewild
+Warning--page numbers missing in both pages and numpages fields in wang2025kvcachewild
+Warning--no number and no volume in F2_wang2025mplus
+Warning--page numbers missing in both pages and numpages fields in F2_wang2025mplus
+Warning--no number and no volume in F20_xiong2025raggym
+Warning--page numbers missing in both pages and numpages fields in F20_xiong2025raggym
+Warning--no number and no volume in F6_yan2025memoryr1
+Warning--page numbers missing in both pages and numpages fields in F6_yan2025memoryr1
+Warning--no number and no volume in F7_zhang2025memoryasaction
+Warning--page numbers missing in both pages and numpages fields in F7_zhang2025memoryasaction
+Warning--no number and no volume in S1_zhang2023h2o
+Warning--page numbers missing in both pages and numpages fields in S1_zhang2023h2o
+Warning--empty publisher in zheng2024sglang
+Warning--empty address in zheng2024sglang
+Warning--page numbers missing in both pages and numpages fields in zheng2024sglang
 You've used 25 entries,
-            4087 wiz_defined-function locations,
-            959 strings with 13101 characters,
-and the built_in function-call counts, 15417 in all, are:
-= -- 1087
-> -- 520
-< -- 43
-+ -- 262
-- -- 117
-* -- 742
-:= -- 2377
-add.period$ -- 55
+            5901 wiz_defined-function locations,
+            1474 strings with 20602 characters,
+and the built_in function-call counts, 31122 in all, are:
+= -- 3725
+> -- 1550
+< -- 0
++ -- 528
+- -- 532
+* -- 2500
+:= -- 3320
+add.period$ -- 120
 call.type$ -- 25
-change.case$ -- 26
-chr.to.int$ -- 114
-cite$ -- 25
-duplicate$ -- 1220
-empty$ -- 1424
-format.name$ -- 142
-if$ -- 3551
-int.to.chr$ -- 0
-int.to.str$ -- 25
-missing$ -- 255
-newline$ -- 110
-num.names$ -- 25
-pop$ -- 705
+change.case$ -- 223
+chr.to.int$ -- 24
+cite$ -- 75
+duplicate$ -- 2519
+empty$ -- 1801
+format.name$ -- 611
+if$ -- 7445
+int.to.chr$ -- 3
+int.to.str$ -- 1
+missing$ -- 112
+newline$ -- 277
+num.names$ -- 199
+pop$ -- 1143
 preamble$ -- 1
-purify$ -- 0
-quote$ -- 2
-skip$ -- 1131
+purify$ -- 429
+quote$ -- 0
+skip$ -- 820
 stack$ -- 0
-substring$ -- 293
-swap$ -- 787
-text.length$ -- 5
+substring$ -- 1707
+swap$ -- 182
+text.length$ -- 0
 text.prefix$ -- 0
-top$ -- 5
-type$ -- 25
-warning$ -- 0
-while$ -- 45
-width$ -- 27
-write$ -- 246
+top$ -- 0
+type$ -- 565
+warning$ -- 50
+while$ -- 147
+width$ -- 0
+write$ -- 488
+(There were 50 warnings)

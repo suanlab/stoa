@@ -24,7 +24,8 @@ def main() -> int:
     paper = ROOT / "paper"
     pdf = paper / "main.pdf"
     sources = [paper / "main.tex", *sorted((paper / "sections").glob("*.tex")),
-               *sorted((paper / "figs").glob("*.pdf")), ROOT / "docs" / "references.bib"]
+               *sorted((paper / "figs").glob("*.pdf")), ROOT / "docs" / "references.bib",
+               *(paper / f for f in ("acmart.cls", "pvldb.sty", "ACM-Reference-Format.bst"))]
     stale = verify.stale_paper_pdf(pdf, sources)
     if stale:
         print("Refusing: " + stale[0])

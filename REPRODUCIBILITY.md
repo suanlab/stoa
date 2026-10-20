@@ -4,13 +4,13 @@ Every number in the paper is produced by a script in this repository from public
 each claim to the command that regenerates it, states what is and is not calibrated, and lists the
 controls that are wired into the harness.
 
-ICDE's Experiment, Analysis & Benchmark category requires "all artifacts necessary to reproduce the
-results. No exceptions"; the artifacts below are that package.
+PVLDB's Experiment, Analysis & Benchmark category requires authors "to make available all experimental
+data and related software (there are no excuses)"; the artifacts below are that package.
 
-> **This package accompanies the ICDE 2027 submission (Experiment, Analysis & Benchmark).** Every
+> **This package accompanies the PVLDB Volume 20 submission (Experiment, Analysis & Benchmark).** Every
 > result in that paper regenerates on CPU from public data, with no API key. The LLM-dependent rows
 > below (LoCoMo, the representation pilot) back the earlier PVLDB version, git tag
-> `pvldb-final-2026-09`, and are **not in the ICDE paper**; they are kept for the record and marked.
+> `pvldb-final-2026-09`, and are **not in this paper**; they are kept for the record and marked.
 
 ## 1. Environment
 
@@ -22,7 +22,7 @@ simulator or a trace, never against an LLM.
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements-lock.txt   # every package pinned, transitive ones included
 pip install -e . --no-deps             # the package itself, without re-resolving the pins
-pytest -q                    # 312 tests, ~3 min; torch-gated tests skip cleanly without torch
+pytest -q                    # 313 tests, ~3 min; torch-gated tests skip cleanly without torch
 
 # Or, without the lock (looser, not the reference versions):
 #   pip install -e ".[dev,rl,eval,figures]"
@@ -176,7 +176,7 @@ Checking while logged in tests your own access, not a reviewer's.
 | **Reachable ceiling, one frame, split-swept, with the synthetic control**: 84.4% / 87.6% unreachable at the midpoint (75.0–95.7% / 77.4–96.6% across splits) on production; 54.6% (29.4–77.9%) on the synthetic control | `python3 scripts/run_reachable_ceiling.py` | `experiments/reachable_ceiling.json` |
 | **Reachable share by trace length** (§V-B, §AS): long-horizon effect | `python3 scripts/run_reachable_by_length.py` | `experiments/reachable_by_length.json` |
 | **External replication** (§V-C, §AT, §AU): Alibaba's four Bailian traces (16-token blocks, corrected bill): split protocol leaves 80.6–97.7% unreachable at the midpoint; the hazard arm reaches 1.5–15.2× the split ceiling with all actions, 1.9–3.9× on three traces and 0 on thinking with tier-only actions | `make reproduce-external` (downloads several GB) | `experiments/bailian_reachable_birthx.json`, `bailian_hazard_birthx.json` |
-| **Split-instant sensitivity** (not cited by the ICDE paper; kept as a robustness record): linear ≈ GBDT to within 0.4 pts at all 10 configurations; captured in [+0.4%, +6.0%] of the full gap; oracle gap 70–87%. (Regenerated 2026-10-16. The earlier artifact gave 81–92% because it predated the 512-token block-size fix, not because of the belief scale; it was missing from `DEPENDS_ON`, so the staleness guard never saw it.) | `python3 scripts/run_split_sensitivity.py` | `experiments/split_sensitivity.json` |
+| **Split-instant sensitivity** (not cited by the paper; kept as a robustness record): linear ≈ GBDT to within 0.4 pts at all 10 configurations; captured in [+0.4%, +6.0%] of the full gap; oracle gap 70–87%. (Regenerated 2026-10-16. The earlier artifact gave 81–92% because it predated the 512-token block-size fix, not because of the belief scale; it was missing from `DEPENDS_ON`, so the staleness guard never saw it.) | `python3 scripts/run_split_sensitivity.py` | `experiments/split_sensitivity.json` |
 | **Reactive tiering on the agentic source** (§V-F): working-set threshold (35% of Belady at a 1% tier → 99% at 10%) and the eviction-signal inversion (LRU 0.83–0.96 of Belady at 5%, LFU 0.29–0.31) | `python3 scripts/run_reactive_kvct.py` | `experiments/reactive_kvct_sweep.json` |
 | **Sampling study** (Table 3, §V-E; Table 2's agentic headroom 68–73%): four randomized draws at 20 and 40 conversations; observed captured ranges [−858, +78] and [−166, +66] (tier-speed tie-break restored, 2026-10-20) | `python3 scripts/run_sampling_study.py --sizes 20,40 --draws 4` | `experiments/sampling_study.json` |
 | *(PVLDB version only)* LoCoMo: retrieval dominates placement | `python3 scripts/run_locomo_baselines.py` (needs `OPENAI_API_KEY`) | `experiments/eval_locomo_leakfree.json` |
@@ -234,7 +234,7 @@ not just in prose:
 | Retracted values must not appear outside a retracting paragraph | `stoa.verify.unmarked_superseded(scope="paragraph")` — the 68 numeric checks are *presence* tests; with 90% and 53% injected into the abstract every one still passed (§AH) |
 | **Every guard above is itself tested**, in both directions | `tests/test_verify.py`, 73 tests, mutation-checked — four guards had lived in a script with no tests, where a refactor could delete one silently (§AG) |
 
-`pytest -q` runs all **312** tests, including the leakage guards and the fast/reference equivalence
+`pytest -q` runs all **313** tests, including the leakage guards and the fast/reference equivalence
 check, in about 2 min 45 s.
 
 ## 7. Known limitations
@@ -258,7 +258,7 @@ The claim table above is complete but not ordered by cost. These four commands a
 cheapest first. The first needs no data, no network and no credentials.
 
 ```bash
-make verify           # ~4 min   312 tests + every paper number against its artifact
+make verify           # ~4 min   313 tests + every paper number against its artifact
 make data-check       # instant  are the traces present and the right length?
 make reproduce-fast   # ~40 min  the central claims, regenerated from the Mooncake traces
 make reproduce-full   # ~6 h     the above plus the LRB hyperparameter sweep
@@ -276,7 +276,7 @@ its absence let a wrong number into a draft; `docs/claims_dependency.md` names w
 `reproduce-llm` calls a hosted model. Two results depend on it (in the PVLDB version: §5.6 placement-vs-retrieval, §5.7 the
 representation pilot). They cannot be bit-reproduced even with a key — `temperature=0` pins sampling,
 not the served weights. The shipped artifacts hold aggregate results only (no prompts or response ids), and
-the ICDE paper does not cite them: `check_paper_numbers.py` skips them as not in this paper.
+the paper does not cite them: `check_paper_numbers.py` skips them as not in this paper.
 
 Everything else is CPU-only and free. `pyproject.toml` keeps loose bounds so the package stays
 installable; `requirements-lock.txt` is the provenance record of the exact versions every number

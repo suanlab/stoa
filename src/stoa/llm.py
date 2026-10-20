@@ -1,5 +1,5 @@
 """PVLDB version only: backs the LLM-dependent LoCoMo and representation results, which the
-ICDE paper omits because they need a paid hosted model (audit L1, section AO.7).
+paper omits because they need a paid hosted model (audit L1, section AO.7).
 
 Minimal OpenAI-compatible chat client for LLM-backed evaluation (docs/research_plan.md §5).
 

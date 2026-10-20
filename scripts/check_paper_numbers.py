@@ -44,8 +44,8 @@ checked = 0
 _LOADED: list[str] = []
 
 
-# Results the ICDE version deliberately omits: they depend on a paid hosted model, and ICDE's
-# EAB category requires every result to be reproducible from the artifact, "no exceptions". The
+# Results this paper deliberately omits: they depend on a paid hosted model, and the EA&B category
+# requires every result to be reproducible from the artifact ("there are no excuses"). The
 # artifacts stay in experiments/ and their claims stay in this file for the record (they back
 # the PVLDB version, git tag pvldb-final-2026-09); they are skipped by name, loudly, rather than
 # deleted. See docs/claims_dependency.md §AO.
@@ -56,7 +56,7 @@ NOT_IN_THIS_PAPER = {"eval_locomo_powered.json", "representation_axis.json",
 def load(name):
     """Read an artifact, recording the name so the staleness map can be audited against it."""
     if name in NOT_IN_THIS_PAPER:
-        print(f"\n[skip] {name}: not in this paper (LLM-dependent; omitted for ICDE EAB)")
+        print(f"\n[skip] {name}: not in this paper (LLM-dependent; omitted for EA&B)")
         return None
     _LOADED.append(name)
     p = EXP / name
@@ -833,11 +833,11 @@ _paper = ROOT / "paper"
 # (STOA_CHECK_URL=1) so an offline run cannot silently report it as passing.
 failures += verify.availability_url_problems(
     _paper / "main.tex", check_network=os.environ.get("STOA_CHECK_URL") == "1")
-# ICDE 2027: "12 pages, excluding references and the AI-generated content acknowledgement".
-# The acknowledgement precedes the references, so the body ends at whichever comes first.
+# PVLDB Vol. 20: "All content, including any appendices and acknowledgements but excluding the
+# references, must fit on the given number of pages" (12 for EA&B). Unlike ICDE, the
+# acknowledgement counts, so the body ends only at the references.
 failures += verify.page_limit_violation(_paper / "main.pdf", limit=12,
-                                        end_headings=("ACKNOWLEDGMENT", "ACKNOWLEDGMENTS",
-                                                      "REFERENCES"))
+                                        end_headings=("REFERENCES",))
 failures += verify.bibtex_problems(_paper / "main.blg")
 failures += verify.author_block_problems(_paper / "main.tex")
 failures += verify.leaked_annotations(_paper / "main.pdf")
@@ -848,7 +848,9 @@ for _t in [_paper / "main.tex", *sorted((_paper / "sections").glob("*.tex"))]:
         _cited |= {k.strip() for k in _m.split(",")}
 failures += verify.citation_hygiene((ROOT / "docs" / "references.bib").read_text(), _cited)
 PDF_SOURCES = [_paper / "main.tex", *sorted((_paper / "sections").glob("*.tex")),
-               *[FIGS / f for f in FIG_SOURCES], ROOT / "docs" / "references.bib"]
+               *[FIGS / f for f in FIG_SOURCES], ROOT / "docs" / "references.bib",
+               # the vendored PVLDB template: a template update changes the PDF too
+               *(_paper / f for f in ("acmart.cls", "pvldb.sty", "ACM-Reference-Format.bst"))]
 _pdf_manifest = _paper / ".build_manifest.json"
 failures += verify.stale_paper_pdf(
     _paper / "main.pdf", PDF_SOURCES,
@@ -882,7 +884,7 @@ failures += verify.producer_problems(
 # --- coverage guards, LAST so `checked` is final -----------------------------------
 # Sitting mid-file, this counted only the checks declared above it and passed while
 # a third of the paper went unchecked.
-# Every artifact the ICDE paper cites, and only those. `capacity_ladder.json` (superseded) and
+# Every artifact the paper cites, and only those. `capacity_ladder.json` (superseded) and
 # `split_sensitivity.json` (not cited) used to be here, so a reproducer was told they were required.
 REQUIRED = ("reactive_real_full_lrb.json", "headroom_by_length.json", "lrb_retraction.json",
             "reachable_ceiling.json", "lrb_sweep.json", "calibration_sensitivity.json",

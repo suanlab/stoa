@@ -1,7 +1,7 @@
 # STOA — Storage & Tiered Orchestration for Agents
 
 Reproducibility package for **"The Unseen Block: What Split-Instant Evaluation
-Hides in KV-Cache Placement"** (prepared for ICDE 2027, Experiment, Analysis & Benchmark category).
+Hides in KV-Cache Placement"** (prepared for PVLDB Volume 20 / VLDB 2027, Experiment, Analysis & Benchmark category).
 
 The paper asks what a KV-block placement policy has to get right, and answers that it has to decide
 *early*, and has to *estimate* how far to trust a block it has never seen. The short version:
@@ -40,7 +40,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-lock.txt      # exact versions the paper's numbers came from, FIRST
 pip install -e . --no-deps                # then the package itself, without re-resolving them
 
-pytest -q                                  # 312 tests, ~3 min
+pytest -q                                  # 313 tests, ~3 min
 python3 scripts/check_paper_numbers.py     # every paper number vs its artifact
 ```
 
@@ -57,13 +57,13 @@ claim to a command and an artifact.
 |---|---|
 | `src/stoa/` | the library: MDP interfaces, simulator, placement, cache policies, statistics |
 | `scripts/` | one script per experiment, each writing a named artifact |
-| `src/stoa/{rl,train,orchestrator,policy,llm}.py`, `src/stoa/eval/{benchmarks,budget,locomo,memqa,representation,retrieval}.py` | scaffolding for the §3–4 frame and the PVLDB-only LLM results; no ICDE number uses them |
+| `src/stoa/{rl,train,orchestrator,policy,llm}.py`, `src/stoa/eval/{benchmarks,budget,locomo,memqa,representation,retrieval}.py` | scaffolding for the §3–4 frame and the LLM results of the earlier PVLDB version; no number in this paper uses them |
 | `experiments/` | the artifacts every number in the paper is checked against |
 | `experiments/superseded/` | artifacts behind retracted claims, kept as record, read by nothing |
-| `paper/` | LaTeX source (IEEE format for ICDE; the PVLDB version is `main_pvldb.tex`) |
+| `paper/` | LaTeX source (official PVLDB template; the ICDE version is `main_icde.tex`, an earlier PVLDB version `main_pvldb.tex`) |
 | `docs/CONVENTIONS.md` | architecture, commands, and the conventions the codebase holds itself to |
 | `docs/claims_dependency.md` | the lab notebook: every claim, what it depends on, and what was retracted |
-| `tests/` | 312 tests, most of which pin a specific defect we hit |
+| `tests/` | 313 tests, most of which pin a specific defect we hit |
 
 ## What is hand-rolled, and why it matters
 

@@ -1,5 +1,5 @@
 """Scaffolding for the formulation and architecture of sections 3-4 (the learned control
-plane). No result reported in the ICDE paper uses this module; it is kept because the
+plane). No result reported in the paper uses this module; it is kept because the
 formulation is offered as a frame, and removing it would orphan its tests (audit L1).
 
 Behavioral-cloning warm-start for the GNN factored policy (RQ2; M6-9).

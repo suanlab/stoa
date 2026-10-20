@@ -656,6 +656,11 @@ def leaked_annotations(pdf: Path,
                 "annotations; do not treat this as a pass."]
     text = subprocess.run(["pdftotext", str(pdf), "-"], capture_output=True, text=True,
                           check=True).stdout
+    # The PVLDB template's own submission placeholders (README: "DOI/pages are normally assigned
+    # during production -- placeholders are fine for submission") are not leaked notes; they are
+    # removed by exact string so that any other "XXX" still fails.
+    for tmpl in ("XX.XX/XXX.XX", "XXX-XXX"):
+        text = text.replace(tmpl, "")
     out = []
     for mk in markers:
         if mk in text:

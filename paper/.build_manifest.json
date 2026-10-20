@@ -1,7 +1,9 @@
 {
-  "pdf": "5ce9d223f3192bad1314fb2a76c244563cd4910eafcc6b4776dd46b74916ca30",
+  "pdf": "70dc0b8403710a7866cdc126d53ca60678e1b066f1d88707441096e6644622f3",
   "sources": {
     "../docs/references.bib": "71ef6e14b0a6ae202a413e2fc9b1cadbee51a1a70ba712366bcde7b0a49393d6",
+    "ACM-Reference-Format.bst": "0590db3b8d255a3af91982ab710f3ace5fcaa52434020c9af8a4f141b00b68f3",
+    "acmart.cls": "2f949e6e3f2a79f2cdc218b9dcdbaa7dd451adb4ee0be1af6dc7ebe00b318ea7",
     "figs/fig_architecture.pdf": "5da04c218947e652d37ca346c665992d5038ebdc8b0b52e8240a04e17095a36d",
     "figs/fig_budget_frontier.pdf": "79b9eaceeddc60ca48baaac04a5988f39cf849ad0f80ab4060116671f2b76683",
     "figs/fig_capacity_ladder.pdf": "d7fefb6279c90373e0753aeb96bf38620c4ef21c760afb3256dfd95634230789",
@@ -13,7 +15,8 @@
     "figs/fig_reactive.pdf": "f1b62a82732caad95f9ff59dce6809d838c1ace7a3b5cb34012692b25a1fb8b0",
     "figs/fig_sequential.pdf": "271b849d4e46ea2911eecba5ad5713610b959f5264e359ce5b66ed861397648c",
     "figs/fig_tier_ablation.pdf": "0f65332c927650cbf531f1d522dcdea453e8b70007d75341f61d29fcf0d18ae7",
-    "main.tex": "23e8f93d601894333f5deeb7321f2c659e7a0d6a881bcb0913682133de857f94",
+    "main.tex": "c32d64eaef89eedbec434f12aaa5e181bb3990e78af02228300c8ddf0db3d4d2",
+    "pvldb.sty": "52ad3948f3231b31d2ac90f470c1759e7f96add7b577ec4e267dfbdc87fc4eb2",
     "sections/01_introduction.tex": "e941cc60687398ca2db6a9abb9f9364e8d9d107cfc78e06b516f89451b1bbaee",
     "sections/02_motivation.tex": "25a59d35e26443b9debbdf77bdf990810a22216224679ea2cd76a635a66f5fa5",
     "sections/03_formulation.tex": "7f4ac5bdf225cb6004073f698ab15917034d0e906001387f0a0af0dbfadf7f0c",

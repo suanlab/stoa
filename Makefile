@@ -1,4 +1,4 @@
-# Tiered reproduction for a reproducibility committee (ICDE 2027 EAB: "no exceptions").
+# Tiered reproduction for a reproducibility committee (PVLDB Vol. 20 EA&B: "there are no excuses").
 #
 # The claim->command->artifact table in REPRODUCIBILITY.md is complete but not ordered by cost:
 # some rows take seconds, one takes 2.5 hours, and two need a paid API key. A committee member
@@ -19,7 +19,7 @@ SHELL := /bin/bash
 .PHONY: reproduce-external help verify reproduce-fast reproduce-full reproduce-llm figures paper clean data-check
 
 help:
-	@echo "make verify          — 312 tests + every paper number against its artifact (no data needed)"
+	@echo "make verify          — 313 tests + every paper number against its artifact (no data needed)"
 	@echo "make data-check      — are the traces present and the right length?"
 	@echo "make reproduce-fast  — regenerate the central claims from the Mooncake traces (~40 min)"
 	@echo "make reproduce-full  — the above plus the LRB hyperparameter sweep (~6 h)"
@@ -109,7 +109,7 @@ reproduce-llm:
 	  echo "OPENAI_API_KEY is unset."; \
 	  echo "These two results call a hosted model at temperature=0 and cost about \$$5 total."; \
 	  echo "They cannot be bit-reproduced even with a key: the served weights are not pinned."; \
-	  echo "The shipped artifacts hold aggregates only; the ICDE paper does not cite them."; exit 1; fi
+	  echo "The shipped artifacts hold aggregates only; the paper does not cite them."; exit 1; fi
 	$(PY) scripts/run_locomo_powered.py --judge
 	$(PY) scripts/run_representation_axis.py --judge
 

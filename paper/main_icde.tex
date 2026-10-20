@@ -1,0 +1,103 @@
+% ARCHIVED ICDE VERSION (target moved to PVLDB Vol. 20 on 2026-10-20). STOA @ ICDE 2027, research track, Experiment, Analysis & Benchmark (EAB) category, round 2.
+% Call verified 2026-10-02 (icde2027.github.io/cf-research-papers.html):
+%   deadline 2026-11-11 5 PM PT, single deadline (no separate abstract) | single-blind
+%   12 pages EXCLUDING references and the AI-generated content acknowledgement | IEEE format
+%   no appendix | EAB titles start with "[Experiment, Analysis, and Benchmark]" (removed at CR)
+%   EAB "MUST provide all artifacts necessary to reproduce the results. No exceptions."
+%   AI-generated content "shall be disclosed in the acknowledgments section".
+% Build: pdflatex main && bibtex main && pdflatex main && pdflatex main
+% The PVLDB-formatted version is preserved as main_pvldb.tex; the exact last PVLDB revision is
+% git tag pvldb-final-2026-09.
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage[hidelinks]{hyperref}
+\hypersetup{pdftitle={The Unseen Block: What Split-Instant Evaluation Hides in KV-Cache Placement},
+  pdfauthor={Suan Lee}}
+\usepackage{url}
+\usepackage{cleveref}
+\graphicspath{{figs/}}
+
+% The reproducibility package. check_paper_numbers.py reads this macro, rejects a placeholder,
+% and with STOA_CHECK_URL=1 fetches it with no credentials.
+\newcommand\artifacturl{https://github.com/suanlab/stoa}
+
+\begin{document}
+
+\title{[Experiment, Analysis, and Benchmark] The Unseen Block: What Split-Instant Evaluation
+Hides in KV-Cache Placement}
+
+% Single-blind: names and affiliations are required. check_paper_numbers.py refuses the
+% placeholder below, and refused "STOA Project" -- the git user name that sat here unnoticed
+% through every PVLDB pass -- so this cannot ship unfilled.
+\author{\IEEEauthorblockN{Suan Lee}
+\IEEEauthorblockA{Semyung University\\
+Jecheon, Republic of Korea\\
+suanlee@semyung.ac.kr\\
+ORCID 0000-0002-3047-1167}}
+
+\maketitle
+
+\begin{abstract}
+A natural way to evaluate how a memory system for LLM agents should place KV-cache blocks across
+storage tiers, and the one we used for three revisions of this work, is at a split instant: observe a
+prefix, place the blocks that exist, and bill the result against a hindsight oracle. On two production
+Mooncake traces this protocol measures little. Of the oracle's advantage, 84.4\% and 87.6\% sits on
+blocks that do not yet exist at the split, so the best possible split-time policy reaches 15.6\% and
+12.4\% of it; the share stays at 75--97\% for every split from 0.3 to 0.7 and under tenfold changes to
+the latency and token weights, though on short traces much more is reachable. Inside that protocol a
+better ranker helps monotonically, but only over that sliver. In a static analysis, deciding at each
+block's arrival puts more within reach, but how much turns on a decision a split-time evaluation never
+meets: where a block never seen ranks against blocks seen once. The prefix says above them (a new
+block's expected reuse is 0.52 against 0.30), and ranking it there captures 2.3--4.9 times what a
+clairvoyant split-time policy can; ranking it behind them can leave arrival-time placement at that
+ceiling. Billed on the same metric, plain recency does better: a multi-tier LRU, which ranks every
+accessed block first, captures 84.5\% and 87.7\% when moving blocks is free, and once a move costs one
+read and one write none of the policies we replay that move blocks beats the static frequency heuristic. What split-instant
+evaluation hides is recency and the price of migration, not a better predictor. Reactive tiering is consistent with this: LRU, LFU and a fill-once cache
+reach 75--99\% (toolagent) and 40--94\% (conversation) of Belady's hit rate, the best adaptive policy (ARC, LeCaR, CACHEUS) beats
+the best of those rules, each chosen per operating point, by at most 4.6 points, and a learned
+replacement policy (LRB) stays below ARC, because 76--78\% of blocks are never reused. We give a one-line
+diagnostic for the protocol failure, release an artifact that regenerates every number on CPU, and
+catalogue the measurement defects we made and caught, including leaks in our own arrival-time experiment
+that survived every number check.
+\end{abstract}
+
+\begin{IEEEkeywords}
+KV cache, memory tiering, cache replacement, evaluation methodology, LLM agents, reproducibility
+\end{IEEEkeywords}
+
+\input{sections/01_introduction}
+\input{sections/02_motivation}
+\input{sections/03_formulation}
+\input{sections/04_architecture}
+\input{sections/05_evidence}
+\input{sections/06_openproblems}
+\input{sections/07_related}
+\input{sections/08_conclusion}
+
+% Required by ICDE 2027 and excluded from the page limit. Written to be checkable: every claim
+% about what the AI did is visible in the artifact's commit history (Co-Authored-By trailers).
+\section*{Acknowledgment}
+\textbf{Use of AI-generated content.} An AI assistant (Anthropic's Claude, Opus~5 and Opus~5.5 models,
+used through the Claude Code agentic environment) was used extensively throughout this work. It wrote
+most of the code in the released artifact, designed and ran most of the experiments and analyses,
+drafted and revised most of the text, and generated the figures from the stored results; its contributions are recorded commit by commit in
+the artifact's history. The ``adversarial review'', the audit and the re-verification passes referred to in
+\Cref{sec:protocol} were internal exercises in which AI agents were prompted to act as reviewers; none
+was peer review, and one
+figure the review produced (a third LRB repair) is neither reproduced nor relied on here. Every result in this paper is
+re-derived from the released artifact by a checker shipped with it; a few historical figures (what an
+earlier version reported) come from the artifact's lab notebook. The initial concept and research
+idea were proposed by the author. The author takes full responsibility for the content of this paper.
+
+\bibliographystyle{IEEEtran}
+\bibliography{../docs/references}
+
+\end{document}

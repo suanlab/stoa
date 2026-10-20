@@ -2169,3 +2169,24 @@ never beats the heuristic with priced ones.
 
 The run_hazard_prior.py refactor (estimate_prior shared with the online replay) was confirmed to reproduce
 `hazard_prior_tier.json` and `hazard_prior.json` exactly (rows and estimates, both action spaces).
+
+## §AW — target moved to PVLDB Volume 20 (EA&B)
+
+On 2026-10-20, after a venue-fit estimate (ICDE and PVLDB both about one in five; PVLDB's monthly
+cycle with revisions judged the better fit for an evaluation-methodology paper), the author moved the
+target from ICDE 2027 (EAB, round 2) to PVLDB Volume 20, Experiment, Analysis & Benchmark. The ICDE
+version was never submitted and is kept as `paper/main_icde.tex`.
+
+What changed, and what each rule did to the guards:
+- **Template**: the official VLDB-Template (commit 39c95f5; acmart v2.19 + `pvldb.sty`), already vendored
+  byte-identical. The first build put a stray page before page 1: acmart's `\shorttitle` is an internal
+  macro, so `\shorttitle{...}` printed its argument. The short title goes in `\title[...]{...}`.
+- **Page rule**: 12 pages excluding references *only*; acknowledgements count. The checker's end
+  heading is now REFERENCES alone. Body, acknowledgement included, ends on page 11.
+- **Title**: EA&B suffix `[Experiment, Analysis & Benchmark]` (ICDE used a prefix); the running head
+  and the PVLDB reference block use the short title.
+- **Placeholders**: the reference block renders `doi:XX.XX/XXX.XX` and `XXX-XXX`, which the template
+  allows at submission. The leaked-annotation guard exempts exactly those strings (tested both ways).
+- **Staleness**: the three vendored template files are now PDF sources in both the build manifest and
+  the checker, so a template update marks the PDF stale.
+- No number changed; 117/117 checks, 313 tests.
