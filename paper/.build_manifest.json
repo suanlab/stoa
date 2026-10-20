@@ -1,5 +1,5 @@
 {
-  "pdf": "35e2077b71109068ca9a04f6a38dee4964be1c7e5df544ca5d930b0869f2473d",
+  "pdf": "b3e51f437274b6df47e3e847a5057ef8750e37858e1296af47c68d1ff310153a",
   "sources": {
     "../docs/references.bib": "71ef6e14b0a6ae202a413e2fc9b1cadbee51a1a70ba712366bcde7b0a49393d6",
     "figs/fig_architecture.pdf": "5da04c218947e652d37ca346c665992d5038ebdc8b0b52e8240a04e17095a36d",
@@ -13,7 +13,7 @@
     "figs/fig_reactive.pdf": "f1b62a82732caad95f9ff59dce6809d838c1ace7a3b5cb34012692b25a1fb8b0",
     "figs/fig_sequential.pdf": "271b849d4e46ea2911eecba5ad5713610b959f5264e359ce5b66ed861397648c",
     "figs/fig_tier_ablation.pdf": "0f65332c927650cbf531f1d522dcdea453e8b70007d75341f61d29fcf0d18ae7",
-    "main.tex": "b5708808a4c6b44e59c78dbe52a12668d94907b293575f3bcfc61441e7ca8ef1",
+    "main.tex": "45a2c5e93da34a87dbf7e7ec306c577eb081fe756e9ebceaf9ac43ab66bfb95b",
     "sections/01_introduction.tex": "bb93e37071bb31723128262f40088909b4efea12f098709d68d63a218ad3cca1",
     "sections/02_motivation.tex": "3b8f229e1fe9fcaa210946e1615df04f0e7eeb5e72981c799959f15b24f834da",
     "sections/03_formulation.tex": "42650df8c04fd629afe1534f4393c0381526a5affcd0963954d2f2e520237d90",

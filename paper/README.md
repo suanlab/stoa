@@ -1,8 +1,10 @@
 # STOA paper source
 
 **Target (2026-10-02): ICDE 2027, research track, Experiment, Analysis & Benchmark (EAB), round 2 —
-deadline 2026-11-11, 5 PM PT.** Title: *[Experiment, Analysis, and Benchmark] Decide on Arrival:
-Placement Timing Beats Placement Prediction on Production KV Traces.* The paper reports what production
+deadline 2026-11-11, 5 PM PT.** Title: *[Experiment, Analysis, and Benchmark] The Unseen Block: What
+Split-Instant Evaluation Hides in KV-Cache Placement.* (Retitled 2026-10-20 from "Decide on Arrival:
+Placement Timing Beats Placement Prediction on Production KV Traces", which the corrected results no
+longer support.) The paper reports what production
 traces say about KV-block placement: split-instant evaluation leaves 84.4% and 87.6% of a hindsight
 oracle's advantage on blocks that do not yet exist, so the best split-time policy reaches 15.6%
 (conversation) and 12.4% (toolagent) of it. Deciding at each block's arrival captures 2.3–4.9x as much

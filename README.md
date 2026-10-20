@@ -1,7 +1,7 @@
 # STOA — Storage & Tiered Orchestration for Agents
 
-Reproducibility package for **"Decide on Arrival: Placement Timing Beats Placement Prediction on
-Production KV Traces"** (prepared for ICDE 2027, Experiment, Analysis & Benchmark category).
+Reproducibility package for **"The Unseen Block: What Split-Instant Evaluation
+Hides in KV-Cache Placement"** (prepared for ICDE 2027, Experiment, Analysis & Benchmark category).
 
 The paper asks what a KV-block placement policy has to get right, and answers that it has to decide
 *early*, and has to *estimate* how far to trust a block it has never seen. The short version:

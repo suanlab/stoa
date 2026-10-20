@@ -1,8 +1,8 @@
 cff-version: 1.2.0
-title: "STOA: reproducibility package for \"Decide on Arrival\""
+title: "STOA: reproducibility package for \"The Unseen Block\""
 message: >-
   If you use this artifact, cite the paper. If you use the attainable-ceiling
-  diagnostic specifically, §5.2 of the paper is the part to cite; the one-line
+  diagnostic specifically, Section V-B of the paper is the part to cite; the one-line
   implementation is stoa.sequential.attainable_ceiling.
 type: software
 authors:
