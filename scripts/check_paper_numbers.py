@@ -358,7 +358,32 @@ if d and _to and _rc and _dg and _hz and _hzt and _eh:
         free = max(r["online_captured_pct"] for r in prod_oa if r["migration_cost_model"] == "zero")
         priced = max(r["online_captured_pct"] for r in prod_oa if r["migration_cost_model"] == "read+write")
         assert priced <= 0.0 + 1e-9, "the paper says no arm beats the heuristic once a move costs a read and a write"
-        claim("online, free migration", f"reach up to {free:.1f}\\% when moving a\nresident block is free", "", "online_admission")
+        claim("online, free migration", f"replayed online (at most {free:.1f}\\%)", "", "online_admission")
+        _h70 = {r["trace"]: r["alpha_at_70pct_of_static"] for r in _oa["rows"] if r["trace"] in PROD
+                and r["arm"] == "hazard-new" and r["policy"] == "onestep" and r["migration_cost_model"] == "read+write"
+                and r["tie"] == "new-behind"}
+        claim("hazard break-even", f"at most {100*_h70['conversation']:.1f}\\% and {100*_h70['toolagent']:.1f}\\% of that price",
+              "", "alpha_at_70pct_of_static")
+        _hzon = [r["online_captured_pct"] for r in _oa["rows"] if r["trace"] in PROD and r["arm"] == "hazard-new"
+                 and r["migration_cost_model"] == "read+write"]
+        assert max(_hzon) <= 1e-9, "the paper says the hazard arm does not beat the heuristic with priced moves"
+    _rcst = load("reactive_cost.json")
+    if _rcst:
+        _rr = {r["trace"]: r["reactive"] for r in _rcst["rows"]}
+        _lz = [_rr[t]["lru"]["zero"] for t in PROD]
+        claim("LRU on the cost metric, free", f"captures {_lz[0]:.1f}\\% and {_lz[1]:.1f}\\%", "", "reactive_cost")
+        claim("second-hit on the cost metric", f"captures\n${_rr['conversation']['second-hit']['zero']:.1f}$\\% and "
+              f"${_rr['toolagent']['second-hit']['zero']:.1f}$\\%", "", "reactive_cost")
+        claim("LRU priced", f"LRU falls to ${_rr['conversation']['lru']['read+write']:.1f}$\\% and\n"
+              f"${_rr['toolagent']['lru']['read+write']:.1f}$\\%", "", "reactive_cost")
+        assert all(_rr[t]["none"]["zero"] == 0.0 for t in _rr), "the replay no longer reproduces the heuristic"
+        assert min(_lz) > free, "the paper says LRU beats every online arrival arm with free moves"
+        # "none of the policies we replay that move blocks beats the static frequency heuristic" once a
+        # move costs one read plus one write: every replayed arm, policy and tie, and both reactive policies
+        _priced = [r["online_captured_pct"] for r in _oa["rows"] if r["trace"] in PROD
+                   and r["migration_cost_model"] == "read+write"]
+        _priced += [_rr[t][pol]["read+write"] for t in PROD for pol in ("lru", "second-hit")]
+        assert max(_priced) <= 1e-9, f"a replayed policy beats the heuristic with priced moves ({max(_priced)})"
     shift = [cap(a, "new-ahead", t, x) - cap(a, "new-behind", t, x) for a in ("all", "tier")
              for t in PROD for x in ORDER]
     claim("tie shift", f"by {min(shift):.0f}--{max(shift):.0f} points", "", "ahead - behind")
@@ -378,9 +403,11 @@ if d and _to and _rc and _dg and _hz and _hzt and _eh:
     rows_dg = {r["trace"]: r for r in _dg["rows"]}
     ratio = [r["first_over_last"] for r in _dg["rows"]]
     aucs = [r["auc_arrival_order"] for r in _dg["rows"]]
-    claim("exposure ratio", f"({min(ratio):.1f}--{max(ratio):.1f} times", "", "diagnostics")
-    assert f"{min(aucs):.2f}" == "0.55" and f"{max(aucs):.2f}" == "0.58"
-    claim("arrival-order AUC", "AUC 0.55--0.58", f"{min(aucs):.3f}-{max(aucs):.3f}", "diagnostics")
+    _pr = [rows_dg[t] for t in PROD]
+    _pratio = sorted(r["first_over_last"] for r in _pr)
+    _pauc = sorted(r["auc_arrival_order"] for r in _pr)
+    claim("exposure ratio, production", f"({_pratio[0]:.1f}--{_pratio[-1]:.1f} times", "", "diagnostics")
+    claim("arrival-order AUC, production", f"AUC {_pauc[0]:.2f}--{_pauc[-1]:.2f} only because", "", "diagnostics")
     eh = {r["trace"]: r for r in _eh["rows"]}
     claim("equal-horizon AUC", f"its AUC is {eh['conversation']['auc_order_equal_horizon']:.2f} and "
           f"{eh['toolagent']['auc_order_equal_horizon']:.2f}", "", "equal_horizon")
@@ -865,7 +892,7 @@ REQUIRED = ("reactive_real_full_lrb.json", "headroom_by_length.json", "lrb_retra
             "hazard_prior.json", "hazard_prior_tier.json", "equal_horizon.json", "reachable_by_length.json",
             "hazard_prior_rescaled.json", "hazard_prior_tier_rescaled.json", "online_admission.json",
             "arrival_admission_reuse.json", "tier_only_reuse.json",
-            "bailian_reachable_birthx.json", "bailian_hazard_birthx.json")
+            "bailian_reachable_birthx.json", "bailian_hazard_birthx.json", "reactive_cost.json")
 missing = [n for n in REQUIRED if not (EXP / n).exists()]
 if missing:
     failures.append("artifacts absent, so their claims went unchecked: " + ", ".join(missing))

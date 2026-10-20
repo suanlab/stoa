@@ -103,7 +103,10 @@ Anything in `experiments/` predating 2026-10-20 should be read against §I, §T�
 use. What survives: the best split-time policy reaches **15.6% / 12.4%** of the oracle's advantage (75–97%
 unreachable across splits). In a static analysis, arrival-time placement captures 2.3–4.9x that when the trust placed in an
 unseen block is estimated from the prefix (`run_hazard_prior.py`); fixed by convention, the same decision
-moves it by 14–29 points and can leave it at the split-time ceiling.
+moves it by 14–29 points and can leave it at the split-time ceiling. Replayed online on the same cost metric, a
+multi-tier LRU beats every arrival-time arm when migration is free, and nothing that moves blocks beats
+the static frequency heuristic once a move costs one read plus one write (`run_online_admission.py`,
+`run_reactive_cost.py`, notebook §AV).
 
 ## 3b. Environment, and what is hand-rolled
 
@@ -161,6 +164,8 @@ Checking while logged in tests your own access, not a reviewer's.
 | **Arrival-time admission** (§V-C; §AP–§AS): order arms on one magnitude multiset and magnitude arms (constant mean, median), both tie conventions, full action space. Production order arms: 38.2–41.5 / 38.9–41.5% (behind), 53.1–55.3 / 56.6–58.1% (ahead), against a 15.6 / 12.4% split ceiling | `python3 scripts/run_arrival_admission.py` | `experiments/arrival_admission.json` |
 | **Tier-only control** (§V-C, §AR): the same ceiling and arms with placement restricted to the tier. Split ceiling 20.4 / 15.3%; order arms 14.3–19.6 / 15.1–19.4% (behind), 38.7–42.3 / 44.3–46.8% (ahead); median arm 0.0 (behind) | `python3 scripts/run_tier_only.py` | `experiments/tier_only.json` |
 | **Estimated prior for unseen blocks** (§V-C, §AS): a new block's expected reuse vs a seen-once block's, from a pseudo-split in the prefix; tie-invariant. Hazard-new / hazard-all: 58.2 / 69.7% (conversation), 61.1 / 68.8% (toolagent); tier-only 47.0 / 56.9% and 51.7 / 54.8% | `python3 scripts/run_hazard_prior.py [--tier-only]` | `experiments/hazard_prior.json`, `hazard_prior_tier.json` |
+| **Online admission replay** (§V-C, §AT H6, §AV): the order, magnitude and hazard arms replayed request by request from the heuristic's starting state, tier-only, with free and read+write-priced migration. Free migration: up to 57.3% (hazard-new 51.2 / 54.9%, new-behind); read+write: no arm above 0.0, the cost-aware variant included (hazard-new −199.0 / −204.1%); the hazard arm keeps 70% of its static gain only below 7.3% / 7.2% of the read+write price | `python3 scripts/run_online_admission.py` | `experiments/online_admission.json` |
+| **Reactive policies on the same metric** (§V-C, §AV): replay with no moves (asserted equal to the heuristic), multi-tier LRU, and cache-on-second-hit. LRU 84.5 / 87.7% free, −400.5 / −401.4% priced; second-hit −6.2 / −2.8% free | `python3 scripts/run_reactive_cost.py` | `experiments/reactive_cost.json` |
 | **Exposure confound**: blocks arriving in the first quarter see 2.3–4.6x the future reuse of the last quarter; arrival order alone predicts reuse at AUC 0.55–0.58; the leaky design's training labels had 34.3% / 46.3% of their mass after the cut | `python3 scripts/run_arrival_diagnostics.py` | `experiments/arrival_diagnostics.json` |
 | **Cost-weight sensitivity**: unreachable share 79.3–97.1% under tenfold changes to λ_L and λ_B, one at a time | `python3 scripts/run_weight_sensitivity.py` | `experiments/weight_sensitivity.json` |
 | **Belief controls**: a constant score must not beat a learned one (it did, until `quantile_match` was given mid-rank tie handling) | `python3 scripts/run_belief_controls.py` | `experiments/belief_controls.json` |

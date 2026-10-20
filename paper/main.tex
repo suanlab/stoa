@@ -57,9 +57,11 @@ block's arrival puts more within reach, but how much turns on a decision a split
 meets: where a block never seen ranks against blocks seen once. The prefix says above them (a new
 block's expected reuse is 0.52 against 0.30), and ranking it there captures 2.3--4.9 times what a
 clairvoyant split-time policy can; ranking it behind them can leave arrival-time placement at that
-ceiling. Replayed online, the gain survives free migration but not migration priced at one read and one
-write. On Mooncake's synthetic control deciding at arrival does not help. Reactive tiering is consistent with this: LRU, LFU and a fill-once cache
-reach 75--99\% and 40--94\% of Belady's hit rate, the best adaptive policy (ARC, LeCaR, CACHEUS) beats
+ceiling. Billed on the same metric, plain recency does better: a multi-tier LRU, which ranks every
+accessed block first, captures 84.5\% and 87.7\% when moving blocks is free, and once a move costs one
+read and one write none of the policies we replay that move blocks beats the static frequency heuristic. What split-instant
+evaluation hides is recency and the price of migration, not a better predictor. Reactive tiering is consistent with this: LRU, LFU and a fill-once cache
+reach 75--99\% (toolagent) and 40--94\% (conversation) of Belady's hit rate, the best adaptive policy (ARC, LeCaR, CACHEUS) beats
 the best of those rules, each chosen per operating point, by at most 4.6 points, and a learned
 replacement policy (LRB) stays below ARC, because 76--78\% of blocks are never reused. We give a one-line
 diagnostic for the protocol failure, release an artifact that regenerates every number on CPU, and
@@ -90,8 +92,9 @@ drafted and revised most of the text, and generated the figures from the stored 
 the artifact's history. The ``adversarial review'', the audit and the re-verification passes referred to in
 \Cref{sec:protocol} were internal exercises in which AI agents were prompted to act as reviewers; none
 was peer review, and one
-figure the review produced (a third LRB repair) is neither reproduced nor relied on here. Every number in this paper is
-re-derived from the released artifact by a checker shipped with it. The initial concept and research
+figure the review produced (a third LRB repair) is neither reproduced nor relied on here. Every result in this paper is
+re-derived from the released artifact by a checker shipped with it; a few historical figures (what an
+earlier version reported) come from the artifact's lab notebook. The initial concept and research
 idea were proposed by the author. The author takes full responsibility for the content of this paper.
 
 \bibliographystyle{IEEEtran}

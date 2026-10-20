@@ -1,0 +1,73 @@
+{
+  "config": {
+    "actions": "tier only",
+    "start": "pre-split blocks by the frequency heuristic",
+    "migration": "zero / read+write per move (as run_online_admission.py)",
+    "bill": "creations are compulsory misses"
+  },
+  "rows": [
+    {
+      "trace": "conversation",
+      "reactive": {
+        "none": {
+          "zero": 0.0,
+          "read+write": 0.0
+        },
+        "lru": {
+          "zero": 84.51,
+          "read+write": -400.47
+        },
+        "second-hit": {
+          "zero": -6.23,
+          "read+write": -226.86
+        }
+      },
+      "best_online_arrival_arm": {
+        "zero": 52.35,
+        "read+write": 0.0
+      }
+    },
+    {
+      "trace": "toolagent",
+      "reactive": {
+        "none": {
+          "zero": 0.0,
+          "read+write": 0.0
+        },
+        "lru": {
+          "zero": 87.71,
+          "read+write": -401.4
+        },
+        "second-hit": {
+          "zero": -2.84,
+          "read+write": -208.68
+        }
+      },
+      "best_online_arrival_arm": {
+        "zero": 57.31,
+        "read+write": 0.0
+      }
+    },
+    {
+      "trace": "synthetic",
+      "reactive": {
+        "none": {
+          "zero": 0.0,
+          "read+write": 0.0
+        },
+        "lru": {
+          "zero": 72.84,
+          "read+write": -141.79
+        },
+        "second-hit": {
+          "zero": 60.76,
+          "read+write": -98.4
+        }
+      },
+      "best_online_arrival_arm": {
+        "zero": 19.8,
+        "read+write": 3.43
+      }
+    }
+  ]
+}

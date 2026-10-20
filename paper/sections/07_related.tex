@@ -4,20 +4,20 @@
 We organize prior work by the three axes STOA unifies; \Cref{tab:positioning} summarizes which axis each
 line decides and by what means.
 
-\paragraph{Representation and memory-OS.}
+\paragraph{Representation and memory-OS}
 MemOS~\cite{F1_li2025memos} and MemGPT~\cite{P14_packer2023memgpt} treat memory as an operating-system
 problem, exposing abstractions (MemCube, virtual context) and primitives to migrate items between
 plaintext, activation, and parameter forms; M+~\cite{F2_wang2025mplus} adds a co-trained latent memory.
 These provide the \emph{mechanism} to change representation and tier but decide \emph{when} by heuristic;
-STOA supplies the learned scheduler they lack.
+STOA frames the learned scheduler they lack; we do not build it.
 
-\paragraph{Content and RL-based management.}
+\paragraph{Content and RL-based management}
 Memory-R1~\cite{F6_yan2025memoryr1} and Memory-as-Action~\cite{F7_zhang2025memoryasaction} learn, with
 RL, \emph{what} to add, update, or delete and how to edit context, and the latter handles the
 trajectory-fracturing that edits cause. But they operate over a single fixed representation and never
 choose a physical tier or schedule offline consolidation---orthogonal to, and composable with, STOA.
 
-\paragraph{Systems tiering and ML-for-systems.}
+\paragraph{Systems tiering and ML-for-systems}
 Serving systems already make prefix KV blocks reusable: PagedAttention~\cite{kwon2023pagedattention}
 manages them in pages that requests can share, SGLang~\cite{zheng2024sglang} reuses them across
 requests through a prefix tree, and CachedAttention~\cite{gao2024cachedattention} and
@@ -26,16 +26,16 @@ policies for what stays where; our traces come from the last of these.
 LMCache~\cite{F5_liu2025lmcache} tiers KV-cache bytes to cut miss-rate; H2O~\cite{S1_zhang2023h2o} evicts
 by attention score. The learnability of such decisions is established: PARROT~\cite{S2_liu2020parrot}
 imitates a Belady oracle for cache replacement, Cold-RL~\cite{S4_coldrl2025} does eviction with offline
-RL in production, and Decima~\cite{S5_mao2019decima} schedules clusters with a GNN policy. STOA inherits
-these techniques but changes the objective from miss-rate to downstream \emph{task utility}, and the
+RL in production, and Decima~\cite{S5_mao2019decima} schedules clusters with a GNN policy. STOA would inherit
+these techniques but change the objective from miss-rate to downstream \emph{task utility}, and the
 action from a single axis to the joint representation\,$\times$\,tier\,$\times$\,timing decision.
 
-\paragraph{Offline consolidation.}
+\paragraph{Offline consolidation}
 Sleep-time compute~\cite{F3_lin2025sleeptime} and LightMem~\cite{F4_fang2025lightmem} show the value of
 precomputing and consolidating memory offline, but treat it as a global mode rather than a per-item,
-budget-aware timing decision---the third axis STOA learns.
+budget-aware timing decision, the third axis of STOA's frame.
 
-\paragraph{Learned and adaptive caching.}
+\paragraph{Learned and adaptive caching}
 Two lines bear directly on our results and we position against them explicitly, because our findings
 reproduce rather than extend them. \textbf{LRB}~\cite{S6_song2020lrb} learns a relaxed-Belady objective
 for CDN caching from a feature vector built out of the deltas between an object's past request

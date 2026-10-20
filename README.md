@@ -20,7 +20,10 @@ The paper asks what a KV-block placement policy has to get right, and answers th
   leave arrival-time placement at the split-time ceiling. Estimated from the prefix (a new block's expected
   reuse exceeds a seen-once block's), arrival-time placement captures **2.3–4.9x** what a clairvoyant
   split-time policy can, under every tie convention and action space, in a static analysis. Replayed
-  online, the gain survives free migration but not migration priced at one read plus one write. On Mooncake's synthetic control it
+  online it is recency that this hides: on the same cost metric a multi-tier LRU captures 84.5% / 87.7%
+  when moving a block is free, more than any arrival-time arm (at most 57.3%), and once a move costs one
+  read plus one write nothing that moves blocks beats the static frequency heuristic
+  (`run_online_admission.py`, `run_reactive_cost.py`). On Mooncake's synthetic control the estimated prior
   does not help, and on one of Alibaba's four Bailian traces the prefix points the wrong way
   (`make reproduce-external`). Earlier versions of this experiment leaked future information, compared order arms that
   also differed in magnitude, fixed two conventions without saying so, and billed creations as reads; the

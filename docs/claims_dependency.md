@@ -2135,3 +2135,37 @@ reverses on thinking, where seen-once blocks are reused more than new ones in th
 tier-only actions, the hazard arm ranks new blocks behind and gains nothing, while every arm that ranks
 them ahead gains about 25 points. With all actions the representation change still pays (15.2×). The
 paper reports this in §V-C as a regularity of these workloads, not a law.
+
+## §AV — the final pre-submission review: recency, and the price of migration
+
+A last review before submission (2026-10-20) returned weak reject. Its central objection: the arrival
+arms were compared only with a split-time placement, never with the obvious online baseline, recency,
+billed on the same metric. Two artifacts answer it.
+
+`run_online_admission.py` now replays the hazard arm too (creations are admitted but not billed, as in
+§AS). `run_reactive_cost.py` replays reactive policies from the same starting state (the static
+heuristic), tier-only, on the same per-access bill, with migration free or priced at one read plus one
+write. The replay with no moves is asserted to equal the heuristic exactly.
+
+| policy (tier-only) | free migration (conv / tool) | read+write (conv / tool) |
+|---|---|---|
+| multi-tier LRU (every access moves the block to the fastest tier) | 84.5 / 87.7% | −400.5 / −401.4% |
+| cache on second hit | −6.2 / −2.8% | −226.9 / −208.7% |
+| hazard-new, one-step displacement | 51.2 / 54.9% | −199.0 / −204.1% |
+| hazard-new, cost-aware displacement | — | 0.0 / 0.0% |
+| best arrival-time arm, any tie | at most 57.3% | at most 0.0% |
+
+The hazard arm keeps 70% of its static gain only if a move costs at most 7.3% / 7.2% of the read+write
+price. On the synthetic control LRU reaches 72.8% free and −141.8% priced.
+
+**What changes in the paper.** Ranking unseen blocks first is a weaker form of recency: when moves are
+free, recency captures more than any arrival-time arm; when they are priced, nothing that moves blocks
+beats the static frequency heuristic. The abstract, introduction (C2), §V-C and conclusion now say that
+what split-instant evaluation hides is recency and the price of migration, not a better predictor. The
+static 2.3–4.9x ratio stands as stated (a static analysis); the limitations sentence that called the arms
+an admission policy was replaced. The checker computes every number in the new paragraph from the two
+artifacts and asserts that LRU beats every online arrival arm with free moves and that the hazard arm
+never beats the heuristic with priced ones.
+
+The run_hazard_prior.py refactor (estimate_prior shared with the online replay) was confirmed to reproduce
+`hazard_prior_tier.json` and `hazard_prior.json` exactly (rows and estimates, both action spaces).

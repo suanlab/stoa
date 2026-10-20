@@ -50,11 +50,11 @@ Y.~Wang, D.~Krotov, Y.~Hu \emph{et~al.}, ``{M+}: Extending {MemoryLLM} with scal
 \bibitem{F3_lin2025sleeptime}
 K.~Lin, C.~Snell, Y.~Wang, C.~Packer, S.~Wooders, I.~Stoica, and J.~E. Gonzalez, ``Sleep-time compute: Beyond inference scaling at test-time,'' \emph{arXiv}, 2025.
 
-\bibitem{F20_xiong2025raggym}
-G.~Xiong, Q.~Jin, X.~Wang \emph{et~al.}, ``{RAG-Gym}: Optimizing reasoning and search agents with process supervision,'' \emph{arXiv:2502.13957v1}, 2025.
-
 \bibitem{F4_fang2025lightmem}
 J.~Fang \emph{et~al.}, ``{LightMem}: Lightweight and efficient memory-augmented generation,'' \emph{arXiv (ICLR 2026)}, 2025.
+
+\bibitem{F20_xiong2025raggym}
+G.~Xiong, Q.~Jin, X.~Wang \emph{et~al.}, ``{RAG-Gym}: Optimizing reasoning and search agents with process supervision,'' \emph{arXiv:2502.13957v1}, 2025.
 
 \bibitem{qin2024mooncake}
 \BIBentryALTinterwordspacing

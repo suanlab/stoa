@@ -35,21 +35,14 @@ consolidation~\cite{F3_lin2025sleeptime} all landed by late 2025, unconnected. W
 \emph{learned scheduler} that, per item and under a shared budget, trades accuracy against latency and
 cost, with \textbf{task utility---not miss rate---as the objective.}
 
-We present \textbf{STOA} (Storage \& Tiered Orchestration for Agents), a learned control plane that
-decides \textbf{representation $\times$ tier $\times$ timing jointly}, per memory item, as a single
-budget-constrained Markov decision process. The operator sets a latency/cost/token budget $(L,C,B)$ at
-serving time and one policy adapts, tracing the accuracy--latency--cost frontier without retraining. To
-tame the combinatorics (fifty legal actions per item, across many items) STOA factors the policy into
-representation, tier, and timing heads over a graph network of the memory store, and evaluates it only
-over the legal joint actions so masking is exact. It warm-starts the policy by imitating a Belady oracle
-and assigns credit for delayed, query-time payoffs with a mix of oracle imitation and process
-supervision~\cite{F20_xiong2025raggym}.
+We frame this as \textbf{STOA} (Storage \& Tiered Orchestration for Agents): one budget-constrained
+Markov decision process over \textbf{representation $\times$ tier $\times$ timing}, per memory item, which a
+learned control plane \emph{would} solve with a serve-time latency/cost/token budget $(L,C,B)$ as its knob.
+We do not build or evaluate that policy. We take the question the frame invites, \emph{is this decision
+learnable?}, to production KV traces, and the measurement turned out to hinge less on the model than on
+what the evaluation protocol lets a policy see: a block that does not exist yet.
 
-Having built the formulation, we take seriously the empirical question it invites---\emph{is this decision
-actually learnable?}---and answer it on production KV traces rather than on synthetic workloads. The
-answer turned out to depend less on the model than on \emph{when the model is asked}.
-
-A natural way to evaluate this decision, and the one three revisions of this paper used, fixes a split
+A natural way to evaluate this decision, and the one earlier versions of this paper used, fixes a split
 instant: observe a prefix, build features from it, place every block, and bill the result against the
 future. Feature
 construction can only describe a block that has been seen --- and on these traces 45--46\% of blocks have
@@ -64,10 +57,12 @@ if one decision is made well: where a block never seen ranks against blocks alre
 a newly arrived block will be reused more than a block seen once; ranking it there captures 2.3 to 4.9
 times what a clairvoyant split-time policy reaches (\textbf{15.6\%} and \textbf{12.4\%} of the oracle's
 advantage, or 20.4\% and 15.3\% when only the tier is chosen), while ranking it behind seen-once blocks
-moves the order arms down by 14 to 29 points and, with tier-only actions, to that ceiling. How new blocks
-are ranked among themselves moves the result by at most 5.3 points. The gain needs migration: replayed
-online, it survives when moving a resident block is free and disappears when a move costs one read and one
-write. A synthetic control does not follow this pattern.
+moves arrival-time placement down by 14 to 29 points and, with tier-only actions, to that ceiling. How new blocks
+are ranked among themselves moves the result by at most 5.3 points. But plain recency, billed on the same
+metric, does better: a multi-tier LRU captures 84.5\% and 87.7\% when moving blocks is free, and once a
+move costs one read and one write none of the policies we replay that move blocks beats the static frequency heuristic. What
+the split-instant protocol hides, then, is recency and the price of migration, not a better predictor. A
+synthetic control does not follow this pattern.
 
 Reaction is competitive for a related reason. Tiering rules that forecast nothing at all --- LRU, LFU and
 a fill-once cache --- reach 75--99\% of Belady's hit rate on one Mooncake trace and 40--94\% on the other,
@@ -90,7 +85,7 @@ the aggregate looked reasonable, which is the point --- none of our checks asked
 quantity was arithmetically able to be what it claimed, and none asked whether a stored result was
 older than the program that wrote it.
 
-\paragraph{Contributions.}
+\paragraph{Contributions}
 \begin{itemize}
   \item \textbf{(C1)} A frame, not an evaluated system: agent-memory placement as one budget-constrained
   MDP over representation $\times$ tier $\times$ timing with a serve-time $(L,C,B)$ knob
@@ -103,8 +98,8 @@ older than the program that wrote it.
   yet when it decides (\Cref{sec:reachable}); inside it, a better ranker helps monotonically but over a
   12--16\% sliver (\Cref{sec:capacity}). Deciding at each block's \emph{arrival} captures 2.3--4.9 times
   the matching split-time ceiling when unseen blocks are ranked above seen-once blocks, as the prefix
-  says they should be, in a static analysis that needs nearly free migration to be realized online
-  (\Cref{sec:arrival}). On a synthetic control deciding at arrival does not help.
+  says they should be (\Cref{sec:arrival}); on the same metric plain recency captures more when
+  migration is free, and with migration priced none of the moving policies we replay beats the static heuristic.
   \item \textbf{(C3)} Measurements of reactive tiering on both sources against the adaptive-replacement
   family (ARC, LeCaR, CACHEUS) and a reimplemented LRB --- the best of them beating the best plain rule by
   at most 4.6 points of Belady across eight operating points --- together with an eviction-signal inversion
@@ -125,6 +120,6 @@ shared budget, with task utility as the objective.
 
 \input{sections/table1_positioning}
 
-\paragraph{Artifact.} Every number in this paper is regenerated on CPU, without a paid API, by the
+\paragraph{Artifact} Every result in this paper is regenerated on CPU, without a paid API, by the
 released package at \url{\artifacturl}; \texttt{make verify} re-derives each one from its stored result
 in a few minutes, and \texttt{make reproduce-full} regenerates those results from the public traces.

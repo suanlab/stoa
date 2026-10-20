@@ -63,75 +63,91 @@ def cbin(c):
     return bisect.bisect_right(COUNT_BINS, c) - 1
 
 
+def estimate_prior(wl, rescale: bool = False) -> dict:
+    """The prefix-only estimate of how far to trust an unseen block (pseudo-split at split / 2).
+
+    Returns c* (where new blocks sit on the old blocks' count scale), the new-block and per-count
+    expected reuse, and `hz_old(b)` for old blocks. Shared with run_online_admission.py.
+    """
+    st = max(1, wl.time_split(0.5))
+    end = wl.accesses[-1][0] + 1
+    p = st // 2
+    scale = (end - st) / (st - p)
+    steps = {b: tr.access_steps for b, tr in wl.traces.items()}
+    # --- estimation, prefix only -------------------------------------------------------
+    old_lab, old_age = defaultdict(list), {}
+    new_lab = []
+    for b, s in steps.items():
+        first = s[0]
+        if first >= st:
+            continue
+        if first < p:
+            c = bisect.bisect_left(s, p)
+            old_lab[cbin(c)].append((p - first, bisect.bisect_left(s, st) - c))
+        else:
+            # its accesses up to the split, the creation access excluded: a compulsory miss,
+            # exactly as Workload.future_counts bills new blocks after the split
+            new_lab.append(bisect.bisect_left(s, st) - 1)
+    h_new = scale * sum(new_lab) / len(new_lab)
+    # age quartiles within each count bin, from the estimation sample
+    table, m_count = {}, {}
+    for cb, pairs in old_lab.items():
+        ages = sorted(a for a, _ in pairs)
+        cuts = [ages[len(ages) * k // 4] for k in (1, 2, 3)]
+        buckets = defaultdict(list)
+        for a, lab in pairs:
+            buckets[bisect.bisect_right(cuts, a)].append(lab)
+        table[cb] = (cuts, {k: scale * sum(v) / len(v) for k, v in buckets.items()})
+        m_count[cb] = scale * sum(l for _, l in pairs) / len(pairs)
+    # c*: where the old blocks' expected reuse by count crosses the new-block mean
+    reps = [1, 2, 3, 5, 9]                         # representative count of each bin
+    # A bin with no estimation blocks (synthetic has none at some counts) borrows the nearest
+    # lower populated bin, so the scale stays monotone in count.
+    for k in range(len(reps)):
+        if k not in table:
+            lower = max((j for j in table if j < k), default=min(table))
+            table[k], m_count[k] = table[lower], m_count[lower]
+    ms = [m_count[k] for k in range(len(reps))]
+    if h_new <= ms[0]:
+        c_star = max(EPS, h_new / ms[0]) if ms[0] > 0 else 0.5   # between 0 and 1
+    else:
+        c_star = reps[-1] + 1.0
+        for k in range(len(reps) - 1):
+            if ms[k] < h_new <= ms[k + 1]:
+                c_star = reps[k] + (h_new - ms[k]) / (ms[k + 1] - ms[k]) * (reps[k + 1] - reps[k])
+                break
+    if rescale:
+        c_star *= st / p
+    if abs(c_star - round(c_star)) < 1e-6:
+        c_star += 1e-3                              # never land exactly on an integer count
+    est = {"pseudo_split": p, "scale": round(scale, 3), "h_new": round(h_new, 4),
+                       "m_by_count_bin": [round(v, 4) for v in ms], "c_star": round(c_star, 4)}
+    steps = {b: tr.access_steps for b, tr in wl.traces.items()}
+    pre = wl.prefix_stats(st)
+
+    def hz_old(b):
+        c = int(pre[b]["count"])
+        cuts, vals = table[cbin(c)]
+        a = st - steps[b][0]
+        return vals.get(bisect.bisect_right(cuts, a), m_count[cbin(c)])
+
+    return {"st": st, "c_star": c_star, "h_new": h_new, "estimates": est, "hz_old": hz_old}
+
+
 def main() -> int:
     out_rows, estimates = [], {}
     for name, path in TRACES.items():
         wl = load_mooncake(str(ROOT / path))
-        st = max(1, wl.time_split(0.5))
-        end = wl.accesses[-1][0] + 1
-        p = st // 2
-        scale = (end - st) / (st - p)
+        E = estimate_prior(wl, RESCALE)
+        st, c_star, hz_old, h_new = E["st"], E["c_star"], E["hz_old"], E["h_new"]
+        estimates[name] = E["estimates"]
         steps = {b: tr.access_steps for b, tr in wl.traces.items()}
-        # --- estimation, prefix only -------------------------------------------------------
-        old_lab, old_age = defaultdict(list), {}
-        new_lab = []
-        for b, s in steps.items():
-            first = s[0]
-            if first >= st:
-                continue
-            if first < p:
-                c = bisect.bisect_left(s, p)
-                old_lab[cbin(c)].append((p - first, bisect.bisect_left(s, st) - c))
-            else:
-                # its accesses up to the split, the creation access excluded: a compulsory miss,
-                # exactly as Workload.future_counts bills new blocks after the split
-                new_lab.append(bisect.bisect_left(s, st) - 1)
-        h_new = scale * sum(new_lab) / len(new_lab)
-        # age quartiles within each count bin, from the estimation sample
-        table, m_count = {}, {}
-        for cb, pairs in old_lab.items():
-            ages = sorted(a for a, _ in pairs)
-            cuts = [ages[len(ages) * k // 4] for k in (1, 2, 3)]
-            buckets = defaultdict(list)
-            for a, lab in pairs:
-                buckets[bisect.bisect_right(cuts, a)].append(lab)
-            table[cb] = (cuts, {k: scale * sum(v) / len(v) for k, v in buckets.items()})
-            m_count[cb] = scale * sum(l for _, l in pairs) / len(pairs)
-        # c*: where the old blocks' expected reuse by count crosses the new-block mean
-        reps = [1, 2, 3, 5, 9]                         # representative count of each bin
-        # A bin with no estimation blocks (synthetic has none at some counts) borrows the nearest
-        # lower populated bin, so the scale stays monotone in count.
-        for k in range(len(reps)):
-            if k not in table:
-                lower = max((j for j in table if j < k), default=min(table))
-                table[k], m_count[k] = table[lower], m_count[lower]
-        ms = [m_count[k] for k in range(len(reps))]
-        if h_new <= ms[0]:
-            c_star = max(EPS, h_new / ms[0]) if ms[0] > 0 else 0.5   # between 0 and 1
-        else:
-            c_star = reps[-1] + 1.0
-            for k in range(len(reps) - 1):
-                if ms[k] < h_new <= ms[k + 1]:
-                    c_star = reps[k] + (h_new - ms[k]) / (ms[k + 1] - ms[k]) * (reps[k + 1] - reps[k])
-                    break
-        if RESCALE:
-            c_star *= st / p
-        if abs(c_star - round(c_star)) < 1e-6:
-            c_star += 1e-3                              # never land exactly on an integer count
-        estimates[name] = {"pseudo_split": p, "scale": round(scale, 3), "h_new": round(h_new, 4),
-                           "m_by_count_bin": [round(v, 4) for v in ms], "c_star": round(c_star, 4)}
         # --- evaluation at the real split ---------------------------------------------------
         pre = wl.prefix_stats(st)
         fut = wl.future_counts(st)
         base = {i.item_id: float(pre[i.item_id]["count"]) for i in wl.items}
         new_ids = [b for b, s in steps.items() if s[0] >= st]
         old_ids = [b for b in base if steps[b][0] < st]
-
-        def hz_old(b):
-            c = int(pre[b]["count"])
-            cuts, vals = table[cbin(c)]
-            a = st - steps[b][0]
-            return vals.get(bisect.bisect_right(cuts, a), m_count[cbin(c)])
 
         c_pref = prefix_greedy_cost(wl)
         c_orac = place_with_beliefs(wl, {b: float(v) for b, v in fut.items()})

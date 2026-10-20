@@ -6,14 +6,16 @@ when to materialize it) are today answered separately by three research communit
 budget-constrained formulation as a frame and measured one of its axes, placement across tiers, on
 production KV traces.
 
-The finding is about when to decide, and it is first a finding about evaluation. Evaluated at a split
+The finding is about what an evaluation lets a policy see, and it is first a finding about evaluation. Evaluated at a split
 instant, as is natural, at least three-quarters of a hindsight oracle's advantage is out of reach of any
 policy that places the blocks present at the split, for every split we tried and under tenfold changes
-to the cost weights; inside that protocol a better ranker helps
+to the cost weights, provided the trace is long (on its first 1{,}500 requests far more is reachable);
+inside that protocol a better ranker helps
 monotonically, but over a sliver. Deciding at each block's arrival puts more within reach on both
 production traces when a block never seen is ranked above blocks seen once, as the prefix says it should
-be: 2.3--4.9 times the split-time ceiling in a static analysis, a gain that needs nearly free migration to
-survive online. On a synthetic control it does not. Reactive tiering, forecasting nothing, already delivers much of the
+be: 2.3--4.9 times the split-time ceiling in a static analysis. Plain recency, billed the same way,
+captures more when moving blocks is free, and once a move is priced none of the moving policies we replay beats the
+static heuristic: what the protocol hides is recency and the price of migration. Reactive tiering, forecasting nothing, already delivers much of the
 achievable hit rate, and the adaptive-replacement family adds little to it, because the signal it adapts on
 is scarce when most blocks are never reused.
 

@@ -42,11 +42,12 @@ DEPENDS_ON = {
     "kvct_placement_n150.json": ("traces.py", "kvct.py", "sequential.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py"),
     # 2026-10-19 experiments (notebook AS)
     "hazard_prior.json": ("traces.py", "sequential.py", "mooncake.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py"),
-    "hazard_prior_tier.json": ("traces.py", "sequential.py", "mooncake.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py", "environment.py"),
+    "hazard_prior_tier.json": ("traces.py", "sequential.py", "mooncake.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py", "environment.py", "causal.py"),
     "arrival_admission_reuse.json": ("traces.py", "sequential.py", "mooncake.py", "causal.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py"),
     "tier_only_reuse.json": ("traces.py", "sequential.py", "mooncake.py", "causal.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py", "environment.py"),
     "bailian_reachable_birthx.json": ("traces.py", "sequential.py", "mooncake.py", "simulator.py", "environment.py"),
     "bailian_hazard_birthx.json": ("traces.py", "sequential.py", "mooncake.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py", "environment.py"),
+    "reactive_cost.json": ("traces.py", "sequential.py", "mooncake.py", "causal.py", "simulator.py", "environment.py", "credit.py", "eval/oracle.py", "gnn.py"),
     "hazard_prior_rescaled.json": ("traces.py", "sequential.py", "mooncake.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py"),
     "hazard_prior_tier_rescaled.json": ("traces.py", "sequential.py", "mooncake.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py", "environment.py"),
     "prefix_features.json": ("traces.py", "sequential.py", "mooncake.py", "causal.py", "simulator.py"),

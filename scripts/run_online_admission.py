@@ -50,7 +50,8 @@ from stoa.simulator import TieringSimulator  # noqa: E402
 
 TIES = ("new-behind", "new-ahead")          # the names run_arrival_admission.py uses
 POLICIES = ("onestep", "cascade", "literal")
-ARMS = ("order-arrival", "order-learned", "order-shuffled", "constant-mean", "constant-median")
+ARMS = ("order-arrival", "order-learned", "order-shuffled", "constant-mean", "constant-median",
+        "hazard-new")   # the estimated prior the paper's arrival claim rests on (final review, 2026-10-20)
 
 
 def tier_only_actions() -> list[Action]:
@@ -354,6 +355,10 @@ def main() -> int:
     tier_only_json = json.loads((ROOT / "experiments" / "tier_only.json").read_text())
     static_rows = {(r["trace"], r["arm"], r.get("tie")): r
                    for r in tier_only_json["arrival_admission"]["results"]}
+    # The hazard arm's static values live in hazard_prior_tier.json (same tier-only frame).
+    _hzt = json.loads((ROOT / "experiments" / "hazard_prior_tier.json").read_text())
+    static_rows.update({(r["trace"], r["arm"], r["tie"]): r for r in _hzt["rows"]
+                        if r["arm"] == "hazard-new"})
     sim, w = TieringSimulator(), DEFAULT_WEIGHTS
     validation, rows, diagnostics = {}, [], {}
 
@@ -422,6 +427,9 @@ def main() -> int:
 
         # ---- 2. the arms' beliefs, and their static value (cross-check vs tier_only.json) -------
         arms, ev_ids, mag = arm_new_beliefs(path, wl, st, n_req)
+        from run_hazard_prior import estimate_prior
+        _cstar = estimate_prior(wl)["c_star"]
+        arms["hazard-new"] = {b_: _cstar for b_ in ev_ids}
         assert set(ev_ids) == {b for k, b in enumerate(ids) if is_new[k]}, "new-block sets differ"
         assert ev_ids == [b for k, b in enumerate(ids) if is_new[k]], "admission order != item order"
 
