@@ -97,6 +97,7 @@
     "traces.py": "9b0d127bca5bc1db76d5818916c2b668f4fe9c10768b06acd77e9eef49999ccb"
   },
   "hazard_prior_tier.json": {
+    "causal.py": "849e57c1dbb8cc69519c0958a34fc8f346832681daf4024fbfa8d01b7a83013d",
     "credit.py": "b29204fd47c0ea34ebf69f0509b8cf0dd47bc878a546d7f3f4e7a4bdd7c4704a",
     "environment.py": "89785be4c02498077c291a84d5944f1e5aaf02335542ca9c6db0311c32d7e0cc",
     "eval/oracle.py": "d7f20602eba894da4cad6829de925764fc700bcc96ec9dce80c9d5ca3d6302c2",
@@ -209,6 +210,17 @@
     "traces.py": "9b0d127bca5bc1db76d5818916c2b668f4fe9c10768b06acd77e9eef49999ccb"
   },
   "reachable_ceiling.json": {
+    "mooncake.py": "f082d010bd27e66fa3a37ad3828195c39fc38812e3af46f568eac264343d3dc1",
+    "sequential.py": "064f7480580757c896d75f53245801332732649dfa288fb0f4002c50243ddc1d",
+    "simulator.py": "9efcbde0ab8d4f4330cbb1886ff560419baa62591b59a7a8154050b558a92359",
+    "traces.py": "9b0d127bca5bc1db76d5818916c2b668f4fe9c10768b06acd77e9eef49999ccb"
+  },
+  "reactive_cost.json": {
+    "causal.py": "849e57c1dbb8cc69519c0958a34fc8f346832681daf4024fbfa8d01b7a83013d",
+    "credit.py": "b29204fd47c0ea34ebf69f0509b8cf0dd47bc878a546d7f3f4e7a4bdd7c4704a",
+    "environment.py": "89785be4c02498077c291a84d5944f1e5aaf02335542ca9c6db0311c32d7e0cc",
+    "eval/oracle.py": "d7f20602eba894da4cad6829de925764fc700bcc96ec9dce80c9d5ca3d6302c2",
+    "gnn.py": "8efd300131b268a41e283c246087e136207fe09ea2c86cd6f2b94d39483f9beb",
     "mooncake.py": "f082d010bd27e66fa3a37ad3828195c39fc38812e3af46f568eac264343d3dc1",
     "sequential.py": "064f7480580757c896d75f53245801332732649dfa288fb0f4002c50243ddc1d",
     "simulator.py": "9efcbde0ab8d4f4330cbb1886ff560419baa62591b59a7a8154050b558a92359",
