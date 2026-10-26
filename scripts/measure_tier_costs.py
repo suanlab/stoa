@@ -200,7 +200,9 @@ def main() -> int:
     if gpu:
         # The price of an asynchronous move: a GEMM loop on one stream, alone and with a copy stream
         # moving the largest block back and forth. Reports the compute slowdown and the copy rate.
-        m = torch.randn(8192, 8192, device=dev, dtype=torch.bfloat16)
+        # bf16 on Ampere or newer; fp16 elsewhere (pre-Ampere cuBLAS has no fast bf16 GEMM)
+        gdt = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+        m = torch.randn(8192, 8192, device=dev, dtype=gdt)
         comp, copy = torch.cuda.Stream(), torch.cuda.Stream()
         n = max(sizes)
         h, g = host(n), torch.empty(n, dtype=torch.uint8, device=dev)
@@ -228,7 +230,7 @@ def main() -> int:
                           "gemm_iters_per_s_with_copy": round(both, 2),
                           "compute_slowdown_pct": round(100 * (1 - both / alone), 2),
                           "copy_GBps_under_compute": round(gbps, 3),
-                          "block_bytes": n, "gemm": "8192x8192 bf16, 4 per round"}
+                          "block_bytes": n, "gemm": f"8192x8192 {str(gdt).split('.')[-1]}, 4 per round"}
         print("overlap:", out["overlap"])
 
     Path(a.out).write_text(json.dumps(out, indent=2) + "\n")
