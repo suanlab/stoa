@@ -174,7 +174,13 @@ $-6.2$\% and $-2.8$\%. Once a move costs one read and one write, LRU falls to $-
 $-401.4$\%, and no arrival-time arm, the hazard arm included, beats the static frequency heuristic; the
 hazard arm keeps 70\% of its static gain only if a move costs at most 7.3\% and 7.2\% of that price.
 Ranking unseen blocks first is a weaker form of recency, and whether either pays is set by the price of
-migration, which the static analysis cannot see.
+migration, which the static analysis cannot see. We timed that price on one host (an A100 80GB on PCIe
+Gen4 x16, six runs, a 64\,MiB Mooncake block of an 8B-class model): a move between GPU and host memory
+costs 0.75--1.87 times the read-plus-write price, whether it blocks serving or overlaps it, because the
+two copy directions did not overlap on this host and a background move took the link time of a load;
+a demotion to the host's rotational disk costs 0.90--1.46 times. Every measured price is at least 10
+times the hazard arm's break-even. The remote tier, which receives most of the hazard arm's online
+demotions, could not be measured there.
 
 \emph{Earlier versions of this experiment were wrong five times, and six of their readings are
 withdrawn.} The first leaked: training labels counted post-split accesses (34.3\% and 46.3\% of label
@@ -468,7 +474,8 @@ checker that re-derives every result in this paper from its artifact and fails o
 
 \subsection{Limitations}
 \label{sec:limits}
-No real vLLM+LMCache deployment was measured, so any cost-expressed quantity should be read as a range.
+No serving deployment was measured, only block moves on one host (\Cref{sec:arrival}), so any
+cost-expressed quantity should be read as a range.
 We tightened what that range means. Our first sensitivity analysis scaled every tier latency by a common
 factor, which moves the absolute scale and leaves the \emph{ratios} between tiers untouched --- and the
 ratios are what a placement policy responds to, so it never tested the parameter that mattered. We
@@ -478,8 +485,8 @@ token), and per-tier latency is that divided by a declared device-class bandwidt
 Sweeping three attention shapes against five device classes puts headroom at \textbf{55--98\%}, which
 contains the 92\% our hand-written table gives --- the headroom conclusion survives (we did not rerun the
 unreachable share or the arrival arms under the derived tables), but two things about the
-table do not. Its GPU:CPU latency ratio is 1:10 where every device class but the deliberately flat one gives 1:80 to 1:250, an order of
-magnitude in the ratio the policy is most sensitive to; and \textbf{6 of the 15 configurations reorder
+table do not. Its GPU:CPU latency ratio is 1:10 where every device class but the deliberately flat one gives 1:80 to 1:250
+(our A100 host measures 1:58), an order of magnitude in the ratio the policy is most sensitive to; and \textbf{6 of the 15 configurations reorder
 the hierarchy} so that latency order and capacity order disagree, which our fixed per-tier capacity table
 cannot express at all. Calibrating against a live deployment remains the open gate; this is the honest
 intermediate, not a substitute. The

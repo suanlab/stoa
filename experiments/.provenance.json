@@ -72,10 +72,10 @@
     "traces.py": "9b0d127bca5bc1db76d5818916c2b668f4fe9c10768b06acd77e9eef49999ccb"
   },
   "eval_locomo_powered.json": {
-    "eval/locomo.py": "108caa67cb6b44691a1ffac855af1e4606e028ff8f87de02459877b3ce8dbda2",
-    "eval/memqa.py": "1578887c3deec77a84438a269de6b8063fa3c952886dc13e9b4e8bd6b31c6f9c",
-    "eval/retrieval.py": "f4a7b388ee7aca1bba3ee06bef62776fdf78d1bb42a367e9c69fc6148c21484b",
-    "llm.py": "be566f654325128a11499914390559fbe8818a4d138dfe3f576ee91c03322c64",
+    "eval/locomo.py": "8c0cb55a6a6abaea6a6c53964bad46bc950d379009170470ad464a7f8c3e667e",
+    "eval/memqa.py": "f20b0141533c0112199514ccd43b1229537ec52edcbe5e58cef6b06428d62456",
+    "eval/retrieval.py": "9c3715d02227d1db998530e5a7536a018ad2364af385c1db9d4adca946b93e93",
+    "llm.py": "b48340481d035f90ed6df6f915e3edfbe81841c1167d663c314d876aaf15c62f",
     "stats.py": "1518ba85270fa136a701d2f55c1054d78413d28e9b825424204605c80e4fb1f7"
   },
   "hazard_prior.json": {
@@ -159,10 +159,10 @@
     "traces.py": "9b0d127bca5bc1db76d5818916c2b668f4fe9c10768b06acd77e9eef49999ccb"
   },
   "locomo_power.json": {
-    "eval/locomo.py": "108caa67cb6b44691a1ffac855af1e4606e028ff8f87de02459877b3ce8dbda2",
-    "eval/memqa.py": "1578887c3deec77a84438a269de6b8063fa3c952886dc13e9b4e8bd6b31c6f9c",
-    "eval/retrieval.py": "f4a7b388ee7aca1bba3ee06bef62776fdf78d1bb42a367e9c69fc6148c21484b",
-    "llm.py": "be566f654325128a11499914390559fbe8818a4d138dfe3f576ee91c03322c64",
+    "eval/locomo.py": "8c0cb55a6a6abaea6a6c53964bad46bc950d379009170470ad464a7f8c3e667e",
+    "eval/memqa.py": "f20b0141533c0112199514ccd43b1229537ec52edcbe5e58cef6b06428d62456",
+    "eval/retrieval.py": "9c3715d02227d1db998530e5a7536a018ad2364af385c1db9d4adca946b93e93",
+    "llm.py": "b48340481d035f90ed6df6f915e3edfbe81841c1167d663c314d876aaf15c62f",
     "stats.py": "1518ba85270fa136a701d2f55c1054d78413d28e9b825424204605c80e4fb1f7"
   },
   "lrb_retraction.json": {
@@ -177,6 +177,7 @@
     "mooncake.py": "f082d010bd27e66fa3a37ad3828195c39fc38812e3af46f568eac264343d3dc1",
     "traces.py": "9b0d127bca5bc1db76d5818916c2b668f4fe9c10768b06acd77e9eef49999ccb"
   },
+  "measured_migration.json": {},
   "online_admission.json": {
     "causal.py": "849e57c1dbb8cc69519c0958a34fc8f346832681daf4024fbfa8d01b7a83013d",
     "credit.py": "b29204fd47c0ea34ebf69f0509b8cf0dd47bc878a546d7f3f4e7a4bdd7c4704a",
@@ -239,10 +240,10 @@
     "traces.py": "9b0d127bca5bc1db76d5818916c2b668f4fe9c10768b06acd77e9eef49999ccb"
   },
   "representation_axis.json": {
-    "eval/locomo.py": "108caa67cb6b44691a1ffac855af1e4606e028ff8f87de02459877b3ce8dbda2",
-    "eval/memqa.py": "1578887c3deec77a84438a269de6b8063fa3c952886dc13e9b4e8bd6b31c6f9c",
-    "eval/representation.py": "2c387dde11cd7cd0f7f3b88b3badb5b2a57ab5bbc26a1c58727b9e8470b925fc",
-    "llm.py": "be566f654325128a11499914390559fbe8818a4d138dfe3f576ee91c03322c64",
+    "eval/locomo.py": "8c0cb55a6a6abaea6a6c53964bad46bc950d379009170470ad464a7f8c3e667e",
+    "eval/memqa.py": "f20b0141533c0112199514ccd43b1229537ec52edcbe5e58cef6b06428d62456",
+    "eval/representation.py": "ec087234f9764fb9e8e9693041a062ede70909d19ac35029fd41d05bccd04987",
+    "llm.py": "b48340481d035f90ed6df6f915e3edfbe81841c1167d663c314d876aaf15c62f",
     "stats.py": "1518ba85270fa136a701d2f55c1054d78413d28e9b825424204605c80e4fb1f7"
   },
   "sampling_study.json": {

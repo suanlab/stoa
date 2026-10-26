@@ -23,7 +23,9 @@ The paper asks what a KV-block placement policy has to get right, and answers th
   online it is recency that this hides: on the same cost metric a multi-tier LRU captures 84.5% / 87.7%
   when moving a block is free, more than any arrival-time arm (at most 57.3%), and once a move costs one
   read plus one write nothing that moves blocks beats the static frequency heuristic
-  (`run_online_admission.py`, `run_reactive_cost.py`). On Mooncake's synthetic control the estimated prior
+  (`run_online_admission.py`, `run_reactive_cost.py`). Timed on an A100 PCIe host, a real move costs
+  0.75–1.87x that price, at least 10x what the arrival-time gain could afford
+  (`measure_tier_costs.py`, `run_measured_migration.py`). On Mooncake's synthetic control the estimated prior
   does not help, and on one of Alibaba's four Bailian traces the prefix points the wrong way
   (`make reproduce-external`). Earlier versions of this experiment leaked future information, compared order arms that
   also differed in magnitude, fixed two conventions without saying so, and billed creations as reads; the

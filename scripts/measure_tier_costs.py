@@ -66,7 +66,7 @@ def machine_info(dirpath: Path, torch) -> dict:
             info["gpu"] = torch.cuda.get_device_name(0)
             info["cuda"] = torch.version.cuda
             info["nvidia_smi"] = _cmd(["nvidia-smi", "--query-gpu=name,memory.total,driver_version,"
-                                       "pcie.link.gen.current,pcie.link.width.current",
+                                       "pcie.link.gen.current,pcie.link.width.current,utilization.gpu,memory.used",
                                        "--format=csv,noheader"])
     return info
 
@@ -232,6 +232,131 @@ def main() -> int:
                           "copy_GBps_under_compute": round(gbps, 3),
                           "block_bytes": n, "gemm": f"8192x8192 {str(gdt).split('.')[-1]}, 4 per round"}
         print("overlap:", out["overlap"])
+
+    # The price of an asynchronous move on the serving path: a migration overlaps compute (above), but
+    # it shares a link with demand reads. A demand thread loads blocks back to back; a background
+    # thread migrates blocks back to back. Price per migration, in demand-read time:
+    #   (demand loads/s alone - demand loads/s with migrations) / migrations/s x demand latency.
+    # Same-direction traffic (a promotion while blocks are loaded) and opposite-direction traffic (a
+    # demotion; PCIe is full duplex) are measured separately, as is cpu->disk under disk reads.
+    import threading
+
+    def contention(demand, migrate, seconds: float) -> dict:
+        def run(fn, stop, box):
+            k = 0
+            while not stop.is_set():
+                fn()
+                k += 1
+            box.append(k)
+
+        def rate(fn_pair):
+            stop, boxes, ths = threading.Event(), [], []
+            for fn in fn_pair:
+                box = []
+                boxes.append(box)
+                ths.append(threading.Thread(target=run, args=(fn, stop, box)))
+            t0 = time.perf_counter()
+            for t in ths:
+                t.start()
+            time.sleep(seconds)
+            stop.set()
+            for t in ths:
+                t.join()
+            dt = time.perf_counter() - t0
+            return [b[0] / dt for b in boxes]
+        d0, = rate([demand])
+        d1, m1 = rate([demand, migrate])
+        lat = 1e3 / d0
+        price = (d0 - d1) / m1 * lat if m1 > 0 else float("nan")
+        return {"demand_per_s_alone": round(d0, 2), "demand_per_s_with_migration": round(d1, 2),
+                "migrations_per_s": round(m1, 2), "demand_latency_ms": round(lat, 4),
+                "price_per_migration_ms": round(price, 4),
+                "demand_slowdown_pct": round(100 * (1 - d1 / d0), 2)}
+
+    nb = kv_bytes("llama3-8b-like", 512)             # a Mooncake block of the 8B shape
+    out["contention"] = {"block_bytes": nb, "seconds": a.overlap_seconds}
+    if gpu:
+        hd, gd = host(nb), torch.empty(nb, dtype=torch.uint8, device=dev)     # demand buffers
+        hm, gm = host(nb), torch.empty(nb, dtype=torch.uint8, device=dev)     # migration buffers
+        sd, sm = torch.cuda.Stream(), torch.cuda.Stream()
+
+        def on(stream, fn):
+            def f():
+                with torch.cuda.stream(stream):
+                    fn()
+                stream.synchronize()
+            return f
+        load = on(sd, lambda: gd.copy_(hd, non_blocking=True))
+        promote = on(sm, lambda: gm.copy_(hm, non_blocking=True))      # cpu -> gpu, same direction
+        demote = on(sm, lambda: hm.copy_(gm, non_blocking=True))       # gpu -> cpu, opposite
+        out["contention"]["h2d_load_vs_promotion"] = contention(load, promote, a.overlap_seconds)
+        out["contention"]["h2d_load_vs_demotion"] = contention(load, demote, a.overlap_seconds)
+        for k in ("h2d_load_vs_promotion", "h2d_load_vs_demotion"):
+            print(k, out["contention"][k], flush=True)
+
+        # The thread-based measurement above can serialize the two streams itself (each thread
+        # launches, then blocks in synchronize), which would make full-duplex links look shared. This
+        # one enqueues K demand loads and K migrations on two streams from ONE thread, with no
+        # synchronization in between, and times each stream with CUDA events: if the copy engines
+        # overlap, the demand stream finishes no later than it does alone.
+        K = 40
+
+        def enqueue(mig):
+            torch.cuda.synchronize()
+            e0d, e1d = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+            e0m, e1m = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+            e0d.record(sd)
+            e0m.record(sm)
+            for _ in range(K):
+                with torch.cuda.stream(sd):
+                    gd.copy_(hd, non_blocking=True)
+                if mig is not None:
+                    with torch.cuda.stream(sm):
+                        mig()
+            e1d.record(sd)
+            e1m.record(sm)
+            torch.cuda.synchronize()
+            return e0d.elapsed_time(e1d), e0m.elapsed_time(e1m)
+
+        enqueue(None)                                                    # warm up
+        ev = {}
+        for name, mig in (("promotion", lambda: gm.copy_(hm, non_blocking=True)),
+                          ("demotion", lambda: hm.copy_(gm, non_blocking=True))):
+            alone = statistics.median(enqueue(None)[0] for _ in range(5))
+            pairs = [enqueue(mig) for _ in range(5)]
+            withm = statistics.median(p[0] for p in pairs)
+            ev[f"h2d_load_vs_{name}"] = {
+                "k": K, "demand_ms_alone": round(alone, 3), "demand_ms_with_migration": round(withm, 3),
+                "migration_stream_ms": round(statistics.median(p[1] for p in pairs), 3),
+                "price_per_migration_ms": round((withm - alone) / K, 4),
+                "demand_latency_ms": round(alone / K, 4)}
+            print("events", name, ev[f"h2d_load_vs_{name}"], flush=True)
+        out["contention_events"] = ev
+        out["copy_engines"] = _cmd(["sh", "-c", "nvidia-smi -q -i 0 | grep -iE 'copy|async' | head -5"])
+    fd_, fm_ = d / "stoa_demand.bin", d / "stoa_migrate.bin"
+    hdd, hmm = host(nb), host(nb)
+    for f_, hb in ((fd_, hdd), (fm_, hmm)):
+        with open(f_, "wb", buffering=0) as fh:
+            fh.write(memoryview(as_np(hb)))
+            os.fsync(fh.fileno())
+
+    def disk_load():
+        evict(fd_)
+        with open(fd_, "rb", buffering=0) as fh:
+            fh.readinto(memoryview(as_np(hdd)))
+
+    def disk_demote():
+        with open(fm_, "wb", buffering=0) as fh:
+            fh.write(memoryview(as_np(hmm)))
+            os.fsync(fh.fileno())
+    out["contention"]["disk_load_vs_demotion"] = contention(disk_load, disk_demote,
+                                                            max(a.overlap_seconds, 10.0))
+    print("disk_load_vs_demotion", out["contention"]["disk_load_vs_demotion"], flush=True)
+    fd_.unlink()
+    fm_.unlink()
+    if gpu:
+        out["other_gpus_at_end"] = _cmd(["nvidia-smi", "--query-gpu=index,utilization.gpu,memory.used",
+                                         "--format=csv,noheader"])
 
     Path(a.out).write_text(json.dumps(out, indent=2) + "\n")
     print(f"wrote {a.out}")

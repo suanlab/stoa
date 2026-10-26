@@ -70,6 +70,7 @@ reproduce-fast: data-check
 	$(PY) scripts/run_hazard_prior.py --rescale-cstar --tier-only
 	$(PY) scripts/run_online_admission.py
 	$(PY) scripts/run_reactive_cost.py
+	$(PY) scripts/run_measured_migration.py   # from the committed raw A100 timings; no GPU needed
 	$(PY) scripts/run_equal_horizon.py
 	$(PY) scripts/run_reachable_by_length.py
 	# Figures are byte-deterministic, so regenerating them from reproduced artifacts leaves the

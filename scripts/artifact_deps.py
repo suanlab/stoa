@@ -47,6 +47,8 @@ DEPENDS_ON = {
     "tier_only_reuse.json": ("traces.py", "sequential.py", "mooncake.py", "causal.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py", "environment.py"),
     "bailian_reachable_birthx.json": ("traces.py", "sequential.py", "mooncake.py", "simulator.py", "environment.py"),
     "bailian_hazard_birthx.json": ("traces.py", "sequential.py", "mooncake.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py", "environment.py"),
+    # derived from tier_costs_a100.json (raw hardware timings) and online_admission.json; no module
+    "measured_migration.json": (),
     "reactive_cost.json": ("traces.py", "sequential.py", "mooncake.py", "causal.py", "simulator.py", "environment.py", "credit.py", "eval/oracle.py", "gnn.py"),
     "hazard_prior_rescaled.json": ("traces.py", "sequential.py", "mooncake.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py"),
     "hazard_prior_tier_rescaled.json": ("traces.py", "sequential.py", "mooncake.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py", "environment.py"),

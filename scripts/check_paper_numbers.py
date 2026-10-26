@@ -367,6 +367,25 @@ if d and _to and _rc and _dg and _hz and _hzt and _eh:
         _hzon = [r["online_captured_pct"] for r in _oa["rows"] if r["trace"] in PROD and r["arm"] == "hazard-new"
                  and r["migration_cost_model"] == "read+write"]
         assert max(_hzon) <= 1e-9, "the paper says the hazard arm does not beat the heuristic with priced moves"
+    # Measured migration price (§AX): one A100 PCIe Gen4 host; raw runs in tier_costs_a100.json
+    _mm = load("measured_migration.json")
+    if _mm:
+        _rows = {r["migration"]: r for r in _mm["rows"]}
+        _gc = [x for mt in ("gpu->cpu", "cpu->gpu") for k in ("alpha_sync_range", "alpha_async_range")
+               for x in _rows[mt][k]]
+        _dk = [x for k in ("alpha_sync_range", "alpha_async_range") for x in _rows["cpu->disk"][k]]
+        claim("measured GPU<->CPU move price", f"costs {min(_gc):.2f}--{max(_gc):.2f} times the read-plus-write price",
+              "", "measured_migration")
+        claim("measured demotion to disk", f"costs {min(_dk):.2f}--{max(_dk):.2f} times", "", "measured_migration")
+        _x = min(_gc + _dk) / max(_mm["hazard_break_even_alpha70"].values())
+        claim("measured price over break-even", f"at least {int(_x)}\ntimes the hazard arm's break-even", "",
+              "measured_migration")
+        claim("measured run count", f"{['', 'one', 'two', 'three', 'four', 'five', 'six'][_mm['config']['n_runs']]} runs",
+              "", "measured_migration")
+        _r = _mm["read_ms"]
+        claim("measured GPU:CPU latency ratio", f"measures 1:{_r['cpu'] / _r['gpu']:.0f})", "", "measured_migration")
+        assert _mm["hazard_break_even_alpha70"] == {t: r for t, r in _h70.items()}, \
+            "measured_migration.json was built against a different online_admission.json"
     _rcst = load("reactive_cost.json")
     if _rcst:
         _rr = {r["trace"]: r["reactive"] for r in _rcst["rows"]}
@@ -894,7 +913,8 @@ REQUIRED = ("reactive_real_full_lrb.json", "headroom_by_length.json", "lrb_retra
             "hazard_prior.json", "hazard_prior_tier.json", "equal_horizon.json", "reachable_by_length.json",
             "hazard_prior_rescaled.json", "hazard_prior_tier_rescaled.json", "online_admission.json",
             "arrival_admission_reuse.json", "tier_only_reuse.json",
-            "bailian_reachable_birthx.json", "bailian_hazard_birthx.json", "reactive_cost.json")
+            "bailian_reachable_birthx.json", "bailian_hazard_birthx.json", "reactive_cost.json",
+            "measured_migration.json")
 missing = [n for n in REQUIRED if not (EXP / n).exists()]
 if missing:
     failures.append("artifacts absent, so their claims went unchecked: " + ", ".join(missing))

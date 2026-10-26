@@ -2190,3 +2190,39 @@ What changed, and what each rule did to the guards:
 - **Staleness**: the three vendored template files are now PDF sources in both the build manifest and
   the checker, so a template update marks the PDF stale.
 - No number changed; 117/117 checks, 313 tests.
+
+## §AX — the price of a migration, measured
+
+The paper's online conclusion (§AV) turns on one assumed number: a move between tiers costs one read
+from the source plus one write to the destination ("read+write"), and the hazard arm keeps 70% of its
+static gain only below 7.3% / 7.2% of that. On 2026-10-26 the author provided a GPU server (4x A100 80GB
+PCIe Gen4; GPU0 idle and used alone, GPUs 1-3 running other users' jobs throughout; local disks are
+rotational behind a MegaRAID SAS-3 3108; no NVMe; no RDMA fabric). `measure_tier_costs.py` ran six
+times on GPU0 from an existing conda env (PyTorch 2.7.1, CUDA 12.6); nothing was installed.
+
+Read latency of one 64 MiB block (8B shape, 512 tokens): GPU 0.047 ms (half a device copy), CPU 2.68 ms
+(pinned H2D), disk 135 ms (page-cache-evicted read). Migration price as a multiple of the measured
+read+write price of the same move, range over runs:
+
+| move | on the serving path | overlapped with serving |
+|---|---|---|
+| gpu->cpu (demotion) | 0.98–1.87 | 0.75–1.43 |
+| cpu->gpu (promotion) | 0.93–1.16 | 0.97–1.09 |
+| cpu->disk (demotion) | 1.42–1.46 | 0.90–1.09 |
+
+**A measurement design that could have lied, checked.** The first contention design ran demand loads and
+migrations in two Python threads, each launching a copy and then synchronizing. Opposite-direction
+traffic (a demotion while blocks are loaded) starved the loads by 85–95%, and the two rates summed to
+the demand rate alone — the signature of serialization, which the threads themselves could have caused.
+A second design enqueues both streams from one thread with no synchronization in between and times each
+with CUDA events. It agrees (3.6 ms per demotion against 3.7 ms): on this host the two copy directions
+do not overlap, so a background demotion takes the link time of a load. An overlapped GEMM was not
+slowed in five of six runs (−1.3 to −0.8%; +15.3% in one), so the price is link time, not compute.
+
+**What it changes.** The read+write assumption is not pessimistic; every measured price is at least 10x
+the hazard arm's break-even, so the online conclusion (no replayed policy that moves blocks beats the
+static heuristic once moves are priced) holds at measured prices on this host. Not measured: the remote
+RDMA tier, which receives most of the hazard arm's online demotions (cpu->remote_rdma 54,837 of 63,169 on
+conversation); NVMe; a full serving stack. The measured GPU:CPU latency ratio is 1:58, between the
+hand-written table's 1:10 and the derived device classes' 1:80–1:250. The paper states all of this in
+§V-C and the limitations.

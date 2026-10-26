@@ -90,8 +90,9 @@ Reproducibility package: `../REPRODUCIBILITY.md` and `make verify`.
 
 In the PVLDB template the body, acknowledgement included, ends on page 11; references start on page 11
 and the PDF is 12 pages. Measure the body, not the file: `stoa.verify.body_pages` with REFERENCES as the
-end heading is the quantity the venue constrains. A calibration pass against a live vLLM+LMCache
-deployment is still the open gate (`docs/claims_dependency.md` §B, §P).
+end heading is the quantity the venue constrains. Block-move costs are now measured on one A100 PCIe
+host (§AX); a full serving deployment (vLLM+LMCache) and the remote RDMA tier remain unmeasured
+(`docs/claims_dependency.md` §B, §P).
 
 ## Figures
 

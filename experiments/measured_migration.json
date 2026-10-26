@@ -1,0 +1,120 @@
+{
+  "config": {
+    "block_bytes": 67108864,
+    "block": "llama3-8b-like, 512 tokens (Mooncake)",
+    "machine": "NVIDIA A100 80GB PCIe, 81920 MiB, 570.211.01, 4, 16, 0 %, 4 MiB",
+    "disk": "RAID-backed rotational (MegaRAID SAS-3 3108), not NVMe",
+    "n_runs": 6,
+    "n_event_runs": 3,
+    "statistic": "median over runs of each run's median",
+    "gpu_read": "half a device-to-device copy",
+    "unmeasured": "remote_rdma (no RDMA fabric on the machine)"
+  },
+  "read_ms": {
+    "gpu": 0.0466,
+    "cpu": 2.6795,
+    "disk": 135.3752
+  },
+  "rows": [
+    {
+      "migration": "gpu->cpu",
+      "read_plus_write_ms": 2.7261,
+      "sync_ms": 4.1794,
+      "alpha_sync": 1.5331,
+      "async_ms": 3.6207,
+      "alpha_async": 1.3282,
+      "async_ms_thread_design": 3.6697,
+      "alpha_async_range": [
+        0.754,
+        1.432
+      ],
+      "alpha_sync_range": [
+        0.981,
+        1.873
+      ]
+    },
+    {
+      "migration": "cpu->gpu",
+      "read_plus_write_ms": 2.7261,
+      "sync_ms": 2.6795,
+      "alpha_sync": 0.9829,
+      "async_ms": 2.7955,
+      "alpha_async": 1.0255,
+      "async_ms_thread_design": 2.769,
+      "alpha_async_range": [
+        0.973,
+        1.087
+      ],
+      "alpha_sync_range": [
+        0.926,
+        1.158
+      ]
+    },
+    {
+      "migration": "gpu->disk",
+      "read_plus_write_ms": 135.4218,
+      "sync_ms": 204.4801,
+      "alpha_sync": 1.5099,
+      "async_ms": null,
+      "alpha_async": null,
+      "async_ms_thread_design": null
+    },
+    {
+      "migration": "cpu->disk",
+      "read_plus_write_ms": 138.0547,
+      "sync_ms": 200.3007,
+      "alpha_sync": 1.4509,
+      "async_ms": 125.508,
+      "alpha_async": 0.9091,
+      "async_ms_thread_design": null,
+      "alpha_async_range": [
+        0.902,
+        1.089
+      ],
+      "alpha_sync_range": [
+        1.422,
+        1.459
+      ]
+    }
+  ],
+  "async_price_per_run_ms": {
+    "h2d_load_vs_demotion": [
+      3.0344,
+      4.3278,
+      3.7075,
+      3.8574,
+      3.6319,
+      2.0144
+    ],
+    "h2d_load_vs_promotion": [
+      3.01,
+      3.3532,
+      2.7676,
+      2.7704,
+      2.7387,
+      2.576
+    ],
+    "disk_load_vs_demotion": [
+      124.5272,
+      125.8821,
+      125.1339,
+      126.5261,
+      125.0978,
+      150.3219
+    ]
+  },
+  "hazard_break_even_alpha70": {
+    "conversation": 0.0732,
+    "toolagent": 0.072
+  },
+  "hazard_onestep_migration_mix": {
+    "conversation": {
+      "gpu->remote_rdma": 8332,
+      "cpu->remote_rdma": 54837
+    },
+    "toolagent": {
+      "gpu->remote_rdma": 8870,
+      "cpu->remote_rdma": 54990
+    }
+  }
+}
