@@ -386,6 +386,26 @@ if d and _to and _rc and _dg and _hz and _hzt and _eh:
         claim("measured GPU:CPU latency ratio", f"measures 1:{_r['cpu'] / _r['gpu']:.0f})", "", "measured_migration")
         assert _mm["hazard_break_even_alpha70"] == {t: r for t, r in _h70.items()}, \
             "measured_migration.json was built against a different online_admission.json"
+    # Migration ledgers (§AY): the online conclusion under four ways to bill a move
+    _ml = load("migration_ledger.json")
+    if _ml:
+        _LED = ("reread", "exclusive", "retained", "write-through")
+        _pr = [r for r in _ml["rows"] if r["trace"] in PROD]
+        _lru = [r["policies"]["lru"]["ledgers"][l]["captured_pct"] for r in _pr for l in _LED]
+        claim("LRU across ledgers", f"leaves LRU at ${min(_lru):.1f}$\\% to ${max(_lru):.1f}$\\%", "",
+              "migration_ledger")
+        _a0 = [v["ledgers"][l]["alpha_0"] for r in _pr for v in r["policies"].values() for l in _LED
+               if v["ledgers"][l]["alpha_0"] is not None]
+        claim("max break-even multiple, production", f"more than\n{max(_a0):.2f} of the assumed price", "",
+              "migration_ledger")
+        if _mm:
+            assert max(_a0) < min(_gc + _dk), "a production policy breaks even inside the measured price range"
+        _pos = [(r["trace"], p, l, v["ledgers"][l]["captured_pct"]) for r in _ml["rows"]
+                for p, v in r["policies"].items() for l in _LED if v["ledgers"][l]["captured_pct"] > 0]
+        assert {(t, p) for t, p, _, _ in _pos} == {("synthetic", "second-hit")}, f"positive rows changed: {_pos}"
+        _sh = {l: x for _, _, l, x in _pos}
+        claim("synthetic second-hit, copy-keeping ledgers",
+              f"ledgers ({_sh['retained']:.1f}\\% and {_sh['write-through']:.1f}\\%)", "", "migration_ledger")
     _rcst = load("reactive_cost.json")
     if _rcst:
         _rr = {r["trace"]: r["reactive"] for r in _rcst["rows"]}
@@ -914,7 +934,7 @@ REQUIRED = ("reactive_real_full_lrb.json", "headroom_by_length.json", "lrb_retra
             "hazard_prior_rescaled.json", "hazard_prior_tier_rescaled.json", "online_admission.json",
             "arrival_admission_reuse.json", "tier_only_reuse.json",
             "bailian_reachable_birthx.json", "bailian_hazard_birthx.json", "reactive_cost.json",
-            "measured_migration.json")
+            "measured_migration.json", "migration_ledger.json")
 missing = [n for n in REQUIRED if not (EXP / n).exists()]
 if missing:
     failures.append("artifacts absent, so their claims went unchecked: " + ", ".join(missing))

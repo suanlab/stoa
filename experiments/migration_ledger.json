@@ -1,0 +1,833 @@
+{
+  "config": {
+    "ledgers": {
+      "reread": "every move: read(src) + write(dst) (the original online ledger)",
+      "exclusive": "promotion on an access: write(dst) only (the serving read was the read)",
+      "retained": "as exclusive; a demotion onto a clean lower copy is free (copy capacity not charged: optimistic for moving policies)",
+      "write-through": "as exclusive; every creation is also written to the second tier (one write each, billed to the policy), so fastest->second demotions are discards (copy capacity not charged)",
+      "zero": "all moves free"
+    },
+    "price_unit": "lambda_L x simulator read latency, as run_online_admission.migration_cost",
+    "alpha_0": "multiple of the ledger's price at which captured share reaches 0",
+    "arrival_arms": "onestep rows of online_admission.json; demotions only, never onto a copy"
+  },
+  "rows": [
+    {
+      "trace": "conversation",
+      "policies": {
+        "lru": {
+          "share_zero": 84.51,
+          "n_moves": {
+            "gpu->cpu demotion": 88451,
+            "gpu->cpu demotion clean": 8950,
+            "cpu->gpu promotion": 1236,
+            "cpu->gpu promotion clean": 9956,
+            "cpu->remote_rdma demotion": 85293,
+            "cpu->remote_rdma demotion clean": 916,
+            "remote_rdma->gpu promotion": 3462,
+            "remote_rdma->gpu promotion clean": 88
+          },
+          "creations": 82659,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 95058.66,
+              "captured_pct": -400.47,
+              "alpha_0": 0.1743
+            },
+            "exclusive": {
+              "migration_cost": 90690.26,
+              "captured_pct": -378.19,
+              "alpha_0": 0.1827
+            },
+            "retained": {
+              "migration_cost": 87988.46,
+              "captured_pct": -364.4,
+              "alpha_0": 0.1883
+            },
+            "write-through": {
+              "migration_cost": 85793.84,
+              "captured_pct": -353.21,
+              "alpha_0": 0.1931
+            },
+            "zero": {
+              "migration_cost": 0.0,
+              "captured_pct": 84.51,
+              "alpha_0": null
+            }
+          }
+        },
+        "second-hit": {
+          "share_zero": -6.23,
+          "n_moves": {
+            "gpu->cpu demotion": 20869,
+            "gpu->cpu demotion clean": 916,
+            "cpu->gpu promotion": 1846,
+            "cpu->gpu promotion clean": 289,
+            "cpu->remote_rdma demotion": 19650,
+            "remote_rdma->gpu promotion": 2852,
+            "disk->gpu promotion": 16798
+          },
+          "creations": 82659,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 43244.2,
+              "captured_pct": -226.86,
+              "alpha_0": -0.0283
+            },
+            "exclusive": {
+              "migration_cost": 20948.4,
+              "captured_pct": -113.11,
+              "alpha_0": -0.0583
+            },
+            "retained": {
+              "migration_cost": 20746.88,
+              "captured_pct": -112.08,
+              "alpha_0": -0.0589
+            },
+            "write-through": {
+              "migration_cost": 32687.5,
+              "captured_pct": -173.0,
+              "alpha_0": -0.0374
+            },
+            "zero": {
+              "migration_cost": 0.0,
+              "captured_pct": -6.23,
+              "alpha_0": null
+            }
+          }
+        },
+        "order-arrival (new-behind)": {
+          "share_zero": 16.99,
+          "creations": 82659,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 13984.42,
+              "captured_pct": -54.36,
+              "alpha_0": 0.2381
+            },
+            "exclusive": {
+              "migration_cost": 13984.42,
+              "captured_pct": -54.36,
+              "alpha_0": 0.2381
+            },
+            "retained": {
+              "migration_cost": 13984.42,
+              "captured_pct": -54.36,
+              "alpha_0": 0.2381
+            },
+            "write-through": {
+              "migration_cost": 30516.22,
+              "captured_pct": -138.7,
+              "alpha_0": 0.1091
+            },
+            "zero": {
+              "migration_cost": 0.0,
+              "captured_pct": 16.99,
+              "alpha_0": null
+            }
+          }
+        },
+        "constant-mean (new-behind)": {
+          "share_zero": 39.58,
+          "creations": 82659,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 39761.6,
+              "captured_pct": -163.28,
+              "alpha_0": 0.1951
+            },
+            "exclusive": {
+              "migration_cost": 39761.6,
+              "captured_pct": -163.28,
+              "alpha_0": 0.1951
+            },
+            "retained": {
+              "migration_cost": 39761.6,
+              "captured_pct": -163.28,
+              "alpha_0": 0.1951
+            },
+            "write-through": {
+              "migration_cost": 56293.4,
+              "captured_pct": -247.63,
+              "alpha_0": 0.1378
+            },
+            "zero": {
+              "migration_cost": 0.0,
+              "captured_pct": 39.58,
+              "alpha_0": null
+            }
+          }
+        },
+        "hazard-new (new-behind)": {
+          "share_zero": 51.21,
+          "creations": 82659,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 49035.44,
+              "captured_pct": -198.97,
+              "alpha_0": 0.2047
+            },
+            "exclusive": {
+              "migration_cost": 49035.44,
+              "captured_pct": -198.97,
+              "alpha_0": 0.2047
+            },
+            "retained": {
+              "migration_cost": 49035.44,
+              "captured_pct": -198.97,
+              "alpha_0": 0.2047
+            },
+            "write-through": {
+              "migration_cost": 65567.24,
+              "captured_pct": -283.31,
+              "alpha_0": 0.1531
+            },
+            "zero": {
+              "migration_cost": 0.0,
+              "captured_pct": 51.21,
+              "alpha_0": null
+            }
+          }
+        },
+        "order-arrival (new-ahead)": {
+          "share_zero": 49.33,
+          "creations": 82659,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 44927.44,
+              "captured_pct": -179.89,
+              "alpha_0": 0.2152
+            },
+            "exclusive": {
+              "migration_cost": 44927.44,
+              "captured_pct": -179.89,
+              "alpha_0": 0.2152
+            },
+            "retained": {
+              "migration_cost": 44927.44,
+              "captured_pct": -179.89,
+              "alpha_0": 0.2152
+            },
+            "write-through": {
+              "migration_cost": 61459.24,
+              "captured_pct": -264.23,
+              "alpha_0": 0.1573
+            },
+            "zero": {
+              "migration_cost": 0.0,
+              "captured_pct": 49.33,
+              "alpha_0": null
+            }
+          }
+        },
+        "constant-mean (new-ahead)": {
+          "share_zero": 39.58,
+          "creations": 82659,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 39761.6,
+              "captured_pct": -163.28,
+              "alpha_0": 0.1951
+            },
+            "exclusive": {
+              "migration_cost": 39761.6,
+              "captured_pct": -163.28,
+              "alpha_0": 0.1951
+            },
+            "retained": {
+              "migration_cost": 39761.6,
+              "captured_pct": -163.28,
+              "alpha_0": 0.1951
+            },
+            "write-through": {
+              "migration_cost": 56293.4,
+              "captured_pct": -247.63,
+              "alpha_0": 0.1378
+            },
+            "zero": {
+              "migration_cost": 0.0,
+              "captured_pct": 39.58,
+              "alpha_0": null
+            }
+          }
+        },
+        "hazard-new (new-ahead)": {
+          "share_zero": 51.21,
+          "creations": 82659,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 49035.44,
+              "captured_pct": -198.97,
+              "alpha_0": 0.2047
+            },
+            "exclusive": {
+              "migration_cost": 49035.44,
+              "captured_pct": -198.97,
+              "alpha_0": 0.2047
+            },
+            "retained": {
+              "migration_cost": 49035.44,
+              "captured_pct": -198.97,
+              "alpha_0": 0.2047
+            },
+            "write-through": {
+              "migration_cost": 65567.24,
+              "captured_pct": -283.31,
+              "alpha_0": 0.1531
+            },
+            "zero": {
+              "migration_cost": 0.0,
+              "captured_pct": 51.21,
+              "alpha_0": null
+            }
+          }
+        }
+      }
+    },
+    {
+      "trace": "toolagent",
+      "policies": {
+        "lru": {
+          "share_zero": 87.71,
+          "n_moves": {
+            "gpu->cpu demotion": 88602,
+            "gpu->cpu demotion clean": 6454,
+            "cpu->gpu promotion": 601,
+            "cpu->gpu promotion clean": 7774,
+            "cpu->remote_rdma demotion": 85819,
+            "cpu->remote_rdma demotion clean": 862,
+            "remote_rdma->gpu promotion": 2143,
+            "remote_rdma->gpu promotion clean": 73
+          },
+          "creations": 84465,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 93473.54,
+              "captured_pct": -401.4,
+              "alpha_0": 0.1793
+            },
+            "exclusive": {
+              "migration_cost": 90468.94,
+              "captured_pct": -385.67,
+              "alpha_0": 0.1853
+            },
+            "retained": {
+              "migration_cost": 88359.46,
+              "captured_pct": -374.64,
+              "alpha_0": 0.1897
+            },
+            "write-through": {
+              "migration_cost": 86449.62,
+              "captured_pct": -364.64,
+              "alpha_0": 0.1939
+            },
+            "zero": {
+              "migration_cost": 0.0,
+              "captured_pct": 87.71,
+              "alpha_0": null
+            }
+          }
+        },
+        "second-hit": {
+          "share_zero": -2.84,
+          "n_moves": {
+            "gpu->cpu demotion": 18451,
+            "gpu->cpu demotion clean": 309,
+            "cpu->gpu promotion": 693,
+            "cpu->gpu promotion clean": 115,
+            "cpu->remote_rdma demotion": 17952,
+            "remote_rdma->gpu promotion": 2051,
+            "disk->gpu promotion": 15901
+          },
+          "creations": 84465,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 39337.4,
+              "captured_pct": -208.68,
+              "alpha_0": -0.0138
+            },
+            "exclusive": {
+              "migration_cost": 18864.0,
+              "captured_pct": -101.55,
+              "alpha_0": -0.0287
+            },
+            "retained": {
+              "migration_cost": 18796.02,
+              "captured_pct": -101.19,
+              "alpha_0": -0.0289
+            },
+            "write-through": {
+              "migration_cost": 31629.8,
+              "captured_pct": -168.34,
+              "alpha_0": -0.0171
+            },
+            "zero": {
+              "migration_cost": 0.0,
+              "captured_pct": -2.84,
+              "alpha_0": null
+            }
+          }
+        },
+        "order-arrival (new-behind)": {
+          "share_zero": 19.58,
+          "creations": 84465,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 13193.5,
+              "captured_pct": -49.46,
+              "alpha_0": 0.2836
+            },
+            "exclusive": {
+              "migration_cost": 13193.5,
+              "captured_pct": -49.46,
+              "alpha_0": 0.2836
+            },
+            "retained": {
+              "migration_cost": 13193.5,
+              "captured_pct": -49.46,
+              "alpha_0": 0.2836
+            },
+            "write-through": {
+              "migration_cost": 30086.5,
+              "captured_pct": -137.85,
+              "alpha_0": 0.1244
+            },
+            "zero": {
+              "migration_cost": 0.0,
+              "captured_pct": 19.58,
+              "alpha_0": null
+            }
+          }
+        },
+        "constant-mean (new-behind)": {
+          "share_zero": 54.87,
+          "creations": 84465,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 49491.4,
+              "captured_pct": -204.1,
+              "alpha_0": 0.2119
+            },
+            "exclusive": {
+              "migration_cost": 49491.4,
+              "captured_pct": -204.1,
+              "alpha_0": 0.2119
+            },
+            "retained": {
+              "migration_cost": 49491.4,
+              "captured_pct": -204.1,
+              "alpha_0": 0.2119
+            },
+            "write-through": {
+              "migration_cost": 66384.4,
+              "captured_pct": -292.49,
+              "alpha_0": 0.158
+            },
+            "zero": {
+              "migration_cost": 0.0,
+              "captured_pct": 54.87,
+              "alpha_0": null
+            }
+          }
+        },
+        "hazard-new (new-behind)": {
+          "share_zero": 54.87,
+          "creations": 84465,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 49491.4,
+              "captured_pct": -204.1,
+              "alpha_0": 0.2119
+            },
+            "exclusive": {
+              "migration_cost": 49491.4,
+              "captured_pct": -204.1,
+              "alpha_0": 0.2119
+            },
+            "retained": {
+              "migration_cost": 49491.4,
+              "captured_pct": -204.1,
+              "alpha_0": 0.2119
+            },
+            "write-through": {
+              "migration_cost": 66384.4,
+              "captured_pct": -292.49,
+              "alpha_0": 0.158
+            },
+            "zero": {
+              "migration_cost": 0.0,
+              "captured_pct": 54.87,
+              "alpha_0": null
+            }
+          }
+        },
+        "order-arrival (new-ahead)": {
+          "share_zero": 53.82,
+          "creations": 84465,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 47014.6,
+              "captured_pct": -192.19,
+              "alpha_0": 0.2188
+            },
+            "exclusive": {
+              "migration_cost": 47014.6,
+              "captured_pct": -192.19,
+              "alpha_0": 0.2188
+            },
+            "retained": {
+              "migration_cost": 47014.6,
+              "captured_pct": -192.19,
+              "alpha_0": 0.2188
+            },
+            "write-through": {
+              "migration_cost": 63907.6,
+              "captured_pct": -280.58,
+              "alpha_0": 0.1609
+            },
+            "zero": {
+              "migration_cost": 0.0,
+              "captured_pct": 53.82,
+              "alpha_0": null
+            }
+          }
+        },
+        "constant-mean (new-ahead)": {
+          "share_zero": 54.87,
+          "creations": 84465,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 49491.4,
+              "captured_pct": -204.1,
+              "alpha_0": 0.2119
+            },
+            "exclusive": {
+              "migration_cost": 49491.4,
+              "captured_pct": -204.1,
+              "alpha_0": 0.2119
+            },
+            "retained": {
+              "migration_cost": 49491.4,
+              "captured_pct": -204.1,
+              "alpha_0": 0.2119
+            },
+            "write-through": {
+              "migration_cost": 66384.4,
+              "captured_pct": -292.49,
+              "alpha_0": 0.158
+            },
+            "zero": {
+              "migration_cost": 0.0,
+              "captured_pct": 54.87,
+              "alpha_0": null
+            }
+          }
+        },
+        "hazard-new (new-ahead)": {
+          "share_zero": 54.87,
+          "creations": 84465,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 49491.4,
+              "captured_pct": -204.1,
+              "alpha_0": 0.2119
+            },
+            "exclusive": {
+              "migration_cost": 49491.4,
+              "captured_pct": -204.1,
+              "alpha_0": 0.2119
+            },
+            "retained": {
+              "migration_cost": 49491.4,
+              "captured_pct": -204.1,
+              "alpha_0": 0.2119
+            },
+            "write-through": {
+              "migration_cost": 66384.4,
+              "captured_pct": -292.49,
+              "alpha_0": 0.158
+            },
+            "zero": {
+              "migration_cost": 0.0,
+              "captured_pct": 54.87,
+              "alpha_0": null
+            }
+          }
+        }
+      }
+    },
+    {
+      "trace": "synthetic",
+      "policies": {
+        "lru": {
+          "share_zero": 72.84,
+          "n_moves": {
+            "gpu->cpu demotion": 18387,
+            "gpu->cpu demotion clean": 26220,
+            "cpu->gpu promotion": 2305,
+            "cpu->gpu promotion clean": 23446,
+            "cpu->remote_rdma demotion": 17792,
+            "cpu->remote_rdma demotion clean": 1064,
+            "remote_rdma->gpu promotion": 6598,
+            "remote_rdma->gpu promotion clean": 1465,
+            "remote_rdma->disk demotion": 1
+          },
+          "creations": 10793,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 35564.42,
+              "captured_pct": -141.79,
+              "alpha_0": 0.3394
+            },
+            "exclusive": {
+              "migration_cost": 25576.42,
+              "captured_pct": -81.51,
+              "alpha_0": 0.4719
+            },
+            "retained": {
+              "migration_cost": 18956.82,
+              "captured_pct": -41.56,
+              "alpha_0": 0.6367
+            },
+            "write-through": {
+              "migration_cost": 17921.48,
+              "captured_pct": -35.32,
+              "alpha_0": 0.6735
+            },
+            "zero": {
+              "migration_cost": 0.0,
+              "captured_pct": 72.84,
+              "alpha_0": null
+            }
+          }
+        },
+        "second-hit": {
+          "share_zero": 60.76,
+          "n_moves": {
+            "gpu->cpu demotion": 11209,
+            "gpu->cpu demotion clean": 21660,
+            "cpu->gpu promotion": 4321,
+            "cpu->gpu promotion clean": 20403,
+            "cpu->remote_rdma demotion": 8145,
+            "remote_rdma->gpu promotion": 4582,
+            "disk->gpu promotion": 3563
+          },
+          "creations": 10793,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 26374.16,
+              "captured_pct": -98.4,
+              "alpha_0": 0.3818
+            },
+            "exclusive": {
+              "migration_cost": 14404.56,
+              "captured_pct": -26.16,
+              "alpha_0": 0.699
+            },
+            "retained": {
+              "migration_cost": 9639.36,
+              "captured_pct": 2.59,
+              "alpha_0": 1.0446
+            },
+            "write-through": {
+              "migration_cost": 9331.98,
+              "captured_pct": 4.45,
+              "alpha_0": 1.079
+            },
+            "zero": {
+              "migration_cost": 0.0,
+              "captured_pct": 60.76,
+              "alpha_0": null
+            }
+          }
+        },
+        "order-arrival (new-behind)": {
+          "share_zero": 6.52,
+          "creations": 10793,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 2478.22,
+              "captured_pct": -8.44,
+              "alpha_0": 0.436
+            },
+            "exclusive": {
+              "migration_cost": 2478.22,
+              "captured_pct": -8.44,
+              "alpha_0": 0.436
+            },
+            "retained": {
+              "migration_cost": 2478.22,
+              "captured_pct": -8.44,
+              "alpha_0": 0.436
+            },
+            "write-through": {
+              "migration_cost": 4636.82,
+              "captured_pct": -21.46,
+              "alpha_0": 0.233
+            },
+            "zero": {
+              "migration_cost": 0.0,
+              "captured_pct": 6.52,
+              "alpha_0": null
+            }
+          }
+        },
+        "constant-mean (new-behind)": {
+          "share_zero": 18.23,
+          "creations": 10793,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 6184.2,
+              "captured_pct": -19.09,
+              "alpha_0": 0.4885
+            },
+            "exclusive": {
+              "migration_cost": 6184.2,
+              "captured_pct": -19.09,
+              "alpha_0": 0.4885
+            },
+            "retained": {
+              "migration_cost": 6184.2,
+              "captured_pct": -19.09,
+              "alpha_0": 0.4885
+            },
+            "write-through": {
+              "migration_cost": 8342.8,
+              "captured_pct": -32.12,
+              "alpha_0": 0.3621
+            },
+            "zero": {
+              "migration_cost": 0.0,
+              "captured_pct": 18.23,
+              "alpha_0": null
+            }
+          }
+        },
+        "hazard-new (new-behind)": {
+          "share_zero": 0.0,
+          "creations": 10793,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 0,
+              "captured_pct": 0.0,
+              "alpha_0": null
+            },
+            "exclusive": {
+              "migration_cost": 0,
+              "captured_pct": 0.0,
+              "alpha_0": null
+            },
+            "retained": {
+              "migration_cost": 0,
+              "captured_pct": 0.0,
+              "alpha_0": null
+            },
+            "write-through": {
+              "migration_cost": 2158.6,
+              "captured_pct": -13.03,
+              "alpha_0": 0.0
+            },
+            "zero": {
+              "migration_cost": 0,
+              "captured_pct": 0.0,
+              "alpha_0": null
+            }
+          }
+        },
+        "order-arrival (new-ahead)": {
+          "share_zero": 12.74,
+          "creations": 10793,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 7081.96,
+              "captured_pct": -30.0,
+              "alpha_0": 0.2981
+            },
+            "exclusive": {
+              "migration_cost": 7081.96,
+              "captured_pct": -30.0,
+              "alpha_0": 0.2981
+            },
+            "retained": {
+              "migration_cost": 7081.96,
+              "captured_pct": -30.0,
+              "alpha_0": 0.2981
+            },
+            "write-through": {
+              "migration_cost": 9240.56,
+              "captured_pct": -43.02,
+              "alpha_0": 0.2285
+            },
+            "zero": {
+              "migration_cost": 0.0,
+              "captured_pct": 12.74,
+              "alpha_0": null
+            }
+          }
+        },
+        "constant-mean (new-ahead)": {
+          "share_zero": 18.23,
+          "creations": 10793,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 6184.2,
+              "captured_pct": -19.09,
+              "alpha_0": 0.4885
+            },
+            "exclusive": {
+              "migration_cost": 6184.2,
+              "captured_pct": -19.09,
+              "alpha_0": 0.4885
+            },
+            "retained": {
+              "migration_cost": 6184.2,
+              "captured_pct": -19.09,
+              "alpha_0": 0.4885
+            },
+            "write-through": {
+              "migration_cost": 8342.8,
+              "captured_pct": -32.12,
+              "alpha_0": 0.3621
+            },
+            "zero": {
+              "migration_cost": 0.0,
+              "captured_pct": 18.23,
+              "alpha_0": null
+            }
+          }
+        },
+        "hazard-new (new-ahead)": {
+          "share_zero": 0.0,
+          "creations": 10793,
+          "ledgers": {
+            "reread": {
+              "migration_cost": 0,
+              "captured_pct": 0.0,
+              "alpha_0": null
+            },
+            "exclusive": {
+              "migration_cost": 0,
+              "captured_pct": 0.0,
+              "alpha_0": null
+            },
+            "retained": {
+              "migration_cost": 0,
+              "captured_pct": 0.0,
+              "alpha_0": null
+            },
+            "write-through": {
+              "migration_cost": 2158.6,
+              "captured_pct": -13.03,
+              "alpha_0": 0.0
+            },
+            "zero": {
+              "migration_cost": 0,
+              "captured_pct": 0.0,
+              "alpha_0": null
+            }
+          }
+        }
+      }
+    }
+  ]
+}

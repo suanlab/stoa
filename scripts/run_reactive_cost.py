@@ -43,19 +43,33 @@ from stoa.simulator import TieringSimulator  # noqa: E402
 MODELS = ("zero", "read+write")
 
 
-def replay(policy, init_tier, is_new, slots, cm, events, w):
+def replay(policy, init_tier, is_new, slots, cm, events, w, ledger=None):
+    """`ledger`, if a dict, receives every move as a Counter keyed (src, dst, kind, clean_copy):
+    kind is "promotion" (on an access, so the serving read has just brought the block up) or
+    "demotion"; clean_copy says whether the block has resided in `dst` before -- the copy a
+    hierarchy that retains lower copies of immutable KV would still hold (run_migration_ledger.py)."""
+    from collections import Counter
     tiers = cm["tiers"]
     k = len(tiers)
     res = [OrderedDict() for _ in range(k)]              # per tier, LRU first
     where = {}
+    seen_in: dict = {}                                    # block -> tiers it has resided in
     for b, t in init_tier.items():
         res[t][b] = None
         where[b] = t
+        seen_in[b] = {t}
     moves = {m: 0.0 for m in MODELS}
+    if ledger is not None:
+        ledger.setdefault("moves", Counter())
+        ledger.setdefault("reads", Counter())
 
     def move(b, src, dst):
         for m in MODELS:
             moves[m] += oa.migration_cost(tiers[src], tiers[dst], cm["read_ms"], w, m)
+        if ledger is not None:
+            kind = "promotion" if dst < src else "demotion"
+            ledger["moves"][(src, dst, kind, dst in seen_in.setdefault(b, set()))] += 1
+        seen_in.setdefault(b, set()).add(dst)
 
     def insert_top(b, src):
         """b (not resident in tier 0) goes to tier 0; overflow cascades down to `src` (or the end)."""
@@ -63,6 +77,8 @@ def replay(policy, init_tier, is_new, slots, cm, events, w):
         where[b] = 0
         if src is not None:
             move(b, src, 0)
+        else:
+            seen_in.setdefault(b, set()).add(0)
         i = 0
         while len(res[i]) > slots[i]:
             v, _ = res[i].popitem(last=False)
@@ -77,6 +93,7 @@ def replay(policy, init_tier, is_new, slots, cm, events, w):
             if len(res[i]) < slots[i]:
                 res[i][b] = None
                 where[b] = i
+                seen_in.setdefault(b, set()).add(i)
                 return
         raise AssertionError("no tier has room")
 
@@ -84,6 +101,8 @@ def replay(policy, init_tier, is_new, slots, cm, events, w):
     for e in events:
         b = e if e >= 0 else ~e
         if e < 0:                                          # creation: compulsory miss, not billed
+            if ledger is not None:
+                ledger["creations"] = ledger.get("creations", 0) + 1
             if policy == "none":
                 place_free(b, fastest=True)
             elif policy == "lru":
@@ -93,6 +112,8 @@ def replay(policy, init_tier, is_new, slots, cm, events, w):
             continue
         t = where[b]
         cost += cm["per"][tiers[t]]
+        if ledger is not None:
+            ledger["reads"][t] += 1
         if policy in ("lru", "second-hit") and t != 0:
             del res[t][b]
             insert_top(b, t)

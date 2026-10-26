@@ -180,7 +180,13 @@ costs 0.75--1.87 times the read-plus-write price, whether it blocks serving or o
 two copy directions did not overlap on this host and a background move took the link time of a load;
 a demotion to the host's rotational disk costs 0.90--1.46 times. Every measured price is at least 10
 times the hazard arm's break-even. The remote tier, which receives most of the hazard arm's online
-demotions, could not be measured there.
+demotions, could not be measured there. Nor does the conclusion depend on how the hierarchy bills a move.
+Crediting the serving read to a promotion, keeping clean lower copies of immutable blocks, or writing
+every block through to host memory at creation (the last two without charging the copies' space)
+leaves LRU at $-401.4$\% to $-353.2$\%, and no production policy pays once a move costs more than
+0.28 of the assumed price; most of LRU's moves demote blocks just created, which have no copy below.
+Only on the synthetic control does a moving policy pay, cache-on-second-hit under the two copy-keeping
+ledgers (2.6\% and 4.5\%).
 
 \emph{Earlier versions of this experiment were wrong five times, and six of their readings are
 withdrawn.} The first leaked: training labels counted post-split accesses (34.3\% and 46.3\% of label

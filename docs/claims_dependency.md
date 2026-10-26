@@ -2226,3 +2226,36 @@ RDMA tier, which receives most of the hazard arm's online demotions (cpu->remote
 conversation); NVMe; a full serving stack. The measured GPU:CPU latency ratio is 1:58, between the
 hand-written table's 1:10 and the derived device classes' 1:80–1:250. The paper states all of this in
 §V-C and the limitations.
+
+## §AY — does the online conclusion depend on how a move is billed?
+
+`IDEA.md` (an independent review, 2026-10-25, kept local by the author's choice) raised P0-4: the
+online replays bill every move as read(src) + write(dst), which (a) bills a promotion's source read on
+top of the serving read that has just brought the block up, and (b) assumes an exclusive hierarchy,
+where real KV stores keep lower copies of immutable blocks (LMCache writes computed KV to host memory).
+Possibly a double count; not confirmed as a bug by the review.
+
+`run_reactive_cost.replay` now records every move (kind, and whether the block has resided in the
+destination before) without changing its output (reactive_cost.json byte-identical).
+`run_migration_ledger.py` bills the moves five ways — reread (the original), exclusive (promotion =
+write only), retained (demotion onto a clean copy free), write-through (every creation also written to
+the second tier, one write each billed to the policy; fastest->second demotions free), zero — and solves
+for alpha_0, the multiple of each ledger's price at which the policy stops beating the heuristic.
+
+| production | reread | exclusive | retained | write-through | zero |
+|---|---|---|---|---|---|
+| LRU, conversation | −400.5 | −378.2 | −364.4 | −353.2 | 84.5 |
+| LRU, toolagent | −401.4 | −385.7 | −374.6 | −364.6 | 87.7 |
+| hazard-new (behind), conversation | −199.0 | −199.0 | −199.0 | −283.3 | 51.2 |
+
+alpha_0 never exceeds 0.28 on production (order-arrival, toolagent, reread); measured multiples are
+0.75–1.87 (§AX). Why the ledger barely matters: LRU's moves are mostly demotions of blocks just created
+(88,451 of 97,401 gpu->cpu demotions on conversation had no copy below). The arrival arms only
+demote blocks placed once, so the copy-keeping ledgers cannot help them; write-through makes them worse
+(they pay a write per creation). Only on the synthetic control does any moving policy pay: second-hit
+under retained / write-through, +2.6% / +4.5%, with alpha_0 1.04 / 1.08 — inside the measured range.
+
+The copy-keeping ledgers do not charge the copies' capacity, so they are optimistic for moving
+policies; the conclusion survives them. The paper states this in §V-C. The checker asserts that no
+production alpha_0 reaches the lowest measured multiple and that the only positive rows are synthetic
+second-hit.
