@@ -60,7 +60,7 @@ miss no placement can serve, so only its later accesses are billed. Even so, new
 blocks with no pre-split access & 45.2\% & 46.1\% \\
 full hindsight gap & 32{,}002 & 31{,}484 \\
 \textbf{reachable gap} (visible blocks only) & \textbf{4{,}996} & \textbf{3{,}900} \\
-share no causal policy can reach & \textbf{84.4\%} & \textbf{87.6\%} \\
+share no split-time policy can reach & \textbf{84.4\%} & \textbf{87.6\%} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -400,9 +400,11 @@ the regression target that learned replacement runs on, for the same underlying 
 
 Three caveats bound this. It is our reimplementation of the published mechanism, not the authors'
 artifact. KV blocks are uniform-size, so byte miss ratio collapses to object miss ratio and LRB loses one
-of its structural advantages over LRU. And the hyperparameter sweep we ran to check that the result was
-not a tuning artifact was run on the \emph{broken} implementation, so it tested the robustness of random
-eviction; we have not repeated it.
+of its structural advantages over LRU. And our first hyperparameter sweep ran on the \emph{broken}
+implementation, so it tested the robustness of random eviction. Rerun on the repaired one at a 10\%
+tier (six settings of window, sample size and trees per trace), LRB spans 41.9--61.8\% of Belady on
+conversation and 77.6--86.4\% on toolagent, below ARC's 77.5\% and 92.3\% at every setting; the band
+is too wide to quote one LRB number, but not wide enough to reach ARC.
 
 
 The eviction signal also inverts by source. On the agent traces LRU reaches 0.83--0.96 of Belady at a 5\%

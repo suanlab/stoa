@@ -79,7 +79,7 @@ has a spread an order of magnitude wider than any effect), and the eviction-sign
 (`run_reactive_kvct.py`). `make reproduce-full` runs all three; `make verify` and `make reproduce-fast`
 run without it.
 
-## Alibaba Qwen Bailian KV traces (optional: an external replication, not cited by the paper)
+## Alibaba Qwen Bailian KV traces (optional: the external replication cited in the paper's §V-C)
 
 Four anonymized two-hour traces from `github.com/alibaba-edu/qwen-bailian-usagetraces-anon`
 (Wang et al., "KVCache Cache in the Wild", USENIX ATC'25), 16-token blocks, Apache-2.0. Not

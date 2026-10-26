@@ -2259,3 +2259,45 @@ The copy-keeping ledgers do not charge the copies' capacity, so they are optimis
 policies; the conclusion survives them. The paper states this in §V-C. The checker asserts that no
 production alpha_0 reaches the lowest measured multiple and that the only positive rows are synthetic
 second-hit.
+
+## §AZ — the split-time ceiling is set by where it puts blocks that are never read again (OPEN; headline-changing)
+
+Found 2026-10-27 while answering `IDEA.md` P0-2 ("is the ceiling an upper bound for its policy
+class?"). An exhaustive check on 200 random 10-block workloads found the published ceiling ABOVE the
+cost of the best visible-block placement in 90 of 200 (tier-only) and 89 of 200 (all actions): it is
+not optimal for its own class.
+
+**Mechanism.** `attainable_ceiling` gives visible blocks their true future count and new blocks 0. A
+visible block that is never read again also gets 0, and every pre-split block precedes every new block
+in item order, so the greedy pass (stable on ties, fastest tier with room) fills the fast tiers with
+dead visible blocks before any new block. Both placements cost a dead block nothing; a policy that
+knows the visible futures, as the ceiling assumes, loses nothing by parking them last. On the production
+traces 92,883 of 100,131 (conversation) and 93,934 of 98,835 (toolagent) visible blocks are dead.
+
+| trace | actions | ceiling as published | dead visible blocks last |
+|---|---|---|---|
+| conversation | all | 15.6% | **50.8%** |
+| conversation | tier | 20.4% | **77.8%** |
+| toolagent | all | 12.4% | **49.4%** |
+| toolagent | tier | 15.3% | **76.2%** |
+| synthetic | all | 45.4% | 62.7% |
+| synthetic | tier | 60.2% | 84.1% |
+
+Parking dead blocks last is still not the class optimum: the exhaustive search beats it in 83 of 200
+(tier) and 82 of 200 (all), by reserving fast slots for arrivals, which requires knowing the arrivals'
+futures. So no split-time "ceiling" in this artifact is an upper bound.
+
+**What this breaks, if adopted.** The paper's §V-B headline ("84.4% and 87.6% of the oracle's
+advantage sits out of a split-time policy's reach"; "the best split-time policy reaches 15.6% and
+12.4%") is a tie-break convention; under tier-only actions the share out of reach is 22–24%. Every
+"times the split-time ceiling" ratio (2.3–4.9x for the hazard arm; 1.5–15.2x on Bailian) was measured
+against the low ceiling; against dead-last the causal hazard arm (47.0 / 51.7% tier-only static) is
+BELOW the clairvoyant split-time reference, as it should be. The recency, migration-price and ledger
+results (§AV, §AX, §AY) do not use the ceiling and stand.
+
+**What survives as a finding.** 93% of the blocks visible at the split are never read again, and the
+oracle's advantage over the frequency heuristic is mostly the cost of putting those blocks in fast
+tiers ahead of new ones. The "reachable share" moves from 15% to 78% with one ordering convention for
+blocks that have no evidence either way — the same kind of defect as the fifteen catalogued, found in the
+paper's own headline. Not yet in the paper: the thesis has to change, and that is the author's call.
+Artifact: `run_ceiling_ties.py` → `experiments/ceiling_ties.json` (~15 min).

@@ -541,6 +541,14 @@ if d:
     lo, hi = _band(10_000)
     claim("censored share, short window", f"{lo:.0f}--{hi:.0f}\\%", "88--91\\%",
           "censored_frac @ 10k")
+    # the repaired sweep, quoted in V-F; it must stay below ARC at every setting
+    _sw = d["traces"]
+    for _t in ("conversation", "toolagent"):
+        assert all(r["over_belady"] < _sw[_t]["arc_over_belady"] for r in _sw[_t]["rows"]), _t
+    claim("repaired LRB sweep vs ARC",
+          f"spans {100*_sw['conversation']['lrb_min_over_belady']:.1f}--{100*_sw['conversation']['lrb_max_over_belady']:.1f}\\% of Belady on\n"
+          f"conversation and {100*_sw['toolagent']['lrb_min_over_belady']:.1f}--{100*_sw['toolagent']['lrb_max_over_belady']:.1f}\\% on toolagent, below ARC's "
+          f"{100*_sw['conversation']['arc_over_belady']:.1f}\\% and {100*_sw['toolagent']['arc_over_belady']:.1f}\\% at every setting", "", "lrb_sweep")
 
 d = load("lrb_retraction.json")
 if d:

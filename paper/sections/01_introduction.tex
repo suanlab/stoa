@@ -122,4 +122,6 @@ shared budget, with task utility as the objective.
 
 \paragraph{Artifact} Every result in this paper is regenerated on CPU, without a paid API, by the
 released package at \url{\artifacturl}; \texttt{make verify} re-derives each one from its stored result
-in a few minutes, and \texttt{make reproduce-full} regenerates those results from the public traces.
+in a few minutes; \texttt{make reproduce-full} regenerates them from the public Mooncake and
+kv-cache-tester traces, \texttt{make reproduce-external} the Alibaba replication, and the block-move
+timings need a CUDA host (\texttt{measure\_tier\_costs.py}).

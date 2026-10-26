@@ -1,0 +1,75 @@
+{
+  "config": {
+    "split": 0.5,
+    "dead_visible": "visible at the split, no future access",
+    "dead_last": "dead visible blocks ordered after every other block (the belief-0 tie)",
+    "toys": "200 random workloads, 6 visible + 4 new uniform blocks, seed 0",
+    "exhaustive": "every feasible tier assignment of the visible blocks; new blocks by the default rule (fastest tier with room, creation order)"
+  },
+  "toys": {
+    "all": {
+      "n": 200,
+      "published_above_exhaustive": 89,
+      "dead_last_above_exhaustive": 82,
+      "max_rel_gap_published": 0.4164,
+      "max_rel_gap_dead_last": 0.3141
+    },
+    "tier": {
+      "n": 200,
+      "published_above_exhaustive": 90,
+      "dead_last_above_exhaustive": 83,
+      "max_rel_gap_published": 0.2785,
+      "max_rel_gap_dead_last": 0.2241
+    }
+  },
+  "rows": [
+    {
+      "trace": "conversation",
+      "actions": "all",
+      "n_visible": 100131,
+      "n_dead_visible": 92883,
+      "published_ceiling_pct": 15.61,
+      "dead_last_ceiling_pct": 50.82
+    },
+    {
+      "trace": "conversation",
+      "actions": "tier",
+      "n_visible": 100131,
+      "n_dead_visible": 92883,
+      "published_ceiling_pct": 20.36,
+      "dead_last_ceiling_pct": 77.84
+    },
+    {
+      "trace": "toolagent",
+      "actions": "all",
+      "n_visible": 98835,
+      "n_dead_visible": 93934,
+      "published_ceiling_pct": 12.39,
+      "dead_last_ceiling_pct": 49.39
+    },
+    {
+      "trace": "toolagent",
+      "actions": "tier",
+      "n_visible": 98835,
+      "n_dead_visible": 93934,
+      "published_ceiling_pct": 15.28,
+      "dead_last_ceiling_pct": 76.24
+    },
+    {
+      "trace": "synthetic",
+      "actions": "all",
+      "n_visible": 33131,
+      "n_dead_visible": 21340,
+      "published_ceiling_pct": 45.38,
+      "dead_last_ceiling_pct": 62.7
+    },
+    {
+      "trace": "synthetic",
+      "actions": "tier",
+      "n_visible": 33131,
+      "n_dead_visible": 21340,
+      "published_ceiling_pct": 60.19,
+      "dead_last_ceiling_pct": 84.12
+    }
+  ]
+}

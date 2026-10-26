@@ -71,6 +71,7 @@ positioned but not run.
 
 In short, each line optimizes one axis and freezes the others, and none decides representation, tier,
 \emph{and} timing jointly under a shared budget (\Cref{tab:positioning}). Our contribution is not a better
-policy but a measurement: on production KV traces the usual split-instant protocol leaves most of a
-hindsight oracle's advantage out of any policy's reach, deciding at each block's arrival brings much of
-it back into reach, and we report the protocol needed to see that.
+policy but a measurement: on production KV traces a split-instant protocol leaves most of a hindsight
+oracle's advantage out of a split-time policy's reach, deciding at each block's arrival brings much of it
+back into reach in a static analysis, and whether that or plain recency pays online is set by the price
+of migration.

@@ -208,7 +208,7 @@ Checking while logged in tests your own access, not a reviewer's.
 
 ## 6. Controls wired into the harness
 
-The paper's §V-G catalogues **twenty-five defects** that produced plausible-but-wrong numbers; `docs/claims_dependency.md`
+The paper's §V-G catalogues **twenty-seven defects** that produced plausible-but-wrong numbers; `docs/claims_dependency.md`
 catalogues each with the symptom it presented. The checks that catch them live in the code and the tests,
 not just in prose:
 
