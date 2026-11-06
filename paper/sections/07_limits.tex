@@ -1,0 +1,21 @@
+\section{Limitations}
+\label{sec:limits}
+No serving deployment was measured, only block moves on one host, so any cost-expressed quantity should be
+read as a range. The per-tier read latencies are a declared table, not measurements; its GPU:CPU latency
+ratio is 1:10 where five derived device classes give 1:80 to 1:250, except a deliberately flat one, and
+our A100 host measures 1:58. Deriving the table from three attention shapes and five device classes puts
+the heuristic-to-oracle headroom at 55--98\%, which contains the 92\% the declared table gives, but we did
+not rerun the ladder or the online replays under the derived tables, and 6 of the 15 configurations
+reorder the hierarchy in a way our fixed capacities cannot express. The remote tier, which receives most
+of the online demotions, and NVMe were not measured.
+
+Every placement result is a single deterministic run with no confidence interval, though the split,
+trace length, cost weights, tie rule, action space and billing are swept rather than fixed. The sources
+are KV-block hash streams from transformer prefix caching: independent in provenance, not in mechanism,
+and we cannot separate workload character from vendor, date or block size. The estimated prior fixes one
+pseudo-split, its count bins and its age quartiles; rescaling for its half-prefix counts moves it by at most
+0.6 points on the production traces. Our LRB, LeCaR, CACHEUS, S3-FIFO, SIEVE and W-TinyLFU are rebuilt from
+their papers, not the authors' artifacts (CACHEUS's CR-LFU expert approximated by LFU, W-TinyLFU's sketch by
+exact aged counts), and uniform block sizes remove one of LRB's advantages over LRU, so their results are
+statements about this workload rather than about these designs. Hawkeye and Mockingjay are not run: a KV
+block hash carries no analogue of the program counter their predictors are indexed by.

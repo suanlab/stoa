@@ -13,93 +13,72 @@ Reallocated glb_str_end (elt_size=4) to 20 items from 10.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Warning--no number and no volume in F5_liu2025lmcache
 Warning--page numbers missing in both pages and numpages fields in F5_liu2025lmcache
-Warning--no number and no volume in F4_fang2025lightmem
-Warning--page numbers missing in both pages and numpages fields in F4_fang2025lightmem
 Warning--empty publisher in gao2024cachedattention
 Warning--empty address in gao2024cachedattention
 Warning--page numbers missing in both pages and numpages fields in gao2024cachedattention
-Warning--no number and no volume in S4_coldrl2025
-Warning--page numbers missing in both pages and numpages fields in S4_coldrl2025
-Warning--empty address in S10_jain2016hawkeye
-Warning--empty publisher in kwon2023pagedattention
-Warning--empty address in kwon2023pagedattention
-Warning--page numbers missing in both pages and numpages fields in kwon2023pagedattention
-Warning--no number and no volume in F1_li2025memos
-Warning--page numbers missing in both pages and numpages fields in F1_li2025memos
-Warning--no number and no volume in F3_lin2025sleeptime
-Warning--page numbers missing in both pages and numpages fields in F3_lin2025sleeptime
-Warning--no number and no volume in S2_liu2020parrot
-Warning--page numbers missing in both pages and numpages fields in S2_liu2020parrot
-Warning--no number and no volume in S5_mao2019decima
-Warning--page numbers missing in both pages and numpages fields in S5_mao2019decima
+Warning--empty publisher in johnson1994twoq
+Warning--empty address in johnson1994twoq
 Warning--empty publisher in S7_megiddo2003arc
 Warning--empty address in S7_megiddo2003arc
 Warning--page numbers missing in both pages and numpages fields in S7_megiddo2003arc
-Warning--no number and no volume in P14_packer2023memgpt
-Warning--page numbers missing in both pages and numpages fields in P14_packer2023memgpt
+Warning--empty publisher in oneil1993lruk
+Warning--empty address in oneil1993lruk
 Warning--empty publisher in qin2024mooncake
 Warning--empty address in qin2024mooncake
 Warning--page numbers missing in both pages and numpages fields in qin2024mooncake
 Warning--empty address in S9_rodriguez2021cacheus
-Warning--empty address in S11_shah2022mockingjay
 Warning--empty publisher in S6_song2020lrb
 Warning--empty address in S6_song2020lrb
 Warning--page numbers missing in both pages and numpages fields in S8_vietri2018lecar
 Warning--empty publisher in wang2025kvcachewild
 Warning--empty address in wang2025kvcachewild
 Warning--page numbers missing in both pages and numpages fields in wang2025kvcachewild
-Warning--no number and no volume in F2_wang2025mplus
-Warning--page numbers missing in both pages and numpages fields in F2_wang2025mplus
-Warning--no number and no volume in F20_xiong2025raggym
-Warning--page numbers missing in both pages and numpages fields in F20_xiong2025raggym
-Warning--no number and no volume in F6_yan2025memoryr1
-Warning--page numbers missing in both pages and numpages fields in F6_yan2025memoryr1
-Warning--no number and no volume in F7_zhang2025memoryasaction
-Warning--page numbers missing in both pages and numpages fields in F7_zhang2025memoryasaction
-Warning--no number and no volume in S1_zhang2023h2o
-Warning--page numbers missing in both pages and numpages fields in S1_zhang2023h2o
-Warning--empty publisher in zheng2024sglang
-Warning--empty address in zheng2024sglang
-Warning--page numbers missing in both pages and numpages fields in zheng2024sglang
-You've used 25 entries,
+Warning--empty publisher in xia2026lah
+Warning--empty address in xia2026lah
+Warning--empty address in yang2023s3fifo
+Warning--empty publisher in zhang2024sieve
+Warning--empty address in zhang2024sieve
+Warning--empty publisher in zhou2021spitfire
+Warning--empty address in zhou2021spitfire
+You've used 23 entries,
             5901 wiz_defined-function locations,
-            1474 strings with 20602 characters,
-and the built_in function-call counts, 31122 in all, are:
-= -- 3725
-> -- 1550
+            1472 strings with 20788 characters,
+and the built_in function-call counts, 31549 in all, are:
+= -- 3641
+> -- 1517
 < -- 0
-+ -- 528
-- -- 532
-* -- 2500
-:= -- 3320
-add.period$ -- 120
-call.type$ -- 25
-change.case$ -- 223
-chr.to.int$ -- 24
-cite$ -- 75
-duplicate$ -- 2519
-empty$ -- 1801
-format.name$ -- 611
-if$ -- 7445
-int.to.chr$ -- 3
++ -- 513
+- -- 500
+* -- 2542
+:= -- 3327
+add.period$ -- 112
+call.type$ -- 23
+change.case$ -- 213
+chr.to.int$ -- 23
+cite$ -- 52
+duplicate$ -- 2607
+empty$ -- 1821
+format.name$ -- 592
+if$ -- 7406
+int.to.chr$ -- 2
 int.to.str$ -- 1
-missing$ -- 112
-newline$ -- 277
-num.names$ -- 199
-pop$ -- 1143
+missing$ -- 102
+newline$ -- 282
+num.names$ -- 184
+pop$ -- 1062
 preamble$ -- 1
-purify$ -- 429
+purify$ -- 416
 quote$ -- 0
-skip$ -- 820
+skip$ -- 930
 stack$ -- 0
-substring$ -- 1707
-swap$ -- 182
+substring$ -- 2165
+swap$ -- 269
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 565
-warning$ -- 50
-while$ -- 147
+type$ -- 578
+warning$ -- 29
+while$ -- 152
 width$ -- 0
-write$ -- 488
-(There were 50 warnings)
+write$ -- 487
+(There were 29 warnings)

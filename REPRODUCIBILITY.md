@@ -99,14 +99,19 @@ Then the online-admission experiment (2026-10-19, §AS) found that every version
 creation, a compulsory miss no tier can serve, as a read from its tier. `Workload.future_counts` now
 excludes it and every artifact was regenerated; the oracle's advantage was inflated about 3x.
 
-Anything in `experiments/` predating 2026-10-20 should be read against §I, §T–§V, §AC and §AP–§AS before
-use. What survives: the best split-time policy reaches **15.6% / 12.4%** of the oracle's advantage (75–97%
-unreachable across splits). In a static analysis, arrival-time placement captures 2.3–4.9x that when the trust placed in an
-unseen block is estimated from the prefix (`run_hazard_prior.py`); fixed by convention, the same decision
-moves it by 14–29 points and can leave it at the split-time ceiling. Replayed online on the same cost metric, a
-multi-tier LRU beats every arrival-time arm when migration is free, and nothing that moves blocks beats
-the static frequency heuristic once a move costs one read plus one write (`run_online_admission.py`,
-`run_reactive_cost.py`, notebook §AV).
+Then a review question (2026-10-27, §AZ) found that the split-time "ceiling" itself was a tie rule: it
+placed visible blocks that are never read again ahead of new blocks, and parking them last moves it from
+20.4% / 15.3% to 77.8% / 76.2% (tier-only). The "84.4% / 87.6% unreachable" headline and every ratio
+against that ceiling (2.3–4.9x for the estimated prior, 1.5–15.2x on Bailian) are withdrawn as
+interpretations; the artifacts that compute them remain and are correct as computations.
+
+Anything in `experiments/` predating 2026-11-06 should be read against §I, §T–§V, §AC, §AP–§AS and §AZ
+before use. What survives: 92.8% / 95.0% of the blocks visible at the split are dead; the tie rule for
+blocks without evidence moves a clairvoyant split-time reference by 48–63 points; knowing which seen
+blocks are dead is worth as much as knowing their futures, and a seen-once rule captures 39.2% / 43.3%
+(`run_evidence_ladder.py`); online, a multi-tier LRU captures 84.5% / 87.7% with free moves, and at
+measured move prices (0.75–1.87x one read plus one write) under five ledgers nothing that moves blocks
+beats the static frequency heuristic (`run_reactive_cost.py`, `run_migration_ledger.py`, §AV–§AY).
 
 ## 3b. Environment, and what is hand-rolled
 
@@ -168,6 +173,10 @@ Checking while logged in tests your own access, not a reviewer's.
 | **Reactive policies on the same metric** (§V-C, §AV): replay with no moves (asserted equal to the heuristic), multi-tier LRU, and cache-on-second-hit. LRU 84.5 / 87.7% free, −400.5 / −401.4% priced; second-hit −6.2 / −2.8% free | `python3 scripts/run_reactive_cost.py` | `experiments/reactive_cost.json` |
 | **Measured migration price** (§V-C, §AX): block moves timed on one A100 80GB PCIe Gen4 x16 host, six runs, 64 MiB block (8B shape, 512 tokens). GPU↔CPU moves cost 0.75–1.87× the read+write price the replay assumes, synchronous or overlapped (the two copy directions did not overlap on this host); demotion to its rotational RAID disk 0.90–1.46×; at least 10× the hazard arm's break-even. Remote RDMA not measured | raw timings: `python3 scripts/measure_tier_costs.py --dir <disk-tier dir> --out run.json` on a CUDA host (hardware-specific; not bit-reproducible); analysis: `python3 scripts/run_measured_migration.py [--collect run*.json]` (no GPU) | `experiments/tier_costs_a100.json` (raw), `measured_migration.json` |
 | **Migration ledgers** (§V-C, §AY): the online policies billed under four ways a hierarchy charges a move (read+write; promotion credited to the serving read; clean lower copies kept; write-through at creation). LRU −401.4 to −353.2% on production under every one; no production policy breaks even above 0.28 of the assumed price (measured 0.75–1.87); only synthetic second-hit turns positive (2.6 / 4.5%) under the copy-keeping ledgers | `python3 scripts/run_migration_ledger.py` (~1 min) | `experiments/migration_ledger.json` |
+| **Blocks without evidence** (§V-A–C, §AZ, §BA): dead share of visible blocks, the clairvoyant split-time reference under both tie rules, and the evidence ladder (seen-once rule, dead-known, visible futures), splits 0.3–0.7, tier-only and all actions. 92.8 / 95.0% dead at the midpoint; reference 20.4 / 15.3% (dead first) vs 77.8 / 76.2% (dead last); seen-once rule 39.2 / 43.3% | `python3 scripts/run_evidence_ladder.py` (~1.5 h); `run_ceiling_ties.py` (~15 min, incl. the exhaustive toy check); `run_reuse_split.py` | `experiments/evidence_ladder.json`, `ceiling_ties.json`, `reuse_split.json` |
+| **Blocks without evidence, external** (§V-C, §BA): the ladder on Alibaba's four Qwen traces, split 0.5, tier-only | `python3 scripts/run_evidence_ladder.py --bailian` (data per `data/README.md`) | `experiments/evidence_ladder_bailian.json` |
+| **Prefix validity of per-block billing** (§III, §BD): hash-chain check (each block id fixes its predecessor) and per-block vs prefix-usable hit rates for LRU and Belady; no hit whose prefix missed | `python3 scripts/run_prefix_validity.py` (~2 min) | `experiments/prefix_validity.json` |
+| **Modern baselines** (§V-E, §BB): S3-FIFO, SIEVE, W-TinyLFU beside Belady, LRU and ARC at the four tier sizes; never above the best plain rule | `python3 scripts/run_modern_baselines.py` (~1 min) | `experiments/modern_baselines.json` |
 | **Exposure confound**: blocks arriving in the first quarter see 2.3–4.6x the future reuse of the last quarter; arrival order alone predicts reuse at AUC 0.55–0.58; the leaky design's training labels had 34.3% / 46.3% of their mass after the cut | `python3 scripts/run_arrival_diagnostics.py` | `experiments/arrival_diagnostics.json` |
 | **Cost-weight sensitivity**: unreachable share 79.3–97.1% under tenfold changes to λ_L and λ_B, one at a time | `python3 scripts/run_weight_sensitivity.py` | `experiments/weight_sensitivity.json` |
 | **Belief controls**: a constant score must not beat a learned one (it did, until `quantile_match` was given mid-rank tie handling) | `python3 scripts/run_belief_controls.py` | `experiments/belief_controls.json` |

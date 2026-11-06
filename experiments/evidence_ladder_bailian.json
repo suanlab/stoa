@@ -1,0 +1,86 @@
+{
+  "config": {
+    "splits": [
+      0.5
+    ],
+    "traces": [
+      "coder",
+      "thinking",
+      "traceA",
+      "traceB"
+    ],
+    "actions": "tier only",
+    "block_tokens": 16,
+    "share": "(heuristic - arm) / (heuristic - oracle), true bill"
+  },
+  "rows": [
+    {
+      "trace": "traceA",
+      "split": 0.5,
+      "actions": "tier",
+      "n_visible": 1300158,
+      "dead_visible_pct": 89.7,
+      "seen_once_precision_for_dead": 0.9036,
+      "seen_once_recall_for_dead": 0.5828,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 29.9,
+        "dead-known": 74.35,
+        "visible-dead-first": 13.82,
+        "visible-dead-last": 74.35,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "traceB",
+      "split": 0.5,
+      "actions": "tier",
+      "n_visible": 1929998,
+      "dead_visible_pct": 93.91,
+      "seen_once_precision_for_dead": 0.9766,
+      "seen_once_recall_for_dead": 0.97,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 34.19,
+        "dead-known": 76.46,
+        "visible-dead-first": 18.3,
+        "visible-dead-last": 76.46,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "coder",
+      "split": 0.5,
+      "actions": "tier",
+      "n_visible": 2731894,
+      "dead_visible_pct": 87.53,
+      "seen_once_precision_for_dead": 0.918,
+      "seen_once_recall_for_dead": 0.6513,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 31.98,
+        "dead-known": 69.12,
+        "visible-dead-first": 12.85,
+        "visible-dead-last": 69.12,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "thinking",
+      "split": 0.5,
+      "actions": "tier",
+      "n_visible": 632146,
+      "dead_visible_pct": 95.82,
+      "seen_once_precision_for_dead": 0.9663,
+      "seen_once_recall_for_dead": 0.7815,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 25.83,
+        "dead-known": 53.68,
+        "visible-dead-first": 2.26,
+        "visible-dead-last": 53.68,
+        "oracle": 100.0
+      }
+    }
+  ]
+}

@@ -3,35 +3,33 @@
 Reproducibility package for **"The Unseen Block: What Split-Instant Evaluation
 Hides in KV-Cache Placement"** (prepared for PVLDB Volume 20 / VLDB 2027, Experiment, Analysis & Benchmark category).
 
-The paper asks what a KV-block placement policy has to get right, and answers that it has to decide
-*early*, and has to *estimate* how far to trust a block it has never seen. The short version:
+The paper asks what an offline evaluation of KV-block placement has to fix, and finds that on production
+traces the order it gives **blocks without evidence** decides what it reports. The short version:
 
-- **Split-instant evaluation understates placement.** On the two production traces we use, 45–46% of
-  blocks have no access before the split, and they carry **84.4% and 87.6%** of a hindsight oracle's
-  advantage, so the best possible split-time policy reaches **15.6% and 12.4%** of it. The share stays at
-  75–97% for every split from 0.3 to 0.7 and under tenfold changes to the cost weights, but it is a
-  long-horizon effect: on the first 1,500 requests of conversation 38.0% is reachable. A block's creation
-  (its KV is computed) is a compulsory miss and is not billed; billing it as a cache read, as earlier
-  versions did, inflated the oracle's advantage about 3x (notebook §AS). The diagnostic is one extra
-  placement pass (`stoa.sequential.attainable_ceiling`); we recommend reporting the reachable share
-  alongside any "fraction of headroom captured".
-- **Deciding at arrival helps only if the trust in unseen blocks is estimated.** Where a never-seen block
-  ranks against blocks seen once moves arrival-time placement by 14–29 points; fixed by convention, it can
-  leave arrival-time placement at the split-time ceiling. Estimated from the prefix (a new block's expected
-  reuse exceeds a seen-once block's), arrival-time placement captures **2.3–4.9x** what a clairvoyant
-  split-time policy can, under every tie convention and action space, in a static analysis. Replayed
-  online it is recency that this hides: on the same cost metric a multi-tier LRU captures 84.5% / 87.7%
-  when moving a block is free, more than any arrival-time arm (at most 57.3%), and once a move costs one
-  read plus one write nothing that moves blocks beats the static frequency heuristic
-  (`run_online_admission.py`, `run_reactive_cost.py`). Timed on an A100 PCIe host, a real move costs
-  0.75–1.87x that price, at least 10x what the arrival-time gain could afford
-  (`measure_tier_costs.py`, `run_measured_migration.py`). On Mooncake's synthetic control the estimated prior
-  does not help, and on one of Alibaba's four Bailian traces the prefix points the wrong way
-  (`make reproduce-external`). Earlier versions of this experiment leaked future information, compared order arms that
-  also differed in magnitude, fixed two conventions without saying so, and billed creations as reads; the
-  paper's §V-C and the notebook's §AP–§AS say how.
-- **Reaction is competitive.** Rules that forecast nothing reach 75–99% of Belady on toolagent and 40–94% on conversation, and the
-  adaptive family (ARC, LeCaR, CACHEUS) beats the best of them by at most 4.6 points.
+- **Most blocks a policy can see are dead.** On the two production Mooncake traces, **92.8% and 95.0%** of
+  the blocks seen before the midpoint split are never read again (88.8–96.0% across splits); the few live
+  ones fit in the fastest tier, and the rest of the reuse falls on blocks not yet created.
+- **A tie rule was the headline.** A clairvoyant split-time reference gives dead seen blocks and unseen
+  blocks the same belief, zero. Broken by item order (dead blocks first), as earlier versions of this
+  paper did, it reaches 20.4% and 15.3% of a hindsight oracle's advantage (tier-only actions); with dead
+  blocks parked behind new ones, **77.8% and 76.2%**. Neither is an upper bound (an exhaustive check on
+  small workloads beats both). The earlier "84.4% / 87.6% is out of a split-time policy's reach" and the
+  "2.3–4.9x the split ceiling" ratio were this tie rule (notebook §AZ; `run_ceiling_ties.py`).
+- **Deadness, not ranking, is what placement has to get right.** Knowing which seen blocks are dead is worth
+  exactly as much as knowing every seen block's future; a parameter-free rule that parks seen-once blocks
+  behind new ones captures 39.2% / 43.3%, an estimated prior 47.0% / 51.7%, a better ranker of seen blocks
+  at most 8.2% / 7.4% (`run_evidence_ladder.py`, notebook §BA).
+- **Online, the price of a move decides.** A multi-tier LRU captures 84.5% / 87.7% when moves are free;
+  timed on an A100 PCIe host a move costs 0.75–1.87x one read plus one write, and under five ways of
+  billing a move none of the replayed policies that move blocks beats the static frequency heuristic
+  (`run_reactive_cost.py`, `measure_tier_costs.py`, `run_migration_ledger.py`; §AV, §AX, §AY).
+- **Reaction stays near plain rules.** Rules that forecast nothing reach 75–99% of Belady on toolagent and
+  40–94% on conversation; ARC, LeCaR and CACHEUS beat the best of them by at most 4.6 points, LRB stays
+  below ARC, and S3-FIFO, SIEVE and W-TinyLFU stay below the best plain rule everywhere
+  (`run_modern_baselines.py`, §BB).
+
+A block's creation (its KV is computed) is a compulsory miss and is never billed; billing it as a cache
+read, as earlier versions did, inflated the oracle's advantage about 3x (notebook §AS).
 
 ## Quick start
 

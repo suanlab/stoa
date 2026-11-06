@@ -1,0 +1,132 @@
+{
+  "config": {
+    "cache_fracs": [
+      0.02,
+      0.05,
+      0.1,
+      0.2
+    ],
+    "order": "requests in file order, blocks in hash-chain order",
+    "slots": "max(1, int(frac * distinct blocks))"
+  },
+  "traces": {
+    "conversation": {
+      "n_blocks": 182790,
+      "n_positions": 288500,
+      "positions_with_another_predecessor": 0,
+      "rows": [
+        {
+          "cache_frac": 0.02,
+          "lru": {
+            "block_hit_rate": 0.0787,
+            "prefix_hit_rate": 0.0787,
+            "unusable_share_of_hits": 0.0
+          },
+          "belady": {
+            "block_hit_rate": 0.3142,
+            "prefix_hit_rate": 0.3142,
+            "unusable_share_of_hits": 0.0
+          }
+        },
+        {
+          "cache_frac": 0.05,
+          "lru": {
+            "block_hit_rate": 0.1954,
+            "prefix_hit_rate": 0.1954,
+            "unusable_share_of_hits": 0.0
+          },
+          "belady": {
+            "block_hit_rate": 0.3664,
+            "prefix_hit_rate": 0.3664,
+            "unusable_share_of_hits": 0.0
+          }
+        },
+        {
+          "cache_frac": 0.1,
+          "lru": {
+            "block_hit_rate": 0.2784,
+            "prefix_hit_rate": 0.2784,
+            "unusable_share_of_hits": 0.0
+          },
+          "belady": {
+            "block_hit_rate": 0.3664,
+            "prefix_hit_rate": 0.3664,
+            "unusable_share_of_hits": 0.0
+          }
+        },
+        {
+          "cache_frac": 0.2,
+          "lru": {
+            "block_hit_rate": 0.3446,
+            "prefix_hit_rate": 0.3446,
+            "unusable_share_of_hits": 0.0
+          },
+          "belady": {
+            "block_hit_rate": 0.3664,
+            "prefix_hit_rate": 0.3664,
+            "unusable_share_of_hits": 0.0
+          }
+        }
+      ]
+    },
+    "toolagent": {
+      "n_blocks": 183300,
+      "n_positions": 409616,
+      "positions_with_another_predecessor": 0,
+      "rows": [
+        {
+          "cache_frac": 0.02,
+          "lru": {
+            "block_hit_rate": 0.3655,
+            "prefix_hit_rate": 0.3655,
+            "unusable_share_of_hits": 0.0
+          },
+          "belady": {
+            "block_hit_rate": 0.5301,
+            "prefix_hit_rate": 0.5301,
+            "unusable_share_of_hits": 0.0
+          }
+        },
+        {
+          "cache_frac": 0.05,
+          "lru": {
+            "block_hit_rate": 0.4494,
+            "prefix_hit_rate": 0.4494,
+            "unusable_share_of_hits": 0.0
+          },
+          "belady": {
+            "block_hit_rate": 0.5525,
+            "prefix_hit_rate": 0.5525,
+            "unusable_share_of_hits": 0.0
+          }
+        },
+        {
+          "cache_frac": 0.1,
+          "lru": {
+            "block_hit_rate": 0.5077,
+            "prefix_hit_rate": 0.5077,
+            "unusable_share_of_hits": 0.0
+          },
+          "belady": {
+            "block_hit_rate": 0.5525,
+            "prefix_hit_rate": 0.5525,
+            "unusable_share_of_hits": 0.0
+          }
+        },
+        {
+          "cache_frac": 0.2,
+          "lru": {
+            "block_hit_rate": 0.5485,
+            "prefix_hit_rate": 0.5485,
+            "unusable_share_of_hits": 0.0
+          },
+          "belady": {
+            "block_hit_rate": 0.5525,
+            "prefix_hit_rate": 0.5525,
+            "unusable_share_of_hits": 0.0
+          }
+        }
+      ]
+    }
+  }
+}

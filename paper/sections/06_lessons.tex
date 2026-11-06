@@ -1,0 +1,59 @@
+\section{What the Measurement Took}
+\label{sec:lessons}
+Twenty-eight defects produced plausible numbers that matched their artifacts on the way here
+(\Cref{tab:defects}), and four of them were claims we had to retract. Most were found by re-verification passes after the
+paper passed every check it defined for itself; two by an adversarial review and five by an audit, both
+run with AI agents (see the Acknowledgments), and the last by a later review that asked whether
+our reference was an upper bound. The artifact's lab notebook records each with its fix.
+
+\begin{table*}[t]
+\centering\footnotesize
+\begin{tabular}{@{}p{3.2cm}p{8.6cm}p{4.9cm}@{}}
+\toprule
+mechanism (count) & what happened & control now in the harness \\
+\midrule
+Reference-frame mismatch (6) & a split over access-event indices that fell past the trace's end; ties
+broken by label (AUC 0.51 to 0.94); an oracle inheriting the heuristic's order; features built at one
+split instant, costs billed at another & one split instant for features, labels and bill; frames compared
+explicitly \\
+Retracted claims (3) & retracted: a ``+66--88\% captured'' agentic headline that sampling showed was never
+measurable; the \emph{decoupling} claim, an artifact of an unreachable denominator; an LRB column that
+measured random eviction because its training buffer was truncated & randomized draws; references reported
+under both tie rules; LRB fails on zero label variance \\
+Free-parameter extrapolation (3) & curves read from one point: a cache size, a trace length, a
+conversation count (+88\% reversing to $-48\%$) & every convenience parameter swept \\
+Believing a report (1) & an edit script printed success after matching nothing & edits asserted to land \\
+Stale derived or parallel surfaces (3) & artifacts older than the code that made them; figures fifteen
+days older than their data; a notebook stating a falsified claim & content-hash provenance; figure and
+PDF manifests; banners on records \\
+Unchecked summaries (1) & a sentence misquoted a checked band's width & spans and maxima asserted;
+withdrawn values must be absent \\
+Unverified interventions (1) & a mutation whose target string was absent ``passed'' & interventions
+asserted to apply; guards tested both ways \\
+A tie rule in the reference (1) & the split-time reference broke the zero-belief tie by item order,
+putting dead visible blocks ahead of new ones: 20.4\% and 15.3\% of the advantage, 77.8\% and 76.2\%
+the other way (tier-only); retracted: ``most of the advantage is out of a split-time policy's reach'' &
+both rules reported; an exhaustive check on small workloads \\
+Emphasis without verification (1) & the headline share sat in no artifact and mixed two references
+(97\% to 95\%, then 84--88\%) & every emphasised number asserted \\
+Leaks and unstated conventions (8) & in the arrival experiment: post-split labels; a cut unlike the bill;
+magnitudes from evaluation blocks' futures; zero beliefs for pre-split blocks; a mixed-scale ceiling; an
+order control that also changed magnitude; unstated tie and action-space conventions (up to 56 points);
+creations billed as reads (the gap inflated about three times) & a causal module with an AST taint test;
+conventions swept; billable access defined in one place \\
+\bottomrule
+\end{tabular}
+\caption{The twenty-eight measurement defects, by mechanism. Each produced a plausible number that matched
+its artifact.}
+\label{tab:defects}
+\end{table*}
+
+Three lessons generalize beyond KV caches. \emph{State the order of blocks without evidence}: any
+reference or policy that gives two blocks the same belief places them by a tie rule, and when most
+blocks have no evidence the rule is the result; LRU-K named this case in 1993 and left it to a
+``subsidiary policy''~\cite{oneil1993lruk}. \emph{Treat every convenience choice as a variable}: the
+split, trace length, action space, tie rule, magnitude scale and billing of creations each moved a
+headline by tens of points here. \emph{Price what a policy does, not only what it serves}: a policy that
+moves blocks is only as good as the move is cheap, and the price has to be measured or bounded rather
+than assumed. The harness ships with these as sweeps, and with a checker that re-derives every number in
+this paper from its artifact and fails on drift.

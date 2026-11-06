@@ -1,0 +1,26 @@
+\subsection{A measurement that was never a measurement}
+\label{sec:sampling}
+We also attempted the obvious follow-up (fit a richer per-block model on the agentic source and place
+with it) and first obtained what looked like a strong positive: $+66$ to $+88\%$ of the headroom
+captured, reproducing across what we took to be two samples. It was not a result, and the way it failed is
+worth more than the number would have been.
+
+The two samples were \emph{sorted prefixes} of the conversation corpus, so the smaller was contained in
+the larger; and file index correlates strongly with conversation shape (mean requests per conversation
+falls from 140 to 37 between files 1--20 and 71--150). Extending the same prefix to 100 and 150
+conversations drove the captured headroom to $-9\%$ and $-48\%$ --- a sign reversal. Re-drawing the
+samples \emph{at random} rather than as prefixes then showed why: four random draws at 40
+conversations land between $-166$ and $+66$ points, and at 20 conversations between $-858$ and $+78$
+(\Cref{tab:kvct}). The spread dwarfs the effect by an order of magnitude. We quote the observed range
+rather than a confidence interval on purpose: with four draws a parametric interval rests on a normality
+assumption these data cannot support, and \emph{captured} is a ratio whose denominator varies per draw.
+An earlier revision of this paper reported $\pm126$ here, computed with the normal quantile against a
+standard deviation estimated from four points; the correct $t(3)$ half-width is $\pm166$ on the current
+artifact. That error was ours. Under a correct sampling protocol there was never a
+measurement here to report.
+
+We keep this in the paper for two reasons. It is the control that our own protocol
+(\Cref{sec:lessons}) lacked, and running it costs minutes; and it bounds what the rest of our numbers
+are worth, since every other result in this section is also a single draw of a parameter we chose.
+
+\input{sections/table3_kvct}

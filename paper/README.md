@@ -6,14 +6,16 @@ before. Title: *The Unseen Block: What Split-Instant Evaluation Hides in KV-Cach
 Analysis & Benchmark]*. It was retitled on 2026-10-20 from "Decide on Arrival: Placement Timing Beats
 Placement Prediction on Production KV Traces", which the corrected results no longer support. The
 target moved from ICDE 2027 (EAB, round 2), whose IEEE-formatted version is kept as `main_icde.tex`; it
-was never submitted. The paper reports what production
-traces say about KV-block placement: split-instant evaluation leaves 84.4% and 87.6% of a hindsight
-oracle's advantage on blocks that do not yet exist, so the best split-time policy reaches 15.6%
-(conversation) and 12.4% (toolagent) of it. Deciding at each block's arrival captures 2.3–4.9x as much
-when the trust placed in an unseen block is estimated from the prefix; fixed by convention, that decision
-moves the result by 14–29 points and can leave it at the split-time ceiling. This is a static analysis;
-replayed online on the same cost metric, a multi-tier LRU beats every arrival-time arm when migration is
-free, and none of the replayed policies that move blocks beats the static heuristic once a move is priced.
+was never submitted. The paper reports what an offline evaluation of KV-block placement has to fix. On the production Mooncake
+traces 92.8% and 95.0% of the blocks seen before the split are never read again, and how an evaluation
+orders these and the not-yet-created blocks, all without evidence, is a tie rule: the same clairvoyant
+split-time reference reaches 20.4% / 15.3% of the oracle's advantage with dead blocks first and 77.8% /
+76.2% with them last (tier-only). Knowing which seen blocks are dead is most of the prize; a seen-once
+rule recovers about half of it; online, at measured move prices, nothing that moves blocks beats a static
+frequency heuristic. **Reframed 2026-11-06** after notebook §AZ showed the earlier headline ("84.4% /
+87.6% out of a split-time policy's reach", "2.3–4.9x the split ceiling") was that tie rule; sections 3–4
+(the MDP formulation and control-plane sketch) and Table 1 were removed, and the paper is now organized
+around evaluation definitions (§3), blocks without evidence (§5.1–5.3), online cost (§5.4) and reaction.
 
 An earlier PVLDB version, with a different framing, is `main_pvldb.tex` (git tag `pvldb-final-2026-09`);
 it was never submitted. Since the ICDE version, the paper drops the two LLM-dependent sections
@@ -88,16 +90,17 @@ Reproducibility package: `../REPRODUCIBILITY.md` and `make verify`.
 
 ## Length
 
-In the PVLDB template the body, acknowledgement included, ends on page 11; references start on page 11
-and the PDF is 12 pages. Measure the body, not the file: `stoa.verify.body_pages` with REFERENCES as the
-end heading is the quantity the venue constrains. Block-move costs are now measured on one A100 PCIe
-host (§AX); a full serving deployment (vLLM+LMCache) and the remote RDMA tier remain unmeasured
-(`docs/claims_dependency.md` §B, §P).
+The reframed paper's body, acknowledgements included, ends on page 8, where the references begin: about
+four of the twelve pages are unused, left for what reviewers will ask. Measure the body,
+not the file: `stoa.verify.body_pages` with REFERENCES as the end heading is the quantity the venue
+constrains. Block-move costs are measured on one A100 PCIe host (§AX); a full serving deployment
+(vLLM+LMCache), NVMe and the remote RDMA tier remain unmeasured.
 
 ## Figures
 
-Generated into `figs/` from `experiments/*.json` by `../scripts/make_figures.py`. **One is embedded:**
-`fig_reactive.pdf` (reactive envelope, ARC and LRB). The control-plane schematic `fig_architecture.pdf`
+Generated into `figs/` from `experiments/*.json` by `../scripts/make_figures.py`. **Three are embedded:**
+`fig_ties.pdf` (the reference under both tie rules across splits), `fig_price.pdf` (captured share against
+the price of a move) and `fig_reactive.pdf` (reactive envelope, ARC and LRB). The control-plane schematic `fig_architecture.pdf`
 was dropped with §IV's compression (2026-10-20). The other ten are produced for a longer version and are *not* in the
 paper — notably `fig_locomo_baselines.pdf` (leak-free LoCoMo: per-query retrieval dominates any
 query-agnostic placement) and `fig_capacity_ladder.pdf`.
@@ -116,15 +119,13 @@ paper reads — an earlier revision had two such files diverge silently.
 
 | Section | State |
 |---|---|
-| Abstract, §1–§8 | complete prose, aligned to the arrival-timing framing |
-| Table 1 (positioning) | complete |
-| §V-G length sweep (headroom 1,500 requests → full) | both traces run to exhaustion |
-| §V-D capacity ladder | linear / GBDT / MLP / oracle, full traces |
-| §V-F reaction | full traces; ARC, LeCaR, CACHEUS + LRB, with ghost-hit and censoring diagnostics |
-| placement vs retrieval, representation axis | **omitted** since the ICDE version (LLM-dependent; in `main_pvldb.tex`) |
-| §V-B synthetic control | Mooncake's third workload; unreachable share 29.4–77.9%; no arrival-time arm beats the split ceiling |
-| §V-C arrival-time admission | causal (§AP); conventions vs an estimated prior for unseen blocks (§AQ–§AS): estimated, 2.3–4.9x the split ceiling (static; needs free migration online) |
-| §V-G protocol | twenty-seven defects + the controls that catch them |
+| §1 Introduction, §2 Background (with the evaluation-protocol table) | complete; references verified (notebook §BC) |
+| §3 Definitions | split, billing, references, tie rules for blocks without evidence, move ledgers |
+| §4 Workloads | Mooncake x3, Alibaba Qwen x4, kv-cache-tester; A100 host for move timings |
+| §5.1–5.3 Blocks without evidence | dead shares, tie-rule references, evidence ladder (`evidence_ladder.json`, `ceiling_ties.json`, `reuse_split.json`) |
+| §5.4–5.5 Arrival, online | estimated prior, recency, measured move price, five ledgers |
+| §5.6–5.8 Ranking, reaction, sampling | capacity ladder, ARC/LeCaR/CACHEUS/LRB + S3-FIFO/SIEVE/W-TinyLFU, the sampling retraction |
+| §6 What the measurement took | twenty-eight defects, four retracted claims |
 
 Every number in the paper is asserted against its artifact by `../scripts/check_paper_numbers.py`; run it
 after regenerating any experiment.

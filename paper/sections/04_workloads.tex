@@ -1,0 +1,19 @@
+\section{Workloads and Setup}
+\label{sec:sources}
+We use \textbf{Mooncake}~\cite{qin2024mooncake}, replayed production traces from a general LLM serving
+stack (conversation, 12{,}031 requests; toolagent, 23{,}608; 512-token blocks), and its third released
+workload, synthetic (public datasets, Poisson arrivals), as a control rather than pooled. Alibaba's four
+Qwen serving traces~\cite{wang2025kvcachewild} (16-token blocks, full length) are an external
+replication, and \textbf{kv-cache-tester}, anonymized agentic coding conversations (64-token blocks), a
+second source for reactive caching. Each request lists the hash ids of the blocks it reads, so a
+repeated hash is a genuine reuse. Block ids in kv-cache-tester are conversation-scoped, so we namespace
+them before pooling; not doing so invents cross-conversation reuse. \Cref{tab:regimes} summarizes the two
+primary sources. The third-party traces are not redistributed; the artifact downloads them and checks
+pinned SHA-256 digests.
+
+Every static and replayed result is a deterministic CPU computation. Block moves were timed on one host
+with an NVIDIA A100 80GB on PCIe Gen4 x16, an AMD EPYC 7513 host, and a rotational RAID-backed disk, on an
+otherwise idle GPU while the host's other GPUs ran other jobs; six runs of a 64\,MiB block (an 8B-class
+model with grouped-query attention, 512 tokens). The host has no NVMe and no RDMA fabric.
+
+\input{sections/table2_regimes}

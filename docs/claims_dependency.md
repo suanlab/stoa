@@ -2301,3 +2301,63 @@ tiers ahead of new ones. The "reachable share" moves from 15% to 78% with one or
 blocks that have no evidence either way — the same kind of defect as the fifteen catalogued, found in the
 paper's own headline. Not yet in the paper: the thesis has to change, and that is the author's call.
 Artifact: `run_ceiling_ties.py` → `experiments/ceiling_ties.json` (~15 min).
+
+## §BA — the evidence ladder: deadness is what placement has to get right
+
+Following §AZ, `run_evidence_ladder.py` separates what the hindsight oracle knows, each arm billed at the
+true post-split cost (tier-only and all actions, splits 0.3–0.7), and `run_reuse_split.py` records where
+post-split reuse falls.
+
+- 92.8% / 95.0% of visible blocks are dead at the midpoint (88.8–96.0% across splits; synthetic 64.4%).
+  The 7,248 / 4,901 live visible blocks carry 45.7% / 74.5% of billable reuse; new blocks the rest. The GPU
+  tier holds about 18,300 blocks, so all live visible blocks fit in it.
+- On production, knowing only WHICH visible blocks are dead captures exactly as much as knowing every
+  visible future (dead-known == visible-dead-last at every split; asserted by the checker). The remainder
+  (22–24% tier-only at the midpoint) is the order among new blocks.
+- The parameter-free causal rule "seen-once blocks behind new ones" captures 39.2% / 43.3% (25.6–52.3%
+  across splits); seen once predicts dead with precision 0.95 / 0.97, recall 78–80%. The estimated prior
+  (§AT) captures 47.0% / 51.7%. On synthetic, the seen-once rule captures 7.5–15.4% (tier-only).
+- A claim drafted for the reframe — "most future reuse falls on blocks the policy has not seen" — was
+  checked before it reached the paper and is false for toolagent (25.4% on new blocks); the paper says
+  what is true: the few live seen blocks fit in the fast tiers and the rest of the reuse is on new blocks.
+
+## §BB — modern one-hit-wonder baselines
+
+IDEA.md E2 asked for W-TinyLFU, S3-FIFO and SIEVE. `stoa.modern` reimplements them from their papers
+(S3-FIFO from Algorithm 1 of the SOSP'23 paper as printed, threshold freq > 1; W-TinyLFU idealized with
+exact counts halved every 10x cache-size accesses). A first test asserted SIEVE keeps a hot set through a
+scan where every hot block is evicted before its first reuse; SIEVE cannot by design (a block earns its
+visited bit only by a hit while resident), so the test was wrong, not the code — it now asserts that limit
+and a separate case where SIEVE matches Belady. On the production traces none of the three beats the best
+of LRU/LFU/fill-once at any of the eight operating points (by 0.1–8.9 points of Belady); W-TinyLFU comes
+closest at the 2% tier. Belady and LRU/ARC recomputed here match the reactive artifact.
+
+## §BC — the reframe, and the references it rests on
+
+On 2026-11-06 the author chose to reframe the paper on blocks without evidence (§AZ) and to target the
+2027-01-01 PVLDB deadline. Sections 3–4 (the MDP formulation and control-plane sketch), Table 1 and the
+"why now" motivation were removed (IDEA.md P0-1); tier-only actions are the primary configuration (P0-3).
+§2 now positions the work against DB buffer management and KV-cache evaluation practice (P0-5). A
+research agent verified every new reference against a primary source (VLDB/USENIX PDFs, Crossref, arXiv)
+and extracted how six KV-cache studies evaluate; the LRU-K "subsidiary policy" quotation was re-checked
+against the paper's text before use. HotPrefix's evaluation section could not be read (ACM returned 403),
+so the paper describes it from its abstract only. The checker was rewritten for the new text: every number
+in §1–§5 is asserted against an artifact, the old headline phrases are in SUPERSEDED_IN_PAPER, and two new
+figures (fig_ties, fig_price) have freshness rules.
+
+## §BD — the ladder on Alibaba's traces, and whether a block hit is a usable hit
+
+**External ladder** (`run_evidence_ladder.py --bailian`, tier-only, split 0.5, 16-token blocks): dead
+visible 89.7 / 93.9 / 87.5 / 95.8% (traceA / traceB / coder / thinking); the clairvoyant reference
+13.8 / 18.3 / 12.9 / 2.3% with dead blocks first and 74.4 / 76.5 / 69.1 / 53.7% with them last; deadness
+again equals visible clairvoyance on all four; the seen-once rule 29.9 / 34.2 / 32.0 / 25.8% — positive on
+thinking, where the estimated prior (§AU) gained nothing. The all-actions space was dropped for these
+traces: one trace had not finished it after more than an hour, and the paper's primary space is tier-only.
+
+**Prefix validity** (`run_prefix_validity.py`, IDEA.md E4). Every replay bills blocks independently, but
+an engine reuses block j only if blocks 0..j-1 of the request are cached too. On Mooncake a block's hash
+fixes its predecessor without exception (0 of 288,500 / 409,616 positions differ), so every access to a
+block is an access to its whole prefix; a policy whose priority is monotone in recency or count therefore
+keeps the prefix at least as well placed as the block. Replayed in hash-chain order, LRU and Belady show
+zero hits whose prefix missed at every tier size. Not checked: ARC, LeCaR, CACHEUS, LRB and the modern
+baselines, whose priorities are not monotone in recency or count.

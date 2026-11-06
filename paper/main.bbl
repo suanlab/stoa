@@ -2,7 +2,7 @@
 %%% Do NOT edit. File created by BibTeX with style
 %%% ACM-Reference-Format-Journals [18-Jan-2012].
 
-\begin{thebibliography}{25}
+\begin{thebibliography}{23}
 
 %%% ====================================================================
 %%% NOTE TO THE USER: you can override these defaults by providing
@@ -37,6 +37,17 @@
 \providecommand\natexlab[1]{#1}
 \providecommand\showeprint[2][]{arXiv:#2}
 
+\bibitem[\protect\citeauthoryear{Canim, Mihaila, Bhattacharjee, Ross, and Lang}{Canim et~al\mbox{.}}{2010}]%
+        {canim2010ssdbufferpool}
+\bibfield{author}{\bibinfo{person}{Mustafa Canim}, \bibinfo{person}{George~A. Mihaila}, \bibinfo{person}{Bishwaranjan Bhattacharjee}, \bibinfo{person}{Kenneth~A. Ross}, {and} \bibinfo{person}{Christian~A. Lang}.} \bibinfo{year}{2010}\natexlab{}.
+\newblock \showarticletitle{{SSD} Bufferpool Extensions for Database Systems}.
+\newblock \bibinfo{journal}{\emph{Proc. {VLDB} Endow.}} \bibinfo{volume}{3}, \bibinfo{number}{1-2} (\bibinfo{year}{2010}), \bibinfo{pages}{1435--1446}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.14778/1920841.1921017}
+\showDOI{\tempurl}
+
+
 \bibitem[\protect\citeauthoryear{Cheng, Liu, et~al\mbox{.}}{Cheng et~al\mbox{.}}{2025}]%
         {F5_liu2025lmcache}
 \bibfield{author}{\bibinfo{person}{Yihua Cheng}, \bibinfo{person}{Yuhan Liu}, {et~al\mbox{.}}} \bibinfo{year}{2025}\natexlab{}.
@@ -46,13 +57,15 @@
 \showeprint[arxiv]{2510.09665}
 
 
-\bibitem[\protect\citeauthoryear{Fang et~al\mbox{.}}{Fang et~al\mbox{.}}{2025}]%
-        {F4_fang2025lightmem}
-\bibfield{author}{\bibinfo{person}{Jizhan Fang} {et~al\mbox{.}}} \bibinfo{year}{2025}\natexlab{}.
-\newblock \showarticletitle{{LightMem}: Lightweight and Efficient Memory-Augmented Generation}.
-\newblock \bibinfo{journal}{\emph{arXiv (ICLR 2026)}} (\bibinfo{year}{2025}).
+\bibitem[\protect\citeauthoryear{Einziger, Friedman, and Manes}{Einziger et~al\mbox{.}}{2017}]%
+        {einziger2017tinylfu}
+\bibfield{author}{\bibinfo{person}{Gil Einziger}, \bibinfo{person}{Roy Friedman}, {and} \bibinfo{person}{Ben Manes}.} \bibinfo{year}{2017}\natexlab{}.
+\newblock \showarticletitle{{TinyLFU}: A Highly Efficient Cache Admission Policy}.
+\newblock \bibinfo{journal}{\emph{{ACM} Trans. Storage}} \bibinfo{volume}{13}, \bibinfo{number}{4} (\bibinfo{year}{2017}), \bibinfo{pages}{1--31}.
 \newblock
-\showeprint[arxiv]{2510.18866}
+\urldef\tempurl%
+\url{https://doi.org/10.1145/3149371}
+\showDOI{\tempurl}
 
 
 \bibitem[\protect\citeauthoryear{Gao, He, Sharma, Kang, Jevdjic, et~al\mbox{.}}{Gao et~al\mbox{.}}{2024}]%
@@ -63,67 +76,46 @@
 \showeprint[arxiv]{2403.19708}
 
 
-\bibitem[\protect\citeauthoryear{Gupta and Bhayani}{Gupta and Bhayani}{2025}]%
-        {S4_coldrl2025}
-\bibfield{author}{\bibinfo{person}{Aayush Gupta} {and} \bibinfo{person}{Arpit Bhayani}.} \bibinfo{year}{2025}\natexlab{}.
-\newblock \showarticletitle{Cold-{RL}: Learning Cache Eviction with Offline Reinforcement Learning for {NGINX}}.
-\newblock \bibinfo{journal}{\emph{arXiv}} (\bibinfo{year}{2025}).
-\newblock
-\showeprint[arxiv]{2508.12485}
-
-
-\bibitem[\protect\citeauthoryear{Jain and Lin}{Jain and Lin}{2016}]%
-        {S10_jain2016hawkeye}
-\bibfield{author}{\bibinfo{person}{Akanksha Jain} {and} \bibinfo{person}{Calvin Lin}.} \bibinfo{year}{2016}\natexlab{}.
-\newblock \showarticletitle{Back to the Future: Leveraging {Belady's} Algorithm for Improved Cache Replacement}. In \bibinfo{booktitle}{\emph{2016 {ACM/IEEE} 43rd Annual International Symposium on Computer Architecture ({ISCA})}}. \bibinfo{publisher}{{IEEE}}, \bibinfo{pages}{78--89}.
+\bibitem[\protect\citeauthoryear{Johnson and Shasha}{Johnson and Shasha}{1994}]%
+        {johnson1994twoq}
+\bibfield{author}{\bibinfo{person}{Theodore Johnson} {and} \bibinfo{person}{Dennis Shasha}.} \bibinfo{year}{1994}\natexlab{}.
+\newblock \showarticletitle{{2Q}: A Low Overhead High Performance Buffer Management Replacement Algorithm}. In \bibinfo{booktitle}{\emph{Proceedings of the 20th International Conference on Very Large Data Bases ({VLDB})}}. \bibinfo{pages}{439--450}.
 \newblock
 \urldef\tempurl%
-\url{https://doi.org/10.1109/ISCA.2016.17}
+\url{https://www.vldb.org/conf/1994/P439.PDF}
+\showURL{%
+\tempurl}
+
+
+\bibitem[\protect\citeauthoryear{Li, Gu, Huan, Wang, Yao, Tian, and Chen}{Li et~al\mbox{.}}{2025}]%
+        {li2025hotprefix}
+\bibfield{author}{\bibinfo{person}{Yuhang Li}, \bibinfo{person}{Rong Gu}, \bibinfo{person}{Chengying Huan}, \bibinfo{person}{Zhibin Wang}, \bibinfo{person}{Renjie Yao}, \bibinfo{person}{Chen Tian}, {and} \bibinfo{person}{Guihai Chen}.} \bibinfo{year}{2025}\natexlab{}.
+\newblock \showarticletitle{{HotPrefix}: Hotness-Aware {KV} Cache Scheduling for Efficient Prefix Sharing in {LLM} Inference Systems}.
+\newblock \bibinfo{journal}{\emph{Proc. {ACM} Manag. Data}} \bibinfo{volume}{3}, \bibinfo{number}{4} (\bibinfo{year}{2025}), \bibinfo{pages}{1--27}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1145/3749168}
 \showDOI{\tempurl}
 
 
-\bibitem[\protect\citeauthoryear{Kwon, Li, Zhuang, Sheng, Zheng, et~al\mbox{.}}{Kwon et~al\mbox{.}}{2023}]%
-        {kwon2023pagedattention}
-\bibfield{author}{\bibinfo{person}{Woosuk Kwon}, \bibinfo{person}{Zhuohan Li}, \bibinfo{person}{Siyuan Zhuang}, \bibinfo{person}{Ying Sheng}, \bibinfo{person}{Lianmin Zheng}, {et~al\mbox{.}}} \bibinfo{year}{2023}\natexlab{}.
-\newblock \showarticletitle{Efficient Memory Management for Large Language Model Serving with {PagedAttention}}. In \bibinfo{booktitle}{\emph{29th ACM Symposium on Operating Systems Principles (SOSP)}}.
+\bibitem[\protect\citeauthoryear{Liu, Yu, and Yang}{Liu et~al\mbox{.}}{2026}]%
+        {liu2026fancyeviction}
+\bibfield{author}{\bibinfo{person}{Yiyu Liu}, \bibinfo{person}{Minlan Yu}, {and} \bibinfo{person}{Juncheng Yang}.} \bibinfo{year}{2026}\natexlab{}.
+\newblock \bibinfo{title}{When Fancy Eviction Fails: Rethinking Cache Replacement For {LLM} Prefix Reuse}.
 \newblock
-\showeprint[arxiv]{2309.06180}
-
-
-\bibitem[\protect\citeauthoryear{Li et~al\mbox{.}}{Li et~al\mbox{.}}{2025}]%
-        {F1_li2025memos}
-\bibfield{author}{\bibinfo{person}{Zhiyu Li} {et~al\mbox{.}}} \bibinfo{year}{2025}\natexlab{}.
-\newblock \showarticletitle{{MemOS}: A Memory {OS} for AI System}.
-\newblock \bibinfo{journal}{\emph{arXiv}} (\bibinfo{year}{2025}).
 \newblock
-\showeprint[arxiv]{2507.03724}
+\showeprint[arxiv]{2609.28870}~[cs.DC]
 
 
-\bibitem[\protect\citeauthoryear{Lin, Snell, Wang, Packer, Wooders, Stoica, and Gonzalez}{Lin et~al\mbox{.}}{2025}]%
-        {F3_lin2025sleeptime}
-\bibfield{author}{\bibinfo{person}{Kevin Lin}, \bibinfo{person}{Charlie Snell}, \bibinfo{person}{Yu Wang}, \bibinfo{person}{Charles Packer}, \bibinfo{person}{Sarah Wooders}, \bibinfo{person}{Ion Stoica}, {and} \bibinfo{person}{Joseph~E. Gonzalez}.} \bibinfo{year}{2025}\natexlab{}.
-\newblock \showarticletitle{Sleep-time Compute: Beyond Inference Scaling at Test-time}.
-\newblock \bibinfo{journal}{\emph{arXiv}} (\bibinfo{year}{2025}).
+\bibitem[\protect\citeauthoryear{Ma, Hong, Um, Lee, Choy, Lee, and Jeon}{Ma et~al\mbox{.}}{2026}]%
+        {ma2026orbitflow}
+\bibfield{author}{\bibinfo{person}{Xinyue Ma}, \bibinfo{person}{Heelim Hong}, \bibinfo{person}{Taegeon Um}, \bibinfo{person}{Jongseop Lee}, \bibinfo{person}{Seoyeong Choy}, \bibinfo{person}{Woo-Yeon Lee}, {and} \bibinfo{person}{Myeongjae Jeon}.} \bibinfo{year}{2026}\natexlab{}.
+\newblock \showarticletitle{{OrbitFlow}: {SLO}-Aware Long-Context {LLM} Serving with Fine-Grained {KV} Cache Reconfiguration}.
+\newblock \bibinfo{journal}{\emph{Proc. {VLDB} Endow.}} \bibinfo{volume}{19}, \bibinfo{number}{5} (\bibinfo{year}{2026}), \bibinfo{pages}{1046--1059}.
 \newblock
-\showeprint[arxiv]{2504.13171}
-
-
-\bibitem[\protect\citeauthoryear{Liu, Hashemi, Swersky, Ranganathan, and Ahn}{Liu et~al\mbox{.}}{2020}]%
-        {S2_liu2020parrot}
-\bibfield{author}{\bibinfo{person}{Evan~Zheran Liu}, \bibinfo{person}{Milad Hashemi}, \bibinfo{person}{Kevin Swersky}, \bibinfo{person}{Parthasarathy Ranganathan}, {and} \bibinfo{person}{Junwhan Ahn}.} \bibinfo{year}{2020}\natexlab{}.
-\newblock \showarticletitle{An Imitation Learning Approach for Cache Replacement}.
-\newblock \bibinfo{journal}{\emph{ICML}} (\bibinfo{year}{2020}).
-\newblock
-\showeprint[arxiv]{2006.16239}
-
-
-\bibitem[\protect\citeauthoryear{Mao, Schwarzkopf, Venkatakrishnan, Meng, and Alizadeh}{Mao et~al\mbox{.}}{2019}]%
-        {S5_mao2019decima}
-\bibfield{author}{\bibinfo{person}{Hongzi Mao}, \bibinfo{person}{Malte Schwarzkopf}, \bibinfo{person}{Shaileshh~Bojja Venkatakrishnan}, \bibinfo{person}{Zili Meng}, {and} \bibinfo{person}{Mohammad Alizadeh}.} \bibinfo{year}{2019}\natexlab{}.
-\newblock \showarticletitle{Learning Scheduling Algorithms for Data Processing Clusters}.
-\newblock \bibinfo{journal}{\emph{SIGCOMM}} (\bibinfo{year}{2019}).
-\newblock
-\showeprint[arxiv]{1810.01963}
+\urldef\tempurl%
+\url{https://doi.org/10.14778/3796195.3796214}
+\showDOI{\tempurl}
 
 
 \bibitem[\protect\citeauthoryear{Megiddo and Modha}{Megiddo and Modha}{2003}]%
@@ -137,13 +129,25 @@
 \tempurl}
 
 
-\bibitem[\protect\citeauthoryear{Packer, Fang, Patil, Lin, Wooders, and Gonzalez}{Packer et~al\mbox{.}}{2023}]%
-        {P14_packer2023memgpt}
-\bibfield{author}{\bibinfo{person}{Charles Packer}, \bibinfo{person}{Vivian Fang}, \bibinfo{person}{Shishir~G. Patil}, \bibinfo{person}{Kevin Lin}, \bibinfo{person}{Sarah Wooders}, {and} \bibinfo{person}{Joseph~E. Gonzalez}.} \bibinfo{year}{2023}\natexlab{}.
-\newblock \showarticletitle{{MemGPT}: Towards {LLMs} as Operating Systems}.
-\newblock \bibinfo{journal}{\emph{arXiv}} (\bibinfo{year}{2023}).
+\bibitem[\protect\citeauthoryear{O'Neil, O'Neil, and Weikum}{O'Neil et~al\mbox{.}}{1993}]%
+        {oneil1993lruk}
+\bibfield{author}{\bibinfo{person}{Elizabeth~J. O'Neil}, \bibinfo{person}{Patrick~E. O'Neil}, {and} \bibinfo{person}{Gerhard Weikum}.} \bibinfo{year}{1993}\natexlab{}.
+\newblock \showarticletitle{The {LRU-K} Page Replacement Algorithm for Database Disk Buffering}. In \bibinfo{booktitle}{\emph{Proceedings of the 1993 {ACM} {SIGMOD} International Conference on Management of Data}}. \bibinfo{pages}{297--306}.
 \newblock
-\showeprint[arxiv]{2310.08560}
+\urldef\tempurl%
+\url{https://doi.org/10.1145/170035.170081}
+\showDOI{\tempurl}
+
+
+\bibitem[\protect\citeauthoryear{Pan and Li}{Pan and Li}{2025}]%
+        {pan2025dbperspective}
+\bibfield{author}{\bibinfo{person}{James Pan} {and} \bibinfo{person}{Guoliang Li}.} \bibinfo{year}{2025}\natexlab{}.
+\newblock \showarticletitle{Database Perspective on {LLM} Inference Systems}.
+\newblock \bibinfo{journal}{\emph{Proc. {VLDB} Endow.}} \bibinfo{volume}{18}, \bibinfo{number}{12} (\bibinfo{year}{2025}), \bibinfo{pages}{5504--5507}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.14778/3750601.3750703}
+\showDOI{\tempurl}
 
 
 \bibitem[\protect\citeauthoryear{Qin, Li, He, Zhang, Wu, Zheng, and Xu}{Qin et~al\mbox{.}}{2025}]%
@@ -170,16 +174,6 @@
 \tempurl}
 
 
-\bibitem[\protect\citeauthoryear{Shah, Jain, and Lin}{Shah et~al\mbox{.}}{2022}]%
-        {S11_shah2022mockingjay}
-\bibfield{author}{\bibinfo{person}{Ishan Shah}, \bibinfo{person}{Akanksha Jain}, {and} \bibinfo{person}{Calvin Lin}.} \bibinfo{year}{2022}\natexlab{}.
-\newblock \showarticletitle{Effective Mimicry of {Belady's} {MIN} Policy}. In \bibinfo{booktitle}{\emph{2022 {IEEE} International Symposium on High-Performance Computer Architecture ({HPCA})}}. \bibinfo{publisher}{{IEEE}}, \bibinfo{pages}{558--572}.
-\newblock
-\urldef\tempurl%
-\url{https://doi.org/10.1109/HPCA53966.2022.00048}
-\showDOI{\tempurl}
-
-
 \bibitem[\protect\citeauthoryear{Song, Berger, Li, and Lloyd}{Song et~al\mbox{.}}{2020}]%
         {S6_song2020lrb}
 \bibfield{author}{\bibinfo{person}{Zhenyu Song}, \bibinfo{person}{Daniel~S. Berger}, \bibinfo{person}{Kai Li}, {and} \bibinfo{person}{Wyatt Lloyd}.} \bibinfo{year}{2020}\natexlab{}.
@@ -202,21 +196,12 @@
 \tempurl}
 
 
-\bibitem[\protect\citeauthoryear{Wang, Han, Wei, Shen, Zhang, Fang, Chen, Yu, and Chen}{Wang et~al\mbox{.}}{2025a}]%
+\bibitem[\protect\citeauthoryear{Wang, Han, Wei, Shen, Zhang, Fang, Chen, Yu, and Chen}{Wang et~al\mbox{.}}{2025}]%
         {wang2025kvcachewild}
-\bibfield{author}{\bibinfo{person}{Jiahao Wang}, \bibinfo{person}{Jinbo Han}, \bibinfo{person}{Xingda Wei}, \bibinfo{person}{Sijie Shen}, \bibinfo{person}{Dingyan Zhang}, \bibinfo{person}{Chenguang Fang}, \bibinfo{person}{Rong Chen}, \bibinfo{person}{Wenyuan Yu}, {and} \bibinfo{person}{Haibo Chen}.} \bibinfo{year}{2025}\natexlab{a}.
+\bibfield{author}{\bibinfo{person}{Jiahao Wang}, \bibinfo{person}{Jinbo Han}, \bibinfo{person}{Xingda Wei}, \bibinfo{person}{Sijie Shen}, \bibinfo{person}{Dingyan Zhang}, \bibinfo{person}{Chenguang Fang}, \bibinfo{person}{Rong Chen}, \bibinfo{person}{Wenyuan Yu}, {and} \bibinfo{person}{Haibo Chen}.} \bibinfo{year}{2025}\natexlab{}.
 \newblock \showarticletitle{{KVCache} Cache in the Wild: Characterizing and Optimizing {KVCache} Cache at a Large Cloud Provider}. In \bibinfo{booktitle}{\emph{USENIX Annual Technical Conference (ATC)}}.
 \newblock
 \showeprint[arxiv]{2506.02634}
-
-
-\bibitem[\protect\citeauthoryear{Wang, Krotov, Hu, et~al\mbox{.}}{Wang et~al\mbox{.}}{2025b}]%
-        {F2_wang2025mplus}
-\bibfield{author}{\bibinfo{person}{Yu Wang}, \bibinfo{person}{Dmitry Krotov}, \bibinfo{person}{Yuanzhe Hu}, {et~al\mbox{.}}} \bibinfo{year}{2025}\natexlab{b}.
-\newblock \showarticletitle{{M+}: Extending {MemoryLLM} with Scalable Long-Term Memory}.
-\newblock \bibinfo{journal}{\emph{ICML}} (\bibinfo{year}{2025}).
-\newblock
-\showeprint[arxiv]{2502.00592}
 
 
 \bibitem[\protect\citeauthoryear{Wong, Wu, Molder, Gunasekar, Lu, Khandkar, Sharma, Berger, Beckmann, and Ganger}{Wong et~al\mbox{.}}{2024}]%
@@ -230,48 +215,68 @@
 \tempurl}
 
 
-\bibitem[\protect\citeauthoryear{Xiong, Jin, Wang, et~al\mbox{.}}{Xiong et~al\mbox{.}}{2025}]%
-        {F20_xiong2025raggym}
-\bibfield{author}{\bibinfo{person}{Guangzhi Xiong}, \bibinfo{person}{Qiao Jin}, \bibinfo{person}{Xiao Wang}, {et~al\mbox{.}}} \bibinfo{year}{2025}\natexlab{}.
-\newblock \showarticletitle{{RAG-Gym}: Optimizing Reasoning and Search Agents with Process Supervision}.
-\newblock \bibinfo{journal}{\emph{arXiv:2502.13957v1}} (\bibinfo{year}{2025}).
+\bibitem[\protect\citeauthoryear{Wu, Sreekanti, and Hellerstein}{Wu et~al\mbox{.}}{2019}]%
+        {wu2019anna}
+\bibfield{author}{\bibinfo{person}{Chenggang Wu}, \bibinfo{person}{Vikram Sreekanti}, {and} \bibinfo{person}{Joseph~M. Hellerstein}.} \bibinfo{year}{2019}\natexlab{}.
+\newblock \showarticletitle{Autoscaling Tiered Cloud Storage in {Anna}}.
+\newblock \bibinfo{journal}{\emph{Proc. {VLDB} Endow.}} \bibinfo{volume}{12}, \bibinfo{number}{6} (\bibinfo{year}{2019}), \bibinfo{pages}{624--638}.
 \newblock
-\showeprint[arxiv]{2502.13957}
+\urldef\tempurl%
+\url{https://doi.org/10.14778/3311880.3311881}
+\showDOI{\tempurl}
 
 
-\bibitem[\protect\citeauthoryear{Yan et~al\mbox{.}}{Yan et~al\mbox{.}}{2025}]%
-        {F6_yan2025memoryr1}
-\bibfield{author}{\bibinfo{person}{Sikuan Yan} {et~al\mbox{.}}} \bibinfo{year}{2025}\natexlab{}.
-\newblock \showarticletitle{{Memory-R1}: Enhancing {LLM} Agents to Manage and Utilize Memories via Reinforcement Learning}.
-\newblock \bibinfo{journal}{\emph{arXiv}} (\bibinfo{year}{2025}).
+\bibitem[\protect\citeauthoryear{Xia, Nixon, Marthen, Bhandari, and Yang}{Xia et~al\mbox{.}}{2026}]%
+        {xia2026lah}
+\bibfield{author}{\bibinfo{person}{Haocheng Xia}, \bibinfo{person}{William Nixon}, \bibinfo{person}{Bintang~Dwi Marthen}, \bibinfo{person}{Pranav Bhandari}, {and} \bibinfo{person}{Juncheng Yang}.} \bibinfo{year}{2026}\natexlab{}.
+\newblock \showarticletitle{Learning-Augmented Heuristics: Simple Yet Smart, Robust and Interpretable Cache Eviction}. In \bibinfo{booktitle}{\emph{{USENIX} Symposium on Operating Systems Design and Implementation ({OSDI} 26)}}. \bibinfo{pages}{2241--2259}.
 \newblock
-\showeprint[arxiv]{2508.19828}
+\urldef\tempurl%
+\url{https://www.usenix.org/conference/osdi26/presentation/xia}
+\showURL{%
+\tempurl}
 
 
-\bibitem[\protect\citeauthoryear{Zhang et~al\mbox{.}}{Zhang et~al\mbox{.}}{2025}]%
-        {F7_zhang2025memoryasaction}
-\bibfield{author}{\bibinfo{person}{Yuxiang Zhang} {et~al\mbox{.}}} \bibinfo{year}{2025}\natexlab{}.
-\newblock \showarticletitle{Memory as Action: Autonomous Context Curation for Long-Horizon Agentic Tasks}.
-\newblock \bibinfo{journal}{\emph{arXiv}} (\bibinfo{year}{2025}).
+\bibitem[\protect\citeauthoryear{Yang, Zhang, Qiu, Yue, and Rashmi}{Yang et~al\mbox{.}}{2023}]%
+        {yang2023s3fifo}
+\bibfield{author}{\bibinfo{person}{Juncheng Yang}, \bibinfo{person}{Yazhuo Zhang}, \bibinfo{person}{Ziyue Qiu}, \bibinfo{person}{Yao Yue}, {and} \bibinfo{person}{K.~V. Rashmi}.} \bibinfo{year}{2023}\natexlab{}.
+\newblock \showarticletitle{{FIFO} Queues are All You Need for Cache Eviction}. In \bibinfo{booktitle}{\emph{Proceedings of the 29th Symposium on Operating Systems Principles ({SOSP} '23)}}. \bibinfo{publisher}{{ACM}}, \bibinfo{pages}{130--149}.
 \newblock
-\showeprint[arxiv]{2510.12635}
+\urldef\tempurl%
+\url{https://doi.org/10.1145/3600006.3613147}
+\showDOI{\tempurl}
 
 
-\bibitem[\protect\citeauthoryear{Zhang et~al\mbox{.}}{Zhang et~al\mbox{.}}{2023}]%
-        {S1_zhang2023h2o}
-\bibfield{author}{\bibinfo{person}{Zhenyu Zhang} {et~al\mbox{.}}} \bibinfo{year}{2023}\natexlab{}.
-\newblock \showarticletitle{{H2O}: Heavy-Hitter Oracle for Efficient Generative Inference of Large Language Models}.
-\newblock \bibinfo{journal}{\emph{NeurIPS}} (\bibinfo{year}{2023}).
+\bibitem[\protect\citeauthoryear{Zhang, Yang, Yue, Vigfusson, and Rashmi}{Zhang et~al\mbox{.}}{2024}]%
+        {zhang2024sieve}
+\bibfield{author}{\bibinfo{person}{Yazhuo Zhang}, \bibinfo{person}{Juncheng Yang}, \bibinfo{person}{Yao Yue}, \bibinfo{person}{Ymir Vigfusson}, {and} \bibinfo{person}{K.~V. Rashmi}.} \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{{SIEVE} is Simpler than {LRU}: an Efficient Turn-Key Eviction Algorithm for Web Caches}. In \bibinfo{booktitle}{\emph{{USENIX} Symposium on Networked Systems Design and Implementation ({NSDI} 24)}}. \bibinfo{pages}{1229--1246}.
 \newblock
-\showeprint[arxiv]{2306.14048}
+\urldef\tempurl%
+\url{https://www.usenix.org/conference/nsdi24/presentation/zhang-yazhuo}
+\showURL{%
+\tempurl}
 
 
-\bibitem[\protect\citeauthoryear{Zheng, Yin, Xie, Sun, Huang, et~al\mbox{.}}{Zheng et~al\mbox{.}}{2024}]%
-        {zheng2024sglang}
-\bibfield{author}{\bibinfo{person}{Lianmin Zheng}, \bibinfo{person}{Liangsheng Yin}, \bibinfo{person}{Zhiqiang Xie}, \bibinfo{person}{Chuyue Sun}, \bibinfo{person}{Jeff Huang}, {et~al\mbox{.}}} \bibinfo{year}{2024}\natexlab{}.
-\newblock \showarticletitle{{SGLang}: Efficient Execution of Structured Language Model Programs}. In \bibinfo{booktitle}{\emph{Advances in Neural Information Processing Systems (NeurIPS)}}.
+\bibitem[\protect\citeauthoryear{Zhang, Yang, Chen, Li, Wang, Sun, Wu, and Weng}{Zhang et~al\mbox{.}}{2026}]%
+        {zhang2026polarkv}
+\bibfield{author}{\bibinfo{person}{Yingqiang Zhang}, \bibinfo{person}{Xinjun Yang}, \bibinfo{person}{Hao Chen}, \bibinfo{person}{Feifei Li}, \bibinfo{person}{Shuwen Wang}, \bibinfo{person}{Chuan Sun}, \bibinfo{person}{Sai Wu}, {and} \bibinfo{person}{Ninglong Weng}.} \bibinfo{year}{2026}\natexlab{}.
+\newblock \showarticletitle{{PolarKV}: Tier Locally, Serve Globally--A {KV} Cache over Cloud Memory and Storage}.
+\newblock \bibinfo{journal}{\emph{Proc. {VLDB} Endow.}} \bibinfo{volume}{19}, \bibinfo{number}{12} (\bibinfo{year}{2026}), \bibinfo{pages}{4480--4493}.
 \newblock
-\showeprint[arxiv]{2312.07104}
+\urldef\tempurl%
+\url{https://doi.org/10.14778/3827998.3828047}
+\showDOI{\tempurl}
+
+
+\bibitem[\protect\citeauthoryear{Zhou, Arulraj, Pavlo, and Cohen}{Zhou et~al\mbox{.}}{2021}]%
+        {zhou2021spitfire}
+\bibfield{author}{\bibinfo{person}{Xinjing Zhou}, \bibinfo{person}{Joy Arulraj}, \bibinfo{person}{Andrew Pavlo}, {and} \bibinfo{person}{David Cohen}.} \bibinfo{year}{2021}\natexlab{}.
+\newblock \showarticletitle{Spitfire: A Three-Tier Buffer Manager for Volatile and Non-Volatile Memory}. In \bibinfo{booktitle}{\emph{Proceedings of the 2021 International Conference on Management of Data ({SIGMOD} '21)}}. \bibinfo{pages}{2195--2207}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1145/3448016.3452819}
+\showDOI{\tempurl}
 
 
 \end{thebibliography}

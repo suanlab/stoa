@@ -249,6 +249,74 @@ def fig_reactive():
     _save(fig, "fig_reactive")
 
 
+def fig_ties():
+    """The clairvoyant split-time reference under both tie rules, and the causal seen-once rule,
+    across splits (tier-only actions). Source: evidence_ladder.json."""
+    d = _load("evidence_ladder.json")
+    if not d:
+        return
+    fig, axes = plt.subplots(1, 2, figsize=(3.45, 1.9), sharey=True)
+    for ax, tr in zip(axes, ("conversation", "toolagent")):
+        rows = sorted((r for r in d["rows"] if r["trace"] == tr and r["actions"] == "tier"),
+                      key=lambda r: r["split"])
+        xs = [r["split"] for r in rows]
+        for key, lab, col, mk in (("visible-dead-last", "reference, dead blocks last", OI["blue"], "o"),
+                                  ("seen-once-last", "causal: seen-once last", OI["green"], "s"),
+                                  ("visible-dead-first", "reference, dead blocks first", OI["vermillion"], "^")):
+            ax.plot(xs, [r["captured_pct"][key] for r in rows], "-" + mk, color=col, lw=1.4, ms=3.5,
+                    label=lab)
+        ax.set_title(tr, fontsize=8)
+        ax.set_xticks(xs)
+        ax.set_xticklabels([f"{x:.1f}" for x in xs], fontsize=7)
+        ax.set_xlabel("split", fontsize=8)
+        ax.set_ylim(0, 100)
+        ax.grid(True, axis="y")
+    axes[0].set_ylabel("% of oracle's advantage", fontsize=8)
+    h, lab = axes[0].get_legend_handles_labels()
+    fig.legend(h, lab, loc="upper center", ncol=3, bbox_to_anchor=(0.5, 1.08), fontsize=5.4,
+               handletextpad=0.3, columnspacing=0.8)
+    _save(fig, "fig_ties")
+
+
+def fig_price():
+    """Captured share against the price of a move, as a multiple of one read plus one write, for
+    multi-tier LRU and the estimated prior replayed online, under the ledgers of
+    migration_ledger.json; the band is the measured range (measured_migration.json)."""
+    d, mm = _load("migration_ledger.json"), _load("measured_migration.json")
+    if not d or not mm:
+        return
+    import numpy as np
+    lo = min(x for r in mm["rows"] for k in ("alpha_sync_range", "alpha_async_range") for x in r.get(k) or [])
+    hi = max(x for r in mm["rows"] for k in ("alpha_sync_range", "alpha_async_range") for x in r.get(k) or [])
+    alphas = np.logspace(-2, np.log10(3), 60)
+    fig, ax = plt.subplots(figsize=(3.45, 2.1))
+    ax.axvspan(lo, hi, color="#EEEEEE", lw=0)
+    ax.annotate("measured\n(A100 host)", (np.sqrt(lo * hi), 62), fontsize=6, color=MUTED, ha="center")
+    styles = {("conversation", "lru"): (OI["blue"], "-"), ("toolagent", "lru"): (OI["blue"], "--"),
+              ("conversation", "hazard-new (new-behind)"): (OI["green"], "-"),
+              ("toolagent", "hazard-new (new-behind)"): (OI["green"], "--")}
+    for r in d["rows"]:
+        for pol in ("lru", "hazard-new (new-behind)"):
+            if (r["trace"], pol) not in styles:
+                continue
+            v = r["policies"][pol]
+            col, ls = styles[(r["trace"], pol)]
+            for led, lw in (("reread", 1.4), ("write-through", 0.8)):
+                m = v["ledgers"][led]
+                slope = (v["share_zero"] - m["captured_pct"])          # captured drop per unit alpha
+                ax.plot(alphas, v["share_zero"] - slope * alphas, ls, color=col, lw=lw,
+                        label=(f"{'LRU' if pol == 'lru' else 'estimated prior'}, {r['trace']}"
+                               if led == "reread" else None))
+    ax.axhline(0, color=INK, lw=0.8)
+    ax.set_xscale("log")
+    ax.set_ylim(-120, 100)
+    ax.set_xlabel("price of a move (x one read + one write)", fontsize=8)
+    ax.set_ylabel("% of oracle's advantage", fontsize=8)
+    ax.grid(True, axis="y")
+    ax.legend(loc="lower left", fontsize=5.6, handletextpad=0.4, labelspacing=0.25)
+    _save(fig, "fig_price")
+
+
 def fig_capacity_ladder():
     """The decoupling, across model class: capacity moves AUC and not placement.
 
@@ -393,6 +461,8 @@ def main():
     fig_locomo_baselines()
     fig_learnability()
     fig_reactive()
+    fig_ties()
+    fig_price()
     fig_capacity_ladder()
     fig_sequential()
 

@@ -1,0 +1,55 @@
+\section{What an Evaluation Has To Fix}
+\label{sec:defs}
+A placement evaluation fixes, often silently, five things: when the policy decides, what it may know,
+what it is billed for, what it is compared with, and how ties are broken. Each one moved a headline
+number in this study by tens of points (\Cref{sec:lessons}). This section states our choices.
+
+\paragraph{Trace, blocks, tiers} A trace is a time-ordered sequence of requests, each naming the KV
+blocks it reads; a repeated block id is a genuine reuse because ids are content hashes of the token
+prefix. Blocks are immutable once computed and, within a source, uniform in size. A placement assigns
+each block to one of four tiers, GPU, host DRAM, remote DRAM over RDMA, and local disk, with capacities
+of 10\%, 30\%, 60\% and unbounded shares of the trace's distinct blocks. A block's first access
+\emph{creates} it (its KV is computed), a compulsory miss that no placement can serve, so only later
+accesses are billed. Billing a creation as a read from its tier, as every earlier version of this work
+did, inflated the oracle's advantage about threefold. Blocks are billed independently, although an
+engine reuses a block only behind its whole prefix. On these traces a block's id fixes its predecessor,
+without exception among 288{,}500 and 409{,}616 block positions, so every access to a block is an access to
+its prefix, and a policy whose priority grows with recency or count keeps a block's prefix at least as well
+placed as the block. Replayed in prefix order, LRU and Belady show no hit whose prefix missed at any tier
+size; we did not check the adaptive policies.
+
+\paragraph{Cost} An access to a block on tier $t$ costs $\lambda_L\,\ell_t$ plus a context-token term
+that does not depend on the tier, with $\lambda_L = 0.1$ per ms and per-tier read latencies $\ell_t$
+from a declared table (\Cref{sec:limits}). We report every result with \emph{tier-only} actions: a KV
+block is moved, not re-encoded. The artifact's cost model also lets a placement change a block's
+representation and timing; we report that space only to show how much a model-dependent action space
+moves the numbers.
+
+\paragraph{The split instant} An offline evaluation picks a split $s$, lets the policy observe the trace
+before $s$, and bills the placement on the accesses at or after $s$. A block is \emph{visible} if it was
+accessed before $s$ and \emph{new} otherwise. Features, labels, the train/evaluation cut and the bill all
+use the same $s$; an earlier version of our arrival experiment used two, and leaked.
+
+\paragraph{References} Every placement is billed at the true post-split cost and reported as a share of
+the gap between two references: the \textbf{frequency heuristic}, which places visible blocks by their
+prefix access count and new blocks after them, fastest tier first; and the \textbf{hindsight oracle},
+which places every block by its true future count. ``Captured'' is
+$(\text{cost}_{\text{heur}} - \text{cost}_{\text{policy}})/(\text{cost}_{\text{heur}} - \text{cost}_{\text{oracle}})$.
+For uniform blocks, tier-only costs that rise with latency and a cost linear in the access count, the
+oracle's greedy order is optimal by the rearrangement inequality. No reference between the two is an
+upper bound for a class of causal policies here, and we do not call one a ceiling (\Cref{sec:evidence}).
+
+\paragraph{Blocks without evidence} Two kinds of block give a split-time policy nothing to rank on: a
+\emph{new} block, which it has not seen, and a \emph{dead} visible block, which it has seen but which
+will not be read again. The frequency heuristic ranks every visible block, dead or not, above every new
+one. A reference that knows the visible blocks' futures gives a dead block and a new block the same
+belief, zero, so their order is set by a tie rule, usually item order. We vary that rule explicitly, and
+\Cref{sec:evidence} shows it decides most of what a split-time evaluation reports.
+
+\paragraph{Online replay and the price of a move} Static placements are one capacity-constrained
+assignment over the evaluation window. Online policies replay the post-split accesses from the same
+starting state, the heuristic's placement of the visible blocks, and pay for every move between tiers.
+We bill a move five ways (\Cref{sec:online}): one read from the source plus one write to the destination;
+the same with a promotion's read credited to the serving access that caused it; with clean lower copies
+kept, so demoting onto one is free; with every block written through to host memory at creation; and
+free. We also measured what a move costs on one GPU host.

@@ -260,90 +260,124 @@ if d:
 # paper as verified on a machine where the artifacts were never generated. Require both a
 # minimum number of checks and that every artifact the paper depends on is present.
 
-# --- arrival-time admission: conventions vs an estimated prior (V-C; notebook AP-AS) ----------
-d = load("arrival_admission.json")
-_to = load("tier_only.json")
+# --- blocks without evidence: the tie rule, the ladder, where reuse falls (V-A..C; notebook AZ, BA) --
+PROD = ("conversation", "toolagent")
+_el, _rs, _ct = load("evidence_ladder.json"), load("reuse_split.json"), load("ceiling_ties.json")
 _hz, _hzt = load("hazard_prior.json"), load("hazard_prior_tier.json")
-_rc = load("reachable_ceiling.json")
-_dg = load("arrival_diagnostics.json")
-_eh = load("equal_horizon.json")
-if d and _to and _rc and _dg and _hz and _hzt and _eh:
-    print("\narrival admission (arrival_admission, tier_only, hazard_prior*)")
-    RES = {"all": d["results"], "tier": _to["arrival_admission"]["results"]}
-    HZ = {"all": _hz["rows"], "tier": _hzt["rows"]}
 
-    def _ceil(acts, t):
-        src = _rc if acts == "all" else _to["reachable_ceiling"]
-        return [r for r in src["traces"][t]["rows"] if r["split_frac"] == 0.5][0]["reachable_pct"]
 
-    def cap(acts, tie, t, arm):
-        return [r["captured_pct"] for r in RES[acts] if r["trace"] == t and r.get("tie") == tie
-                and r["arm"] == arm][0]
+def f1(v):
+    return f"{v:.1f}".replace("-0.0", "0.0")
 
-    def hz(acts, tie, t, arm):
-        return [r["captured_pct"] for r in HZ[acts] if r["trace"] == t and r["tie"] == tie
-                and r["arm"] == arm][0]
 
-    def _f1(v):
-        return f"{v:.1f}".replace("-0.0", "0.0")
+if _el and _rs and _ct and _hz and _hzt:
+    print("\nblocks without evidence (evidence_ladder, reuse_split, ceiling_ties, hazard_prior*)")
 
-    ORDER = ("order-arrival", "order-learned", "order-shuffled")
-    PROD = ("conversation", "toolagent")
-    short = {"conversation": "conv", "toolagent": "tool"}
-    CFG = [(a, tie) for a in ("all", "tier") for tie in ("new-behind", "new-ahead")]
-    for a, tie in CFG:
-        for t in PROD:
-            o = [cap(a, tie, t, x) for x in ORDER]
-            row = (f"& {short[t]} & {_ceil(a, t):.1f} & {_f1(min(o))}--{_f1(max(o))} & "
-                   f"{_f1(cap(a, tie, t, 'constant-mean'))} & {_f1(cap(a, tie, t, 'constant-median'))} & "
-                   f"{_f1(hz(a, tie, t, 'hazard-new'))} & {_f1(hz(a, tie, t, 'hazard-all'))} \\\\")
-            claim(f"{a}/{tie} {t} row", row, "", "arrival row")
+    def L(t, sp, a, split=0.5):
+        return [r for r in _el["rows"] if r["trace"] == t and r["actions"] == a and r["split"] == split][0][
+            "captured_pct"][sp]
+
+    def ER(t, split=0.5):
+        return [r for r in _el["rows"] if r["trace"] == t and r["split"] == split and r["actions"] == "tier"][0]
+
+    def HZ(t, rows):
+        return [r["captured_pct"] for r in rows if r["trace"] == t and r["arm"] == "hazard-new"
+                and r["tie"] == "new-behind"][0]
+
+    # the ladder's claim that deadness is all of visible clairvoyance on production, at every split
+    assert all(abs(r["captured_pct"]["dead-known"] - r["captured_pct"]["visible-dead-last"]) < 1e-9
+               for r in _el["rows"] if r["trace"] in PROD), "dead-known != visible-dead-last on production"
+    dead = [ER(t)["dead_visible_pct"] for t in PROD]
+    claim("dead share, bold", f"\\textbf{{{dead[0]:.1f}\\% and {dead[1]:.1f}\\%}}", "", "evidence_ladder")
+    claim("dead share, abstract", f"{dead[0]:.1f}\\% and {dead[1]:.1f}\\% of the blocks seen before", "", "evidence_ladder")
+    _ds = [r["dead_visible_pct"] for r in _el["rows"] if r["trace"] in PROD]
+    claim("dead share across splits", f"and {min(_ds):.1f}--{max(_ds):.1f}\\% across splits", "", "evidence_ladder")
+    claim("dead share, synthetic", f"({ER('synthetic')['dead_visible_pct']:.1f}\\% on the synthetic", "", "evidence_ladder")
+    _rsm = {r["trace"]: r for r in _rs["rows"] if r["split"] == 0.5}
+    assert all(abs(_rsm[t]["dead_visible_pct"] - ER(t)["dead_visible_pct"]) < 1e-9 for t in _rsm), "two dead shares"
+
+    def _thou(n):
+        return f"{n:,}".replace(",", "{,}")
+    claim("live visible blocks and their reuse",
+          f"{_thou(_rsm['conversation']['n_live_visible'])} and {_thou(_rsm['toolagent']['n_live_visible'])}"
+          f" blocks, carry {_rsm['conversation']['reuse_on_live_visible_pct']:.1f}\\% and "
+          f"{_rsm['toolagent']['reuse_on_live_visible_pct']:.1f}\\%", "", "reuse_split")
+    claim("reuse on new blocks", f"{_rsm['conversation']['reuse_on_new_pct']:.1f}\\% and "
+          f"{_rsm['toolagent']['reuse_on_new_pct']:.1f}\\%. A policy", "", "reuse_split")
+    # the tie-rule table and its prose
+    T = ("conversation", "toolagent", "synthetic")
+    claim("ties row: dead first", "dead visible blocks ahead of new ones & " + " & ".join(
+        f1(L(t, "visible-dead-first", "tier")) for t in T) + " \\\\", "", "evidence_ladder")
+    claim("ties row: dead last", "dead visible blocks behind new ones & " + " & ".join(
+        (f"\\textbf{{{f1(L(t, 'visible-dead-last', 'tier'))}}}" if t in PROD else f1(L(t, "visible-dead-last", "tier")))
+        for t in T) + " \\\\", "", "evidence_ladder")
+    claim("ties row: all actions", "same, all actions & " + " & ".join(
+        f"{f1(L(t, 'visible-dead-first', 'all'))} / {f1(L(t, 'visible-dead-last', 'all'))}" for t in T) + " \\\\",
+        "", "evidence_ladder")
+    _gap = [r["captured_pct"]["visible-dead-last"] - r["captured_pct"]["visible-dead-first"]
+            for r in _el["rows"] if r["trace"] in PROD and r["actions"] == "tier"]
+    claim("tie-rule gap across splits", f"by {min(_gap):.0f}--{max(_gap):.0f} points", "", "evidence_ladder")
+    _df = [L(t, "visible-dead-first", "tier") for t in PROD]
+    _dl = [L(t, "visible-dead-last", "tier") for t in PROD]
+    claim("references, bold", f"\\textbf{{{_df[0]:.1f}\\%\nand {_df[1]:.1f}\\%}}", "", "evidence_ladder")
+    claim("references dead-last, bold", f"reaches \\textbf{{{_dl[0]:.1f}\\% and {_dl[1]:.1f}\\%}}", "", "evidence_ladder")
+    claim("references, abstract", f"reaches\n{_df[0]:.1f}\\% and {_df[1]:.1f}\\% of a hindsight", "", "evidence_ladder")
+    claim("references dead-last, abstract", f"same reference reaches {_dl[0]:.1f}\\% and {_dl[1]:.1f}\\%", "",
+          "evidence_ladder")
+    claim("references, conclusion", f"reaches {min(_df):.0f}--{max(_df):.0f}\\% of\nthe oracle's advantage or "
+          f"{min(_dl):.0f}--{max(_dl):.0f}\\%", "", "evidence_ladder")
+    # the published convention and dead-last as computed by an independent producer
+    for r in _ct["rows"]:
+        assert abs(r["published_ceiling_pct"] - L(r["trace"], "visible-dead-first", r["actions"])) < 0.01, r
+        assert abs(r["dead_last_ceiling_pct"] - L(r["trace"], "visible-dead-last", r["actions"])) < 0.01, r
+    _toy = _ct["toys"]["tier"]
+    claim("exhaustive toys", f"visible blocks beats the published convention in {_toy['published_above_exhaustive']} "
+          f"and the dead-last one in {_toy['dead_last_above_exhaustive']}", "", "ceiling_ties")
+    # the ladder table
+    _hzv = {t: HZ(t, _hzt["rows"]) for t in T}
+    claim("ladder: seen-once", "\\emph{causal:} seen-once behind new & " + " & ".join(
+        f1(L(t, "seen-once-last", "tier")) for t in T) + " \\\\", "", "evidence_ladder")
+    claim("ladder: prior", "\\emph{causal:} estimated prior & " + " & ".join(
+        f1(_hzv[t]) for t in T) + " \\\\", "", "hazard_prior_tier")
+    claim("ladder: dead-known", "which visible blocks are dead & " + " & ".join(
+        f1(L(t, "dead-known", "tier")) for t in T) + " \\\\", "", "evidence_ladder")
+    claim("ladder: dead-last", "visible futures, dead last & " + " & ".join(
+        f1(L(t, "visible-dead-last", "tier")) for t in T) + " \\\\", "", "evidence_ladder")
+    _rem = [100 - L(t, "visible-dead-last", "tier") for t in PROD]
+    claim("remainder: order among new blocks", f"What remains, {min(_rem):.0f}--{max(_rem):.0f}\\%", "",
+          "evidence_ladder")
+    _p = [ER(t)["seen_once_precision_for_dead"] for t in PROD]
+    _rc_ = [ER(t)["seen_once_recall_for_dead"] for t in PROD]
+    claim("seen-once precision", f"dead with probability {_p[0]:.2f} and {_p[1]:.2f}", "", "evidence_ladder")
+    claim("seen-once recall", f"{100*min(_rc_):.0f}--{100*max(_rc_):.0f}\\% of the dead ones", "", "evidence_ladder")
+    _so = [L(t, "seen-once-last", "tier") for t in PROD]
+    claim("seen-once rule, abstract", f"recovers {_so[0]:.1f}\\% and {_so[1]:.1f}\\%", "", "evidence_ladder")
+    claim("seen-once rule, V-C", f"captures {_so[0]:.1f}\\%\nand {_so[1]:.1f}\\%", "", "evidence_ladder")
+    claim("seen-once rule, intro", f"captures {_so[0]:.1f}\\% and {_so[1]:.1f}\\% of the advantage", "",
+          "evidence_ladder")
+    _sos = [r["captured_pct"]["seen-once-last"] for r in _el["rows"] if r["trace"] in PROD and r["actions"] == "tier"]
+    claim("seen-once across splits", f"({min(_sos):.1f}--{max(_sos):.1f}\\% across splits)", "", "evidence_ladder")
+    _sy = [r for r in _el["rows"] if r["trace"] == "synthetic" and r["actions"] == "tier"]
+    claim("synthetic dead range", f"fewer blocks\nare dead ({min(r['dead_visible_pct'] for r in _sy):.0f}--"
+          f"{max(r['dead_visible_pct'] for r in _sy):.0f}\\%)", "", "evidence_ladder")
+    claim("synthetic seen-once range", f"captures {min(r['captured_pct']['seen-once-last'] for r in _sy):.1f}--"
+          f"{max(r['captured_pct']['seen-once-last'] for r in _sy):.1f}\\%", "", "evidence_ladder")
+    _hp = [_hzv[t] for t in PROD]
+    _ha = [HZ(t, _hz["rows"]) for t in PROD]
+    claim("prior, tier and all", f"It captures {_hp[0]:.1f}\\% and {_hp[1]:.1f}\\% with tier-only actions\n"
+          f"({_ha[0]:.1f}\\% and {_ha[1]:.1f}\\% with all actions)", "", "hazard_prior*")
+    claim("prior, intro", f"captures {_hp[0]:.1f}\\% and {_hp[1]:.1f}\\%, and on three", "", "hazard_prior_tier")
+    claim("prior, abstract", f"({_hp[0]:.1f}\\% and {_hp[1]:.1f}\\% with an estimated", "", "hazard_prior_tier")
+    assert abs(_hzv["synthetic"]) < 0.05, "the paper says the prior captures nothing on synthetic (tier-only)"
     # The estimate is tie-invariant by construction; assert it rather than trust it.
-    for a in ("all", "tier"):
-        for r in HZ[a]:
-            other = hz(a, "new-ahead" if r["tie"] == "new-behind" else "new-behind", r["trace"], r["arm"])
-            assert abs(r["captured_pct"] - other) < 1e-9, "the hazard arm depends on the tie convention"
+    for _rows in (_hz["rows"], _hzt["rows"]):
+        _bt = {(r["trace"], r["arm"], r["tie"]): r["captured_pct"] for r in _rows}
+        assert all(abs(v - _bt[(t, a, "new-ahead" if tie == "new-behind" else "new-behind")]) < 1e-9
+                   for (t, a, tie), v in _bt.items()), "the estimated prior depends on the tie convention"
     est = _hz["estimates"]
-    claim("new-block expected reuse", f"({est['conversation']['h_new']:.2f} and {est['toolagent']['h_new']:.2f})",
-          "", "h_new")
-    claim("seen-once expected reuse", f"({est['conversation']['m_by_count_bin'][0]:.2f} and "
-          f"{est['toolagent']['m_by_count_bin'][0]:.2f})", "", "m(count 1)")
+    claim("new vs seen-once reuse", f"({est['conversation']['h_new']:.2f} against "
+          f"{est['conversation']['m_by_count_bin'][0]:.2f} on conversation)", "", "h_new, m(1)")
     assert all(2 < est[t]["c_star"] < 3 for t in PROD), "the paper places new blocks between count 2 and 3"
-    conv_arms = [cap(a, tie, t, x) for a, tie in CFG for t in PROD
-                 for x in ORDER + ("constant-mean", "constant-median")]
-    claim("convention span", f"span {_f1(min(conv_arms))}--{_f1(max(conv_arms))}\\% of the advantage", "", "all arms")
-    tb = [cap("tier", "new-behind", t, x) for t in PROD for x in ORDER]
-    tbc = [_ceil("tier", t) for t in PROD]
-    assert all(cap("tier", "new-behind", t, x) < 1.3 * _ceil("tier", t) for t in PROD for x in ORDER), \
-        "the paper says tier-only/behind order arms land at the split ceiling"
-    claim("tier/behind at the ceiling", f"{_f1(min(tb))}--{_f1(max(tb))}\\% against {min(tbc):.1f}--{max(tbc):.1f}\\%",
-          "", "tier, new-behind")
-    hz_vals = [(hz(a, "new-behind", t, x), _ceil(a, t)) for a in ("all", "tier") for t in PROD
-               for x in ("hazard-new", "hazard-all")]
-    r_new = [hz(a, "new-behind", t, "hazard-new") / _ceil(a, t) for a in ("all", "tier") for t in PROD]
-    r_all = [v / c_ for v, c_ in hz_vals]
-    claim("hazard-new ratio, V-C", f"captures {min(r_new):.1f}--{max(r_new):.1f} times the matching", "", "hazard-new / ceiling")
-    claim("hazard ratio incl. old blocks", f"({min(r_all):.1f}--{max(r_all):.1f} when old blocks", "", "both hazard arms")
-    claim("hazard-new ratio, abstract", f"captures {min(r_new):.1f}--{max(r_new):.1f} times what", "", "rounded")
-    claim("hazard-new ratio, intro", f"captures {min(r_new):.1f} to {max(r_new):.1f}\ntimes", "", "rounded")
-    claim("hazard-new ratio, C2", f"captures {min(r_new):.1f}--{max(r_new):.1f} times\n  the matching", "", "rounded")
-    claim("hazard-new ratio, conclusion", f"{min(r_new):.1f}--{max(r_new):.1f} times the split-time ceiling in a static", "", "rounded")
-    claim("hazard values vs ceilings", f"{min(v for v, _ in hz_vals):.1f}--{max(v for v, _ in hz_vals):.1f}\\%\n"
-          f"against {min(c_ for _, c_ in hz_vals):.1f}--{max(c_ for _, c_ in hz_vals):.1f}\\%", "", "hazard arms")
-    assert abs(hz("all", "new-behind", "toolagent", "hazard-new") - cap("all", "new-behind", "toolagent", "constant-mean")) < 0.05, \
-        "the paper says the hazard arm coincides with the mean arm on toolagent"
-    claim("abstract: new vs seen-once reuse", f"is {est['conversation']['h_new']:.2f} against "
-          f"{est['conversation']['m_by_count_bin'][0]:.2f})", "", "h_new, m(1)")
-    _ar, _tr = load("arrival_admission_reuse.json"), load("tier_only_reuse.json")
-    if _ar and _tr:
-        _rr, _rv = [], []
-        for _res, _acts in ((_ar["results"], "all"), (_tr["arrival_admission"]["results"], "tier")):
-            for r in _res:
-                if r["trace"] in PROD and r["arm"] in ORDER:
-                    _rr.append(r["captured_pct"] / _ceil(_acts, r["trace"]))
-                    _rv.append(r["captured_pct"])
-        claim("reuse-scale order arms", f"puts every order arm at {min(_rr):.1f}--{max(_rr):.1f} times the split-time ceiling\n"
-              f"({min(_rv):.1f}--{max(_rv):.1f}\\%)", "", "reference multiset minus creation")
     _hzr, _hztr = load("hazard_prior_rescaled.json"), load("hazard_prior_tier_rescaled.json")
     if _hzr and _hztr:
         _dv = []
@@ -351,14 +385,73 @@ if d and _to and _rc and _dg and _hz and _hzt and _eh:
             _yy = {(r["trace"], r["arm"], r["tie"]): r["captured_pct"] for r in _y["rows"]}
             _dv += [abs(r["captured_pct"] - _yy[(r["trace"], r["arm"], r["tie"])]) for r in _x["rows"]
                     if r["trace"] in PROD and r["arm"] == "hazard-new"]
-        claim("hazard rescale sensitivity", f"by at most {max(_dv):.1f} points on the production traces", "", "rescaled c*")
+        claim("hazard rescale sensitivity", f"by at most {max(_dv):.1f}\npoints on the production traces", "",
+              "rescaled c*")
+
+# The ladder on Alibaba's traces (V-C; notebook BA)
+_elb = load("evidence_ladder_bailian.json")
+if _elb:
+    _b = [r for r in _elb["rows"] if r["actions"] == "tier" and r["split"] == 0.5]
+    assert len(_b) == 4 and all(abs(r["captured_pct"]["dead-known"] - r["captured_pct"]["visible-dead-last"]) < 1e-9
+                                for r in _b), "Bailian: deadness no longer equals visible clairvoyance"
+
+    def _rng(key, sub=None):
+        v = [r[key] if sub is None else r[key][sub] for r in _b]
+        return f"{min(v):.1f}--{max(v):.1f}"
+    claim("Bailian ladder", f"{_rng('dead_visible_pct')}\\% of visible blocks are dead, the reference moves from "
+          f"{_rng('captured_pct', 'visible-dead-first')}\\% with\ndead blocks first to "
+          f"{_rng('captured_pct', 'visible-dead-last')}\\% with them last", "", "evidence_ladder_bailian")
+    claim("Bailian seen-once", f"the seen-once rule captures {_rng('captured_pct', 'seen-once-last')}\\%", "",
+          "evidence_ladder_bailian")
+    _th = [r for r in _b if r["trace"] == "thinking"][0]
+    assert _th["captured_pct"]["seen-once-last"] > 1.0, "the paper says the seen-once rule gains on thinking"
+
+# Prefix validity of independent-block billing (III; notebook BD)
+_pv = load("prefix_validity.json")
+if _pv:
+    _t = _pv["traces"]
+    assert all(v["positions_with_another_predecessor"] == 0 for v in _t.values()), "hash chains broken"
+    assert all(r[p]["unusable_share_of_hits"] == 0.0 for v in _t.values() for r in v["rows"] for p in ("lru", "belady")), \
+        "a hit whose prefix missed"
+    claim("hash-chain positions", "without exception among " + " and ".join(
+        f"{_t[x]['n_positions']:,}".replace(",", "{,}") for x in ("conversation", "toolagent")) + " block positions",
+        "", "prefix_validity")
+
+# Arrival-time conventions (V-C): tie shift and order spread from the order/magnitude arms.
+d = load("arrival_admission.json")
+_to = load("tier_only.json")
+if d and _to:
+    RES = {"all": d["results"], "tier": _to["arrival_admission"]["results"]}
+
+    def cap(acts, tie, t, arm):
+        return [r["captured_pct"] for r in RES[acts] if r["trace"] == t and r.get("tie") == tie
+                and r["arm"] == arm][0]
+    ORDER = ("order-arrival", "order-learned", "order-shuffled")
+    CFG = [(a, tie) for a in ("all", "tier") for tie in ("new-behind", "new-ahead")]
+    shift = [cap(a, "new-ahead", t, x) - cap(a, "new-behind", t, x) for a in ("all", "tier")
+             for t in PROD for x in ORDER]
+    claim("tie shift", f"by {min(shift):.0f}--{max(shift):.0f} points", "", "ahead - behind")
+    spread = max(max(cap(a, tie, t, x) for x in ORDER) - min(cap(a, tie, t, x) for x in ORDER)
+                 for a, tie in CFG for t in PROD)
+    claim("order spread", f"at most {spread:.1f}", "", "max-min of order arms")
+
+# External: the estimated prior on Alibaba's traces, tier-only, absolute (notebook AU)
+_bH = load("bailian_hazard_birthx.json")
+if _bH:
+    _bt = {r["trace"]: r["captured_pct"] for r in _bH["rows"]
+           if r["actions"] == "tier_only" and r["arm"] == "hazard-new" and r["tie"] == "new-behind"}
+    claim("external prior, tier-only", f"it captures {_bt['traceA']:.1f}\\%, {_bt['traceB']:.1f}\\% and "
+          f"{_bt['coder']:.1f}\\% on three\nand {f1(_bt['thinking'])}\\% on the fourth (thinking)", "", "bailian hazard")
+
+# Online replay, measured price, ledgers (V-D; notebook AT H6, AV, AX, AY)
+if True:
     _oa = load("online_admission.json")
     if _oa:
         prod_oa = [r for r in _oa["rows"] if r["trace"] in PROD and r["arm"] != "arrival-ceiling"]
         free = max(r["online_captured_pct"] for r in prod_oa if r["migration_cost_model"] == "zero")
         priced = max(r["online_captured_pct"] for r in prod_oa if r["migration_cost_model"] == "read+write")
         assert priced <= 0.0 + 1e-9, "the paper says no arm beats the heuristic once a move costs a read and a write"
-        claim("online, free migration", f"replayed online (at most {free:.1f}\\%)", "", "online_admission")
+        claim("online, free migration", f"arrival-time arms capture up to {free:.1f}\\%", "", "online_admission")
         _h70 = {r["trace"]: r["alpha_at_70pct_of_static"] for r in _oa["rows"] if r["trace"] in PROD
                 and r["arm"] == "hazard-new" and r["policy"] == "onestep" and r["migration_cost_model"] == "read+write"
                 and r["tie"] == "new-behind"}
@@ -378,12 +471,14 @@ if d and _to and _rc and _dg and _hz and _hzt and _eh:
               "", "measured_migration")
         claim("measured demotion to disk", f"costs {min(_dk):.2f}--{max(_dk):.2f} times", "", "measured_migration")
         _x = min(_gc + _dk) / max(_mm["hazard_break_even_alpha70"].values())
-        claim("measured price over break-even", f"at least {int(_x)}\ntimes the hazard arm's break-even", "",
+        claim("measured price over break-even", f"at least {int(_x)} times the estimated prior's break-even", "",
+              "measured_migration")
+        claim("measured price over break-even, intro", f"at least {int(_x)} times what the arrival-time", "",
               "measured_migration")
         claim("measured run count", f"{['', 'one', 'two', 'three', 'four', 'five', 'six'][_mm['config']['n_runs']]} runs",
               "", "measured_migration")
         _r = _mm["read_ms"]
-        claim("measured GPU:CPU latency ratio", f"measures 1:{_r['cpu'] / _r['gpu']:.0f})", "", "measured_migration")
+        claim("measured GPU:CPU latency ratio", f"host measures 1:{_r['cpu'] / _r['gpu']:.0f}", "", "measured_migration")
         assert _mm["hazard_break_even_alpha70"] == {t: r for t, r in _h70.items()}, \
             "measured_migration.json was built against a different online_admission.json"
     # Migration ledgers (§AY): the online conclusion under four ways to bill a move
@@ -423,52 +518,6 @@ if d and _to and _rc and _dg and _hz and _hzt and _eh:
                    and r["migration_cost_model"] == "read+write"]
         _priced += [_rr[t][pol]["read+write"] for t in PROD for pol in ("lru", "second-hit")]
         assert max(_priced) <= 1e-9, f"a replayed policy beats the heuristic with priced moves ({max(_priced)})"
-    shift = [cap(a, "new-ahead", t, x) - cap(a, "new-behind", t, x) for a in ("all", "tier")
-             for t in PROD for x in ORDER]
-    claim("tie shift", f"by {min(shift):.0f}--{max(shift):.0f} points", "", "ahead - behind")
-    claim("tie shift, intro", f"by {min(shift):.0f} to {max(shift):.0f} points", "", "ahead - behind")
-    spread = max(max(cap(a, tie, t, x) for x in ORDER) - min(cap(a, tie, t, x) for x in ORDER)
-                 for a, tie in CFG for t in PROD)
-    claim("order spread", f"at most {spread:.1f}", "", "max-min of order arms")
-    worst = max(max(cap(a, tie, t, x) for a, tie in CFG) - min(cap(a, tie, t, x) for a, tie in CFG)
-                for t in PROD for x in ORDER + ("constant-mean", "constant-median"))
-    claim("convention sensitivity of one arm", f"up to {worst:.0f} points", "", "max over configs")
-    sy = [cap(a, tie, "synthetic", x) for a, tie in CFG for x in ORDER + ("constant-mean", "constant-median")]
-    sy += [hz(a, "new-behind", "synthetic", x) for a in ("all", "tier") for x in ("hazard-new", "hazard-all")]
-    assert max(cap("all", tie, "synthetic", x) for tie in ("new-behind", "new-ahead")
-               for x in ORDER + ("constant-mean", "constant-median")) < _ceil("all", "synthetic")
-    claim("synthetic", f"{_ceil('all', 'synthetic'):.1f}\\% ({_ceil('tier', 'synthetic'):.1f}\\% tier-only) and every\n"
-          f"arrival arm, the hazard arms included, stays below it ({_f1(min(sy))}--{_f1(max(sy))}\\%)", "", "synthetic")
-    rows_dg = {r["trace"]: r for r in _dg["rows"]}
-    ratio = [r["first_over_last"] for r in _dg["rows"]]
-    aucs = [r["auc_arrival_order"] for r in _dg["rows"]]
-    _pr = [rows_dg[t] for t in PROD]
-    _pratio = sorted(r["first_over_last"] for r in _pr)
-    _pauc = sorted(r["auc_arrival_order"] for r in _pr)
-    claim("exposure ratio, production", f"({_pratio[0]:.1f}--{_pratio[-1]:.1f} times", "", "diagnostics")
-    claim("arrival-order AUC, production", f"AUC {_pauc[0]:.2f}--{_pauc[-1]:.2f} only because", "", "diagnostics")
-    eh = {r["trace"]: r for r in _eh["rows"]}
-    claim("equal-horizon AUC", f"its AUC is {eh['conversation']['auc_order_equal_horizon']:.2f} and "
-          f"{eh['toolagent']['auc_order_equal_horizon']:.2f}", "", "equal_horizon")
-    claim("old design's label leak", f"({rows_dg['conversation']['old_design_label_mass_after_cut_pct']:.1f}\\% and "
-          f"{rows_dg['toolagent']['old_design_label_mass_after_cut_pct']:.1f}\\% of label", "", "diagnostics")
-    claim("split ceiling, introduction", f"(\\textbf{{{_ceil('all', 'conversation'):.1f}\\%}} and "
-          f"\\textbf{{{_ceil('all', 'toolagent'):.1f}\\%}} of", "", "reachable_ceiling @ 0.5")
-
-# External replication on Alibaba's Bailian traces (V-C; notebook AT, AU).
-_bR, _bH = load("bailian_reachable_birthx.json"), load("bailian_hazard_birthx.json")
-if _bR and _bH:
-    print("\nexternal traces (bailian_reachable_birthx.json, bailian_hazard_birthx.json)")
-    _BT = ("traceA", "traceB", "coder", "thinking")
-    _un = [[r["unreachable_pct"] for r in _bR["full"]["traces"][t]["rows"] if r["split_frac"] == 0.5][0] for t in _BT]
-    _rt = {sp: {r["trace"]: r["captured_pct"] / r["split_ceiling_pct"] for r in _bH["rows"]
-                if r["actions"] == sp and r["arm"] == "hazard-new" and r["tie"] == "new-behind"} for sp in ("full", "tier_only")}
-    _tpos = [v for v in _rt["tier_only"].values() if v > 0.01]
-    assert sum(1 for v in _rt["tier_only"].values() if v <= 0.01) == 1 and _rt["tier_only"]["thinking"] <= 0.01, \
-        "the paper says tier-only hazard gains nothing on exactly one trace, thinking"
-    claim("external unreachable", f"split protocol leaves {min(_un):.1f}--{max(_un):.1f}\\% of the advantage", "", "bailian @ 0.5")
-    claim("external hazard, all actions", f"reaches {min(_rt['full'].values()):.1f}--{max(_rt['full'].values()):.1f} times the split-time ceiling with all", "", "bailian hazard")
-    claim("external hazard, tier only", f"it reaches {min(_tpos):.1f}--{max(_tpos):.1f} times on three", "", "bailian hazard")
 
 # Table 2 (audit pass 2026-10-19): every cell from a producer.
 _ss = load("source_stats.json")
@@ -580,6 +629,25 @@ if d:
     # not part of this artifact. A number nobody can regenerate is not one the checker should
     # certify, and the paper no longer states it.
 
+# Modern one-hit-wonder baselines (V-E; notebook BB): never above the best pure rule.
+_mb, _rx2 = load("modern_baselines.json"), load("reactive_real_full_lrb.json")
+if _mb and _rx2:
+    print("\nmodern baselines (experiments/modern_baselines.json)")
+    _gaps, _closest = [], None
+    for _t in ("conversation", "toolagent"):
+        for _m, _r in zip(_mb["traces"][_t]["rows"], _rx2["traces"][_t]["rows"]):
+            assert _m["cache_frac"] == _r["cache_frac"] and abs(_m["belady"] - _r["belady"]) < 1e-4, "two Beladys"
+            _pure = max(_r["lru"], _r["h2o"], _r["static"]) / _r["belady"]
+            _best = max(_m[k + "_over_belady"] for k in ("s3fifo", "sieve", "wtinylfu"))
+            _gaps.append(100 * (_pure - _best))
+            if _closest is None or _pure - _best < _closest[0]:
+                _closest = (_pure - _best, max(("s3fifo", "sieve", "wtinylfu"), key=lambda k: _m[k + "_over_belady"]),
+                            _m["cache_frac"])
+    assert min(_gaps) > 0, "a modern baseline beat the best pure rule"
+    assert _closest[1] == "wtinylfu" and _closest[2] == min(r["cache_frac"] for r in _mb["traces"]["toolagent"]["rows"])
+    claim("modern baselines below best pure", f"by {min(_gaps):.1f} to {max(_gaps):.1f} points of Belady", "",
+          "modern_baselines")
+
 # --- capacity ladder, causal magnitude scale (section 5.3, audit H2) ---------------------------
 def _sg(v):
     return "0.0" if round(v, 1) == 0 else f"{v:+.1f}"
@@ -589,10 +657,8 @@ d = load("capacity_ladder_fixed.json")
 if d:
     print("\ncapacity ladder, causal scale (experiments/capacity_ladder_fixed.json)")
     by = {(r["eval"], r["rung"]): r for r in d["results"]}
-    for rung in ("constant", "random", "count", "linear", "gbdt", "mlp"):
-        c, t = by[("conversation", rung)], by[("toolagent", rung)]
-        claim(f"ladder row: {rung}", f"${_sg(c['captured_of_attainable_pct'])}$ & "
-              f"${_sg(t['captured_of_attainable_pct'])}$", "", "captured_of_attainable_pct")
+    claim("strongest ranker's AUC", f"cross-trace AUC {by[('conversation', 'mlp')]['auc_cross_trace']:.2f} and "
+          f"{by[('toolagent', 'mlp')]['auc_cross_trace']:.2f}", "", "ladder")
     # The paper now claims monotone conversion on BOTH traces, rungs ordered by AUC.
     for tr in ("conversation", "toolagent"):
         rungs = sorted(("count", "linear", "gbdt", "mlp"), key=lambda r: by[(tr, r)]["auc_cross_trace"])
@@ -609,31 +675,10 @@ if d:
 d = load("belief_controls.json")
 if d:
     print("\nbelief controls (experiments/belief_controls.json)")
-    for r in d["results"]:
-        if r["rung"] == "ceiling":
-            continue
-        diff = r["magnitude_contribution"]
-        dtxt = f"{diff:.1f}" if diff >= 0 else f"${diff:.1f}$"
-        row = (f"${_sg(r['native_of_attainable'])}$ & ${_sg(r['common_scale_of_attainable'])}$ & {dtxt}")
-        claim(f"{r['trace']} {r['rung']} magnitude row", row, row, "belief control row")
     s2 = d["summary"]
     claim("magnitude contribution range",
           f"{s2['magnitude_min_points']:.0f} to {s2['magnitude_max_points']:.0f} points",
           f"{s2['magnitude_min_points']}-{s2['magnitude_max_points']}", "summary")
-
-# Cost-weight sensitivity (audit M4).
-d = load("weight_sensitivity.json")
-if d:
-    print("\nweight sensitivity (experiments/weight_sensitivity.json)")
-    sm = d["summary"]
-    claim("unreachable share across weight variants",
-          f"{sm['unreachable_min']:.1f}--{sm['unreachable_max']:.1f}\\%", "", "weight variants @ 0.5")
-    _rc2 = load("reachable_ceiling.json")
-    if _rc2:
-        prod = [r["unreachable_pct"] for t in ("conversation", "toolagent")
-                for r in _rc2["traces"][t]["rows"]] + [r["unreachable_pct"] for r in d["rows"]]
-        claim("abstract: 92--99 across splits and weights",
-              f"stays at {min(prod):.0f}--{max(prod):.0f}\\%", "", "splits + weights")
 
 # --- staleness guard ---------------------------------------------------------------
 # An artifact older than the code that produces it is not evidence about the current code.
@@ -660,31 +705,6 @@ _manifest = json.loads(_PROV.read_text()) if _PROV.exists() else None
 # §5.2's table: the paper's headline, and for twelve passes backed by nothing. Every row is
 # now derived from one artifact computed in one frame. See §AN for what the old numbers were
 # and why they could not all be right at once.
-d = load("reachable_ceiling.json")
-if d:
-    print("\nreachable ceiling (experiments/reachable_ceiling.json)")
-    for _t in ("conversation", "toolagent"):
-        rows = d["traces"][_t]["rows"]
-        at = [r for r in rows if r["split_frac"] == 0.5][0]
-        claim(f"{_t}: blocks with no pre-split access", f"{at['no_pre_split_pct']:.1f}\\%",
-              at["no_pre_split_pct"], "no_pre_split_pct @ 0.5")
-        claim(f"{_t}: full hindsight gap",
-              f"{at['full_hindsight_gap']:,.0f}".replace(",", "{,}"),
-              at["full_hindsight_gap"], "prefix_greedy - oracle @ 0.5")
-        claim(f"{_t}: attainable gap",
-              f"{at['attainable_gap']:,.0f}".replace(",", "{,}"),
-              at["attainable_gap"], "prefix_greedy - ceiling @ 0.5")
-        claim(f"{_t}: unreachable share", f"{at['unreachable_pct']:.1f}\\%",
-              at["unreachable_pct"], "1 - attainable/full @ 0.5")
-        lo, hi = d["traces"][_t]["unreachable_min"], d["traces"][_t]["unreachable_max"]
-        claim(f"{_t}: unreachable across splits 0.3-0.7",
-              f"{lo:.1f}--{hi:.1f}\\%", f"{lo}-{hi}", "split sweep")
-    # The pair as the abstract and §5.2 state it, rounded.
-    u = [round(d["traces"][t]["rows"][2]["unreachable_pct"], 1)
-         for t in ("conversation", "toolagent")]
-    claim("unreachable pair as stated in prose", f"{u[0]:.1f}\\% and {u[1]:.1f}\\%",
-          f"{u}", "both traces @ 0.5")
-
 # Trace sizes and the length dependence of headroom, from headroom_by_length.json -- which has a
 # producer. Its predecessor (mooncake_length_sweep.json) had none, carried no headroom column at
 # all, and the paper's "87%" / "81.0% to 87.2%" predated the §W fix while §5.8 said 80% (§AO).
@@ -701,49 +721,19 @@ if d:
           f"conversation, {_tex(full['conversation']['requests'])} requests; "
           f"toolagent, {_tex(full['toolagent']['requests'])}",
           f"{full['conversation']['requests']} / {full['toolagent']['requests']}", "full_trace rows")
-    for _t, _needle in (("toolagent", "from {a:.1f}\\% to {b:.1f}\\% on toolagent"),
-                        ("conversation", "from {a:.1f}\\% to {b:.1f}\\% on conversation")):
-        a_, b_ = rows[(_t, 1500)]["headroom_pct"], full[_t]["headroom_pct"]
-        claim(f"{_t}: headroom 1,500 requests -> full", _needle.format(a=a_, b=b_),
-              f"{a_} -> {b_}", "reference_costs by length")
     _h = round((full["conversation"]["headroom_pct"] + full["toolagent"]["headroom_pct"]) / 2)
     claim("Table 2 headroom at full length", f"heuristic vs.\\ oracle & {_h}\\%",
           f"{full['conversation']['headroom_pct']} / {full['toolagent']['headroom_pct']}",
           "full_trace rows, rounded")
 
-# The synthetic control (§5.2, §5.4): reported, never pooled.
-d = load("reachable_ceiling.json")
-if d and "synthetic" in d["traces"]:
-    print("\nsynthetic control (experiments/reachable_ceiling.json)")
-    sy = d["traces"]["synthetic"]
-    mid = [r for r in sy["rows"] if r["split_frac"] == 0.5][0]
-    claim("synthetic: blocks new at the midpoint", f"{mid['no_pre_split_pct']:.1f}\\%",
-          mid["no_pre_split_pct"], "no_pre_split_pct @ 0.5")
-    claim("synthetic: unreachable at the midpoint", f"{mid['unreachable_pct']:.1f}\\%",
-          mid["unreachable_pct"], "@ 0.5")
-    claim("synthetic: unreachable across splits",
-          f"{sy['unreachable_min']:.1f}--{sy['unreachable_max']:.1f}\\%",
-          f"{sy['unreachable_min']}-{sy['unreachable_max']}", "split sweep")
-    claim("synthetic: split instant already reaches", f"{mid['reachable_pct']:.1f}\\%",
-          mid["reachable_pct"], "reachable_pct @ 0.5")
-    _lo = min(r["no_pre_split_pct"] for r in sy["rows"])
-    claim("synthetic: fewest new blocks across splits", f"only {_lo:.0f}\\% of blocks are new",
-          _lo, "min no_pre_split_pct")
-
 PROSE_FILES = ("README.md", "paper/README.md", "REPRODUCIBILITY.md")
-_arr = load("arrival_admission.json")
-_rch = load("reachable_ceiling.json")
-if _arr and _rch:
-    _by = {(r["trace"], r["arm"]): r for r in _arr["results"]}
-    HEADLINE = {}
-    for _t in ("conversation", "toolagent"):
-        # The causal headline (audit H2): the best split-time policy against plain FCFS admission
-        # at arrival, both as a share of the same full hindsight gap.
-        _at = [r for r in _rch["traces"][_t]["rows"] if r["split_frac"] == 0.5][0]
-        HEADLINE[f"split-time ceiling, {_t}"] = f"{_at['reachable_pct']:.1f}%"
-    HEADLINE["estimated prior vs split ceiling"] = "2.3–4.9"
-    HEADLINE["tie-convention shift"] = "14–29"
-    failures += verify.prose_drift(PROSE_FILES, HEADLINE, ROOT, trigger="arrival")
+_elh = load("evidence_ladder.json")
+if _elh:
+    _r5 = {r["trace"]: r for r in _elh["rows"] if r["split"] == 0.5 and r["actions"] == "tier"}
+    HEADLINE = {f"dead visible share, {t}": f"{_r5[t]['dead_visible_pct']:.1f}%" for t in ("conversation", "toolagent")}
+    HEADLINE.update({f"reference, dead blocks last, {t}": f"{_r5[t]['captured_pct']['visible-dead-last']:.1f}%"
+                     for t in ("conversation", "toolagent")})
+    failures += verify.prose_drift(PROSE_FILES, HEADLINE, ROOT, trigger="dead")
 
 # The lab notebook legitimately records superseded measurements -- rewriting them would destroy
 # the record. But an unmarked one reads as current: §V.2 stated "shuffling the arrival order
@@ -807,6 +797,10 @@ SUPERSEDED_IN_PAPER = {
     "18--39": "tie shift under the creation-billing defect (now 14--29)",
     "at least three times": "a claim the corrected bill falsifies",
     "within 2.1 points of each other": "order spread under the creation-billing defect (now 5.3)",
+    # The split-time ceiling was a tie rule (notebook AZ): its headline and every ratio against it.
+    "2.3--4.9": "estimated prior / split-time ceiling, against a tie-rule reference (section AZ)",
+    "84.4\\% and 87.6\\%": "the 'unreachable share', a tie rule (section AZ)",
+    "out of a split-time policy's reach": "the retracted section V-B headline (section AZ)",
 }
 for _tex in [ROOT / "paper" / "main.tex", *sorted((ROOT / "paper" / "sections").glob("*.tex"))]:
     failures += verify.unmarked_superseded(
@@ -860,6 +854,8 @@ if NOTEBOOK.exists():
 # they are regenerable and unguarded, which is the honest description of an unused plot.
 FIG_SOURCES = {
     "fig_reactive.pdf": ("reactive_real_full_lrb.json",),
+    "fig_ties.pdf": ("evidence_ladder.json",),
+    "fig_price.pdf": ("migration_ledger.json", "measured_migration.json"),
 }
 FIGS = ROOT / "paper" / "figs"
 failures += verify.stale_figures(FIG_SOURCES, FIGS, EXP)
@@ -934,15 +930,14 @@ failures += verify.producer_problems(
 # Every artifact the paper cites, and only those. `capacity_ladder.json` (superseded) and
 # `split_sensitivity.json` (not cited) used to be here, so a reproducer was told they were required.
 REQUIRED = ("reactive_real_full_lrb.json", "headroom_by_length.json", "lrb_retraction.json",
-            "reachable_ceiling.json", "lrb_sweep.json", "calibration_sensitivity.json",
-            "sampling_study.json", "arrival_admission.json", "arrival_diagnostics.json",
-            "belief_controls.json", "capacity_ladder_fixed.json", "weight_sensitivity.json",
+            "lrb_sweep.json", "calibration_sensitivity.json", "sampling_study.json",
+            "arrival_admission.json", "belief_controls.json", "capacity_ladder_fixed.json",
             "source_stats.json", "reactive_kvct_sweep.json", "tier_only.json",
-            "hazard_prior.json", "hazard_prior_tier.json", "equal_horizon.json", "reachable_by_length.json",
-            "hazard_prior_rescaled.json", "hazard_prior_tier_rescaled.json", "online_admission.json",
-            "arrival_admission_reuse.json", "tier_only_reuse.json",
-            "bailian_reachable_birthx.json", "bailian_hazard_birthx.json", "reactive_cost.json",
-            "measured_migration.json", "migration_ledger.json")
+            "hazard_prior.json", "hazard_prior_tier.json", "hazard_prior_rescaled.json",
+            "hazard_prior_tier_rescaled.json", "online_admission.json", "bailian_hazard_birthx.json",
+            "reactive_cost.json", "measured_migration.json", "migration_ledger.json",
+            "evidence_ladder.json", "reuse_split.json", "ceiling_ties.json", "modern_baselines.json",
+            "evidence_ladder_bailian.json", "prefix_validity.json")
 missing = [n for n in REQUIRED if not (EXP / n).exists()]
 if missing:
     failures.append("artifacts absent, so their claims went unchecked: " + ", ".join(missing))

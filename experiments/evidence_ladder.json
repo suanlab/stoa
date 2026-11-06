@@ -1,0 +1,525 @@
+{
+  "config": {
+    "splits": [
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7
+    ],
+    "share": "(heuristic - arm) / (heuristic - oracle), true bill",
+    "behind": "belief 0 and later item order than every new block (stable greedy)"
+  },
+  "rows": [
+    {
+      "trace": "conversation",
+      "split": 0.3,
+      "actions": "tier",
+      "n_visible": 65611,
+      "dead_visible_pct": 88.79,
+      "seen_once_precision_for_dead": 0.9139,
+      "seen_once_recall_for_dead": 0.7986,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 25.59,
+        "dead-known": 54.44,
+        "visible-dead-first": 6.39,
+        "visible-dead-last": 54.44,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "conversation",
+      "split": 0.3,
+      "actions": "all",
+      "n_visible": 65611,
+      "dead_visible_pct": 88.79,
+      "seen_once_precision_for_dead": 0.9139,
+      "seen_once_recall_for_dead": 0.7986,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 6.98,
+        "dead-known": 31.44,
+        "visible-dead-first": 4.28,
+        "visible-dead-last": 31.44,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "conversation",
+      "split": 0.4,
+      "actions": "tier",
+      "n_visible": 83443,
+      "dead_visible_pct": 91.36,
+      "seen_once_precision_for_dead": 0.9391,
+      "seen_once_recall_for_dead": 0.7851,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 36.74,
+        "dead-known": 66.38,
+        "visible-dead-first": 11.3,
+        "visible-dead-last": 66.38,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "conversation",
+      "split": 0.4,
+      "actions": "all",
+      "n_visible": 83443,
+      "dead_visible_pct": 91.36,
+      "seen_once_precision_for_dead": 0.9391,
+      "seen_once_recall_for_dead": 0.7851,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 16.88,
+        "dead-known": 40.93,
+        "visible-dead-first": 8.25,
+        "visible-dead-last": 40.93,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "conversation",
+      "split": 0.5,
+      "actions": "tier",
+      "n_visible": 100131,
+      "dead_visible_pct": 92.76,
+      "seen_once_precision_for_dead": 0.9487,
+      "seen_once_recall_for_dead": 0.7836,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 39.18,
+        "dead-known": 77.84,
+        "visible-dead-first": 20.36,
+        "visible-dead-last": 77.84,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "conversation",
+      "split": 0.5,
+      "actions": "all",
+      "n_visible": 100131,
+      "dead_visible_pct": 92.76,
+      "seen_once_precision_for_dead": 0.9487,
+      "seen_once_recall_for_dead": 0.7836,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 17.88,
+        "dead-known": 50.82,
+        "visible-dead-first": 15.61,
+        "visible-dead-last": 50.82,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "conversation",
+      "split": 0.6,
+      "actions": "tier",
+      "n_visible": 117274,
+      "dead_visible_pct": 93.73,
+      "seen_once_precision_for_dead": 0.9581,
+      "seen_once_recall_for_dead": 0.785,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 44.08,
+        "dead-known": 82.1,
+        "visible-dead-first": 22.21,
+        "visible-dead-last": 82.1,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "conversation",
+      "split": 0.6,
+      "actions": "all",
+      "n_visible": 117274,
+      "dead_visible_pct": 93.73,
+      "seen_once_precision_for_dead": 0.9581,
+      "seen_once_recall_for_dead": 0.785,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 22.94,
+        "dead-known": 55.6,
+        "visible-dead-first": 19.12,
+        "visible-dead-last": 55.6,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "conversation",
+      "split": 0.7,
+      "actions": "tier",
+      "n_visible": 133497,
+      "dead_visible_pct": 94.64,
+      "seen_once_precision_for_dead": 0.9642,
+      "seen_once_recall_for_dead": 0.7828,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 47.23,
+        "dead-known": 85.09,
+        "visible-dead-first": 26.28,
+        "visible-dead-last": 85.09,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "conversation",
+      "split": 0.7,
+      "actions": "all",
+      "n_visible": 133497,
+      "dead_visible_pct": 94.64,
+      "seen_once_precision_for_dead": 0.9642,
+      "seen_once_recall_for_dead": 0.7828,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 26.43,
+        "dead-known": 60.52,
+        "visible-dead-first": 25.01,
+        "visible-dead-last": 60.52,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "toolagent",
+      "split": 0.3,
+      "actions": "tier",
+      "n_visible": 64032,
+      "dead_visible_pct": 91.83,
+      "seen_once_precision_for_dead": 0.95,
+      "seen_once_recall_for_dead": 0.8095,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 28.15,
+        "dead-known": 52.33,
+        "visible-dead-first": 4.78,
+        "visible-dead-last": 52.33,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "toolagent",
+      "split": 0.3,
+      "actions": "all",
+      "n_visible": 64032,
+      "dead_visible_pct": 91.83,
+      "seen_once_precision_for_dead": 0.95,
+      "seen_once_recall_for_dead": 0.8095,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 10.54,
+        "dead-known": 30.39,
+        "visible-dead-first": 3.42,
+        "visible-dead-last": 30.39,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "toolagent",
+      "split": 0.4,
+      "actions": "tier",
+      "n_visible": 81401,
+      "dead_visible_pct": 93.72,
+      "seen_once_precision_for_dead": 0.9621,
+      "seen_once_recall_for_dead": 0.8019,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 38.38,
+        "dead-known": 63.71,
+        "visible-dead-first": 7.93,
+        "visible-dead-last": 63.71,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "toolagent",
+      "split": 0.4,
+      "actions": "all",
+      "n_visible": 81401,
+      "dead_visible_pct": 93.72,
+      "seen_once_precision_for_dead": 0.9621,
+      "seen_once_recall_for_dead": 0.8019,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 19.26,
+        "dead-known": 39.18,
+        "visible-dead-first": 6.17,
+        "visible-dead-last": 39.18,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "toolagent",
+      "split": 0.5,
+      "actions": "tier",
+      "n_visible": 98835,
+      "dead_visible_pct": 95.04,
+      "seen_once_precision_for_dead": 0.9722,
+      "seen_once_recall_for_dead": 0.8011,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 43.29,
+        "dead-known": 76.24,
+        "visible-dead-first": 15.28,
+        "visible-dead-last": 76.24,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "toolagent",
+      "split": 0.5,
+      "actions": "all",
+      "n_visible": 98835,
+      "dead_visible_pct": 95.04,
+      "seen_once_precision_for_dead": 0.9722,
+      "seen_once_recall_for_dead": 0.8011,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 23.15,
+        "dead-known": 49.39,
+        "visible-dead-first": 12.39,
+        "visible-dead-last": 49.39,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "toolagent",
+      "split": 0.6,
+      "actions": "tier",
+      "n_visible": 115932,
+      "dead_visible_pct": 95.39,
+      "seen_once_precision_for_dead": 0.9767,
+      "seen_once_recall_for_dead": 0.8036,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 47.06,
+        "dead-known": 79.64,
+        "visible-dead-first": 18.14,
+        "visible-dead-last": 79.64,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "toolagent",
+      "split": 0.6,
+      "actions": "all",
+      "n_visible": 115932,
+      "dead_visible_pct": 95.39,
+      "seen_once_precision_for_dead": 0.9767,
+      "seen_once_recall_for_dead": 0.8036,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 27.21,
+        "dead-known": 53.83,
+        "visible-dead-first": 16.66,
+        "visible-dead-last": 53.83,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "toolagent",
+      "split": 0.7,
+      "actions": "tier",
+      "n_visible": 132916,
+      "dead_visible_pct": 96.04,
+      "seen_once_precision_for_dead": 0.9784,
+      "seen_once_recall_for_dead": 0.8034,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 52.3,
+        "dead-known": 85.02,
+        "visible-dead-first": 22.17,
+        "visible-dead-last": 85.02,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "toolagent",
+      "split": 0.7,
+      "actions": "all",
+      "n_visible": 132916,
+      "dead_visible_pct": 96.04,
+      "seen_once_precision_for_dead": 0.9784,
+      "seen_once_recall_for_dead": 0.8034,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 31.67,
+        "dead-known": 59.71,
+        "visible-dead-first": 22.6,
+        "visible-dead-last": 59.71,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "synthetic",
+      "split": 0.3,
+      "actions": "tier",
+      "n_visible": 23038,
+      "dead_visible_pct": 57.14,
+      "seen_once_precision_for_dead": 0.6585,
+      "seen_once_recall_for_dead": 0.9344,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 7.53,
+        "dead-known": 47.39,
+        "visible-dead-first": 34.53,
+        "visible-dead-last": 59.51,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "synthetic",
+      "split": 0.3,
+      "actions": "all",
+      "n_visible": 23038,
+      "dead_visible_pct": 57.14,
+      "seen_once_precision_for_dead": 0.6585,
+      "seen_once_recall_for_dead": 0.9344,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": -28.18,
+        "dead-known": 30.17,
+        "visible-dead-first": 22.12,
+        "visible-dead-last": 37.76,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "synthetic",
+      "split": 0.4,
+      "actions": "tier",
+      "n_visible": 28137,
+      "dead_visible_pct": 60.69,
+      "seen_once_precision_for_dead": 0.7317,
+      "seen_once_recall_for_dead": 0.9013,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 14.48,
+        "dead-known": 60.16,
+        "visible-dead-first": 51.87,
+        "visible-dead-last": 74.77,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "synthetic",
+      "split": 0.4,
+      "actions": "all",
+      "n_visible": 28137,
+      "dead_visible_pct": 60.69,
+      "seen_once_precision_for_dead": 0.7317,
+      "seen_once_recall_for_dead": 0.9013,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": -25.14,
+        "dead-known": 42.4,
+        "visible-dead-first": 36.7,
+        "visible-dead-last": 52.45,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "synthetic",
+      "split": 0.5,
+      "actions": "tier",
+      "n_visible": 33131,
+      "dead_visible_pct": 64.41,
+      "seen_once_precision_for_dead": 0.7919,
+      "seen_once_recall_for_dead": 0.8642,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 15.4,
+        "dead-known": 67.04,
+        "visible-dead-first": 60.19,
+        "visible-dead-last": 84.12,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "synthetic",
+      "split": 0.5,
+      "actions": "all",
+      "n_visible": 33131,
+      "dead_visible_pct": 64.41,
+      "seen_once_precision_for_dead": 0.7919,
+      "seen_once_recall_for_dead": 0.8642,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": -23.8,
+        "dead-known": 50.34,
+        "visible-dead-first": 45.38,
+        "visible-dead-last": 62.7,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "synthetic",
+      "split": 0.6,
+      "actions": "tier",
+      "n_visible": 37519,
+      "dead_visible_pct": 67.03,
+      "seen_once_precision_for_dead": 0.8518,
+      "seen_once_recall_for_dead": 0.8397,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 14.28,
+        "dead-known": 70.08,
+        "visible-dead-first": 75.44,
+        "visible-dead-last": 94.67,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "synthetic",
+      "split": 0.6,
+      "actions": "all",
+      "n_visible": 37519,
+      "dead_visible_pct": 67.03,
+      "seen_once_precision_for_dead": 0.8518,
+      "seen_once_recall_for_dead": 0.8397,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": -22.13,
+        "dead-known": 58.68,
+        "visible-dead-first": 62.9,
+        "visible-dead-last": 78.04,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "synthetic",
+      "split": 0.7,
+      "actions": "tier",
+      "n_visible": 40405,
+      "dead_visible_pct": 72.37,
+      "seen_once_precision_for_dead": 0.9138,
+      "seen_once_recall_for_dead": 0.7901,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 13.58,
+        "dead-known": 68.58,
+        "visible-dead-first": 80.62,
+        "visible-dead-last": 98.09,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "synthetic",
+      "split": 0.7,
+      "actions": "all",
+      "n_visible": 40405,
+      "dead_visible_pct": 72.37,
+      "seen_once_precision_for_dead": 0.9138,
+      "seen_once_recall_for_dead": 0.7901,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": -15.23,
+        "dead-known": 60.94,
+        "visible-dead-first": 70.57,
+        "visible-dead-last": 84.55,
+        "oracle": 100.0
+      }
+    }
+  ]
+}

@@ -49,28 +49,21 @@ Block: What Split-Instant Evaluation Hides in KV-Cache Placement [Experiment, An
 \email{suanlee@semyung.ac.kr}
 
 \begin{abstract}
-A natural way to evaluate how a memory system for LLM agents should place KV-cache blocks across
-storage tiers, and the one we used for three revisions of this work, is at a split instant: observe a
-prefix, place the blocks that exist, and bill the result against a hindsight oracle. On two production
-Mooncake traces this protocol measures little. Of the oracle's advantage, 84.4\% and 87.6\% sits on
-blocks that do not yet exist at the split, so the best possible split-time policy reaches 15.6\% and
-12.4\% of it; the share stays at 75--97\% for every split from 0.3 to 0.7 and under tenfold changes to
-the latency and token weights, though on short traces much more is reachable. Inside that protocol a
-better ranker helps monotonically, but only over that sliver. In a static analysis, deciding at each
-block's arrival puts more within reach, but how much turns on a decision a split-time evaluation never
-meets: where a block never seen ranks against blocks seen once. The prefix says above them (a new
-block's expected reuse is 0.52 against 0.30), and ranking it there captures 2.3--4.9 times what a
-clairvoyant split-time policy can; ranking it behind them can leave arrival-time placement at that
-ceiling. Billed on the same metric, plain recency does better: a multi-tier LRU, which ranks every
-accessed block first, captures 84.5\% and 87.7\% when moving blocks is free, and once a move costs one
-read and one write none of the policies we replay that move blocks beats the static frequency heuristic. What split-instant
-evaluation hides is recency and the price of migration, not a better predictor. Reactive tiering is consistent with this: LRU, LFU and a fill-once cache
-reach 75--99\% (toolagent) and 40--94\% (conversation) of Belady's hit rate, the best adaptive policy (ARC, LeCaR, CACHEUS) beats
-the best of those rules, each chosen per operating point, by at most 4.6 points, and a learned
-replacement policy (LRB) stays below ARC, because 76--78\% of blocks are never reused. We give a one-line
-diagnostic for the protocol failure, release an artifact that regenerates every number on CPU, and
-catalogue the measurement defects we made and caught, including leaks in our own arrival-time experiment
-that survived every number check.
+KV-cache placement across GPU, host, remote and storage tiers is evaluated by replaying traces, and the
+choices such an evaluation fixes silently decide what it reports. On two production Mooncake traces,
+92.8\% and 95.0\% of the blocks seen before the evaluation split are never read again; with the blocks not
+yet created, they give a placement policy no evidence of future use, and how an evaluation orders them is
+a tie rule. Under the rule earlier versions of this paper used, a clairvoyant split-time reference reaches
+20.4\% and 15.3\% of a hindsight oracle's advantage, suggesting most of it is out of a split-time policy's
+reach; with the dead blocks parked behind new ones the same reference reaches 77.8\% and 76.2\%. Knowing
+which seen blocks are dead is worth as much as knowing their whole future, and a parameter-free rule that
+parks blocks seen once behind new ones recovers 39.2\% and 43.3\% (47.0\% and 51.7\% with an estimated
+prior, which three of four Alibaba serving traces support). Online, a multi-tier LRU captures 84.5\% and
+87.7\% when moving a block is free, but at the move prices we measured on an A100 host, 0.75--1.87 times one
+read plus one write, and under five ways of billing a move, none of the replayed policies that move blocks
+beats a static frequency heuristic. Reactive replacement, S3-FIFO, SIEVE and W-TinyLFU included, stays
+within a few points of plain rules. An artifact regenerates every number on CPU, and we catalogue the
+twenty-eight defects, four of them retracted claims, that produced plausible numbers on the way.
 \end{abstract}
 
 \maketitle
@@ -81,12 +74,16 @@ that survived every number check.
 %%% VLDB block end %%%
 
 \input{sections/01_introduction}
-\input{sections/02_motivation}
-\input{sections/03_formulation}
-\input{sections/04_architecture}
-\input{sections/05_evidence}
-\input{sections/06_openproblems}
-\input{sections/07_related}
+\input{sections/02_background}
+\input{sections/03_definitions}
+\input{sections/04_workloads}
+\input{sections/05a_evidence}
+\input{sections/05b_online}
+\input{sections/05d_ranking}
+\input{sections/05c_reaction}
+\input{sections/05e_sampling}
+\input{sections/06_lessons}
+\input{sections/07_limits}
 \input{sections/08_conclusion}
 
 % Counts toward PVLDB's 12 pages (only references are excluded). Written to be checkable: every
@@ -97,7 +94,7 @@ used through the Claude Code agentic environment) was used extensively throughou
 most of the code in the released artifact, designed and ran most of the experiments and analyses,
 drafted and revised most of the text, and generated the figures from the stored results; its contributions are recorded commit by commit in
 the artifact's history. The ``adversarial review'', the audit and the re-verification passes referred to in
-\Cref{sec:protocol} were internal exercises in which AI agents were prompted to act as reviewers; none
+\Cref{sec:lessons} were internal exercises in which AI agents were prompted to act as reviewers; none
 was peer review, and one
 figure the review produced (a third LRB repair) is neither reproduced nor relied on here. Every result in this paper is
 re-derived from the released artifact by a checker shipped with it; a few historical figures (what an

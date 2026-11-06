@@ -1,0 +1,149 @@
+{
+  "config": {
+    "splits": [
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7
+    ],
+    "reuse": "billable post-split accesses (creations excluded)"
+  },
+  "rows": [
+    {
+      "trace": "conversation",
+      "split": 0.3,
+      "n_visible": 65611,
+      "n_live_visible": 7353,
+      "dead_visible_pct": 88.79,
+      "reuse_on_new_pct": 62.65,
+      "reuse_on_live_visible_pct": 37.35
+    },
+    {
+      "trace": "conversation",
+      "split": 0.4,
+      "n_visible": 83443,
+      "n_live_visible": 7206,
+      "dead_visible_pct": 91.36,
+      "reuse_on_new_pct": 58.98,
+      "reuse_on_live_visible_pct": 41.02
+    },
+    {
+      "trace": "conversation",
+      "split": 0.5,
+      "n_visible": 100131,
+      "n_live_visible": 7248,
+      "dead_visible_pct": 92.76,
+      "reuse_on_new_pct": 54.32,
+      "reuse_on_live_visible_pct": 45.68
+    },
+    {
+      "trace": "conversation",
+      "split": 0.6,
+      "n_visible": 117274,
+      "n_live_visible": 7358,
+      "dead_visible_pct": 93.73,
+      "reuse_on_new_pct": 50.29,
+      "reuse_on_live_visible_pct": 49.71
+    },
+    {
+      "trace": "conversation",
+      "split": 0.7,
+      "n_visible": 133497,
+      "n_live_visible": 7156,
+      "dead_visible_pct": 94.64,
+      "reuse_on_new_pct": 46.74,
+      "reuse_on_live_visible_pct": 53.26
+    },
+    {
+      "trace": "toolagent",
+      "split": 0.3,
+      "n_visible": 64032,
+      "n_live_visible": 5230,
+      "dead_visible_pct": 91.83,
+      "reuse_on_new_pct": 28.26,
+      "reuse_on_live_visible_pct": 71.74
+    },
+    {
+      "trace": "toolagent",
+      "split": 0.4,
+      "n_visible": 81401,
+      "n_live_visible": 5114,
+      "dead_visible_pct": 93.72,
+      "reuse_on_new_pct": 26.89,
+      "reuse_on_live_visible_pct": 73.11
+    },
+    {
+      "trace": "toolagent",
+      "split": 0.5,
+      "n_visible": 98835,
+      "n_live_visible": 4901,
+      "dead_visible_pct": 95.04,
+      "reuse_on_new_pct": 25.45,
+      "reuse_on_live_visible_pct": 74.55
+    },
+    {
+      "trace": "toolagent",
+      "split": 0.6,
+      "n_visible": 115932,
+      "n_live_visible": 5348,
+      "dead_visible_pct": 95.39,
+      "reuse_on_new_pct": 23.24,
+      "reuse_on_live_visible_pct": 76.76
+    },
+    {
+      "trace": "toolagent",
+      "split": 0.7,
+      "n_visible": 132916,
+      "n_live_visible": 5269,
+      "dead_visible_pct": 96.04,
+      "reuse_on_new_pct": 22.1,
+      "reuse_on_live_visible_pct": 77.9
+    },
+    {
+      "trace": "synthetic",
+      "split": 0.3,
+      "n_visible": 23038,
+      "n_live_visible": 9874,
+      "dead_visible_pct": 57.14,
+      "reuse_on_new_pct": 43.65,
+      "reuse_on_live_visible_pct": 56.35
+    },
+    {
+      "trace": "synthetic",
+      "split": 0.4,
+      "n_visible": 28137,
+      "n_live_visible": 11062,
+      "dead_visible_pct": 60.69,
+      "reuse_on_new_pct": 32.51,
+      "reuse_on_live_visible_pct": 67.49
+    },
+    {
+      "trace": "synthetic",
+      "split": 0.5,
+      "n_visible": 33131,
+      "n_live_visible": 11791,
+      "dead_visible_pct": 64.41,
+      "reuse_on_new_pct": 24.03,
+      "reuse_on_live_visible_pct": 75.97
+    },
+    {
+      "trace": "synthetic",
+      "split": 0.6,
+      "n_visible": 37519,
+      "n_live_visible": 12369,
+      "dead_visible_pct": 67.03,
+      "reuse_on_new_pct": 12.12,
+      "reuse_on_live_visible_pct": 87.88
+    },
+    {
+      "trace": "synthetic",
+      "split": 0.7,
+      "n_visible": 40405,
+      "n_live_visible": 11163,
+      "dead_visible_pct": 72.37,
+      "reuse_on_new_pct": 7.9,
+      "reuse_on_live_visible_pct": 92.1
+    }
+  ]
+}
