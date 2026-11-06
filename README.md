@@ -42,7 +42,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-lock.txt      # exact versions the paper's numbers came from, FIRST
 pip install -e . --no-deps                # then the package itself, without re-resolving them
 
-pytest -q                                  # 313 tests, ~3 min
+pytest -q                                  # 318 tests, ~3 min
 python3 scripts/check_paper_numbers.py     # every paper number vs its artifact
 ```
 
@@ -65,7 +65,7 @@ claim to a command and an artifact.
 | `paper/` | LaTeX source (official PVLDB template; the ICDE version is `main_icde.tex`, an earlier PVLDB version `main_pvldb.tex`) |
 | `docs/CONVENTIONS.md` | architecture, commands, and the conventions the codebase holds itself to |
 | `docs/claims_dependency.md` | the lab notebook: every claim, what it depends on, and what was retracted |
-| `tests/` | 313 tests, most of which pin a specific defect we hit |
+| `tests/` | 318 tests, most of which pin a specific defect we hit |
 
 ## What is hand-rolled, and why it matters
 

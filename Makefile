@@ -19,7 +19,7 @@ SHELL := /bin/bash
 .PHONY: reproduce-external help verify reproduce-fast reproduce-full reproduce-llm figures paper clean data-check
 
 help:
-	@echo "make verify          — 313 tests + every paper number against its artifact (no data needed)"
+	@echo "make verify          — 318 tests + every paper number against its artifact (no data needed)"
 	@echo "make data-check      — are the traces present and the right length?"
 	@echo "make reproduce-fast  — regenerate the central claims from the Mooncake traces (~40 min)"
 	@echo "make reproduce-full  — the above plus the LRB hyperparameter sweep (~6 h)"

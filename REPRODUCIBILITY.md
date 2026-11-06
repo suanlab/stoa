@@ -22,7 +22,7 @@ simulator or a trace, never against an LLM.
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements-lock.txt   # every package pinned, transitive ones included
 pip install -e . --no-deps             # the package itself, without re-resolving the pins
-pytest -q                    # 313 tests, ~3 min; torch-gated tests skip cleanly without torch
+pytest -q                    # 318 tests, ~3 min; torch-gated tests skip cleanly without torch
 
 # Or, without the lock (looser, not the reference versions):
 #   pip install -e ".[dev,rl,eval,figures]"
@@ -236,7 +236,7 @@ not just in prose:
 | Retracted values must not appear outside a retracting paragraph | `stoa.verify.unmarked_superseded(scope="paragraph")` — the 68 numeric checks are *presence* tests; with 90% and 53% injected into the abstract every one still passed (§AH) |
 | **Every guard above is itself tested**, in both directions | `tests/test_verify.py`, 73 tests, mutation-checked — four guards had lived in a script with no tests, where a refactor could delete one silently (§AG) |
 
-`pytest -q` runs all **313** tests, including the leakage guards and the fast/reference equivalence
+`pytest -q` runs all **318** tests, including the leakage guards and the fast/reference equivalence
 check, in about 2 min 45 s.
 
 ## 7. Known limitations
@@ -260,7 +260,7 @@ The claim table above is complete but not ordered by cost. These four commands a
 cheapest first. The first needs no data, no network and no credentials.
 
 ```bash
-make verify           # ~4 min   313 tests + every paper number against its artifact
+make verify           # ~4 min   318 tests + every paper number against its artifact
 make data-check       # instant  are the traces present and the right length?
 make reproduce-fast   # ~40 min  the central claims, regenerated from the Mooncake traces
 make reproduce-full   # ~6 h     the above plus the LRB hyperparameter sweep
