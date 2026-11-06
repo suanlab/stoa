@@ -74,6 +74,11 @@ reproduce-fast: data-check
 	$(PY) scripts/run_migration_ledger.py
 	$(PY) scripts/run_equal_horizon.py
 	$(PY) scripts/run_reachable_by_length.py
+	# Blocks without evidence (V-A-C; notebook AZ-BD): the cheap pieces. The ladder itself (~1.5 h)
+	# and the tie-rule check with its exhaustive toy search (~15 min) are in reproduce-full.
+	$(PY) scripts/run_reuse_split.py
+	$(PY) scripts/run_prefix_validity.py
+	$(PY) scripts/run_modern_baselines.py
 	# Figures are byte-deterministic, so regenerating them from reproduced artifacts leaves the
 	# committed PDF build manifest valid; without this step the figure guard reports them stale.
 	$(PY) scripts/make_figures.py
@@ -81,6 +86,8 @@ reproduce-fast: data-check
 
 # --- tier 2: everything that does not cost money -------------------------------------------
 reproduce-full: reproduce-fast
+	$(PY) scripts/run_evidence_ladder.py
+	$(PY) scripts/run_ceiling_ties.py
 	$(PY) scripts/run_reactive_real.py --lrb
 	$(PY) scripts/run_lrb_retraction.py
 	$(PY) scripts/run_lrb_sweep.py
@@ -101,6 +108,7 @@ reproduce-full: reproduce-fast
 reproduce-external:
 	$(PY) scripts/run_bailian.py --birthx
 	$(PY) scripts/run_bailian_hazard.py
+	$(PY) scripts/run_evidence_ladder.py --bailian
 	$(PY) scripts/check_paper_numbers.py
 
 # --- tier 3: the two claims that need a paid third-party API --------------------------------
