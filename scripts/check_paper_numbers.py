@@ -406,6 +406,72 @@ if _elb:
     _th = [r for r in _b if r["trace"] == "thinking"][0]
     assert _th["captured_pct"]["seen-once-last"] > 1.0, "the paper says the seen-once rule gains on thinking"
 
+# Why: departure from stationarity (H1), censoring (H6), age rules (H2) (V-B; notebook BF)
+_ir, _irb, _hz6, _ar2 = (load("irm_departure.json"), load("irm_departure_bailian.json"), load("eval_window.json"),
+                         load("age_rules.json"))
+if _ir and _irb and _hz6 and _ar2:
+    print("\nwhy (irm_departure*, horizon, age_rules)")
+    _R = {t: {r["k"]: r["rho"] for r in v["as_recorded"]["by_k"]} for t, v in _ir["traces"].items()}
+    _S = {t: {r["k"]: r["rho"] for r in v["shuffled_control"]["by_k"]} for t, v in _ir["traces"].items()}
+    claim("shuffled control rho_1", f"{_S['conversation'][1]:.2f} and {_S['toolagent'][1]:.2f} for blocks seen once",
+          "", "irm_departure")
+    for _t in PROD:
+        _g = _ir["traces"][_t]["shuffled_control"]
+        assert abs(_g["good_turing_missing_mass"] - _g["post_split_access_share_new"]) < 0.002, _t
+    _r14 = [_R[t][k] for t in PROD for k in (1, 2, 3, 4)]
+    claim("rho k=1..4 production", f"reused\n{min(_r14):.2f}--{max(_r14):.2f} times as often", "", "irm_departure")
+    claim("overprediction factor, intro", f"overpredict a seen block's reuse {1/max(_r14):.1f} to {1/min(_r14):.1f} times",
+          "", "irm_departure")
+    claim("rho k=5 production", f"({_R['conversation'][5]:.2f} and {_R['toolagent'][5]:.2f} for blocks seen five times)",
+          "", "irm_departure")
+    _ar = {t: _ir["traces"][t]["as_recorded"] for t in PROD}
+    claim("new-block share vs missing mass", f"blocks receive {100*_ar['conversation']['post_split_access_share_new']:.1f}\\% and "
+          f"{100*_ar['toolagent']['post_split_access_share_new']:.1f}\\% of the accesses after the split where the missing mass "
+          f"predicts {100*_ar['conversation']['good_turing_missing_mass']:.1f}\\% and\n"
+          f"{100*_ar['toolagent']['good_turing_missing_mass']:.1f}\\%", "", "irm_departure")
+    _b1 = {t: [r["rho"] for r in v["as_recorded"]["by_k"] if r["k"] == 1][0] for t, v in _irb["traces"].items()}
+    assert sum(1 for v in _b1.values() if v >= 0.8) < 2, "pre-registered H1 rejection on Alibaba"
+    _three = sorted(v for t, v in _b1.items() if t != "traceB")
+    claim("Alibaba rho_1", f"({_three[0]:.2f}--{_three[-1]:.2f} for blocks seen once); the fourth,\ntraceB, is nearly "
+          f"stationary ({_b1['traceB']:.2f})", "", "irm_departure_bailian")
+    claim("synthetic rho_1", f"departs the other way ({_R['synthetic'][1]:.2f})", "", "irm_departure")
+    _H = {(r["trace"], r["horizon_min"]): r for r in _hz6["rows"]}
+    _end = {t: max((r for r in _hz6["rows"] if r["trace"] == t), key=lambda r: r["horizon_min"]) for t in PROD}
+    claim("H6 dead share", f"moves the dead share from {_end['conversation']['dead_visible_pct']:.1f}\\% to\n"
+          f"{_H[('conversation', 7.5)]['dead_visible_pct']:.1f}\\% on conversation and from "
+          f"{_end['toolagent']['dead_visible_pct']:.1f}\\% to {_H[('toolagent', 7.5)]['dead_visible_pct']:.1f}\\% on toolagent, "
+          f"by {_H[('conversation', 15.0)]['dead_visible_pct'] - _end['conversation']['dead_visible_pct']:.1f} and "
+          f"{_H[('toolagent', 15.0)]['dead_visible_pct'] - _end['toolagent']['dead_visible_pct']:.1f} points", "", "eval_window")
+    assert all(_H[(t, 15.0)]["dead_visible_pct"] - _end[t]["dead_visible_pct"] < 3 for t in PROD), "H6 registered"
+    claim("H6 reference vs window", f"falls\nfrom {_H[('conversation', 7.5)]['captured_pct']['visible-dead-last']:.1f}\\% to "
+          f"{_end['conversation']['captured_pct']['visible-dead-last']:.1f}\\% on conversation", "", "eval_window")
+    _gp = [r["captured_pct"]["visible-dead-last"] - r["captured_pct"]["visible-dead-first"] for r in _hz6["rows"] if r["trace"] in PROD]
+    claim("H6 tie gap", f"by {min(_gp):.0f}--{max(_gp):.0f} points at every length", "", "eval_window")
+    _A = {r["trace"]: r for r in _ar2["rows"]}
+    claim("H2 precision", f"dead {100*_A['conversation']['precision_for_dead']['old-low-count-last']:.1f}\\% and "
+          f"{100*_A['toolagent']['precision_for_dead']['old-low-count-last']:.1f}\\% of the time", "", "age_rules")
+    assert all(0.45 < _A[t]["recall_for_dead"]["old-low-count-last"] < 0.55 for t in PROD), "the paper says half"
+    claim("H2 primary", f"captures {_A['conversation']['captured_pct']['old-low-count-last']:.1f}\\% and\n"
+          f"{_A['toolagent']['captured_pct']['old-low-count-last']:.1f}\\%, less than the seen-once rule", "", "age_rules")
+    assert all(_A[t]["captured_pct"]["old-low-count-last"] < _A[t]["captured_pct"]["seen-once-last"] for t in PROD)
+    claim("H2 exploratory old75", f"captures {_A['conversation']['captured_pct']['old75-last']:.1f}\\% and "
+          f"{_A['toolagent']['captured_pct']['old75-last']:.1f}\\%", "", "age_rules")
+    _ab = load("age_rules_bailian.json")
+    if _ab:
+        _B = {r["trace"]: r["captured_pct"] for r in _ab["rows"]}
+        assert all(v["old-low-count-last"] < v["seen-once-last"] for v in _B.values()), "registered rule vs seen-once, Alibaba"
+        assert sum(v["old75-last"] > v["seen-once-last"] for v in _B.values()) == 2, "old75 beats seen-once on two"
+        claim("old75 on traceB", f"loses {-_B['traceB']['old75-last']:.1f}\\% on traceB", "", "age_rules_bailian")
+        _every = [r["captured_pct"] for r in _ar2["rows"]] + list(_B.values())
+        _rules = ("seen-once-last", "old-low-count-last", "old-last", "old-seen-once-last")
+        assert all(v[r_] > 0 for v in _every for r_ in _rules), "every rule but old75 gains on every trace"
+        assert min(v["old75-last"] for v in _every) < 0, "old75 loses on some trace"
+        assert not any(all(v[r_] > v["seen-once-last"] for v in _every)
+                       for r_ in ("old-low-count-last", "old-last", "old75-last", "old-seen-once-last")), \
+            "a rule beats the seen-once rule on every trace"
+    assert min(min(v for v in _A[t]["precision_for_dead"].values()) for t in PROD) >= 0.945, \
+        "the paper says every rule's precision is 0.95 or more to two decimals"
+
 # Prefix validity of independent-block billing (III; notebook BD)
 _pv = load("prefix_validity.json")
 if _pv:
@@ -981,7 +1047,8 @@ REQUIRED = ("reactive_real_full_lrb.json", "headroom_by_length.json", "lrb_retra
             "reactive_cost.json", "measured_migration.json", "migration_ledger.json",
             "evidence_ladder.json", "reuse_split.json", "ceiling_ties.json", "modern_baselines.json",
             "evidence_ladder_bailian.json", "prefix_validity.json", "serving_tiers_a100.json",
-            "measured_table.json")
+            "measured_table.json", "irm_departure.json", "irm_departure_bailian.json", "eval_window.json",
+            "age_rules.json", "age_rules_bailian.json")
 missing = [n for n in REQUIRED if not (EXP / n).exists()]
 if missing:
     failures.append("artifacts absent, so their claims went unchecked: " + ", ".join(missing))

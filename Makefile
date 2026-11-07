@@ -81,6 +81,9 @@ reproduce-fast: data-check
 	$(PY) scripts/run_modern_baselines.py
 	$(PY) scripts/run_serving_tiers.py        # summary from the committed raw serving runs; no GPU needed
 	$(PY) scripts/run_measured_table.py
+	$(PY) scripts/run_irm_departure.py
+	$(PY) scripts/run_age_rules.py
+	$(PY) scripts/run_horizon.py
 	# Figures are byte-deterministic, so regenerating them from reproduced artifacts leaves the
 	# committed PDF build manifest valid; without this step the figure guard reports them stale.
 	$(PY) scripts/make_figures.py
@@ -111,6 +114,8 @@ reproduce-external:
 	$(PY) scripts/run_bailian.py --birthx
 	$(PY) scripts/run_bailian_hazard.py
 	$(PY) scripts/run_evidence_ladder.py --bailian
+	$(PY) scripts/run_irm_departure.py --bailian
+	$(PY) scripts/run_age_rules.py --bailian
 	$(PY) scripts/check_paper_numbers.py
 
 # --- tier 3: the two claims that need a paid third-party API --------------------------------

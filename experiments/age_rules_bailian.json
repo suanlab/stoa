@@ -1,0 +1,158 @@
+{
+  "config": {
+    "split": 0.5,
+    "actions": "tier only",
+    "primary": "old-low-count-last",
+    "registered": "confirmed if primary - seen-once >= 10 on both production traces; rejected if < 3 or worse on >= 2 of 4 Alibaba"
+  },
+  "rows": [
+    {
+      "trace": "traceA",
+      "split": 0.5,
+      "median_age_steps": 9094,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "oracle": 100.0,
+        "seen-once-last": 29.9,
+        "old-low-count-last": 24.82,
+        "old-last": 32.72,
+        "old75-last": 53.15,
+        "old-seen-once-last": 14.32,
+        "dead-known": 74.35
+      },
+      "precision_for_dead": {
+        "seen-once-last": 0.9036,
+        "old-low-count-last": 0.9892,
+        "old-last": 0.9887,
+        "old75-last": 0.9755,
+        "old-seen-once-last": 0.9893
+      },
+      "recall_for_dead": {
+        "seen-once-last": 0.5828,
+        "old-low-count-last": 0.4553,
+        "old-last": 0.5509,
+        "old75-last": 0.8155,
+        "old-seen-once-last": 0.3292
+      },
+      "n_parked": {
+        "seen-once-last": 752168,
+        "old-low-count-last": 536784,
+        "old-last": 649839,
+        "old75-last": 974901,
+        "old-seen-once-last": 388028,
+        "dead-known": 1166184
+      }
+    },
+    {
+      "trace": "traceB",
+      "split": 0.5,
+      "median_age_steps": 41404,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "oracle": 100.0,
+        "seen-once-last": 34.19,
+        "old-low-count-last": 10.27,
+        "old-last": 0.89,
+        "old75-last": -19.1,
+        "old-seen-once-last": 16.76,
+        "dead-known": 76.46
+      },
+      "precision_for_dead": {
+        "seen-once-last": 0.9766,
+        "old-low-count-last": 0.9753,
+        "old-last": 0.9718,
+        "old75-last": 0.9618,
+        "old-seen-once-last": 0.9798
+      },
+      "recall_for_dead": {
+        "seen-once-last": 0.97,
+        "old-low-count-last": 0.5139,
+        "old-last": 0.5174,
+        "old75-last": 0.768,
+        "old-seen-once-last": 0.5047
+      },
+      "n_parked": {
+        "seen-once-last": 1800219,
+        "old-low-count-last": 955048,
+        "old-last": 964998,
+        "old75-last": 1447421,
+        "old-seen-once-last": 933555,
+        "dead-known": 1812506
+      }
+    },
+    {
+      "trace": "coder",
+      "split": 0.5,
+      "median_age_steps": 9713,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "oracle": 100.0,
+        "seen-once-last": 31.98,
+        "old-low-count-last": 21.61,
+        "old-last": 26.34,
+        "old75-last": 36.06,
+        "old-seen-once-last": 13.47,
+        "dead-known": 69.12
+      },
+      "precision_for_dead": {
+        "seen-once-last": 0.918,
+        "old-low-count-last": 0.9523,
+        "old-last": 0.9461,
+        "old75-last": 0.9278,
+        "old-seen-once-last": 0.958
+      },
+      "recall_for_dead": {
+        "seen-once-last": 0.6513,
+        "old-low-count-last": 0.4548,
+        "old-last": 0.5403,
+        "old75-last": 0.795,
+        "old-seen-once-last": 0.3721
+      },
+      "n_parked": {
+        "seen-once-last": 1696339,
+        "old-low-count-last": 1141838,
+        "old-last": 1365542,
+        "old75-last": 2048742,
+        "old-seen-once-last": 928773,
+        "dead-known": 2391157
+      }
+    },
+    {
+      "trace": "thinking",
+      "split": 0.5,
+      "median_age_steps": 2709,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "oracle": 100.0,
+        "seen-once-last": 25.83,
+        "old-low-count-last": 9.41,
+        "old-last": 13.47,
+        "old75-last": 24.07,
+        "old-seen-once-last": 8.01,
+        "dead-known": 53.68
+      },
+      "precision_for_dead": {
+        "seen-once-last": 0.9663,
+        "old-low-count-last": 0.9799,
+        "old-last": 0.981,
+        "old75-last": 0.9787,
+        "old-seen-once-last": 0.977
+      },
+      "recall_for_dead": {
+        "seen-once-last": 0.7815,
+        "old-low-count-last": 0.441,
+        "old-last": 0.5116,
+        "old75-last": 0.7652,
+        "old-seen-once-last": 0.3822
+      },
+      "n_parked": {
+        "seen-once-last": 489884,
+        "old-low-count-last": 272608,
+        "old-last": 315922,
+        "old75-last": 473551,
+        "old-seen-once-last": 236980,
+        "dead-known": 605742
+      }
+    }
+  ]
+}

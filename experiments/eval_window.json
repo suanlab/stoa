@@ -1,0 +1,165 @@
+{
+  "config": {
+    "split": 0.25,
+    "horizons_min": [
+      7.5,
+      15.0,
+      30.0,
+      45.0
+    ],
+    "actions": "tier only",
+    "registered": "censoring matters if dead share @15 min - @longest >= 10 points; it does not if < 3"
+  },
+  "rows": [
+    {
+      "trace": "conversation",
+      "horizon_min": 7.5,
+      "horizon_min_actual": 7.5,
+      "post_split_requests": 1485,
+      "dead_visible_pct": 90.22,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 27.88,
+        "dead-known": 89.74,
+        "visible-dead-first": 51.58,
+        "visible-dead-last": 89.74,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "conversation",
+      "horizon_min": 15.0,
+      "horizon_min_actual": 14.95,
+      "post_split_requests": 3032,
+      "dead_visible_pct": 89.23,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 31.76,
+        "dead-known": 84.06,
+        "visible-dead-first": 33.76,
+        "visible-dead-last": 84.06,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "conversation",
+      "horizon_min": 30.0,
+      "horizon_min_actual": 29.95,
+      "post_split_requests": 6252,
+      "dead_visible_pct": 88.3,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 25.89,
+        "dead-known": 61.43,
+        "visible-dead-first": 9.06,
+        "visible-dead-last": 61.43,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "conversation",
+      "horizon_min": 45.0,
+      "horizon_min_actual": 42.45,
+      "post_split_requests": 9023,
+      "dead_visible_pct": 87.47,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 20.49,
+        "dead-known": 47.48,
+        "visible-dead-first": 6.67,
+        "visible-dead-last": 47.48,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "toolagent",
+      "horizon_min": 7.5,
+      "horizon_min_actual": 7.45,
+      "post_split_requests": 2980,
+      "dead_visible_pct": 91.42,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 31.55,
+        "dead-known": 87.96,
+        "visible-dead-first": 49.72,
+        "visible-dead-last": 87.96,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "toolagent",
+      "horizon_min": 15.0,
+      "horizon_min_actual": 14.95,
+      "post_split_requests": 6047,
+      "dead_visible_pct": 90.69,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 35.1,
+        "dead-known": 81.97,
+        "visible-dead-first": 32.19,
+        "visible-dead-last": 81.97,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "toolagent",
+      "horizon_min": 30.0,
+      "horizon_min_actual": 29.95,
+      "post_split_requests": 12309,
+      "dead_visible_pct": 90.65,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 26.15,
+        "dead-known": 59.4,
+        "visible-dead-first": 7.98,
+        "visible-dead-last": 59.4,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "toolagent",
+      "horizon_min": 45.0,
+      "horizon_min_actual": 42.6,
+      "post_split_requests": 17706,
+      "dead_visible_pct": 90.53,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 21.63,
+        "dead-known": 45.47,
+        "visible-dead-first": 5.69,
+        "visible-dead-last": 45.47,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "synthetic",
+      "horizon_min": 7.5,
+      "horizon_min_actual": 7.49,
+      "post_split_requests": 1761,
+      "dead_visible_pct": 58.74,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": -8.5,
+        "dead-known": 53.66,
+        "visible-dead-first": 35.34,
+        "visible-dead-last": 64.95,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "synthetic",
+      "horizon_min": 15.0,
+      "horizon_min_actual": 12.49,
+      "post_split_requests": 2994,
+      "dead_visible_pct": 55.42,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 5.98,
+        "dead-known": 42.23,
+        "visible-dead-first": 21.07,
+        "visible-dead-last": 52.01,
+        "oracle": 100.0
+      }
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "pdf": "41a586ce1ce111ea31145ece30a0877cd14f054cb7b7c72f762d5728bfc7b677",
+  "pdf": "1cb98f065ac9692a30c8faba1dc9269efa0cd182567900ce8143a7d3a174e5fd",
   "sources": {
     "../docs/references.bib": "256c64b16b44a998e94c1ab5f587b7775a14c0b9dba6869a07803a013cec388b",
     "ACM-Reference-Format.bst": "0590db3b8d255a3af91982ab710f3ace5fcaa52434020c9af8a4f141b00b68f3",
@@ -17,9 +17,9 @@
     "figs/fig_sequential.pdf": "271b849d4e46ea2911eecba5ad5713610b959f5264e359ce5b66ed861397648c",
     "figs/fig_tier_ablation.pdf": "0f65332c927650cbf531f1d522dcdea453e8b70007d75341f61d29fcf0d18ae7",
     "figs/fig_ties.pdf": "40f98ae61b8c74b91bbd83f7e98a5e584cb98e48c1fb39aae6f86b8309ec642c",
-    "main.tex": "a65574a1b519cd651a83c5b2b456e923a675d0f00a5f9dafe6ac2835f34e6a95",
+    "main.tex": "ffa92f6e3624c2294b76597db2b3339e9a00c4611eaaf0a8f2b53bcbe8d1b267",
     "pvldb.sty": "52ad3948f3231b31d2ac90f470c1759e7f96add7b577ec4e267dfbdc87fc4eb2",
-    "sections/01_introduction.tex": "c100829eacf7e4ea914234766c76aba6200eb100bede1e1d8dba6bc6d1901bd5",
+    "sections/01_introduction.tex": "b5daffe1e030d4415478514cb9f57b5108c5abf8073ef290c07149c6d50ea514",
     "sections/02_background.tex": "a0f6d47d0a7b9645bd11e531b46248a252804fde09ab00fea39e96eca0ec58a2",
     "sections/03_definitions.tex": "82af35eaf6fac428ba1be58aa4fe53b0bdd54cf95181afcb7c402b91a7255e3c",
     "sections/04_workloads.tex": "7c60ecda39d88dd1c70cd213a010bf675eafd823d82396a9cebd99d56cca7e96",
@@ -29,6 +29,7 @@
     "sections/05d_ranking.tex": "11dd3e5fb9f4eb1fe88757695e1a8f809a15cc3baa74971875c62558e3749618",
     "sections/05e_sampling.tex": "1857a6e11dfee72fd0ab081588f02796c95413ebf84f5a0dcb5798730d7a004c",
     "sections/05f_serving.tex": "ca5c82038a5e5e7604b9ddf828c6ebed7b8a6f01bf8d3b108ada820e989fdb0c",
+    "sections/05g_why.tex": "0ba6f4e412f4d25b87ae50a8978d71be5a0722bd1ef5ef310da8d4d6a5a7787c",
     "sections/06_lessons.tex": "60f82a631c4e118982ac23e1e3e273f6c77d1216e179c8d49ee44702f3b0ea7e",
     "sections/07_limits.tex": "00ce450e27209f26778ae3676f2296759499dc7f702b085b11b8814bf74d0d09",
     "sections/08_conclusion.tex": "8e410d1ed701fe2d84c698d0cb5bfc8d21c59db91d55e5ce2c491f54df3c4191",

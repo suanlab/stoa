@@ -25,7 +25,10 @@ approximates it: a block seen once is dead with probability 0.95 and 0.97, and a
 blocks behind new ones, with no parameters, captures 39.2\% and 43.3\% of the advantage; an estimated prior
 for new blocks captures 47.0\% and 51.7\%, and on three of Alibaba's four serving traces it points the
 same way (\Cref{sec:arrival}). A better ranker of the seen blocks, by contrast, gains at most 8.2\% and
-7.4\% (\Cref{sec:capacity}).
+7.4\% (\Cref{sec:capacity}). The reason is that KV reuse is not stationary:
+estimators that assume a stationary reference process, exact on our traces once their requests are
+shuffled, overpredict a seen block's reuse 3.7 to 8.4 times on the traces as recorded, because blocks are
+created and abandoned with sessions (\Cref{sec:why}).
 
 Static analysis assumes that a block, once placed, stays. Replayed online, plain recency does the same job
 better: a multi-tier LRU captures 84.5\% and 87.7\% when moving a block is free, more than any arrival-time

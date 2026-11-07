@@ -2399,3 +2399,48 @@ dead blocks first 13.8–21.9%, last 69.1–89.7%; seen-once rule 31.8–58.9%; 
 −574.8 to −220.3%, break-even 0.13–0.29, below the serving move price (0.77). ADVISE H7 is not falsified:
 the ordering of the ladder and the online conclusion hold under the measured costs. The paper reports this
 in §V-E (new subsection) and the limitations now say what was and was not measured.
+
+## §BF — why: KV reuse is not stationary (ADVISE H1, H6, H2)
+
+Three hypotheses from ADVISE.md, each with its falsification condition written into the producing
+script's docstring before it ran.
+
+**H1 — departure from the independent reference model** (`run_irm_departure.py`, split 0.5). Robbins'
+identity and Good–Turing's missing mass are exact under a stationary reference process and need only the
+counts. Control: the same trace with requests in random order (seed 0) — ρ_1 = 1.04 / 1.05 and missing
+mass within 0.002 of the new-block access share (0.608 vs 0.609, 0.423 vs 0.422), so the estimators are
+sound on these data. As recorded: ρ_k = 0.12–0.27 for k = 1..4 on production, 0.51 / 0.65 at k = 5; new
+blocks receive 82.2 / 57.4% of post-split accesses where the missing mass predicts 50.1 / 36.4%. Alibaba:
+ρ_1 = 0.28 / 0.71 / 0.31 / 0.19 (traceA / traceB / coder / thinking), control on traceA 0.92–1.01. The
+registered rejection (≥ 2 of 4 Alibaba traces with ρ_1 ≥ 0.8) did not occur. The stronger prediction
+written in ADVISE ("below 0.5 for every k ≤ 5") fails at k = 5 and is reported as failing. traceB, the
+most nearly stationary trace, is the one where the estimated prior gained least (34.2%). Synthetic: ρ > 1.
+
+**H6 — is "dead" a censoring artifact?** (`run_horizon.py` → `eval_window.json`, split 0.25, windows of
+7.5, 15, 30 min and to the trace's end, about 42 min). Dead share 90.2 → 87.5% (conversation), 91.4 →
+90.5% (toolagent); 15 min vs end differs by 1.8 / 0.2 points, below the registered 3-point "does not
+matter" bound. Blocks that die, die quickly. But the window length is itself a convention: the clairvoyant
+reference with dead blocks last falls 89.7 → 47.5% (conversation) as the window lengthens, because later
+new blocks carry more of the advantage; the tie-rule gap stays 38–52 points at every length. (The
+artifact was first named horizon.json; the producer guard matched it as a substring of equal_horizon.json
+and credited the wrong script, so it was renamed.)
+
+**H2 — age instead of count** (`run_age_rules.py`, split 0.5, tier-only). Registered primary rule:
+park visible blocks with count ≤ 2 and age above the median behind new blocks. Precision for dead 98.0 /
+99.9%, recall 49%; captured 28.0 / 28.8% against the seen-once rule's 39.2 / 43.3% — **rejected** (it was
+to beat seen-once by ≥ 10 points). Exploratory, after the fact: parking the oldest three quarters
+captures 49.0 / 50.4%. Lesson: with every rule's precision ≥ 0.95, recall decides. ADVISE's expectation
+that age would beat count was wrong in the form registered.
+
+Two drafting errors caught by the checker while writing §V-B: "matches to the third decimal" (0.608 vs
+0.609 do not), and "precision above 0.95" (seen-once on conversation is 0.9487). Both now say what is true
+and the checker asserts the true statement.
+
+**H2 on Alibaba** (`run_age_rules.py --bailian`): the registered rule is below the seen-once rule on all
+four traces (9.4 / 24.8 / 10.3 / 21.6% vs 25.8 / 29.9 / 34.2 / 32.0%, thinking / traceA / traceB / coder),
+which also meets the registered rejection condition. The post-hoc "oldest three quarters" rule beats
+seen-once on traceA (53.2%) and coder (36.1%), falls just below it on thinking (24.1%), and loses 19.1% on
+traceB, the nearly stationary trace. A sentence drafted for §V-B — "only the seen-once rule gains on every
+trace" — was false (the other age rules are small but positive everywhere); the paper now says what the
+checker asserts: every rule except the oldest-three-quarters one gains on every trace, and none beats the
+seen-once rule on every trace.

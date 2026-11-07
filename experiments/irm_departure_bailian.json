@@ -1,0 +1,259 @@
+{
+  "config": {
+    "split": 0.5,
+    "k": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "control": "requests shuffled, seed 0",
+    "registered": "rejected if >= 2 of 4 Alibaba traces have rho_1 >= 0.8"
+  },
+  "traces": {
+    "traceA": {
+      "as_recorded": {
+        "split_step": 21528,
+        "good_turing_missing_mass": 0.2604,
+        "post_split_access_share_new": 0.7531,
+        "by_k": [
+          {
+            "k": 1,
+            "n_k": 752168,
+            "actual_mean_future": 0.2217,
+            "robbins": 0.7982,
+            "rho": 0.2777,
+            "p_dead": 0.9036
+          },
+          {
+            "k": 2,
+            "n_k": 300186,
+            "actual_mean_future": 0.2712,
+            "robbins": 1.2221,
+            "rho": 0.2219,
+            "p_dead": 0.8978
+          },
+          {
+            "k": 3,
+            "n_k": 122290,
+            "actual_mean_future": 0.2782,
+            "robbins": 1.915,
+            "rho": 0.1453,
+            "p_dead": 0.8943
+          },
+          {
+            "k": 4,
+            "n_k": 58545,
+            "actual_mean_future": 0.3996,
+            "robbins": 2.3385,
+            "rho": 0.1709,
+            "p_dead": 0.8741
+          },
+          {
+            "k": 5,
+            "n_k": 27381,
+            "actual_mean_future": 0.3235,
+            "robbins": 3.3639,
+            "rho": 0.0962,
+            "p_dead": 0.8892
+          }
+        ]
+      },
+      "shuffled_control": {
+        "split_step": 21528,
+        "good_turing_missing_mass": 0.3503,
+        "post_split_access_share_new": 0.3568,
+        "by_k": [
+          {
+            "k": 1,
+            "n_k": 1108541,
+            "actual_mean_future": 0.5914,
+            "robbins": 0.6394,
+            "rho": 0.9249,
+            "p_dead": 0.6153
+          },
+          {
+            "k": 2,
+            "n_k": 354417,
+            "actual_mean_future": 1.001,
+            "robbins": 0.9943,
+            "rho": 1.0067,
+            "p_dead": 0.4655
+          },
+          {
+            "k": 3,
+            "n_k": 117471,
+            "actual_mean_future": 1.534,
+            "robbins": 1.5725,
+            "rho": 0.9755,
+            "p_dead": 0.275
+          },
+          {
+            "k": 4,
+            "n_k": 46182,
+            "actual_mean_future": 2.207,
+            "robbins": 2.217,
+            "rho": 0.9955,
+            "p_dead": 0.1752
+          },
+          {
+            "k": 5,
+            "n_k": 20477,
+            "actual_mean_future": 3.0675,
+            "robbins": 3.2709,
+            "rho": 0.9378,
+            "p_dead": 0.2215
+          }
+        ]
+      }
+    },
+    "traceB": {
+      "as_recorded": {
+        "split_step": 86399,
+        "good_turing_missing_mass": 0.3628,
+        "post_split_access_share_new": 0.4127,
+        "by_k": [
+          {
+            "k": 1,
+            "n_k": 1800219,
+            "actual_mean_future": 0.0461,
+            "robbins": 0.0648,
+            "rho": 0.7121,
+            "p_dead": 0.9766
+          },
+          {
+            "k": 2,
+            "n_k": 58303,
+            "actual_mean_future": 0.8972,
+            "robbins": 0.8784,
+            "rho": 1.0214,
+            "p_dead": 0.6592
+          },
+          {
+            "k": 3,
+            "n_k": 17071,
+            "actual_mean_future": 3.0121,
+            "robbins": 2.3509,
+            "rho": 1.2813,
+            "p_dead": 0.3924
+          },
+          {
+            "k": 4,
+            "n_k": 10033,
+            "actual_mean_future": 2.7721,
+            "robbins": 3.2857,
+            "rho": 0.8437,
+            "p_dead": 0.4012
+          },
+          {
+            "k": 5,
+            "n_k": 6593,
+            "actual_mean_future": 4.0611,
+            "robbins": 4.1963,
+            "rho": 0.9678,
+            "p_dead": 0.2516
+          }
+        ]
+      }
+    },
+    "coder": {
+      "as_recorded": {
+        "split_step": 21505,
+        "good_turing_missing_mass": 0.2167,
+        "post_split_access_share_new": 0.6087,
+        "by_k": [
+          {
+            "k": 1,
+            "n_k": 1696339,
+            "actual_mean_future": 0.1657,
+            "robbins": 0.5363,
+            "rho": 0.3091,
+            "p_dead": 0.918
+          },
+          {
+            "k": 2,
+            "n_k": 454845,
+            "actual_mean_future": 0.3527,
+            "robbins": 1.4801,
+            "rho": 0.2383,
+            "p_dead": 0.8361
+          },
+          {
+            "k": 3,
+            "n_k": 224398,
+            "actual_mean_future": 0.4674,
+            "robbins": 2.2885,
+            "rho": 0.2042,
+            "p_dead": 0.824
+          },
+          {
+            "k": 4,
+            "n_k": 128381,
+            "actual_mean_future": 0.6769,
+            "robbins": 2.9185,
+            "rho": 0.2319,
+            "p_dead": 0.7791
+          },
+          {
+            "k": 5,
+            "n_k": 74937,
+            "actual_mean_future": 0.7311,
+            "robbins": 3.7845,
+            "rho": 0.1932,
+            "p_dead": 0.7573
+          }
+        ]
+      }
+    },
+    "thinking": {
+      "as_recorded": {
+        "split_step": 5405,
+        "good_turing_missing_mass": 0.3459,
+        "post_split_access_share_new": 0.7914,
+        "by_k": [
+          {
+            "k": 1,
+            "n_k": 489884,
+            "actual_mean_future": 0.0501,
+            "robbins": 0.2609,
+            "rho": 0.1918,
+            "p_dead": 0.9663
+          },
+          {
+            "k": 2,
+            "n_k": 63906,
+            "actual_mean_future": 0.2447,
+            "robbins": 1.2809,
+            "rho": 0.191,
+            "p_dead": 0.9455
+          },
+          {
+            "k": 3,
+            "n_k": 27285,
+            "actual_mean_future": 0.1109,
+            "robbins": 2.473,
+            "rho": 0.0448,
+            "p_dead": 0.9512
+          },
+          {
+            "k": 4,
+            "n_k": 16869,
+            "actual_mean_future": 0.1689,
+            "robbins": 4.0571,
+            "rho": 0.0416,
+            "p_dead": 0.9031
+          },
+          {
+            "k": 5,
+            "n_k": 13688,
+            "actual_mean_future": 0.2065,
+            "robbins": 2.1286,
+            "rho": 0.097,
+            "p_dead": 0.9428
+          }
+        ]
+      }
+    }
+  }
+}

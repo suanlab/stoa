@@ -1,0 +1,121 @@
+{
+  "config": {
+    "split": 0.5,
+    "actions": "tier only",
+    "primary": "old-low-count-last",
+    "registered": "confirmed if primary - seen-once >= 10 on both production traces; rejected if < 3 or worse on >= 2 of 4 Alibaba"
+  },
+  "rows": [
+    {
+      "trace": "conversation",
+      "split": 0.5,
+      "median_age_steps": 2978,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "oracle": 100.0,
+        "seen-once-last": 39.18,
+        "old-low-count-last": 28.02,
+        "old-last": 30.46,
+        "old75-last": 48.96,
+        "old-seen-once-last": 22.09,
+        "dead-known": 77.84
+      },
+      "precision_for_dead": {
+        "seen-once-last": 0.9487,
+        "old-low-count-last": 0.9799,
+        "old-last": 0.9805,
+        "old75-last": 0.9707,
+        "old-seen-once-last": 0.9797
+      },
+      "recall_for_dead": {
+        "seen-once-last": 0.7836,
+        "old-low-count-last": 0.4896,
+        "old-last": 0.5284,
+        "old75-last": 0.7828,
+        "old-seen-once-last": 0.4223
+      },
+      "n_parked": {
+        "seen-once-last": 76717,
+        "old-low-count-last": 46412,
+        "old-last": 50060,
+        "old75-last": 74901,
+        "old-seen-once-last": 40033,
+        "dead-known": 92883
+      }
+    },
+    {
+      "trace": "toolagent",
+      "split": 0.5,
+      "median_age_steps": 5848,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "oracle": 100.0,
+        "seen-once-last": 43.29,
+        "old-low-count-last": 28.84,
+        "old-last": 31.1,
+        "old75-last": 50.43,
+        "old-seen-once-last": 23.07,
+        "dead-known": 76.24
+      },
+      "precision_for_dead": {
+        "seen-once-last": 0.9722,
+        "old-low-count-last": 0.9991,
+        "old-last": 0.9983,
+        "old75-last": 0.9928,
+        "old-seen-once-last": 0.999
+      },
+      "recall_for_dead": {
+        "seen-once-last": 0.8011,
+        "old-low-count-last": 0.487,
+        "old-last": 0.5248,
+        "old75-last": 0.7833,
+        "old-seen-once-last": 0.4235
+      },
+      "n_parked": {
+        "seen-once-last": 77409,
+        "old-low-count-last": 45791,
+        "old-last": 49383,
+        "old75-last": 74117,
+        "old-seen-once-last": 39821,
+        "dead-known": 93934
+      }
+    },
+    {
+      "trace": "synthetic",
+      "split": 0.5,
+      "median_age_steps": 814,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "oracle": 100.0,
+        "seen-once-last": 15.4,
+        "old-low-count-last": 6.82,
+        "old-last": 12.12,
+        "old75-last": -4.19,
+        "old-seen-once-last": 6.55,
+        "dead-known": 67.04
+      },
+      "precision_for_dead": {
+        "seen-once-last": 0.7919,
+        "old-low-count-last": 0.7926,
+        "old-last": 0.7867,
+        "old75-last": 0.7074,
+        "old-seen-once-last": 0.8374
+      },
+      "recall_for_dead": {
+        "seen-once-last": 0.8642,
+        "old-low-count-last": 0.5971,
+        "old-last": 0.6104,
+        "old75-last": 0.8233,
+        "old-seen-once-last": 0.5699
+      },
+      "n_parked": {
+        "seen-once-last": 23290,
+        "old-low-count-last": 16076,
+        "old-last": 16557,
+        "old75-last": 24837,
+        "old-seen-once-last": 14523,
+        "dead-known": 21340
+      }
+    }
+  ]
+}
