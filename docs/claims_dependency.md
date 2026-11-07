@@ -2444,3 +2444,28 @@ traceB, the nearly stationary trace. A sentence drafted for §V-B — "only the 
 trace" — was false (the other age rules are small but positive everywhere); the paper now says what the
 checker asserts: every rule except the oldest-three-quarters one gains on every trace, and none beats the
 seen-once rule on every trace.
+
+## §BG — ski rental (ADVISE H3) and predicting where moving stops paying (H4)
+
+`run_ski_rental.py`, criteria in its docstring before it ran. Policy: a resident on a slower tier
+accumulates the extra cost of its accesses relative to the GPU tier and is promoted once that reaches
+alpha x the read+write price of the move (Karlin et al. 1988's rent-or-buy rule, 2-competitive for one
+block); creations take the fastest tier with room; the GPU tier is LRU-ordered and overflow cascades.
+
+**H3 — rejected.** Break-even 0.27 / 0.30 (LRU 0.17 / 0.18), so the threshold does delay the point where
+moving stops paying, but at every grid price in the measured band (0.75–1.87) ski loses 40.7–97.2%,
+below the registered −5% line. Why: at alpha = 1 each promotion forces 1.94 / 1.95 demotions, 62% of the
+move cost, which a per-block rent-or-buy rule does not see — buying a fast slot for one block sells one
+for another. Exploratory, after the rejection: counting the forced cascade in the threshold cuts the loss
+in the band to 4.1–16.8%, never to zero. Even with free moves ski reaches only 45.2 / 47.1% (LRU 84.5 /
+87.7%), because it leaves creations on slow tiers until they have paid; and its curve is not monotone in
+alpha (a threshold crossing a multiple of the per-access saving changes how many accesses a promotion
+needs), which is why the band is reported as a range.
+
+**H4 — not confirmed as registered.** Replaying each policy on the trace before the split (pseudo-split at
+its midpoint) predicts the break-even price 30.7 / 32.5% low for LRU (outside the registered ±30%) and
+19.4 / 20.7% low for ski (inside). The registration required both, so H4 is not confirmed; the error is
+one-signed (low in every case), consistent with §BF H6: a shorter window lowers the values.
+
+What the paper says (§V-D): moving a block only once it has paid does not rescue moving at measured prices;
+the obstacle is capacity coupling, not the decision rule.

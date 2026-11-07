@@ -90,8 +90,8 @@ Reproducibility package: `../REPRODUCIBILITY.md` and `make verify`.
 
 ## Length
 
-The reframed paper's body, acknowledgements included, ends on page 8, where the references begin: about
-four of the twelve pages are unused, left for what reviewers will ask. Measure the body,
+The paper's body, acknowledgements included, ends on page 9, where the references begin: about three of
+the twelve pages are unused, left for what reviewers will ask. Measure the body,
 not the file: `stoa.verify.body_pages` with REFERENCES as the end heading is the quantity the venue
 constrains. Block-move costs are measured on one A100 PCIe host (§AX); a full serving deployment
 (vLLM+LMCache), NVMe and the remote RDMA tier remain unmeasured.

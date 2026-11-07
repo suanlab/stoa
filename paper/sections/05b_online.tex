@@ -48,3 +48,13 @@ and no production policy pays once a move costs more than 0.28 of the assumed pr
 demote blocks just created, which have no copy below. Only on the synthetic control does a moving policy
 pay, cache-on-second-hit under the two copy-keeping ledgers (2.6\% and 4.5\%). The remote tier, which
 receives most of the arrival arms' online demotions, could not be measured.
+
+Moving a block only once it has paid for the move does not change this. A ski-rental policy promotes a
+block when the extra cost of its accesses from a slower tier reaches the price of the move, the rule that
+is 2-competitive for one block's rent-or-buy decision~\cite{karlin1988snoopy}. It breaks even at 0.27 and
+0.30 of the read-plus-write price, later than LRU (0.17 and 0.18), but at every price in the measured band
+it loses 40.7--97.2\%. Each promotion into a full GPU tier forces 1.94 and 1.95 demotions on average, 62\% of
+its move cost, and the rent-or-buy rule does not see them. Counting that cascade in the threshold, which
+we tried afterwards, cuts the loss to 4.1--16.8\% but not to zero. The break-even price can be estimated
+from the past: replaying a policy on the trace before the split puts it 19 to 33\% below the value observed
+after the split, low in every case.

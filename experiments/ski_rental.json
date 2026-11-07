@@ -1,0 +1,468 @@
+{
+  "config": {
+    "alphas": [
+      0.0,
+      0.01,
+      0.02,
+      0.05,
+      0.1,
+      0.15,
+      0.2,
+      0.3,
+      0.5,
+      0.75,
+      1.0,
+      1.25,
+      1.5,
+      1.87,
+      2.0,
+      3.0
+    ],
+    "band": [
+      0.75,
+      1.87
+    ],
+    "serving_alpha": 0.77,
+    "price": "alpha x read+write (run_online_admission.migration_cost)",
+    "registered_H3": "confirmed if ski >= 0 at every grid alpha in the band; rejected if < -5 at all",
+    "registered_H4": "prefix-replay break-even within +-30% of the observed one, LRU and ski, both traces"
+  },
+  "traces": {
+    "conversation": {
+      "after_split": [
+        {
+          "alpha": 0.0,
+          "ski_pct": 45.188,
+          "ski_cascade_pct": 45.188,
+          "lru_pct": 84.513
+        },
+        {
+          "alpha": 0.01,
+          "ski_pct": 43.496,
+          "ski_cascade_pct": 43.496,
+          "lru_pct": 79.663
+        },
+        {
+          "alpha": 0.02,
+          "ski_pct": 41.804,
+          "ski_cascade_pct": 41.804,
+          "lru_pct": 74.813
+        },
+        {
+          "alpha": 0.05,
+          "ski_pct": 36.728,
+          "ski_cascade_pct": 36.728,
+          "lru_pct": 60.264
+        },
+        {
+          "alpha": 0.1,
+          "ski_pct": 28.267,
+          "ski_cascade_pct": 28.267,
+          "lru_pct": 36.014
+        },
+        {
+          "alpha": 0.15,
+          "ski_pct": 19.807,
+          "ski_cascade_pct": 19.807,
+          "lru_pct": 11.765
+        },
+        {
+          "alpha": 0.2,
+          "ski_pct": 11.346,
+          "ski_cascade_pct": 11.346,
+          "lru_pct": -12.485
+        },
+        {
+          "alpha": 0.3,
+          "ski_pct": -5.575,
+          "ski_cascade_pct": -5.575,
+          "lru_pct": -60.983
+        },
+        {
+          "alpha": 0.5,
+          "ski_pct": -39.416,
+          "ski_cascade_pct": -9.556,
+          "lru_pct": -157.981
+        },
+        {
+          "alpha": 0.75,
+          "ski_pct": -81.719,
+          "ski_cascade_pct": -8.24,
+          "lru_pct": -279.228
+        },
+        {
+          "alpha": 1.0,
+          "ski_pct": -41.8,
+          "ski_cascade_pct": -15.087,
+          "lru_pct": -400.475
+        },
+        {
+          "alpha": 1.25,
+          "ski_pct": -57.921,
+          "ski_cascade_pct": -11.819,
+          "lru_pct": -521.722
+        },
+        {
+          "alpha": 1.5,
+          "ski_pct": -74.043,
+          "ski_cascade_pct": -5.663,
+          "lru_pct": -642.969
+        },
+        {
+          "alpha": 1.87,
+          "ski_pct": -97.165,
+          "ski_cascade_pct": -4.11,
+          "lru_pct": -822.414
+        },
+        {
+          "alpha": 2.0,
+          "ski_pct": -43.036,
+          "ski_cascade_pct": -4.643,
+          "lru_pct": -885.463
+        },
+        {
+          "alpha": 3.0,
+          "ski_pct": -38.725,
+          "ski_cascade_pct": -3.402,
+          "lru_pct": -1370.45
+        }
+      ],
+      "prefix_replay": [
+        {
+          "alpha": 0.0,
+          "ski_pct": 40.131,
+          "ski_cascade_pct": 40.131,
+          "lru_pct": 70.447
+        },
+        {
+          "alpha": 0.01,
+          "ski_pct": 38.266,
+          "ski_cascade_pct": 38.266,
+          "lru_pct": 64.613
+        },
+        {
+          "alpha": 0.02,
+          "ski_pct": 36.402,
+          "ski_cascade_pct": 36.402,
+          "lru_pct": 58.78
+        },
+        {
+          "alpha": 0.05,
+          "ski_pct": 30.809,
+          "ski_cascade_pct": 30.809,
+          "lru_pct": 41.28
+        },
+        {
+          "alpha": 0.1,
+          "ski_pct": 21.488,
+          "ski_cascade_pct": 21.488,
+          "lru_pct": 12.113
+        },
+        {
+          "alpha": 0.15,
+          "ski_pct": 12.166,
+          "ski_cascade_pct": 12.166,
+          "lru_pct": -17.054
+        },
+        {
+          "alpha": 0.2,
+          "ski_pct": 2.845,
+          "ski_cascade_pct": 2.845,
+          "lru_pct": -46.22
+        },
+        {
+          "alpha": 0.3,
+          "ski_pct": -15.798,
+          "ski_cascade_pct": -15.798,
+          "lru_pct": -104.554
+        },
+        {
+          "alpha": 0.5,
+          "ski_pct": -53.084,
+          "ski_cascade_pct": -15.018,
+          "lru_pct": -221.221
+        },
+        {
+          "alpha": 0.75,
+          "ski_pct": -99.692,
+          "ski_cascade_pct": -14.079,
+          "lru_pct": -367.055
+        },
+        {
+          "alpha": 1.0,
+          "ski_pct": -48.247,
+          "ski_cascade_pct": -20.183,
+          "lru_pct": -512.889
+        },
+        {
+          "alpha": 1.25,
+          "ski_pct": -64.862,
+          "ski_cascade_pct": -13.731,
+          "lru_pct": -658.722
+        },
+        {
+          "alpha": 1.5,
+          "ski_pct": -81.476,
+          "ski_cascade_pct": -5.241,
+          "lru_pct": -804.556
+        },
+        {
+          "alpha": 1.87,
+          "ski_pct": -102.37,
+          "ski_cascade_pct": -3.047,
+          "lru_pct": -1020.39
+        },
+        {
+          "alpha": 2.0,
+          "ski_pct": -48.657,
+          "ski_cascade_pct": -3.337,
+          "lru_pct": -1096.224
+        },
+        {
+          "alpha": 3.0,
+          "ski_pct": -37.721,
+          "ski_cascade_pct": -0.807,
+          "lru_pct": -1679.559
+        }
+      ],
+      "break_even_observed": {
+        "lru": 0.1743,
+        "ski": 0.2671
+      },
+      "ski_cascade_min_in_band": -15.087,
+      "ski_cascade_max_in_band": -4.11,
+      "break_even_predicted": {
+        "lru": 0.1208,
+        "ski": 0.2153
+      },
+      "ski_moves_at_alpha_1": {
+        "promotions": 8089,
+        "demotions": 15656,
+        "promotion_cost": 4806.379999999343,
+        "demotion_cost": 7833.180000001554,
+        "demotions_per_promotion": 1.935,
+        "demotion_share_of_move_cost": 0.6197
+      },
+      "ski_min_in_band": -97.165,
+      "ski_max_in_band": -41.8
+    },
+    "toolagent": {
+      "after_split": [
+        {
+          "alpha": 0.0,
+          "ski_pct": 47.084,
+          "ski_cascade_pct": 47.084,
+          "lru_pct": 87.715
+        },
+        {
+          "alpha": 0.01,
+          "ski_pct": 45.525,
+          "ski_cascade_pct": 45.525,
+          "lru_pct": 82.824
+        },
+        {
+          "alpha": 0.02,
+          "ski_pct": 43.966,
+          "ski_cascade_pct": 43.966,
+          "lru_pct": 77.933
+        },
+        {
+          "alpha": 0.05,
+          "ski_pct": 39.289,
+          "ski_cascade_pct": 39.289,
+          "lru_pct": 63.259
+        },
+        {
+          "alpha": 0.1,
+          "ski_pct": 31.493,
+          "ski_cascade_pct": 31.493,
+          "lru_pct": 38.804
+        },
+        {
+          "alpha": 0.15,
+          "ski_pct": 23.697,
+          "ski_cascade_pct": 23.697,
+          "lru_pct": 14.348
+        },
+        {
+          "alpha": 0.2,
+          "ski_pct": 15.901,
+          "ski_cascade_pct": 15.901,
+          "lru_pct": -10.107
+        },
+        {
+          "alpha": 0.3,
+          "ski_pct": 0.31,
+          "ski_cascade_pct": 0.31,
+          "lru_pct": -59.019
+        },
+        {
+          "alpha": 0.5,
+          "ski_pct": -30.873,
+          "ski_cascade_pct": -8.29,
+          "lru_pct": -156.841
+        },
+        {
+          "alpha": 0.75,
+          "ski_pct": -69.852,
+          "ski_cascade_pct": -9.062,
+          "lru_pct": -279.119
+        },
+        {
+          "alpha": 1.0,
+          "ski_pct": -40.735,
+          "ski_cascade_pct": -16.804,
+          "lru_pct": -401.396
+        },
+        {
+          "alpha": 1.25,
+          "ski_pct": -56.958,
+          "ski_cascade_pct": -12.23,
+          "lru_pct": -523.674
+        },
+        {
+          "alpha": 1.5,
+          "ski_pct": -73.18,
+          "ski_cascade_pct": -5.953,
+          "lru_pct": -645.952
+        },
+        {
+          "alpha": 1.87,
+          "ski_pct": -97.202,
+          "ski_cascade_pct": -4.48,
+          "lru_pct": -826.923
+        },
+        {
+          "alpha": 2.0,
+          "ski_pct": -47.065,
+          "ski_cascade_pct": -5.05,
+          "lru_pct": -890.508
+        },
+        {
+          "alpha": 3.0,
+          "ski_pct": -40.237,
+          "ski_cascade_pct": -3.506,
+          "lru_pct": -1379.619
+        }
+      ],
+      "prefix_replay": [
+        {
+          "alpha": 0.0,
+          "ski_pct": 41.964,
+          "ski_cascade_pct": 41.964,
+          "lru_pct": 72.592
+        },
+        {
+          "alpha": 0.01,
+          "ski_pct": 40.211,
+          "ski_cascade_pct": 40.211,
+          "lru_pct": 66.591
+        },
+        {
+          "alpha": 0.02,
+          "ski_pct": 38.459,
+          "ski_cascade_pct": 38.459,
+          "lru_pct": 60.589
+        },
+        {
+          "alpha": 0.05,
+          "ski_pct": 33.203,
+          "ski_cascade_pct": 33.203,
+          "lru_pct": 42.586
+        },
+        {
+          "alpha": 0.1,
+          "ski_pct": 24.442,
+          "ski_cascade_pct": 24.442,
+          "lru_pct": 12.581
+        },
+        {
+          "alpha": 0.15,
+          "ski_pct": 15.681,
+          "ski_cascade_pct": 15.681,
+          "lru_pct": -17.425
+        },
+        {
+          "alpha": 0.2,
+          "ski_pct": 6.92,
+          "ski_cascade_pct": 6.92,
+          "lru_pct": -47.431
+        },
+        {
+          "alpha": 0.3,
+          "ski_pct": -10.602,
+          "ski_cascade_pct": -10.602,
+          "lru_pct": -107.442
+        },
+        {
+          "alpha": 0.5,
+          "ski_pct": -45.646,
+          "ski_cascade_pct": -14.03,
+          "lru_pct": -227.464
+        },
+        {
+          "alpha": 0.75,
+          "ski_pct": -89.451,
+          "ski_cascade_pct": -14.296,
+          "lru_pct": -377.492
+        },
+        {
+          "alpha": 1.0,
+          "ski_pct": -47.173,
+          "ski_cascade_pct": -21.734,
+          "lru_pct": -527.52
+        },
+        {
+          "alpha": 1.25,
+          "ski_pct": -63.745,
+          "ski_cascade_pct": -14.838,
+          "lru_pct": -677.548
+        },
+        {
+          "alpha": 1.5,
+          "ski_pct": -80.317,
+          "ski_cascade_pct": -4.282,
+          "lru_pct": -827.576
+        },
+        {
+          "alpha": 1.87,
+          "ski_pct": -103.119,
+          "ski_cascade_pct": -4.095,
+          "lru_pct": -1049.617
+        },
+        {
+          "alpha": 2.0,
+          "ski_pct": -52.091,
+          "ski_cascade_pct": -4.457,
+          "lru_pct": -1127.631
+        },
+        {
+          "alpha": 3.0,
+          "ski_pct": -40.407,
+          "ski_cascade_pct": -0.66,
+          "lru_pct": -1727.743
+        }
+      ],
+      "break_even_observed": {
+        "lru": 0.1793,
+        "ski": 0.302
+      },
+      "ski_cascade_min_in_band": -16.804,
+      "ski_cascade_max_in_band": -4.48,
+      "break_even_predicted": {
+        "lru": 0.121,
+        "ski": 0.2395
+      },
+      "ski_moves_at_alpha_1": {
+        "promotions": 7836,
+        "demotions": 15297,
+        "promotion_cost": 4708.319999999354,
+        "demotion_cost": 7692.7200000014955,
+        "demotions_per_promotion": 1.952,
+        "demotion_share_of_move_cost": 0.6203
+      },
+      "ski_min_in_band": -97.202,
+      "ski_max_in_band": -40.735
+    }
+  }
+}

@@ -1,7 +1,7 @@
 {
-  "pdf": "1cb98f065ac9692a30c8faba1dc9269efa0cd182567900ce8143a7d3a174e5fd",
+  "pdf": "8c9dba806f801e7f6eb5cdd668942cb59cc273ae5b9624fbe572b4a3cef7bd7f",
   "sources": {
-    "../docs/references.bib": "256c64b16b44a998e94c1ab5f587b7775a14c0b9dba6869a07803a013cec388b",
+    "../docs/references.bib": "9617204a9c2212846692cb170e83cfa2c9174991b7765cf7342fe9068b6c922b",
     "ACM-Reference-Format.bst": "0590db3b8d255a3af91982ab710f3ace5fcaa52434020c9af8a4f141b00b68f3",
     "acmart.cls": "2f949e6e3f2a79f2cdc218b9dcdbaa7dd451adb4ee0be1af6dc7ebe00b318ea7",
     "figs/fig_architecture.pdf": "5da04c218947e652d37ca346c665992d5038ebdc8b0b52e8240a04e17095a36d",
@@ -24,7 +24,7 @@
     "sections/03_definitions.tex": "82af35eaf6fac428ba1be58aa4fe53b0bdd54cf95181afcb7c402b91a7255e3c",
     "sections/04_workloads.tex": "7c60ecda39d88dd1c70cd213a010bf675eafd823d82396a9cebd99d56cca7e96",
     "sections/05a_evidence.tex": "743798b0489322d0d099aeefb6663d659caff7e5513ad50402daffbf94e69892",
-    "sections/05b_online.tex": "828042f63eda191f9772abf76a6c3608e3937b1f0b00545791ab6780e0bebdef",
+    "sections/05b_online.tex": "724d5cf1df4ebc759ec83ef36763edd27d4b9bc291afc083f4958b8930418c42",
     "sections/05c_reaction.tex": "c59d0b837a52ed505536668ca794e418eb61264d1c02aebeeb549036a0eb5f03",
     "sections/05d_ranking.tex": "11dd3e5fb9f4eb1fe88757695e1a8f809a15cc3baa74971875c62558e3749618",
     "sections/05e_sampling.tex": "1857a6e11dfee72fd0ab081588f02796c95413ebf84f5a0dcb5798730d7a004c",

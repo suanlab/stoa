@@ -472,6 +472,31 @@ if _ir and _irb and _hz6 and _ar2:
     assert min(min(v for v in _A[t]["precision_for_dead"].values()) for t in PROD) >= 0.945, \
         "the paper says every rule's precision is 0.95 or more to two decimals"
 
+# Ski rental (H3) and predicting the break-even price (H4) (V-D; notebook BG)
+_sk = load("ski_rental.json")
+if _sk:
+    print("\nski rental (ski_rental.json)")
+    _T = _sk["traces"]
+    _o = {t: _T[t]["break_even_observed"] for t in PROD}
+    claim("ski break-even", f"breaks even at {_o['conversation']['ski']:.2f} and\n{_o['toolagent']['ski']:.2f} of the "
+          f"read-plus-write price, later than LRU ({_o['conversation']['lru']:.2f} and {_o['toolagent']['lru']:.2f})", "", "ski_rental")
+    _lo = min(_T[t]["ski_min_in_band"] for t in PROD)
+    _hi = max(_T[t]["ski_max_in_band"] for t in PROD)
+    assert _hi < -5, "H3 registered rejection: below -5% at every price in the band"
+    claim("ski in band", f"it loses {-_hi:.1f}--{-_lo:.1f}\\%", "", "ski_rental")
+    _m = {t: _T[t]["ski_moves_at_alpha_1"] for t in PROD}
+    claim("cascade per promotion", f"forces {_m['conversation']['demotions_per_promotion']:.2f} and "
+          f"{_m['toolagent']['demotions_per_promotion']:.2f} demotions on average, "
+          f"{100*_m['conversation']['demotion_share_of_move_cost']:.0f}\\% of\nits move cost", "", "ski_rental")
+    assert round(100 * _m["toolagent"]["demotion_share_of_move_cost"]) == round(100 * _m["conversation"]["demotion_share_of_move_cost"])
+    _clo = min(_T[t]["ski_cascade_min_in_band"] for t in PROD)
+    _chi = max(_T[t]["ski_cascade_max_in_band"] for t in PROD)
+    assert _chi < 0, "the paper says counting the cascade does not reach zero"
+    claim("cascade-aware ski in band", f"cuts the loss to {-_chi:.1f}--{-_clo:.1f}\\% but not to zero", "", "ski_rental")
+    _err = [100 * (1 - _T[t]["break_even_predicted"][p] / _T[t]["break_even_observed"][p]) for t in PROD for p in ("lru", "ski")]
+    assert all(e > 0 for e in _err), "the paper says the prefix estimate is low in every case"
+    claim("H4 prediction error", f"puts it {min(_err):.0f} to {max(_err):.0f}\\% below the value observed", "", "ski_rental")
+
 # Prefix validity of independent-block billing (III; notebook BD)
 _pv = load("prefix_validity.json")
 if _pv:
@@ -1048,7 +1073,7 @@ REQUIRED = ("reactive_real_full_lrb.json", "headroom_by_length.json", "lrb_retra
             "evidence_ladder.json", "reuse_split.json", "ceiling_ties.json", "modern_baselines.json",
             "evidence_ladder_bailian.json", "prefix_validity.json", "serving_tiers_a100.json",
             "measured_table.json", "irm_departure.json", "irm_departure_bailian.json", "eval_window.json",
-            "age_rules.json", "age_rules_bailian.json")
+            "age_rules.json", "age_rules_bailian.json", "ski_rental.json")
 missing = [n for n in REQUIRED if not (EXP / n).exists()]
 if missing:
     failures.append("artifacts absent, so their claims went unchecked: " + ", ".join(missing))

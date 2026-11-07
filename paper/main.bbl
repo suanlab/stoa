@@ -2,7 +2,7 @@
 %%% Do NOT edit. File created by BibTeX with style
 %%% ACM-Reference-Format-Journals [18-Jan-2012].
 
-\begin{thebibliography}{23}
+\begin{thebibliography}{24}
 
 %%% ====================================================================
 %%% NOTE TO THE USER: you can override these defaults by providing
@@ -85,6 +85,17 @@
 \url{https://www.vldb.org/conf/1994/P439.PDF}
 \showURL{%
 \tempurl}
+
+
+\bibitem[\protect\citeauthoryear{Karlin, Manasse, Rudolph, and Sleator}{Karlin et~al\mbox{.}}{1988}]%
+        {karlin1988snoopy}
+\bibfield{author}{\bibinfo{person}{Anna~R. Karlin}, \bibinfo{person}{Mark~S. Manasse}, \bibinfo{person}{Larry Rudolph}, {and} \bibinfo{person}{Daniel~D. Sleator}.} \bibinfo{year}{1988}\natexlab{}.
+\newblock \showarticletitle{Competitive Snoopy Caching}.
+\newblock \bibinfo{journal}{\emph{Algorithmica}} \bibinfo{volume}{3}, \bibinfo{number}{1-4} (\bibinfo{year}{1988}), \bibinfo{pages}{79--119}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1007/BF01762111}
+\showDOI{\tempurl}
 
 
 \bibitem[\protect\citeauthoryear{Li, Gu, Huan, Wang, Yao, Tian, and Chen}{Li et~al\mbox{.}}{2025}]%

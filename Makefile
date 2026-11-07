@@ -84,6 +84,7 @@ reproduce-fast: data-check
 	$(PY) scripts/run_irm_departure.py
 	$(PY) scripts/run_age_rules.py
 	$(PY) scripts/run_horizon.py
+	$(PY) scripts/run_ski_rental.py
 	# Figures are byte-deterministic, so regenerating them from reproduced artifacts leaves the
 	# committed PDF build manifest valid; without this step the figure guard reports them stale.
 	$(PY) scripts/make_figures.py

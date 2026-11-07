@@ -40,45 +40,45 @@ Warning--empty publisher in zhang2024sieve
 Warning--empty address in zhang2024sieve
 Warning--empty publisher in zhou2021spitfire
 Warning--empty address in zhou2021spitfire
-You've used 23 entries,
+You've used 24 entries,
             5901 wiz_defined-function locations,
-            1472 strings with 20788 characters,
-and the built_in function-call counts, 31549 in all, are:
-= -- 3641
-> -- 1517
+            1480 strings with 20948 characters,
+and the built_in function-call counts, 32882 in all, are:
+= -- 3847
+> -- 1569
 < -- 0
-+ -- 513
-- -- 500
-* -- 2542
-:= -- 3327
-add.period$ -- 112
-call.type$ -- 23
-change.case$ -- 213
-chr.to.int$ -- 23
-cite$ -- 52
-duplicate$ -- 2607
-empty$ -- 1821
-format.name$ -- 592
-if$ -- 7406
++ -- 530
+- -- 516
+* -- 2644
+:= -- 3456
+add.period$ -- 117
+call.type$ -- 24
+change.case$ -- 221
+chr.to.int$ -- 24
+cite$ -- 53
+duplicate$ -- 2708
+empty$ -- 1893
+format.name$ -- 612
+if$ -- 7748
 int.to.chr$ -- 2
 int.to.str$ -- 1
-missing$ -- 102
-newline$ -- 282
-num.names$ -- 184
-pop$ -- 1062
+missing$ -- 106
+newline$ -- 293
+num.names$ -- 192
+pop$ -- 1094
 preamble$ -- 1
-purify$ -- 416
+purify$ -- 433
 quote$ -- 0
-skip$ -- 930
+skip$ -- 962
 stack$ -- 0
-substring$ -- 2165
-swap$ -- 269
+substring$ -- 2267
+swap$ -- 280
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 578
+type$ -- 594
 warning$ -- 29
-while$ -- 152
+while$ -- 159
 width$ -- 0
-write$ -- 487
+write$ -- 507
 (There were 29 warnings)
