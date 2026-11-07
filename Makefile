@@ -79,6 +79,8 @@ reproduce-fast: data-check
 	$(PY) scripts/run_reuse_split.py
 	$(PY) scripts/run_prefix_validity.py
 	$(PY) scripts/run_modern_baselines.py
+	$(PY) scripts/run_serving_tiers.py        # summary from the committed raw serving runs; no GPU needed
+	$(PY) scripts/run_measured_table.py
 	# Figures are byte-deterministic, so regenerating them from reproduced artifacts leaves the
 	# committed PDF build manifest valid; without this step the figure guard reports them stale.
 	$(PY) scripts/make_figures.py

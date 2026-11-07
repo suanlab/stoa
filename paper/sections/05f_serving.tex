@@ -1,0 +1,30 @@
+\subsection{What a serving stack measures}
+\label{sec:serving}
+We ran an 8B-class model with the Llama-3-8B attention shape (DeepSeek-R1-Distill-Llama-8B) in vLLM 0.11
+with LMCache 0.3.9 on the same A100 host, and timed the first token for a prefix held in each place:
+
+\begin{center}\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+prefix tokens & recompute & GPU cache & host memory & disk (cold) \\
+\midrule
+512 & 50.4 & 13.8 & 17.1 & 58.7 \\
+2,048 & 157.9 & 16.3 & 26.7 & 201.1 \\
+8,192 & 678.5 & 23.2 & 64.2 & 749.6 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent{\footnotesize Median time to first token (ms) over seven prefixes each; the host's rotational RAID disk
+read after its page cache and controller cache were flushed.}
+
+\medskip
+\noindent Per 512-token block, loading from host memory costs 2.56\,ms and storing there 2.94\,ms;
+recomputing costs 41.0\,ms; loading from the cold disk costs 45.4\,ms, more than recomputing, so on this
+host a disk tier does not pay at any prefix length we tried. A first run that did not flush the disk
+controller's cache loaded twice as fast as the array reads cold; we report it as cache-assisted and do
+not use it. Under these costs, moving a block from GPU to host memory costs 0.77 of the read-plus-write
+price. Replacing the declared latency table with the measured costs, and sweeping the unmeasured remote
+tier from twice the host cost to just under the disk cost, leaves every conclusion in place: the reference
+moves from 13.8--21.9\% with dead blocks first to 69.1--89.7\% with them last, the seen-once rule captures
+31.8--58.9\%, and LRU, at 82.2--92.3\% with free moves, falls to $-574.8$\% to $-220.3$\% at the
+read-plus-write price and breaks even only below 0.13--0.29 of it.

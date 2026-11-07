@@ -2361,3 +2361,41 @@ block is an access to its whole prefix; a policy whose priority is monotone in r
 keeps the prefix at least as well placed as the block. Replayed in hash-chain order, LRU and Belady show
 zero hits whose prefix missed at every tier size. Not checked: ARC, LeCaR, CACHEUS, LRB and the modern
 baselines, whose priorities are not monotone in recency or count.
+
+## §BE — a real serving stack: vLLM + LMCache on the A100 host (ADVISE H7)
+
+On 2026-11-08 GPU2 of the author's A100 host came free. `measure_serving_tiers.py` ran
+DeepSeek-R1-Distill-Llama-8B (Llama-3-8B attention shape: 32 layers, 8 KV heads, head dim 128; already
+cached on the host) in vLLM 0.11.0 + LMCache 0.3.9 (PyTorch 2.8 / CUDA 12.8) in an environment of its own.
+Two setbacks first, recorded because each would have produced a number: vLLM 0.33 installs a CUDA-13
+PyTorch the host's driver (CUDA 12.8) cannot run, and vLLM 0.11 with Transformers 5 fails at the
+tokenizer; both were fixed by pinning versions in a fresh environment, nothing in the author's own.
+
+Time to first token, median of seven fresh prefixes each (ms):
+
+| prefix | recompute | GPU cache | host memory | disk, cold | disk, cache-assisted |
+|---|---|---|---|---|---|
+| 512 | 50.4 | 13.8 | 17.1 | 58.7 | 60.9 |
+| 2,048 | 157.9 | 16.3 | 26.7 | 201.1 | 165.6 |
+| 8,192 | 678.5 | 23.2 | 64.2 | 749.6 | 356.0 |
+
+**A measurement that would have lied.** The first disk run (and a rerun with LMCache's host staging
+buffer cut to 1 GB) loaded a 1 GiB prefix in about 330 ms beyond the GPU-hit baseline, about 3 GB/s,
+while the same array reads a large old file cold at 1.0 GB/s. The page cache had been evicted with
+`posix_fadvise`, so the reads were served by the RAID controller's cache. A cold mode now stores every
+prefix first, evicts the page cache, streams 16 GB of unrelated data from the same array (0.83 GB/s), and
+only then loads; LMCache's own log confirms every load was a full hit (8,192 of 8,192 tokens) at about
+1.4 GB/s. The cache-assisted runs are kept in the artifact, labelled, and not used.
+
+Per 512-token block (64 MiB): host load 2.56 ms (the raw copy of §AX gave 2.68), host store 2.94 ms,
+recompute 41.0 ms, cold-disk load 45.4 ms — a rotational disk tier loses to recomputation here at every
+prefix length tried. The GPU tier's marginal cost (attention over cached blocks) is 0.63 ms per block, so
+the serving GPU:host ratio is about 1:5, against 1:10 declared and 1:58 for a raw copy. A GPU→host move
+costs 0.77 of the read-plus-write price under these costs.
+
+`run_measured_table.py` reruns the ladder and the online LRU replay with the measured costs in place of
+the declared table, sweeping the unmeasured remote tier (2x host, 3x host, just under disk). Reference with
+dead blocks first 13.8–21.9%, last 69.1–89.7%; seen-once rule 31.8–58.9%; LRU free 82.2–92.3%, priced
+−574.8 to −220.3%, break-even 0.13–0.29, below the serving move price (0.77). ADVISE H7 is not falsified:
+the ordering of the ladder and the online conclusion hold under the measured costs. The paper reports this
+in §V-E (new subsection) and the limitations now say what was and was not measured.

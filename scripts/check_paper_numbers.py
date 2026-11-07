@@ -417,6 +417,49 @@ if _pv:
         f"{_t[x]['n_positions']:,}".replace(",", "{,}") for x in ("conversation", "toolagent")) + " block positions",
         "", "prefix_validity")
 
+# Serving stack and the measured latency table (V-E; notebook BE)
+_sv, _mt = load("serving_tiers_a100.json"), load("measured_table.json")
+if _sv and _mt:
+    print("\nserving stack (serving_tiers_a100.json, measured_table.json)")
+    _s = _sv["summary"]
+    _t, _pb = _s["ttft_median_ms"], _s["per_512_token_block"]
+    for _L, _lab in (("512", "512"), ("2048", "2,048"), ("8192", "8,192")):
+        _r = _t[_L]
+        claim(f"serving TTFT row {_L}", f"{_lab} & {_r['recompute']:.1f} & {_r['gpu']:.1f} & {_r['cpu']:.1f} & "
+              f"{_r['disk_cold']:.1f} \\\\", "", "serving_tiers_a100")
+    claim("serving per-block costs", f"loading from host memory costs {_pb['cpu_load_ms']:.2f}\\,ms and storing there "
+          f"{_pb['cpu_store_ms']:.2f}\\,ms;\nrecomputing costs {_pb['recompute_ms']:.1f}\\,ms; loading from the cold disk costs "
+          f"{_pb['disk_cold_load_ms']:.1f}\\,ms", "", "serving_tiers_a100")
+    assert _pb["disk_cold_load_ms"] > _pb["recompute_ms"], "the paper says a cold disk load costs more than recomputing"
+    assert all(_t[L]["disk_cold"] > _t[L]["recompute"] for L in ("512", "2048", "8192")), \
+        "the paper says a cold disk tier does not pay against recomputation at any prefix length tried"
+    _assist = _t["8192"]["disk_cold"] / _t["8192"]["disk_cache_assisted"]
+    assert 1.7 < _assist < 2.5, f"the paper says the cache-assisted run was about twice as fast ({_assist:.2f})"
+    _g = (_t["8192"]["gpu"] - _t["512"]["gpu"]) / 15
+    _h = _g + _pb["cpu_load_ms"]
+    claim("serving move price multiple", f"costs {_pb['cpu_store_ms'] / (_g + _h):.2f} of the read-plus-write\nprice",
+          "", "serving_tiers_a100")
+    claim("serving GPU:host ratio", f"about 1:{_h / _g:.0f}.", "", "serving_tiers_a100")
+    _m = [r for r in _mt["rows"] if r["table"] != "declared"]
+    def _rg(f, nd=1):
+        v = [f(r) for r in _m]
+        return f"{min(v):.{nd}f}--{max(v):.{nd}f}"
+    claim("measured table: references", f"moves from {_rg(lambda r: r['ladder_pct']['dead-first'])}\\% with dead blocks first to "
+          f"{_rg(lambda r: r['ladder_pct']['dead-last'])}\\% with them last", "", "measured_table")
+    claim("measured table: seen-once", f"the seen-once rule captures\n{_rg(lambda r: r['ladder_pct']['seen-once-last'])}\\%",
+          "", "measured_table")
+    _lp = [r["lru_read_write_pct"] for r in _m]
+    claim("measured table: LRU", f"LRU, at {_rg(lambda r: r['lru_free_pct'])}\\% with free moves, falls to ${min(_lp):.1f}$\\% to "
+          f"${max(_lp):.1f}$\\% at the\nread-plus-write price and breaks even only below {_rg(lambda r: r['lru_alpha_0'], 2)} of it",
+          "", "measured_table")
+    assert max(r["lru_alpha_0"] for r in _m) < _pb["cpu_store_ms"] / (_g + _h), "LRU breaks even at the serving move price"
+    # the declared-table rows must reproduce the evidence ladder and the reactive replay
+    _dec = {r["trace"]: r for r in _mt["rows"] if r["table"] == "declared"}
+    _rcx = {r["trace"]: r["reactive"] for r in load("reactive_cost.json")["rows"]}
+    for _tr in PROD:
+        assert abs(_dec[_tr]["ladder_pct"]["dead-last"] - L(_tr, "visible-dead-last", "tier")) < 0.01, _tr
+        assert abs(_dec[_tr]["lru_free_pct"] - _rcx[_tr]["lru"]["zero"]) < 0.01, _tr
+
 # Arrival-time conventions (V-C): tie shift and order spread from the order/magnitude arms.
 d = load("arrival_admission.json")
 _to = load("tier_only.json")
@@ -937,7 +980,8 @@ REQUIRED = ("reactive_real_full_lrb.json", "headroom_by_length.json", "lrb_retra
             "hazard_prior_tier_rescaled.json", "online_admission.json", "bailian_hazard_birthx.json",
             "reactive_cost.json", "measured_migration.json", "migration_ledger.json",
             "evidence_ladder.json", "reuse_split.json", "ceiling_ties.json", "modern_baselines.json",
-            "evidence_ladder_bailian.json", "prefix_validity.json")
+            "evidence_ladder_bailian.json", "prefix_validity.json", "serving_tiers_a100.json",
+            "measured_table.json")
 missing = [n for n in REQUIRED if not (EXP / n).exists()]
 if missing:
     failures.append("artifacts absent, so their claims went unchecked: " + ", ".join(missing))

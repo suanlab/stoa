@@ -1,0 +1,170 @@
+{
+  "config": {
+    "split": 0.5,
+    "actions": "tier only",
+    "tables": "declared, and three measured tables differing only in the unmeasured remote tier",
+    "source": "run_serving_tiers.per_tier_costs()"
+  },
+  "rows": [
+    {
+      "table": "declared",
+      "trace": "conversation",
+      "read_ms": {
+        "gpu": 0.2,
+        "cpu": 2.0,
+        "disk": 12.0,
+        "remote_rdma": 6.0
+      },
+      "ladder_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 39.18,
+        "dead-first": 20.36,
+        "dead-last": 77.84,
+        "oracle": 100.0
+      },
+      "lru_free_pct": 84.51,
+      "lru_read_write_pct": -400.47,
+      "lru_alpha_0": 0.1743
+    },
+    {
+      "table": "declared",
+      "trace": "toolagent",
+      "read_ms": {
+        "gpu": 0.2,
+        "cpu": 2.0,
+        "disk": 12.0,
+        "remote_rdma": 6.0
+      },
+      "ladder_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 43.29,
+        "dead-first": 15.28,
+        "dead-last": 76.24,
+        "oracle": 100.0
+      },
+      "lru_free_pct": 87.71,
+      "lru_read_write_pct": -401.4,
+      "lru_alpha_0": 0.1793
+    },
+    {
+      "table": "remote = 2x host",
+      "trace": "conversation",
+      "read_ms": {
+        "gpu": 0.6269,
+        "cpu": 3.1889,
+        "remote_rdma": 6.3777,
+        "disk": 45.9899
+      },
+      "ladder_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 31.82,
+        "dead-first": 21.88,
+        "dead-last": 71.31,
+        "oracle": 100.0
+      },
+      "lru_free_pct": 82.16,
+      "lru_read_write_pct": -574.82,
+      "lru_alpha_0": 0.1251
+    },
+    {
+      "table": "remote = 2x host",
+      "trace": "toolagent",
+      "read_ms": {
+        "gpu": 0.6269,
+        "cpu": 3.1889,
+        "remote_rdma": 6.3777,
+        "disk": 45.9899
+      },
+      "ladder_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 34.89,
+        "dead-first": 16.08,
+        "dead-last": 69.13,
+        "oracle": 100.0
+      },
+      "lru_free_pct": 85.26,
+      "lru_read_write_pct": -570.49,
+      "lru_alpha_0": 0.13
+    },
+    {
+      "table": "remote = 3x host",
+      "trace": "conversation",
+      "read_ms": {
+        "gpu": 0.6269,
+        "cpu": 3.1889,
+        "remote_rdma": 9.5666,
+        "disk": 45.9899
+      },
+      "ladder_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 40.46,
+        "dead-first": 20.1,
+        "dead-last": 78.98,
+        "oracle": 100.0
+      },
+      "lru_free_pct": 84.92,
+      "lru_read_write_pct": -427.3,
+      "lru_alpha_0": 0.1658
+    },
+    {
+      "table": "remote = 3x host",
+      "trace": "toolagent",
+      "read_ms": {
+        "gpu": 0.6269,
+        "cpu": 3.1889,
+        "remote_rdma": 9.5666,
+        "disk": 45.9899
+      },
+      "ladder_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 44.76,
+        "dead-first": 15.14,
+        "dead-last": 77.49,
+        "oracle": 100.0
+      },
+      "lru_free_pct": 88.15,
+      "lru_read_write_pct": -428.63,
+      "lru_alpha_0": 0.1706
+    },
+    {
+      "table": "remote \u2248 disk (0.99x)",
+      "trace": "conversation",
+      "read_ms": {
+        "gpu": 0.6269,
+        "cpu": 3.1889,
+        "remote_rdma": 45.53,
+        "disk": 45.9899
+      },
+      "ladder_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 52.58,
+        "dead-first": 17.59,
+        "dead-last": 89.74,
+        "oracle": 100.0
+      },
+      "lru_free_pct": 88.79,
+      "lru_read_write_pct": -220.27,
+      "lru_alpha_0": 0.2873
+    },
+    {
+      "table": "remote \u2248 disk (0.99x)",
+      "trace": "toolagent",
+      "read_ms": {
+        "gpu": 0.6269,
+        "cpu": 3.1889,
+        "remote_rdma": 45.53,
+        "disk": 45.9899
+      },
+      "ladder_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 58.91,
+        "dead-first": 13.79,
+        "dead-last": 89.46,
+        "oracle": 100.0
+      },
+      "lru_free_pct": 92.29,
+      "lru_read_write_pct": -225.22,
+      "lru_alpha_0": 0.2907
+    }
+  ]
+}

@@ -1,13 +1,14 @@
 \section{Limitations}
 \label{sec:limits}
-No serving deployment was measured, only block moves on one host, so any cost-expressed quantity should be
-read as a range. The per-tier read latencies are a declared table, not measurements; its GPU:CPU latency
-ratio is 1:10 where five derived device classes give 1:80 to 1:250, except a deliberately flat one, and
-our A100 host measures 1:58. Deriving the table from three attention shapes and five device classes puts
+Costs were measured on one host, with one model and one serving stack (\Cref{sec:serving}); its disk is
+rotational and it has no NVMe and no RDMA fabric, so the remote tier's cost is swept rather than measured.
+The results use a declared per-tier latency table and are rerun under the measured one; its GPU:CPU
+latency ratio is 1:10 where five derived device classes give 1:80 to 1:250, except a deliberately flat one,
+a raw copy on our A100 host measures 1:58, and the serving stack, where a GPU-resident block still costs
+attention time, about 1:5. Deriving the table from three attention shapes and five device classes puts
 the heuristic-to-oracle headroom at 55--98\%, which contains the 92\% the declared table gives, but we did
 not rerun the ladder or the online replays under the derived tables, and 6 of the 15 configurations
-reorder the hierarchy in a way our fixed capacities cannot express. The remote tier, which receives most
-of the online demotions, and NVMe were not measured.
+reorder the hierarchy in a way our fixed capacities cannot express.
 
 Every placement result is a single deterministic run with no confidence interval, though the split,
 trace length, cost weights, tie rule, action space and billing are swept rather than fixed. The sources

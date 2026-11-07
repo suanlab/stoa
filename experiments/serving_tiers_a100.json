@@ -1,0 +1,594 @@
+{
+ "producer": "scripts/measure_serving_tiers.py on one A100 80GB PCIe Gen4 x16 (GPU idle, host shared); assembled by run_serving_tiers.py --collect",
+ "runs": {
+  "serve_none": {
+   "mode": "none",
+   "model": "6a6f4aa4197940add57724a7707d069478df56b1",
+   "lengths": [
+    512,
+    2048,
+    8192
+   ],
+   "suffix_tokens": 16,
+   "reps": 7,
+   "results": {
+    "512": {
+     "recompute": {
+      "median_ms": 50.35,
+      "all_ms": [
+       51.53,
+       49.935,
+       49.974,
+       50.775,
+       50.388,
+       50.35,
+       50.315
+      ]
+     },
+     "gpu": {
+      "median_ms": 13.79,
+      "all_ms": [
+       13.896,
+       13.821,
+       13.772,
+       13.79,
+       13.691,
+       13.803,
+       13.706
+      ]
+     }
+    },
+    "2048": {
+     "recompute": {
+      "median_ms": 157.883,
+      "all_ms": [
+       158.083,
+       157.883,
+       159.123,
+       156.36,
+       159.298,
+       157.557,
+       155.906
+      ]
+     },
+     "gpu": {
+      "median_ms": 16.263,
+      "all_ms": [
+       15.857,
+       16.147,
+       19.062,
+       16.263,
+       16.273,
+       15.866,
+       16.527
+      ]
+     }
+    },
+    "8192": {
+     "recompute": {
+      "median_ms": 678.489,
+      "all_ms": [
+       675.643,
+       673.276,
+       679.508,
+       677.728,
+       678.489,
+       680.506,
+       680.056
+      ]
+     },
+     "gpu": {
+      "median_ms": 23.193,
+      "all_ms": [
+       23.268,
+       23.721,
+       23.193,
+       22.732,
+       23.374,
+       22.847,
+       22.71
+      ]
+     }
+    }
+   },
+   "env": {
+    "vllm": "0.11.0",
+    "torch": "2.8.0+cu128",
+    "python": "3.12.16",
+    "gpu": "NVIDIA A100 80GB PCIe",
+    "nvidia_smi": "0, NVIDIA A100 80GB PCIe, 4, 16, 71 %, 17383 MiB\n1, NVIDIA A100 80GB PCIe, 4, 16, 0 %, 41885 MiB\n2, NVIDIA A100 80GB PCIe, 4, 16, 97 %, 42253 MiB\n3, NVIDIA A100 80GB PCIe, 4, 8, 0 %, 0 MiB"
+   }
+  },
+  "serve_cpu": {
+   "mode": "cpu",
+   "model": "6a6f4aa4197940add57724a7707d069478df56b1",
+   "lengths": [
+    512,
+    2048,
+    8192
+   ],
+   "suffix_tokens": 16,
+   "reps": 7,
+   "results": {
+    "512": {
+     "cold_with_store": {
+      "median_ms": 53.76,
+      "all_ms": [
+       54.726,
+       53.633,
+       53.488,
+       54.768,
+       53.9,
+       53.76,
+       53.102
+      ]
+     },
+     "cpu": {
+      "median_ms": 17.119,
+      "all_ms": [
+       17.356,
+       17.119,
+       17.117,
+       17.128,
+       16.932,
+       18.103,
+       16.76
+      ]
+     }
+    },
+    "2048": {
+     "cold_with_store": {
+      "median_ms": 168.674,
+      "all_ms": [
+       167.512,
+       168.137,
+       181.402,
+       168.674,
+       169.08,
+       168.46,
+       168.677
+      ]
+     },
+     "cpu": {
+      "median_ms": 26.73,
+      "all_ms": [
+       26.567,
+       27.269,
+       29.71,
+       26.474,
+       26.809,
+       26.365,
+       26.73
+      ]
+     }
+    },
+    "8192": {
+     "cold_with_store": {
+      "median_ms": 718.5,
+      "all_ms": [
+       722.411,
+       715.671,
+       716.441,
+       718.98,
+       718.5,
+       718.825,
+       716.688
+      ]
+     },
+     "cpu": {
+      "median_ms": 64.214,
+      "all_ms": [
+       64.61,
+       64.405,
+       66.024,
+       63.73,
+       64.028,
+       64.214,
+       64.081
+      ]
+     }
+    }
+   },
+   "env": {
+    "vllm": "0.11.0",
+    "torch": "2.8.0+cu128",
+    "python": "3.12.16",
+    "gpu": "NVIDIA A100 80GB PCIe",
+    "nvidia_smi": "0, NVIDIA A100 80GB PCIe, 4, 16, 70 %, 17383 MiB\n1, NVIDIA A100 80GB PCIe, 4, 16, 0 %, 41885 MiB\n2, NVIDIA A100 80GB PCIe, 4, 16, 100 %, 42389 MiB\n3, NVIDIA A100 80GB PCIe, 4, 8, 0 %, 0 MiB",
+    "lmcache": "unknown"
+   }
+  },
+  "serve_disk": {
+   "mode": "disk",
+   "model": "6a6f4aa4197940add57724a7707d069478df56b1",
+   "lengths": [
+    512,
+    2048,
+    8192
+   ],
+   "suffix_tokens": 16,
+   "reps": 7,
+   "results": {
+    "512": {
+     "cold_with_store": {
+      "median_ms": 54.789,
+      "all_ms": [
+       59.287,
+       55.071,
+       53.38,
+       55.065,
+       53.392,
+       54.789,
+       53.099
+      ]
+     },
+     "disk": {
+      "median_ms": 60.933,
+      "all_ms": [
+       60.933,
+       58.935,
+       63.615,
+       57.504,
+       73.559,
+       78.708,
+       56.695
+      ]
+     }
+    },
+    "2048": {
+     "cold_with_store": {
+      "median_ms": 176.03,
+      "all_ms": [
+       175.507,
+       176.51,
+       178.531,
+       177.179,
+       176.03,
+       173.371,
+       170.968
+      ]
+     },
+     "disk": {
+      "median_ms": 165.631,
+      "all_ms": [
+       169.726,
+       153.283,
+       165.631,
+       153.036,
+       151.357,
+       165.986,
+       168.439
+      ]
+     }
+    },
+    "8192": {
+     "cold_with_store": {
+      "median_ms": 724.039,
+      "all_ms": [
+       728.485,
+       722.334,
+       724.039,
+       729.169,
+       721.616,
+       721.917,
+       726.173
+      ]
+     },
+     "disk": {
+      "median_ms": 356.039,
+      "all_ms": [
+       351.889,
+       360.332,
+       356.039,
+       356.572,
+       348.992,
+       352.511,
+       362.527
+      ]
+     }
+    }
+   },
+   "env": {
+    "vllm": "0.11.0",
+    "torch": "2.8.0+cu128",
+    "python": "3.12.16",
+    "gpu": "NVIDIA A100 80GB PCIe",
+    "nvidia_smi": "0, NVIDIA A100 80GB PCIe, 4, 16, 66 %, 17383 MiB\n1, NVIDIA A100 80GB PCIe, 4, 16, 0 %, 41885 MiB\n2, NVIDIA A100 80GB PCIe, 4, 16, 33 %, 42355 MiB\n3, NVIDIA A100 80GB PCIe, 4, 8, 0 %, 0 MiB",
+    "lmcache": "unknown"
+   },
+   "disk_mount": "/dev/sdb ext4"
+  },
+  "serve_disk_buf1": {
+   "mode": "disk",
+   "model": "6a6f4aa4197940add57724a7707d069478df56b1",
+   "lengths": [
+    512,
+    2048,
+    8192
+   ],
+   "suffix_tokens": 16,
+   "reps": 7,
+   "results": {
+    "512": {
+     "cold_with_store": {
+      "median_ms": 55.298,
+      "all_ms": [
+       55.298,
+       56.465,
+       54.953,
+       54.293,
+       57.825,
+       54.15,
+       60.109
+      ]
+     },
+     "disk": {
+      "median_ms": 72.77,
+      "all_ms": [
+       82.917,
+       72.77,
+       70.692,
+       72.774,
+       70.061,
+       79.774,
+       62.639
+      ]
+     }
+    },
+    "2048": {
+     "cold_with_store": {
+      "median_ms": 173.761,
+      "all_ms": [
+       172.903,
+       174.235,
+       172.399,
+       174.181,
+       175.991,
+       173.761,
+       172.578
+      ]
+     },
+     "disk": {
+      "median_ms": 163.111,
+      "all_ms": [
+       152.998,
+       147.271,
+       172.641,
+       146.914,
+       165.744,
+       163.111,
+       175.349
+      ]
+     }
+    },
+    "8192": {
+     "cold_with_store": {
+      "median_ms": 721.509,
+      "all_ms": [
+       718.148,
+       722.618,
+       715.764,
+       717.207,
+       721.509,
+       723.016,
+       731.96
+      ]
+     },
+     "disk": {
+      "median_ms": 351.9,
+      "all_ms": [
+       327.506,
+       348.46,
+       350.0,
+       351.9,
+       377.416,
+       355.152,
+       409.764
+      ]
+     }
+    }
+   },
+   "env": {
+    "vllm": "0.11.0",
+    "torch": "2.8.0+cu128",
+    "python": "3.12.16",
+    "gpu": "NVIDIA A100 80GB PCIe",
+    "nvidia_smi": "0, NVIDIA A100 80GB PCIe, 4, 16, 67 %, 17383 MiB\n1, NVIDIA A100 80GB PCIe, 4, 16, 0 %, 41885 MiB\n2, NVIDIA A100 80GB PCIe, 4, 16, 10 %, 42349 MiB\n3, NVIDIA A100 80GB PCIe, 4, 8, 0 %, 0 MiB",
+    "lmcache": "unknown"
+   },
+   "disk_mount": "/dev/sdb ext4",
+   "disk_cpu_buffer_gb": 1.0
+  },
+  "serve_disk_cold": {
+   "mode": "disk",
+   "model": "6a6f4aa4197940add57724a7707d069478df56b1",
+   "lengths": [
+    512,
+    2048,
+    8192
+   ],
+   "suffix_tokens": 16,
+   "reps": 7,
+   "results": {
+    "512": {
+     "cold_with_store": {
+      "median_ms": 58.095,
+      "all_ms": [
+       58.095,
+       64.341,
+       56.792,
+       62.823,
+       57.383,
+       64.126,
+       56.767
+      ]
+     },
+     "disk_cold": {
+      "median_ms": 58.745,
+      "all_ms": [
+       66.813,
+       58.709,
+       58.745,
+       57.09,
+       61.131,
+       54.981,
+       65.482
+      ]
+     }
+    },
+    "2048": {
+     "cold_with_store": {
+      "median_ms": 185.513,
+      "all_ms": [
+       184.251,
+       187.604,
+       183.728,
+       190.187,
+       184.851,
+       185.513,
+       186.544
+      ]
+     },
+     "disk_cold": {
+      "median_ms": 201.075,
+      "all_ms": [
+       230.649,
+       229.502,
+       201.075,
+       190.041,
+       203.048,
+       195.209,
+       201.063
+      ]
+     }
+    },
+    "8192": {
+     "cold_with_store": {
+      "median_ms": 762.307,
+      "all_ms": [
+       760.428,
+       762.194,
+       762.307,
+       764.5,
+       765.745,
+       760.602,
+       766.66
+      ]
+     },
+     "disk_cold": {
+      "median_ms": 749.58,
+      "all_ms": [
+       830.783,
+       754.908,
+       756.701,
+       731.336,
+       749.58,
+       734.444,
+       748.637
+      ]
+     }
+    },
+    "flush": {
+     "bytes": 17186717470,
+     "gbps": 0.834
+    }
+   },
+   "env": {
+    "vllm": "0.11.0",
+    "torch": "2.8.0+cu128",
+    "python": "3.12.16",
+    "gpu": "NVIDIA A100 80GB PCIe",
+    "nvidia_smi": "0, NVIDIA A100 80GB PCIe, 4, 16, 66 %, 17381 MiB\n1, NVIDIA A100 80GB PCIe, 4, 16, 0 %, 41885 MiB\n2, NVIDIA A100 80GB PCIe, 4, 16, 0 %, 42349 MiB\n3, NVIDIA A100 80GB PCIe, 4, 8, 0 %, 0 MiB",
+    "lmcache": "unknown"
+   },
+   "disk_mount": "/dev/sdb ext4",
+   "disk_cpu_buffer_gb": 1.0
+  }
+ },
+ "lmcache_logged": {
+  "cpu_retrieve_ms_8192": [
+   40.9874,
+   41.1039,
+   42.2501,
+   40.8744,
+   40.9354,
+   40.99,
+   40.8919
+  ],
+  "cpu_store_ms_8192": [
+   47.0966,
+   47.0512,
+   46.1279,
+   48.3235,
+   49.6848,
+   47.2023,
+   46.5815
+  ],
+  "disk_cold_retrieve_ms_8192": [
+   795.4056,
+   731.4379,
+   732.8283,
+   707.9182,
+   725.8141,
+   711.0165,
+   724.9323
+  ],
+  "disk_store_ms_8192": [
+   88.8946,
+   88.7251,
+   88.5275,
+   89.7964,
+   90.2924,
+   86.171,
+   87.6871
+  ]
+ },
+ "summary": {
+  "ttft_median_ms": {
+   "512": {
+    "recompute": 50.35,
+    "gpu": 13.79,
+    "cpu": 17.119,
+    "disk_cold": 58.745,
+    "disk_cache_assisted": 60.933
+   },
+   "2048": {
+    "recompute": 157.883,
+    "gpu": 16.263,
+    "cpu": 26.73,
+    "disk_cold": 201.075,
+    "disk_cache_assisted": 165.631
+   },
+   "8192": {
+    "recompute": 678.489,
+    "gpu": 23.193,
+    "cpu": 64.214,
+    "disk_cold": 749.58,
+    "disk_cache_assisted": 356.039
+   }
+  },
+  "per_512_token_block": {
+   "recompute_ms": 40.956,
+   "cpu_load_ms": 2.562,
+   "disk_cold_load_ms": 45.363,
+   "cpu_store_ms": 2.944
+  },
+  "n_logged": {
+   "cpu_retrieve_ms_8192": 7,
+   "cpu_store_ms_8192": 7,
+   "disk_cold_retrieve_ms_8192": 7,
+   "disk_store_ms_8192": 7
+  },
+  "disk_cold_load_gbps": 1.479,
+  "cpu_load_gbps": 26.197,
+  "flush_read_gbps": 0.834,
+  "flush_gib": 16.0,
+  "env": {
+   "vllm": "0.11.0",
+   "torch": "2.8.0+cu128",
+   "python": "3.12.16",
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "nvidia_smi": "0, NVIDIA A100 80GB PCIe, 4, 16, 71 %, 17383 MiB\n1, NVIDIA A100 80GB PCIe, 4, 16, 0 %, 41885 MiB\n2, NVIDIA A100 80GB PCIe, 4, 16, 97 %, 42253 MiB\n3, NVIDIA A100 80GB PCIe, 4, 8, 0 %, 0 MiB"
+  }
+ }
+}

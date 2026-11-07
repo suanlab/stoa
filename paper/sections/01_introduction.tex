@@ -33,7 +33,9 @@ policy (\Cref{sec:online}). Whether anything that moves blocks pays is set by th
 KV-cache studies usually assume away (\Cref{tab:protocols}). We measured it on an A100 host: a move between
 GPU and host memory costs 0.75--1.87 times one read plus one write, at least 10 times what the arrival-time
 gain could afford, and under every way of billing a move we tried, none of the replayed policies that move
-blocks beats a static frequency heuristic. Reactive replacement, finally, stays within a few points of
+blocks beats a static frequency heuristic. A serving stack (vLLM with LMCache) on the same host confirms
+it under its own costs and adds that loading a block from a cold rotational disk costs more than
+recomputing it (\Cref{sec:serving}). Reactive replacement, finally, stays within a few points of
 plain rules: the adaptive family (ARC, LeCaR, CACHEUS) beats the best plain rule by at most 4.6 points of
 Belady, a learned LRB stays below ARC, and S3-FIFO, SIEVE and W-TinyLFU stay below the best plain rule
 everywhere, because most blocks never produce the second access these designs act on (\Cref{sec:reaction}).
