@@ -49,8 +49,12 @@ same, all actions & 15.6 / 50.8 & 12.4 / 49.4 & 45.4 / 62.7 \\
 (tier-only), more than any policy difference we measured. Neither version is an upper bound for the
 policies it stands for: on 200 random ten-block workloads an exhaustive search over placements of the
 visible blocks beats the published convention in 90 and the dead-last one in 83, by reserving fast
-slots for arrivals, which needs knowledge of the arrivals. We therefore report both and call neither a
-ceiling. The headline of earlier versions, that most of the oracle's advantage is out of a split-time
+slots for arrivals, which needs knowledge of the arrivals. Knowing only the arrivals' average does not
+lift the reference: parking every visible block whose future is below the mean future of the new blocks
+(0.35 and 0.34 accesses) parks exactly the dead ones on the production traces, so the dead-last reference
+is already what a split-time reference can build from the arrival distribution; on the small workloads
+the same rule recovers 52.4\% of the gap to the exhaustive search. We therefore report both and call
+neither a ceiling. The headline of earlier versions, that most of the oracle's advantage is out of a split-time
 policy's reach, was this tie rule.
 
 \subsection{Knowing which seen blocks are dead is most of the prize}

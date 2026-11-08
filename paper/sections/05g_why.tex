@@ -29,5 +29,8 @@ that are dead 98.0\% and 99.9\% of the time but reaches only half of the dead on
 captures 49.0\% and 50.4\%, but on Alibaba's traces it beats the seen-once rule on two, falls below it on
 the other two, and loses 19.1\% on traceB, the nearly stationary trace, where age says least; the
 registered rule is below the seen-once rule on all four. Every rule we tried gains on every trace except
-that one, and none beats the seen-once rule on every trace. With every rule's precision at 0.95 or more to two decimals, what decides a rule's
+that one, and none beats the seen-once rule on every trace. Measuring age by the session instead of the
+block, with the session taken from the prefix as the block after the first branching point of its hash
+chain, changes the result by less than a point (29.8\% and 30.6\% against 30.5\% and 31.1\%), since reading
+a block reads its prefix. With every rule's precision at 0.95 or more to two decimals, what decides a rule's
 value is how many of the dead blocks it reaches.

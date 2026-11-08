@@ -1,0 +1,42 @@
+{
+  "config": {
+    "toys": "run_ceiling_ties.toy, 200, seed 0",
+    "split": 0.5,
+    "registered": "confirmed if recovered >= 0.5 (toys, tier-only); rejected if < 0.25"
+  },
+  "toys": {
+    "all": {
+      "recovered_share": -2.0918,
+      "newsvendor_worse_than_dead_last": 133,
+      "n": 200
+    },
+    "tier": {
+      "recovered_share": 0.5238,
+      "newsvendor_worse_than_dead_last": 15,
+      "n": 200
+    }
+  },
+  "traces": [
+    {
+      "trace": "conversation",
+      "mean_future_new": 0.3472,
+      "dead_last_pct": 77.84,
+      "newsvendor_pct": 77.84,
+      "parked_live_visible": 0
+    },
+    {
+      "trace": "toolagent",
+      "mean_future_new": 0.3396,
+      "dead_last_pct": 76.24,
+      "newsvendor_pct": 76.24,
+      "parked_live_visible": 0
+    },
+    {
+      "trace": "synthetic",
+      "mean_future_new": 1.3734,
+      "dead_last_pct": 84.12,
+      "newsvendor_pct": 84.63,
+      "parked_live_visible": 2683
+    }
+  ]
+}

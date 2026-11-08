@@ -1,0 +1,76 @@
+{
+  "config": {
+    "split": 0.5,
+    "actions": "tier only",
+    "session": "block after the first branching point on the chain (branching = >= 2 successors seen before the split)",
+    "registered": "rejected if session-old-last is >= 3 points below block-old-last on either production trace"
+  },
+  "rows": [
+    {
+      "trace": "conversation",
+      "branching_blocks": 1834,
+      "n_sessions_visible": 3864,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "oracle": 100.0,
+        "seen-once-last": 39.18,
+        "block-old-last": 30.46,
+        "session-old-last": 29.8
+      },
+      "precision_for_dead": {
+        "seen-once-last": 0.9487,
+        "block-old-last": 0.9805,
+        "session-old-last": 0.9784
+      },
+      "recall_for_dead": {
+        "seen-once-last": 0.7836,
+        "block-old-last": 0.5284,
+        "session-old-last": 0.5268
+      }
+    },
+    {
+      "trace": "toolagent",
+      "branching_blocks": 1866,
+      "n_sessions_visible": 9597,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "oracle": 100.0,
+        "seen-once-last": 43.29,
+        "block-old-last": 31.1,
+        "session-old-last": 30.6
+      },
+      "precision_for_dead": {
+        "seen-once-last": 0.9722,
+        "block-old-last": 0.9983,
+        "session-old-last": 0.9972
+      },
+      "recall_for_dead": {
+        "seen-once-last": 0.8011,
+        "block-old-last": 0.5248,
+        "session-old-last": 0.5243
+      }
+    },
+    {
+      "trace": "synthetic",
+      "branching_blocks": 202,
+      "n_sessions_visible": 32588,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "oracle": 100.0,
+        "seen-once-last": 15.4,
+        "block-old-last": 12.12,
+        "session-old-last": 12.09
+      },
+      "precision_for_dead": {
+        "seen-once-last": 0.7919,
+        "block-old-last": 0.7867,
+        "session-old-last": 0.7867
+      },
+      "recall_for_dead": {
+        "seen-once-last": 0.8642,
+        "block-old-last": 0.6104,
+        "session-old-last": 0.6103
+      }
+    }
+  ]
+}

@@ -472,6 +472,26 @@ if _ir and _irb and _hz6 and _ar2:
     assert min(min(v for v in _A[t]["precision_for_dead"].values()) for t in PROD) >= 0.945, \
         "the paper says every rule's precision is 0.95 or more to two decimals"
 
+# Reservation (H5) and session-level age (H8) (V-A, V-B; notebook BH)
+_rv, _sa = load("reservation.json"), load("session_age.json")
+if _rv and _sa:
+    print("\nreservation and sessions (reservation.json, session_age.json)")
+    _T5 = {r["trace"]: r for r in _rv["traces"]}
+    assert all(_T5[t]["newsvendor_pct"] == _T5[t]["dead_last_pct"] and _T5[t]["parked_live_visible"] == 0 for t in PROD), \
+        "the paper says the newsvendor rule parks exactly the dead blocks on production"
+    claim("newsvendor mean future", f"of the new blocks\n({_T5['conversation']['mean_future_new']:.2f} and "
+          f"{_T5['toolagent']['mean_future_new']:.2f} accesses)", "", "reservation")
+    _rs5 = _rv["toys"]["tier"]["recovered_share"]
+    assert _rs5 >= 0.5, "H5 registered: confirmed on toys (tier-only)"
+    claim("newsvendor recovered share", f"recovers {100*_rs5:.1f}\\% of the gap to the exhaustive search", "", "reservation")
+    _S8 = {r["trace"]: r["captured_pct"] for r in _sa["rows"]}
+    assert all(_S8[t]["block-old-last"] - _S8[t]["session-old-last"] < 3 for t in PROD), "H8 registered rejection"
+    assert all(abs(_S8[t]["block-old-last"] - _S8[t]["session-old-last"]) < 1 for t in PROD), "the paper says under a point"
+    claim("session vs block age", f"({_S8['conversation']['session-old-last']:.1f}\\% and {_S8['toolagent']['session-old-last']:.1f}\\% "
+          f"against {_S8['conversation']['block-old-last']:.1f}\\% and {_S8['toolagent']['block-old-last']:.1f}\\%)", "", "session_age")
+    _ag = {r["trace"]: r["captured_pct"] for r in load("age_rules.json")["rows"]}
+    assert all(abs(_ag[t]["old-last"] - _S8[t]["block-old-last"]) < 0.01 for t in PROD), "two block-age rules disagree"
+
 # Ski rental (H3) and predicting the break-even price (H4) (V-D; notebook BG)
 _sk = load("ski_rental.json")
 if _sk:
@@ -1073,7 +1093,8 @@ REQUIRED = ("reactive_real_full_lrb.json", "headroom_by_length.json", "lrb_retra
             "evidence_ladder.json", "reuse_split.json", "ceiling_ties.json", "modern_baselines.json",
             "evidence_ladder_bailian.json", "prefix_validity.json", "serving_tiers_a100.json",
             "measured_table.json", "irm_departure.json", "irm_departure_bailian.json", "eval_window.json",
-            "age_rules.json", "age_rules_bailian.json", "ski_rental.json")
+            "age_rules.json", "age_rules_bailian.json", "ski_rental.json", "reservation.json",
+            "session_age.json")
 missing = [n for n in REQUIRED if not (EXP / n).exists()]
 if missing:
     failures.append("artifacts absent, so their claims went unchecked: " + ", ".join(missing))

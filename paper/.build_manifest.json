@@ -1,5 +1,5 @@
 {
-  "pdf": "8c9dba806f801e7f6eb5cdd668942cb59cc273ae5b9624fbe572b4a3cef7bd7f",
+  "pdf": "f6a39345390e1cf90da6993c79bba9c0d27dce640557e1a5e81d37cd7e293688",
   "sources": {
     "../docs/references.bib": "9617204a9c2212846692cb170e83cfa2c9174991b7765cf7342fe9068b6c922b",
     "ACM-Reference-Format.bst": "0590db3b8d255a3af91982ab710f3ace5fcaa52434020c9af8a4f141b00b68f3",
@@ -23,13 +23,13 @@
     "sections/02_background.tex": "a0f6d47d0a7b9645bd11e531b46248a252804fde09ab00fea39e96eca0ec58a2",
     "sections/03_definitions.tex": "82af35eaf6fac428ba1be58aa4fe53b0bdd54cf95181afcb7c402b91a7255e3c",
     "sections/04_workloads.tex": "7c60ecda39d88dd1c70cd213a010bf675eafd823d82396a9cebd99d56cca7e96",
-    "sections/05a_evidence.tex": "743798b0489322d0d099aeefb6663d659caff7e5513ad50402daffbf94e69892",
+    "sections/05a_evidence.tex": "1a124a91d1b4943fe792ea9150c0c101230db0c1b0218654f0f9a95456145631",
     "sections/05b_online.tex": "724d5cf1df4ebc759ec83ef36763edd27d4b9bc291afc083f4958b8930418c42",
     "sections/05c_reaction.tex": "c59d0b837a52ed505536668ca794e418eb61264d1c02aebeeb549036a0eb5f03",
     "sections/05d_ranking.tex": "11dd3e5fb9f4eb1fe88757695e1a8f809a15cc3baa74971875c62558e3749618",
     "sections/05e_sampling.tex": "1857a6e11dfee72fd0ab081588f02796c95413ebf84f5a0dcb5798730d7a004c",
     "sections/05f_serving.tex": "ca5c82038a5e5e7604b9ddf828c6ebed7b8a6f01bf8d3b108ada820e989fdb0c",
-    "sections/05g_why.tex": "0ba6f4e412f4d25b87ae50a8978d71be5a0722bd1ef5ef310da8d4d6a5a7787c",
+    "sections/05g_why.tex": "276f299a6c87ce2dd60285c6596ba7e8cdd7efff14b47f46c474a7c9fa75e147",
     "sections/06_lessons.tex": "60f82a631c4e118982ac23e1e3e273f6c77d1216e179c8d49ee44702f3b0ea7e",
     "sections/07_limits.tex": "00ce450e27209f26778ae3676f2296759499dc7f702b085b11b8814bf74d0d09",
     "sections/08_conclusion.tex": "8e410d1ed701fe2d84c698d0cb5bfc8d21c59db91d55e5ce2c491f54df3c4191",

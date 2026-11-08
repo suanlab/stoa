@@ -49,6 +49,8 @@ DEPENDS_ON = {
     "bailian_hazard_birthx.json": ("traces.py", "sequential.py", "mooncake.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py", "environment.py"),
     # derived from tier_costs_a100.json (raw hardware timings) and online_admission.json; no module
     "prefix_validity.json": (),
+    "reservation.json": ("traces.py", "sequential.py", "mooncake.py", "simulator.py", "environment.py", "eval/oracle.py"),
+    "session_age.json": ("traces.py", "sequential.py", "mooncake.py", "simulator.py", "environment.py", "eval/oracle.py"),
     "ski_rental.json": ("traces.py", "sequential.py", "mooncake.py", "simulator.py", "environment.py", "eval/oracle.py", "causal.py", "credit.py", "gnn.py"),
     "irm_departure.json": ("traces.py", "mooncake.py"),
     "irm_departure_bailian.json": ("traces.py", "mooncake.py"),

@@ -2469,3 +2469,25 @@ one-signed (low in every case), consistent with §BF H6: a shorter window lowers
 
 What the paper says (§V-D): moving a block only once it has paid does not rescue moving at measured prices;
 the obstacle is capacity coupling, not the decision rule.
+
+## §BH — reservation (ADVISE H5) and sessions (H8)
+
+**H5 — confirmed, narrowly, on the small workloads; moot on production** (`run_reservation.py`). A
+reference that knows the visible futures and only the MEAN future of the new blocks parks every visible
+block below that mean behind the new ones (newsvendor). On the 200 ten-block workloads of §AZ it recovers
+52.4% of the gap between dead-last and the exhaustive search (tier-only; registered threshold 50%). With
+all actions it does worse than dead-last (−209%), because a parked live block's zero belief also changes
+which representation the greedy pass gives it — one more way the 50-action space is model-dependent. On
+production the new blocks' mean future is 0.35 / 0.34 accesses, below every live block's, so the rule parks
+exactly the dead blocks and equals dead-last (77.84 / 76.24%); on synthetic (mean 1.37) it parks 2,683 live
+blocks and adds 0.5 points. Reading: on these traces dead-last is what a split-time reference can build
+from the arrival distribution; the exhaustive search's extra gain needs per-arrival knowledge.
+
+**H8 — not rejected, and no gain** (`run_session_age.py`). The traces carry no session ids, and the hash
+chain's root is not one (conversation has a single root, the shared system prompt). A session is taken
+from the prefix: branching points are blocks followed by two or more different blocks before the split; a
+block's session is the block after the first branching point on its chain. Session-age rule 29.8 / 30.6%
+vs the block-age rule 30.5 / 31.1% (precision 0.978 / 0.997, recall 0.527 / 0.524 vs 0.981 / 0.998, 0.528 /
+0.525): within a point, as expected once reading a block reads its prefix. The registered rejection (≥ 3
+points below) did not occur. The first version used the chain root and crashed on an empty set; that run
+wrote nothing.
