@@ -9,6 +9,33 @@
       5
     ],
     "control": "requests shuffled, seed 0",
+    "shuffle_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "chunks_requests": [
+      100,
+      1000,
+      3000
+    ],
     "registered": "rejected if >= 2 of 4 Alibaba traces have rho_1 >= 0.8"
   },
   "traces": {
@@ -106,6 +133,199 @@
             "p_dead": 0.0239
           }
         ]
+      },
+      "shuffle_seeds": {
+        "seeds": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19
+        ],
+        "rho_range": {
+          "1": [
+            0.8649,
+            1.2387
+          ],
+          "2": [
+            0.7434,
+            1.406
+          ],
+          "3": [
+            0.5083,
+            2.1184
+          ],
+          "4": [
+            0.339,
+            1.9536
+          ],
+          "5": [
+            0.4837,
+            3.6806
+          ]
+        },
+        "gt_minus_actual_range": [
+          -0.0408,
+          0.0271
+        ]
+      },
+      "chunk_shuffles": {
+        "100": {
+          "split_step": 6015,
+          "good_turing_missing_mass": 0.6,
+          "post_split_access_share_new": 0.6039,
+          "by_k": [
+            {
+              "k": 1,
+              "n_k": 85720,
+              "actual_mean_future": 0.2565,
+              "robbins": 0.3057,
+              "rho": 0.8392,
+              "p_dead": 0.8033
+            },
+            {
+              "k": 2,
+              "n_k": 13101,
+              "actual_mean_future": 0.9209,
+              "robbins": 0.8271,
+              "rho": 1.1134,
+              "p_dead": 0.4407
+            },
+            {
+              "k": 3,
+              "n_k": 3612,
+              "actual_mean_future": 1.7926,
+              "robbins": 1.2226,
+              "rho": 1.4663,
+              "p_dead": 0.2403
+            },
+            {
+              "k": 4,
+              "n_k": 1104,
+              "actual_mean_future": 2.0996,
+              "robbins": 1.8297,
+              "rho": 1.1475,
+              "p_dead": 0.1966
+            },
+            {
+              "k": 5,
+              "n_k": 404,
+              "actual_mean_future": 3.849,
+              "robbins": 4.5743,
+              "rho": 0.8415,
+              "p_dead": 0.104
+            }
+          ]
+        },
+        "1000": {
+          "split_step": 6015,
+          "good_turing_missing_mass": 0.5543,
+          "post_split_access_share_new": 0.6805,
+          "by_k": [
+            {
+              "k": 1,
+              "n_k": 80597,
+              "actual_mean_future": 0.2226,
+              "robbins": 0.296,
+              "rho": 0.752,
+              "p_dead": 0.8462
+            },
+            {
+              "k": 2,
+              "n_k": 11930,
+              "actual_mean_future": 0.5371,
+              "robbins": 1.321,
+              "rho": 0.4066,
+              "p_dead": 0.7263
+            },
+            {
+              "k": 3,
+              "n_k": 5253,
+              "actual_mean_future": 0.8923,
+              "robbins": 1.2488,
+              "rho": 0.7145,
+              "p_dead": 0.6067
+            },
+            {
+              "k": 4,
+              "n_k": 1640,
+              "actual_mean_future": 1.1006,
+              "robbins": 1.9726,
+              "rho": 0.558,
+              "p_dead": 0.5244
+            },
+            {
+              "k": 5,
+              "n_k": 647,
+              "actual_mean_future": 3.1669,
+              "robbins": 2.8099,
+              "rho": 1.1271,
+              "p_dead": 0.34
+            }
+          ]
+        },
+        "3000": {
+          "split_step": 6015,
+          "good_turing_missing_mass": 0.5322,
+          "post_split_access_share_new": 0.779,
+          "by_k": [
+            {
+              "k": 1,
+              "n_k": 73799,
+              "actual_mean_future": 0.1634,
+              "robbins": 0.318,
+              "rho": 0.514,
+              "p_dead": 0.9013
+            },
+            {
+              "k": 2,
+              "n_k": 11733,
+              "actual_mean_future": 0.347,
+              "robbins": 0.8297,
+              "rho": 0.4182,
+              "p_dead": 0.8099
+            },
+            {
+              "k": 3,
+              "n_k": 3245,
+              "actual_mean_future": 0.3963,
+              "robbins": 2.1066,
+              "rho": 0.1881,
+              "p_dead": 0.7744
+            },
+            {
+              "k": 4,
+              "n_k": 1709,
+              "actual_mean_future": 0.7771,
+              "robbins": 2.5132,
+              "rho": 0.3092,
+              "p_dead": 0.6987
+            },
+            {
+              "k": 5,
+              "n_k": 859,
+              "actual_mean_future": 0.8056,
+              "robbins": 4.3795,
+              "rho": 0.1839,
+              "p_dead": 0.5891
+            }
+          ]
+        }
       }
     },
     "toolagent": {
@@ -202,6 +422,199 @@
             "p_dead": 0.0589
           }
         ]
+      },
+      "shuffle_seeds": {
+        "seeds": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19
+        ],
+        "rho_range": {
+          "1": [
+            0.9042,
+            1.3069
+          ],
+          "2": [
+            0.6935,
+            1.1997
+          ],
+          "3": [
+            0.6883,
+            1.8728
+          ],
+          "4": [
+            0.6151,
+            3.9955
+          ],
+          "5": [
+            0.1638,
+            2.9822
+          ]
+        },
+        "gt_minus_actual_range": [
+          -0.01,
+          0.0158
+        ]
+      },
+      "chunk_shuffles": {
+        "100": {
+          "split_step": 11803,
+          "good_turing_missing_mass": 0.4253,
+          "post_split_access_share_new": 0.4313,
+          "by_k": [
+            {
+              "k": 1,
+              "n_k": 86773,
+              "actual_mean_future": 0.273,
+              "robbins": 0.2477,
+              "rho": 1.1017,
+              "p_dead": 0.8189
+            },
+            {
+              "k": 2,
+              "n_k": 10749,
+              "actual_mean_future": 0.8254,
+              "robbins": 0.8683,
+              "rho": 0.9506,
+              "p_dead": 0.4913
+            },
+            {
+              "k": 3,
+              "n_k": 3111,
+              "actual_mean_future": 1.5272,
+              "robbins": 1.1392,
+              "rho": 1.3406,
+              "p_dead": 0.3552
+            },
+            {
+              "k": 4,
+              "n_k": 886,
+              "actual_mean_future": 1.9842,
+              "robbins": 3.4594,
+              "rho": 0.5736,
+              "p_dead": 0.2449
+            },
+            {
+              "k": 5,
+              "n_k": 613,
+              "actual_mean_future": 1.9739,
+              "robbins": 4.5808,
+              "rho": 0.4309,
+              "p_dead": 0.1419
+            }
+          ]
+        },
+        "1000": {
+          "split_step": 11803,
+          "good_turing_missing_mass": 0.4236,
+          "post_split_access_share_new": 0.4279,
+          "by_k": [
+            {
+              "k": 1,
+              "n_k": 87954,
+              "actual_mean_future": 0.2305,
+              "robbins": 0.271,
+              "rho": 0.8505,
+              "p_dead": 0.8409
+            },
+            {
+              "k": 2,
+              "n_k": 11917,
+              "actual_mean_future": 0.8501,
+              "robbins": 0.8355,
+              "rho": 1.0175,
+              "p_dead": 0.5191
+            },
+            {
+              "k": 3,
+              "n_k": 3319,
+              "actual_mean_future": 1.2389,
+              "robbins": 1.4281,
+              "rho": 0.8675,
+              "p_dead": 0.3691
+            },
+            {
+              "k": 4,
+              "n_k": 1185,
+              "actual_mean_future": 2.2464,
+              "robbins": 2.0084,
+              "rho": 1.1185,
+              "p_dead": 0.1291
+            },
+            {
+              "k": 5,
+              "n_k": 476,
+              "actual_mean_future": 3.9034,
+              "robbins": 6.0252,
+              "rho": 0.6478,
+              "p_dead": 0.2437
+            }
+          ]
+        },
+        "3000": {
+          "split_step": 11803,
+          "good_turing_missing_mass": 0.3856,
+          "post_split_access_share_new": 0.5044,
+          "by_k": [
+            {
+              "k": 1,
+              "n_k": 78569,
+              "actual_mean_future": 0.157,
+              "robbins": 0.2977,
+              "rho": 0.5273,
+              "p_dead": 0.8985
+            },
+            {
+              "k": 2,
+              "n_k": 11695,
+              "actual_mean_future": 0.5165,
+              "robbins": 0.9214,
+              "rho": 0.5605,
+              "p_dead": 0.7
+            },
+            {
+              "k": 3,
+              "n_k": 3592,
+              "actual_mean_future": 0.9925,
+              "robbins": 1.7673,
+              "rho": 0.5616,
+              "p_dead": 0.5064
+            },
+            {
+              "k": 4,
+              "n_k": 1587,
+              "actual_mean_future": 1.2798,
+              "robbins": 1.903,
+              "rho": 0.6725,
+              "p_dead": 0.4455
+            },
+            {
+              "k": 5,
+              "n_k": 604,
+              "actual_mean_future": 1.5579,
+              "robbins": 7.3808,
+              "rho": 0.2111,
+              "p_dead": 0.543
+            }
+          ]
+        }
       }
     },
     "synthetic": {
@@ -298,6 +711,199 @@
             "p_dead": 0.107
           }
         ]
+      },
+      "shuffle_seeds": {
+        "seeds": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19
+        ],
+        "rho_range": {
+          "1": [
+            0.8119,
+            1.3562
+          ],
+          "2": [
+            0.754,
+            1.4187
+          ],
+          "3": [
+            0.6889,
+            1.6481
+          ],
+          "4": [
+            0.3838,
+            1.8844
+          ],
+          "5": [
+            0.3488,
+            2.326
+          ]
+        },
+        "gt_minus_actual_range": [
+          -0.0538,
+          0.0333
+        ]
+      },
+      "chunk_shuffles": {
+        "100": {
+          "split_step": 1996,
+          "good_turing_missing_mass": 0.2853,
+          "post_split_access_share_new": 0.3156,
+          "by_k": [
+            {
+              "k": 1,
+              "n_k": 16821,
+              "actual_mean_future": 0.6251,
+              "robbins": 0.5427,
+              "rho": 1.1518,
+              "p_dead": 0.7299
+            },
+            {
+              "k": 2,
+              "n_k": 4564,
+              "actual_mean_future": 1.9654,
+              "robbins": 2.0377,
+              "rho": 0.9645,
+              "p_dead": 0.2147
+            },
+            {
+              "k": 3,
+              "n_k": 3100,
+              "actual_mean_future": 2.8274,
+              "robbins": 2.3187,
+              "rho": 1.2194,
+              "p_dead": 0.1252
+            },
+            {
+              "k": 4,
+              "n_k": 1797,
+              "actual_mean_future": 2.852,
+              "robbins": 3.108,
+              "rho": 0.9176,
+              "p_dead": 0.1007
+            },
+            {
+              "k": 5,
+              "n_k": 1117,
+              "actual_mean_future": 3.6777,
+              "robbins": 1.0421,
+              "rho": 3.5292,
+              "p_dead": 0.0
+            }
+          ]
+        },
+        "1000": {
+          "split_step": 1996,
+          "good_turing_missing_mass": 0.3542,
+          "post_split_access_share_new": 0.2645,
+          "by_k": [
+            {
+              "k": 1,
+              "n_k": 19767,
+              "actual_mean_future": 0.7128,
+              "robbins": 0.6354,
+              "rho": 1.1217,
+              "p_dead": 0.786
+            },
+            {
+              "k": 2,
+              "n_k": 6280,
+              "actual_mean_future": 2.7341,
+              "robbins": 1.2745,
+              "rho": 2.1452,
+              "p_dead": 0.1693
+            },
+            {
+              "k": 3,
+              "n_k": 2668,
+              "actual_mean_future": 1.7871,
+              "robbins": 2.4333,
+              "rho": 0.7344,
+              "p_dead": 0.25
+            },
+            {
+              "k": 4,
+              "n_k": 1623,
+              "actual_mean_future": 2.5841,
+              "robbins": 4.122,
+              "rho": 0.6269,
+              "p_dead": 0.2021
+            },
+            {
+              "k": 5,
+              "n_k": 1338,
+              "actual_mean_future": 4.9365,
+              "robbins": 0.6726,
+              "rho": 7.3389,
+              "p_dead": 0.0426
+            }
+          ]
+        },
+        "3000": {
+          "split_step": 1996,
+          "good_turing_missing_mass": 0.4714,
+          "post_split_access_share_new": 0.3534,
+          "by_k": [
+            {
+              "k": 1,
+              "n_k": 23290,
+              "actual_mean_future": 0.9048,
+              "robbins": 0.4635,
+              "rho": 1.9522,
+              "p_dead": 0.7919
+            },
+            {
+              "k": 2,
+              "n_k": 5397,
+              "actual_mean_future": 2.6971,
+              "robbins": 1.6498,
+              "rho": 1.6348,
+              "p_dead": 0.2581
+            },
+            {
+              "k": 3,
+              "n_k": 2968,
+              "actual_mean_future": 2.5937,
+              "robbins": 1.4124,
+              "rho": 1.8364,
+              "p_dead": 0.3137
+            },
+            {
+              "k": 4,
+              "n_k": 1048,
+              "actual_mean_future": 1.979,
+              "robbins": 1.6555,
+              "rho": 1.1954,
+              "p_dead": 0.3693
+            },
+            {
+              "k": 5,
+              "n_k": 347,
+              "actual_mean_future": 2.9539,
+              "robbins": 1.4006,
+              "rho": 2.1091,
+              "p_dead": 0.536
+            }
+          ]
+        }
       }
     }
   }

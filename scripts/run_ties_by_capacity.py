@@ -9,9 +9,14 @@ control:
 
   heuristic        prefix counts, new blocks last (0)
   seen-once-last   causal: visible blocks seen once behind the new blocks
+  dead-known       clairvoyant on deadness only: prefix counts for live visible blocks, dead ones behind new
   dead-first       clairvoyant visible futures, dead visible blocks ahead of new ones (the published rule)
   dead-last        the same, dead visible blocks behind new ones
   oracle           clairvoyant futures for every block (100)
+
+Where "knowing deadness = knowing every visible future" holds (§BJ; review 2026-11-09): at our capacities
+the live visible blocks fit in the GPU tier, so their order cannot matter; each row records the live visible
+blocks and the GPU tier's slots, and dead-known beside dead-last, so the boundary is visible.
 
 Also reported: the oracle's advantage over the heuristic in ms of block reads per post-split request
 (cost / lambda_latency; the token term is the same on every tier and cancels, tier-only actions change
@@ -38,7 +43,7 @@ from stoa.mooncake import load_mooncake  # noqa: E402
 from train_session_features import parse_requests  # noqa: E402
 
 TRACES = {n: f"data/mooncake_{n}_trace.jsonl" for n in ("conversation", "toolagent", "synthetic")}
-SCALES = (0.25, 0.5, 1.0, 1.5)
+SCALES = (0.1, 0.25, 0.5, 1.0, 1.5)
 FINITE = (Tier.GPU, Tier.CPU, Tier.REMOTE_RDMA)
 
 
@@ -51,14 +56,17 @@ def ladder(wl, path):
     cnt = {b: float(pre[b]["count"]) for b in vis}
     arms = {"heuristic": (wl, cnt),
             "seen-once-last": (ordered(wl, once), {b: (0.0 if b in once else c) for b, c in cnt.items()}),
+            "dead-known": (ordered(wl, dead), {b: (0.0 if b in dead else c) for b, c in cnt.items()}),
             "dead-first": (wl, {b: float(fut.get(b, 0)) for b in vis}),
             "dead-last": (ordered(wl, dead), {b: float(fut.get(b, 0)) for b in vis}),
             "oracle": (wl, {i.item_id: float(fut.get(i.item_id, 0)) for i in wl.items})}
     cost = {a: sq.place_with_beliefs(w_, b_) for a, (w_, b_) in arms.items()}
     span = cost["heuristic"] - cost["oracle"]
     n_req = sum(1 for t, _s, _b in parse_requests(str(ROOT / path), 10 ** 9) if t >= st)
+    gpu_slots = int(simmod.TieringSimulator().tier_capacities(wl.total_bytes)[Tier.GPU] // wl.items[0].size_bytes)
     return ({a: round(100 * (cost["heuristic"] - c) / span, 2) for a, c in cost.items()},
-            round(span / DEFAULT_WEIGHTS.lambda_latency / n_req, 3), n_req)
+            round(span / DEFAULT_WEIGHTS.lambda_latency / n_req, 3), n_req,
+            {"live_visible": len(vis) - len(dead), "gpu_slots": gpu_slots})
 
 
 def main() -> int:
@@ -71,11 +79,12 @@ def main() -> int:
             for s in SCALES:
                 for t in FINITE:
                     simmod._TIER_CAPACITY_FRACTION[t] = base[t] * s
-                pct, ms, n_req = ladder(wl, path)
+                pct, ms, n_req, sizes = ladder(wl, path)
                 rows.append({"trace": name, "scale": s,
                              "fractions": {t.value: round(simmod._TIER_CAPACITY_FRACTION[t], 4) for t in FINITE},
                              "captured_pct": pct, "tie_rule_swing": round(pct["dead-last"] - pct["dead-first"], 2),
-                             "oracle_advantage_ms_per_request": ms, "post_split_requests": n_req})
+                             "oracle_advantage_ms_per_request": ms, "post_split_requests": n_req, **sizes,
+                             "deadness_vs_futures_gap": round(pct["dead-last"] - pct["dead-known"], 2)})
                 print(rows[-1], flush=True)
     finally:
         simmod._TIER_CAPACITY_FRACTION.clear()

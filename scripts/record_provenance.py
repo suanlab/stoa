@@ -40,12 +40,24 @@ def main() -> int:
               "commit/revert the modules first.")
         return 1
 
+    # The producer scripts too (notebook BJ): each artifact's producer and the scripts it imports.
+    from artifact_deps import PRODUCERS, READERS
+    prods = {art: verify.producer_scripts(art, ROOT / "scripts", READERS, PRODUCERS) for art in depends_on}
+    sdeps = sorted({f"scripts/{n}" for v in prods.values() for n in v})
+    dirty = subprocess.run(["git", "status", "--porcelain", "--", *sdeps],
+                           capture_output=True, text=True, cwd=ROOT).stdout.strip()
+    if dirty:
+        print("producer scripts have uncommitted changes:\n" + dirty)
+        print("\nRefusing, for the same reason: commit them, regenerate the artifacts, then record.")
+        return 1
+
     out = {}
     for art, mods in depends_on.items():
         if not (ROOT / "experiments" / art).exists():
             continue
         out[art] = {m: verify.module_digest(ROOT / "src" / "stoa" / m)
                     for m in mods if (ROOT / "src" / "stoa" / m).exists()}
+        out[art].update({f"scripts/{n}": verify.module_digest(ROOT / "scripts" / n) for n in prods[art]})
     dest = ROOT / "experiments" / ".provenance.json"
     dest.write_text(json.dumps(out, indent=2, sort_keys=True) + "\n")
     print(f"wrote {dest.relative_to(ROOT)} for {len(out)} artifacts")

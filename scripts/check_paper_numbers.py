@@ -413,8 +413,23 @@ if _ir and _irb and _hz6 and _ar2:
     print("\nwhy (irm_departure*, horizon, age_rules)")
     _R = {t: {r["k"]: r["rho"] for r in v["as_recorded"]["by_k"]} for t, v in _ir["traces"].items()}
     _S = {t: {r["k"]: r["rho"] for r in v["shuffled_control"]["by_k"]} for t, v in _ir["traces"].items()}
-    claim("shuffled control rho_1", f"{_S['conversation'][1]:.2f} and {_S['toolagent'][1]:.2f} for blocks seen once",
+    claim("shuffled control rho_1", f"blocks seen once is {_S['conversation'][1]:.2f} and {_S['toolagent'][1]:.2f}",
           "", "irm_departure")
+    # twenty shuffles and chunked shuffles (notebook BJ)
+    _sd = {t: _ir["traces"][t]["shuffle_seeds"] for t in PROD}
+    _r1 = [x for t in PROD for x in _sd[t]["rho_range"]["1"]]
+    claim("rho_1 over twenty shuffles", f"{min(_r1):.2f}--{max(_r1):.2f} over twenty shuffles", "", "irm_departure")
+    assert len(_sd["conversation"]["seeds"]) == 20
+    assert max(abs(x) for t in PROD for x in _sd[t]["gt_minus_actual_range"]) < 0.045, "the paper says within 0.04"
+    _r35 = [x for t in PROD for k in ("3", "4", "5") for x in _sd[t]["rho_range"][k]]
+    claim("rho k>=3 shuffles", f"tight ({min(_r35):.2f}--{max(_r35):.1f})", "", "irm_departure")
+    _ch = {(t, c): [r["rho"] for r in _ir["traces"][t]["chunk_shuffles"][c]["by_k"] if r["k"] == 1][0]
+           for t in PROD for c in ("100", "1000", "3000")}
+    claim("chunk shuffles", f"reach {_ch[('conversation', '1000')]:.2f} and {_ch[('toolagent', '1000')]:.2f} "
+          f"({_ch[('conversation', '100')]:.2f} and {_ch[('toolagent', '100')]:.2f} with 100-request chunks, "
+          f"{_ch[('conversation', '3000')]:.2f} and {_ch[('toolagent', '3000')]:.2f} with 3,000)", "", "irm_departure")
+    assert all(_ch[(t, "1000")] >= 0.5 for t in PROD), "registered: not local structure"
+    assert not all(_ch[(t, "1000")] >= 0.8 for t in PROD), "the paper says the test does not settle drift on both"
     for _t in PROD:
         _g = _ir["traces"][_t]["shuffled_control"]
         assert abs(_g["good_turing_missing_mass"] - _g["post_split_access_share_new"]) < 0.002, _t
@@ -432,8 +447,14 @@ if _ir and _irb and _hz6 and _ar2:
     _b1 = {t: [r["rho"] for r in v["as_recorded"]["by_k"] if r["k"] == 1][0] for t, v in _irb["traces"].items()}
     assert sum(1 for v in _b1.values() if v >= 0.8) < 2, "pre-registered H1 rejection on Alibaba"
     _three = sorted(v for t, v in _b1.items() if t != "traceB")
-    claim("Alibaba rho_1", f"({_three[0]:.2f}--{_three[-1]:.2f} for blocks seen once); the fourth,\ntraceB, is nearly "
-          f"stationary ({_b1['traceB']:.2f})", "", "irm_departure_bailian")
+    claim("Alibaba rho_1", f"({_three[0]:.2f}--{_three[-1]:.2f} for blocks seen once); the fourth,\ntraceB, is close "
+          f"to the model ({_b1['traceB']:.2f})", "", "irm_departure_bailian")
+    # the departure does not predict the prior's gain (a sentence once said traceB "gains least")
+    _bh = {r["trace"]: r["captured_pct"] for r in load("bailian_hazard_birthx.json")["rows"]
+           if r["actions"] == "tier_only" and r["arm"] == "hazard-new" and r["tie"] == "new-behind"}
+    assert min(_b1, key=_b1.get) == "thinking" and _bh["thinking"] < 0.05 and min(_bh, key=_bh.get) != "traceB"
+    claim("prior vs departure", f"it gains {_bh['traceB']:.1f}\\% on traceB and nothing on thinking", "",
+          "bailian_hazard_birthx + irm_departure_bailian")
     claim("synthetic rho_1", f"departs the other way ({_R['synthetic'][1]:.2f})", "", "irm_departure")
     _H = {(r["trace"], r["horizon_min"]): r for r in _hz6["rows"]}
     _end = {t: max((r for r in _hz6["rows"] if r["trace"] == t), key=lambda r: r["horizon_min"]) for t in PROD}
@@ -447,6 +468,18 @@ if _ir and _irb and _hz6 and _ar2:
           f"{_end['conversation']['captured_pct']['visible-dead-last']:.1f}\\% on conversation", "", "eval_window")
     _gp = [r["captured_pct"]["visible-dead-last"] - r["captured_pct"]["visible-dead-first"] for r in _hz6["rows"] if r["trace"] in PROD]
     claim("H6 tie gap", f"by {min(_gp):.0f}--{max(_gp):.0f} points at every length", "", "eval_window")
+    _F = {(r["trace"], r["horizon_min"]): r for r in _hz6["fixed_capacity_rows"]}
+    _Fend = {t: max((r for r in _hz6["fixed_capacity_rows"] if r["trace"] == t), key=lambda r: r["horizon_min"]) for t in PROD}
+    claim("fixed-capacity reference", f"from {_F[('conversation', 7.5)]['captured_pct']['visible-dead-last']:.1f}\\% to "
+          f"{_Fend['conversation']['captured_pct']['visible-dead-last']:.1f}\\% and from "
+          f"{_F[('toolagent', 7.5)]['captured_pct']['visible-dead-last']:.1f}\\% to "
+          f"{_Fend['toolagent']['captured_pct']['visible-dead-last']:.1f}\\%", "", "eval_window fixed")
+    _gf = [r["captured_pct"]["visible-dead-last"] - r["captured_pct"]["visible-dead-first"]
+           for r in _hz6["fixed_capacity_rows"] if r["trace"] in PROD]
+    claim("fixed-capacity tie gap", f"moves it by {min(_gf):.0f}--{max(_gf):.0f} points;", "", "eval_window fixed")
+    claim("fixed-capacity seen-once", f"loses {-_F[('conversation', 7.5)]['captured_pct']['seen-once-last']:.1f}\\% and "
+          f"{-_F[('toolagent', 7.5)]['captured_pct']['seen-once-last']:.1f}\\% at 7.5 minutes", "", "eval_window fixed")
+    assert all(_F[(t, 7.5)]["gpu_slots_fixed"] > _F[(t, 7.5)]["gpu_slots_per_window"] for t in PROD)
     _A = {r["trace"]: r for r in _ar2["rows"]}
     claim("H2 precision", f"dead {100*_A['conversation']['precision_for_dead']['old-low-count-last']:.1f}\\% and "
           f"{100*_A['toolagent']['precision_for_dead']['old-low-count-last']:.1f}\\% of the time", "", "age_rules")
@@ -518,8 +551,27 @@ if _tc and _el and _ct:
     _msw = {t: _ms[t] * _base[t]["tie_rule_swing"] / 100 for t in PROD}
     claim("tie rule in ms", f"by {_msw['conversation']:.1f} and {_msw['toolagent']:.1f}\\,ms per request", "",
           "ties_by_capacity")
-    _so = {r["trace"]: r["captured_pct"]["seen-once-last"] for r in _small}
-    claim("seen-once at the smallest tiers", f"captures {_so['conversation']:.1f}\\% and {_so['toolagent']:.1f}\\%",
+    _q = {r["trace"]: r["captured_pct"]["seen-once-last"] for r in _R if r["scale"] == 0.25}
+    claim("seen-once at a quarter", f"captures {_q['conversation']:.1f}\\% and {_q['toolagent']:.1f}\\% on\nthe production",
+          "", "ties_by_capacity")
+    assert all(abs(r["captured_pct"]["seen-once-last"]) < 0.05 for r in _small), "the paper says nothing at a tenth"
+    # where knowing deadness equals knowing every visible future (notebook BJ)
+    _b1 = {r["trace"]: r for r in _R if r["scale"] == 1.0}
+    _pool = _b1["conversation"]["gpu_slots"] * 64 * 2**20 / 2**40
+    claim("GPU pool at the timed block size", f"would be a {_pool:.1f}\\,TiB pool", "", "ties_by_capacity")
+    claim("live visible vs GPU slots", f"the {_b1['conversation']['live_visible']:,}".replace(",", "{,}")
+          + f" and {_b1['toolagent']['live_visible']:,}".replace(",", "{,}") + " live visible blocks fit in the GPU tier's "
+          + f"{_b1['conversation']['gpu_slots']:,}".replace(",", "{,}") + " and "
+          + f"{_b1['toolagent']['gpu_slots']:,}".replace(",", "{,}") + " slots", "", "ties_by_capacity")
+    assert all(r["deadness_vs_futures_gap"] == 0 for r in _R if r["live_visible"] <= r["gpu_slots"])
+    _over = [r for r in _R if r["live_visible"] > r["gpu_slots"]]
+    assert 3.5 < max(r["live_visible"] / r["gpu_slots"] for r in _over) < 4.5, "the paper says up to four times"
+    claim("deadness gap past the boundary", f"opens a gap of at most {max(r['deadness_vs_futures_gap'] for r in _over):.1f} points",
+          "", "ties_by_capacity")
+    _sy = [r for r in _tc["rows"] if r["trace"] == "synthetic"]
+    _rat = [r["live_visible"] / r["gpu_slots"] for r in _sy]
+    claim("synthetic live/GPU and gap", f"with {min(_rat):.1f}--{max(_rat):.0f} times as many, ranking the live\nblocks is worth "
+          f"{min(r['deadness_vs_futures_gap'] for r in _sy):.0f}--{max(r['deadness_vs_futures_gap'] for r in _sy):.0f} points",
           "", "ties_by_capacity")
     # A ranker against each reference (all actions, where the ladder was trained)
     _lad = {(r["eval"], r["rung"]): r for r in load("capacity_ladder_fixed.json")["results"]}
@@ -537,6 +589,32 @@ if _tc and _el and _ct:
     claim("seen-once, all actions", f"({_ela['conversation']['seen-once-last']:.1f}\\% and\n"
           f"{_ela['toolagent']['seen-once-last']:.1f}\\%", "", "evidence_ladder")
     assert all(0.3 <= _mlp[t] / _ela[t]["seen-once-last"] <= 0.5 for t in PROD), "the paper says a third to a half"
+
+# One physical ledger for static and online policies; prices by path (V-A, V-D; notebook BJ)
+_pl = load("physical_ledger.json")
+if _pl:
+    print("\nphysical ledger (physical_ledger.json)")
+    _P = {r["trace"]: r for r in _pl["rows"]}
+    _band = lambda pol: [x for t in PROD for L in _pl["config"]["ledgers"] for x in _P[t]["physical_share_in_band"][L][pol]]
+    _so, _lr, _sh, _or = _band("seen-once"), _band("lru"), _band("second-hit"), _band("oracle")
+    assert max(_so) < 0 and max(_lr) < 0 and max(_sh) < 0, "the paper says every one loses in the band"
+    claim("seen-once realized", f"the seen-once rule loses {-max(_so):.0f}--{-min(_so):.0f}\\% against", "", "physical_ledger")
+    claim("LRU physical", f"LRU still loses {-max(_lr):.0f}--{-min(_lr):.0f}\\% on the production traces", "", "physical_ledger")
+    claim("second-hit physical", f"the second hit {-max(_sh):.0f}--{-min(_sh):.0f}\\%", "", "physical_ledger")
+    claim("oracle physical", f"keeps at most {max(_or):.0f}\\% of its advantage", "", "physical_ledger")
+    _wt = {t: _P[t]["grid"]["write-through"]["lru"]["0.75/0.0"] for t in PROD}
+    claim("LRU with remote free", f"LRU gains {_wt['conversation']:.1f}\\% and {_wt['toolagent']:.1f}\\% under write-through",
+          "", "physical_ledger")
+    _be = [v for t in PROD for k, v in _P[t]["alpha_U_break_even"].items() if k.split("|")[1] == "lru"]
+    _lo = [_P[t]["alpha_U_break_even"][f"{L}|lru|0.75"] for t in PROD for L in ("exclusive", "retained", "write-through")]
+    assert all(v["pays"] == "below" for v in _lo)
+    claim("remote break-even", f"costs more than {min(v['alpha_U'] for v in _lo):.2f}--{max(v['alpha_U'] for v in _lo):.2f} "
+          "of read-plus-write", "", "physical_ledger")
+    assert max(v["alpha_U"] for v in _lo) < 0.25, "the paper says under a quarter"
+    assert all(_P[t]["alpha_U_break_even"][f"reread|lru|0.75"]["pays"] == "never" for t in PROD)
+    assert all(_P[t]["alpha_U_break_even"][f"{L}|lru|1.87"]["pays"] == "never" for t in PROD for L in _pl["config"]["ledgers"])
+    assert all(_P[t]["alpha_U_break_even"][f"{L}|second-hit|{a}"]["pays"] == "never" for t in PROD
+               for L in _pl["config"]["ledgers"] for a in (0.75, 1.87))
 
 # Ski rental (H3) and predicting the break-even price (H4) (V-D; notebook BG)
 _sk = load("ski_rental.json")
@@ -831,6 +909,29 @@ if d:
                  for r in d["rows"])
     claim("widest disagreement between the two repairs", f"{widest:.1f} points",
           "2.1 points", "lrb_repair_* spread")
+    # LRB's own randomness at the tightest tier (notebook BJ): the registered "all eight" criterion fails
+    _ls = load("lrb_seeds.json")
+    if _ls:
+        _rows = _ls["rows"]
+        _cross = [r for r in _rows if r["seeds_at_or_above_arc"] > 0]
+        assert len(_cross) == 3 and max(r["seeds_at_or_above_arc"] for r in _rows) == 2, "the paper says one or two in three pairs"
+        assert all(r["lrb_by_seed"][0] == d_r for r in _rows for d_r in
+                   [[x for x in d["rows"] if x["trace"] == r["trace"] and x["cache_frac"] == r["cache_frac"]][0][
+                       "lrb_repair_" + r["repair"]]]), "seed 0 does not reproduce lrb_retraction.json"
+        claim("LRB seeds past ARC", f"by at most {100*max(r['max'] - r['arc'] for r in _cross):.1f}\npoints of Belady", "",
+              "lrb_seeds")
+        claim("LRB seed spread", f"over up to {100*max(r['max'] - r['min'] for r in _rows if r['trace'] == 'conversation'):.1f} "
+              "points on conversation", "", "lrb_seeds")
+        _mg = {(r["trace"], r["cache_frac"]): 100 * (_arc[(r["trace"], r["cache_frac"])]
+               - max(r["lrb_repair_all_history"], r["lrb_repair_sliding_window"])) for r in d["rows"] if r["cache_frac"] != 0.02}
+        _big = sorted(v for v in _mg.values() if v >= 9)
+        assert len(_big) == 5 and min(_mg.values()) < max(r["max"] - r["min"] for r in _rows) * 100
+        claim("LRB margins elsewhere", f"by 9 points or more at five\nof the other six", "", "lrb_retraction")
+        # as a reader computes it from the table's one-decimal entries
+        _mgt = min(round(100 * _arc[(r["trace"], r["cache_frac"])], 1)
+                   - round(100 * max(r["lrb_repair_all_history"], r["lrb_repair_sliding_window"]), 1)
+                   for r in d["rows"] if r["cache_frac"] != 0.02)
+        claim("LRB smallest margin", f"the margin is {_mgt:.1f}\npoints", "", "lrb_retraction")
     # The "17-point reimplementation gap" assertion that stood here was removed in §AO: its
     # source was a repair produced by an AI agent in an internal review simulation, whose code is
     # not part of this artifact. A number nobody can regenerate is not one the checker should
@@ -898,7 +999,7 @@ if d:
 # headline table by up to 39 points. Nothing caught it, because every check compared
 # artifacts to the paper and none compared artifacts to their own dependencies.
 SRC = ROOT / "src" / "stoa"
-from artifact_deps import DEPENDS_ON  # noqa: E402  (shared with record_provenance.py)
+from artifact_deps import DEPENDS_ON, PRODUCERS, READERS  # noqa: E402  (shared with record_provenance.py)
 # mtime alone gave a false positive during pass 7's mutation testing: restoring a file from
 # backup moves the timestamp without changing a byte. The manifest records what each artifact
 # was actually generated from, so a moved timestamp with a matching digest is silent and a
@@ -1128,12 +1229,8 @@ failures += verify.unbacked_emphasised_numbers(
 _IN_PAPER = {k: v for k, v in DEPENDS_ON.items() if k not in NOT_IN_THIS_PAPER}
 print(f"\n[skip] freshness of {sorted(set(DEPENDS_ON) - set(_IN_PAPER))}: not cited by this paper")
 failures += verify.undeclared_artifacts(_LOADED, DEPENDS_ON, EXP)
-failures += verify.stale_artifacts(_IN_PAPER, EXP, SRC, manifest=_manifest)
-failures += verify.producer_problems(
-    _IN_PAPER, ROOT / "scripts", SRC,
-    readers=("check_paper_numbers.py", "make_figures.py", "record_provenance.py"),
-    producers={"reactive_real_full_lrb.json": "run_reactive_real.py",
-               "capacity_ladder_fixed.json": "run_capacity_ladder.py"})
+failures += verify.stale_artifacts(_IN_PAPER, EXP, SRC, manifest=_manifest, scripts=ROOT / "scripts")
+failures += verify.producer_problems(_IN_PAPER, ROOT / "scripts", SRC, readers=READERS, producers=PRODUCERS)
 
 # --- coverage guards, LAST so `checked` is final -----------------------------------
 # Sitting mid-file, this counted only the checks declared above it and passed while
@@ -1151,7 +1248,7 @@ REQUIRED = ("reactive_real_full_lrb.json", "headroom_by_length.json", "lrb_retra
             "evidence_ladder_bailian.json", "prefix_validity.json", "serving_tiers_a100.json",
             "measured_table.json", "irm_departure.json", "irm_departure_bailian.json", "eval_window.json",
             "age_rules.json", "age_rules_bailian.json", "ski_rental.json", "reservation.json",
-            "session_age.json", "ties_by_capacity.json")
+            "session_age.json", "ties_by_capacity.json", "physical_ledger.json", "lrb_seeds.json")
 missing = [n for n in REQUIRED if not (EXP / n).exists()]
 if missing:
     failures.append("artifacts absent, so their claims went unchecked: " + ", ".join(missing))

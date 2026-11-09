@@ -8,7 +8,8 @@
       45.0
     ],
     "actions": "tier only",
-    "registered": "censoring matters if dead share @15 min - @longest >= 10 points; it does not if < 3"
+    "registered": "censoring matters if dead share @15 min - @longest >= 10 points; it does not if < 3",
+    "fixed_capacity": "absolute tier bytes held at the full trace's"
   },
   "rows": [
     {
@@ -152,6 +153,198 @@
       "horizon_min_actual": 12.49,
       "post_split_requests": 2994,
       "dead_visible_pct": 55.42,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 5.98,
+        "dead-known": 42.23,
+        "visible-dead-first": 21.07,
+        "visible-dead-last": 52.01,
+        "oracle": 100.0
+      }
+    }
+  ],
+  "fixed_capacity_rows": [
+    {
+      "trace": "conversation",
+      "horizon_min": 7.5,
+      "horizon_min_actual": 7.5,
+      "dead_visible_pct": 90.22,
+      "n_visible": 55585,
+      "n_live_visible": 5436,
+      "n_new": 23341,
+      "gpu_slots_fixed": 18279,
+      "gpu_slots_per_window": 7892,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": -16.5,
+        "dead-known": 90.21,
+        "visible-dead-first": 47.3,
+        "visible-dead-last": 90.21,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "conversation",
+      "horizon_min": 15.0,
+      "horizon_min_actual": 14.95,
+      "dead_visible_pct": 89.23,
+      "n_visible": 55585,
+      "n_live_visible": 5988,
+      "n_new": 44872,
+      "gpu_slots_fixed": 18279,
+      "gpu_slots_per_window": 10045,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 3.62,
+        "dead-known": 76.22,
+        "visible-dead-first": 21.7,
+        "visible-dead-last": 76.22,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "conversation",
+      "horizon_min": 30.0,
+      "horizon_min_actual": 29.95,
+      "dead_visible_pct": 88.3,
+      "n_visible": 55585,
+      "n_live_visible": 6502,
+      "n_new": 89398,
+      "gpu_slots_fixed": 18279,
+      "gpu_slots_per_window": 14498,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 26.84,
+        "dead-known": 66.37,
+        "visible-dead-first": 10.14,
+        "visible-dead-last": 66.37,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "conversation",
+      "horizon_min": 45.0,
+      "horizon_min_actual": 42.45,
+      "dead_visible_pct": 87.47,
+      "n_visible": 55585,
+      "n_live_visible": 6963,
+      "n_new": 127205,
+      "gpu_slots_fixed": 18279,
+      "gpu_slots_per_window": 18279,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 20.49,
+        "dead-known": 47.48,
+        "visible-dead-first": 6.67,
+        "visible-dead-last": 47.48,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "toolagent",
+      "horizon_min": 7.5,
+      "horizon_min_actual": 7.45,
+      "dead_visible_pct": 91.42,
+      "n_visible": 53832,
+      "n_live_visible": 4618,
+      "n_new": 23696,
+      "gpu_slots_fixed": 18330,
+      "gpu_slots_per_window": 7752,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": -12.45,
+        "dead-known": 90.61,
+        "visible-dead-first": 45.47,
+        "visible-dead-last": 90.61,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "toolagent",
+      "horizon_min": 15.0,
+      "horizon_min_actual": 14.95,
+      "dead_visible_pct": 90.69,
+      "n_visible": 53832,
+      "n_live_visible": 5012,
+      "n_new": 45832,
+      "gpu_slots_fixed": 18330,
+      "gpu_slots_per_window": 9966,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 2.98,
+        "dead-known": 75.76,
+        "visible-dead-first": 20.2,
+        "visible-dead-last": 75.76,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "toolagent",
+      "horizon_min": 30.0,
+      "horizon_min_actual": 29.95,
+      "dead_visible_pct": 90.65,
+      "n_visible": 53832,
+      "n_live_visible": 5034,
+      "n_new": 91083,
+      "gpu_slots_fixed": 18330,
+      "gpu_slots_per_window": 14491,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 28.65,
+        "dead-known": 64.2,
+        "visible-dead-first": 8.89,
+        "visible-dead-last": 64.2,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "toolagent",
+      "horizon_min": 45.0,
+      "horizon_min_actual": 42.6,
+      "dead_visible_pct": 90.53,
+      "n_visible": 53832,
+      "n_live_visible": 5097,
+      "n_new": 129468,
+      "gpu_slots_fixed": 18330,
+      "gpu_slots_per_window": 18330,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": 21.63,
+        "dead-known": 45.47,
+        "visible-dead-first": 5.69,
+        "visible-dead-last": 45.47,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "synthetic",
+      "horizon_min": 7.5,
+      "horizon_min_actual": 7.49,
+      "dead_visible_pct": 58.74,
+      "n_visible": 19723,
+      "n_live_visible": 8138,
+      "n_new": 20593,
+      "gpu_slots_fixed": 4392,
+      "gpu_slots_per_window": 4031,
+      "captured_pct": {
+        "heuristic": 0.0,
+        "seen-once-last": -7.93,
+        "dead-known": 58.17,
+        "visible-dead-first": 32.03,
+        "visible-dead-last": 69.1,
+        "oracle": 100.0
+      }
+    },
+    {
+      "trace": "synthetic",
+      "horizon_min": 15.0,
+      "horizon_min_actual": 12.49,
+      "dead_visible_pct": 55.42,
+      "n_visible": 19723,
+      "n_live_visible": 8793,
+      "n_new": 24201,
+      "gpu_slots_fixed": 4392,
+      "gpu_slots_per_window": 4392,
       "captured_pct": {
         "heuristic": 0.0,
         "seen-once-last": 5.98,

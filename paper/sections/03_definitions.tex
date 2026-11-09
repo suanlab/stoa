@@ -8,7 +8,10 @@ number in this study by tens of points (\Cref{sec:lessons}). This section states
 blocks it reads; a repeated block id is a genuine reuse because ids are content hashes of the token
 prefix. Blocks are immutable once computed and, within a source, uniform in size. A placement assigns
 each block to one of four tiers, GPU, host DRAM, remote DRAM over RDMA, and local disk, with capacities
-of 10\%, 30\%, 60\% and unbounded shares of the trace's distinct blocks. A block's first access
+of 10\%, 30\%, 60\% and unbounded shares of the trace's distinct blocks, counted in block slots. The
+experimenter sets them from the whole trace; a running system would fix them in bytes in advance, and we
+sweep them (\Cref{sec:ties}). The replay is in slots, so a block's byte size does not enter it; the move
+prices we measured are for one 64\,MiB block on one host and are applied per slot. A block's first access
 \emph{creates} it (its KV is computed), a compulsory miss that no placement can serve, so only later
 accesses are billed. Billing a creation as a read from its tier, as every earlier version of this work
 did, inflated the oracle's advantage about threefold. Blocks are billed independently, although an
@@ -40,11 +43,12 @@ For uniform blocks, tier-only costs that rise with latency and a cost linear in 
 oracle's greedy order is optimal by the rearrangement inequality. No reference between the two is an
 upper bound for a class of causal policies here, and we do not call one a ceiling (\Cref{sec:evidence}).
 
-\paragraph{Blocks without evidence} Two kinds of block give a split-time policy nothing to rank on: a
-\emph{new} block, which it has not seen, and a \emph{dead} visible block, which it has seen but which
-will not be read again. The frequency heuristic ranks every visible block, dead or not, above every new
-one. A reference that knows the visible blocks' futures gives a dead block and a new block the same
-belief, zero, so their order is set by a tie rule, usually item order. We vary that rule explicitly, and
+\paragraph{Blocks without evidence} A reference that knows the futures of the visible blocks gives two
+kinds of block the same belief, zero: a \emph{new} block, which no policy has seen, and a \emph{dead} visible block,
+which has a history but will not be read again. A policy cannot tell a dead block from a live one; the
+reference can. The frequency heuristic ranks every visible block, dead or not, above every new
+one. Under the reference, the order of the two zero-belief kinds is set by a tie rule, usually item
+order. We vary that rule explicitly, and
 \Cref{sec:evidence} shows it decides most of what a split-time evaluation reports.
 
 \paragraph{Online replay and the price of a move} Static placements are one capacity-constrained
@@ -53,4 +57,6 @@ starting state, the heuristic's placement of the visible blocks, and pay for eve
 We bill a move five ways (\Cref{sec:online}): one read from the source plus one write to the destination;
 the same with a promotion's read credited to the serving access that caused it; with clean lower copies
 kept, so demoting onto one is free; with every block written through to host memory at creation; and
-free. We also measured what a move costs on one GPU host.
+free. We also measured what a move costs on one GPU host. The bill is additive: every read and every move
+adds its price, with no overlap, queueing or batching, and every block stays in some tier, with no
+discard-and-recompute action.

@@ -14,15 +14,19 @@ data and related software (there are no excuses)"; the artifacts below are that 
 
 ## 1. Environment
 
-CPU only — no GPU is required anywhere in this work. Every experiment trains against a tiering
-simulator or a trace, never against an LLM.
+CPU for everything except two hardware measurements. Every replay, ladder and sweep runs on CPU
+against a trace and the tiering simulator. Two raw measurements need a CUDA host and are not
+bit-reproducible: the block-move timings (`measure_tier_costs.py`, §AX) and the vLLM + LMCache tier
+probe (`measure_serving_tiers.py`, §BE). Their raw per-repetition numbers are committed
+(`experiments/tier_costs_a100.json`, `serving_tiers_a100.json`), and the summaries the paper uses are
+recomputed from them on CPU. The GPU environment that produced them is in `requirements-gpu.txt`.
 
 ```bash
 # poppler-utils (pdftotext, pdfinfo, pdffonts) for the checker: apt-get install poppler-utils
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements-lock.txt   # every package pinned, transitive ones included
 pip install -e . --no-deps             # the package itself, without re-resolving the pins
-pytest -q                    # 319 tests, ~3 min; torch-gated tests skip cleanly without torch
+pytest -q                    # 325 tests, ~3 min; torch-gated tests skip cleanly without torch
 
 # Or, without the lock (looser, not the reference versions):
 #   pip install -e ".[dev,rl,eval,figures]"
@@ -166,8 +170,8 @@ Checking while logged in tests your own access, not a reviewer's.
 | Reactive tiering on Mooncake, full traces (75–99% of Belady on toolagent, 40–94% on conversation) | `python3 scripts/run_reactive_real.py` (defaults to the full trace) | `experiments/reactive_real_full.json` |
 | ARC meets the envelope at 5%/10% tiers only; adapts on 3.5–7.3% of misses | same run — `arc`, `arc_over_belady`, `arc_ghost_hit_rate_of_misses` columns | `experiments/reactive_real_full.json` |
 | **RETRACTED (§V)** — "LRB below ARC at all 8 operating points": the training buffer was truncated to its tail, so labels were constant and eviction was random. Fixed (sliding window + uniform subsample, hard failure on zero label variance) and re-run | `python3 scripts/run_reactive_real.py --lrb` (~35 min) | `experiments/reactive_real_full_lrb.json` |
-| **Arrival-time admission** (§V-C; §AP–§AS): order arms on one magnitude multiset and magnitude arms (constant mean, median), both tie conventions, full action space. Production order arms: 38.2–41.5 / 38.9–41.5% (behind), 53.1–55.3 / 56.6–58.1% (ahead), against a 15.6 / 12.4% split ceiling | `python3 scripts/run_arrival_admission.py` | `experiments/arrival_admission.json` |
-| **Tier-only control** (§V-C, §AR): the same ceiling and arms with placement restricted to the tier. Split ceiling 20.4 / 15.3%; order arms 14.3–19.6 / 15.1–19.4% (behind), 38.7–42.3 / 44.3–46.8% (ahead); median arm 0.0 (behind) | `python3 scripts/run_tier_only.py` | `experiments/tier_only.json` |
+| **Historical; the ceiling reading is withdrawn (§AZ)** — **Arrival-time admission** (§V-C; §AP–§AS): order arms on one magnitude multiset and magnitude arms (constant mean, median), both tie conventions, full action space. Production order arms: 38.2–41.5 / 38.9–41.5% (behind), 53.1–55.3 / 56.6–58.1% (ahead), against a 15.6 / 12.4% split ceiling | `python3 scripts/run_arrival_admission.py` | `experiments/arrival_admission.json` |
+| **Historical; the ceiling reading is withdrawn (§AZ)** — **Tier-only control** (§V-C, §AR): the same ceiling and arms with placement restricted to the tier. Split ceiling 20.4 / 15.3%; order arms 14.3–19.6 / 15.1–19.4% (behind), 38.7–42.3 / 44.3–46.8% (ahead); median arm 0.0 (behind) | `python3 scripts/run_tier_only.py` | `experiments/tier_only.json` |
 | **Estimated prior for unseen blocks** (§V-C, §AS): a new block's expected reuse vs a seen-once block's, from a pseudo-split in the prefix; tie-invariant. Hazard-new / hazard-all: 58.2 / 69.7% (conversation), 61.1 / 68.8% (toolagent); tier-only 47.0 / 56.9% and 51.7 / 54.8% | `python3 scripts/run_hazard_prior.py [--tier-only]` | `experiments/hazard_prior.json`, `hazard_prior_tier.json` |
 | **Online admission replay** (§V-C, §AT H6, §AV): the order, magnitude and hazard arms replayed request by request from the heuristic's starting state, tier-only, with free and read+write-priced migration. Free migration: up to 57.3% (hazard-new 51.2 / 54.9%, new-behind); read+write: no arm above 0.0, the cost-aware variant included (hazard-new −199.0 / −204.1%); the hazard arm keeps 70% of its static gain only below 7.3% / 7.2% of the read+write price | `python3 scripts/run_online_admission.py` | `experiments/online_admission.json` |
 | **Reactive policies on the same metric** (§V-C, §AV): replay with no moves (asserted equal to the heuristic), multi-tier LRU, and cache-on-second-hit. LRU 84.5 / 87.7% free, −400.5 / −401.4% priced; second-hit −6.2 / −2.8% free | `python3 scripts/run_reactive_cost.py` | `experiments/reactive_cost.json` |
@@ -178,10 +182,12 @@ Checking while logged in tests your own access, not a reviewer's.
 | **Prefix validity of per-block billing** (§III, §BD): hash-chain check (each block id fixes its predecessor) and per-block vs prefix-usable hit rates for LRU and Belady; no hit whose prefix missed | `python3 scripts/run_prefix_validity.py` (~2 min) | `experiments/prefix_validity.json` |
 | **Serving stack** (§V-E, §BE): time to first token by tier in vLLM 0.11 + LMCache 0.3.9 (8B model, A100 PCIe Gen4, rotational RAID disk read cold), and per-block costs; host load 2.56 ms, store 2.94 ms, recompute 41.0 ms, cold-disk load 45.4 ms per 512-token block | raw runs: `measure_serving_tiers.py --mode {none,cpu,disk} [--disk-cold]` on a CUDA host (hardware-specific); summary: `python3 scripts/run_serving_tiers.py [--collect DIR]` | `experiments/serving_tiers_a100.json` |
 | **Measured latency table** (§V-E, §BE): the ladder and online LRU rerun with the serving costs, remote tier swept; conclusions unchanged | `python3 scripts/run_measured_table.py` (~3 min) | `experiments/measured_table.json` |
-| **Why: non-stationary reuse** (§V-B, §BF): H1 Robbins/Good–Turing vs actual reuse with a shuffled-order control; H6 dead share and ladder vs evaluation window; H2 age-based rules (registered rule rejected) | `python3 scripts/run_irm_departure.py [--bailian]`, `run_horizon.py`, `run_age_rules.py [--bailian]` | `experiments/irm_departure*.json`, `eval_window.json`, `age_rules*.json` |
+| **Why: departure from the independent reference model** (§V-B, §BF, §BJ; twenty shuffle seeds and chunk shuffles of 100/1,000/3,000 requests; the window sweep also at fixed byte capacity): H1 Robbins/Good–Turing vs actual reuse with a shuffled-order control; H6 dead share and ladder vs evaluation window; H2 age-based rules (registered rule rejected) | `python3 scripts/run_irm_departure.py [--bailian]`, `run_horizon.py`, `run_age_rules.py [--bailian]` | `experiments/irm_departure*.json`, `eval_window.json`, `age_rules*.json` |
 | **Ski rental and predicted break-even** (§V-D, §BG): rent-or-buy promotion across a price grid; H3 rejected (−40.7 to −97.2% in the measured band); cascade-aware variant −4.1 to −16.8%; prefix-replay break-even 19–33% low | `python3 scripts/run_ski_rental.py` (~1 min) | `experiments/ski_rental.json` |
 | **Reservation and sessions** (§V-A, §V-B, §BH): newsvendor reference (visible futures + mean arrival future) recovers 52.4% of the dead-last-to-exhaustive gap on toys and equals dead-last on production; session-level age within a point of block age | `python3 scripts/run_reservation.py` (~7 min), `run_session_age.py` (~1 min) | `experiments/reservation.json`, `session_age.json` |
-| **Tie rule across capacities** (§V-A, §BI): the bounded tiers scaled together by 0.25–1.5; the tie rule moves the reference 30–72 points on production (smallest at the smallest tiers); the oracle's advantage is 32.6 / 16.2 ms of block reads per post-split request at our capacities | `python3 scripts/run_ties_by_capacity.py` (~2 min) | `experiments/ties_by_capacity.json` |
+| **Tie rule across capacities** (§V-A, §BI, §BJ): the bounded tiers scaled together by 0.1–1.5; with dead-known and the live-visible/GPU-slot counts (deadness = every visible future while the live blocks fit; ≤1.9 points apart on production past that); the tie rule moves the reference 30–72 points on production (smallest at the smallest tiers); the oracle's advantage is 32.6 / 16.2 ms of block reads per post-split request at our capacities | `python3 scripts/run_ties_by_capacity.py` (~2 min) | `experiments/ties_by_capacity.json` |
+| **One physical ledger; prices by path** (§V-A, §V-D, §BJ): every policy billed for storing each new block from the GPU and every static policy for its split-time rearrangement, prices split into GPU↔host (measured) and remote/disk (unmeasured). In the measured band LRU loses 46–333% on production, realizing the seen-once rule 37–160%; with GPU↔host at 0.75 LRU pays only if remote moves cost under 0.02–0.23 of read+write | `python3 scripts/run_physical_ledger.py` (~2 min) | `experiments/physical_ledger.json` |
+| **LRB seeds** (§V-H, §BJ): both repairs, ten seeds, 2% tier; the registered "below ARC at all eight" fails there (1–2 of 10 seeds reach ARC in three of four trace–repair pairs) | `python3 scripts/run_lrb_seeds.py` (~40 min, 36 workers) | `experiments/lrb_seeds.json` |
 | **Modern baselines** (§V-E, §BB): S3-FIFO, SIEVE, W-TinyLFU beside Belady, LRU and ARC at the four tier sizes; never above the best plain rule | `python3 scripts/run_modern_baselines.py` (~1 min) | `experiments/modern_baselines.json` |
 | **Exposure confound**: blocks arriving in the first quarter see 2.3–4.6x the future reuse of the last quarter; arrival order alone predicts reuse at AUC 0.55–0.58; the leaky design's training labels had 34.3% / 46.3% of their mass after the cut | `python3 scripts/run_arrival_diagnostics.py` | `experiments/arrival_diagnostics.json` |
 | **Cost-weight sensitivity**: unreachable share 79.3–97.1% under tenfold changes to λ_L and λ_B, one at a time | `python3 scripts/run_weight_sensitivity.py` | `experiments/weight_sensitivity.json` |
@@ -190,9 +196,9 @@ Checking while logged in tests your own access, not a reviewer's.
 | **Length attribution** (separates train length from eval length; AUC rises 38 points with the model held fixed) | `python3 scripts/train_session_features.py --train-requests N --requests M --out experiments/mooncake_attribution_sweep.json` (one row per run) | `experiments/mooncake_attribution_sweep.json` |
 | **Censoring sweep**: 83–88% of LRB's training rows are right-censored at the default window, 88–91% at a shorter one, across 12 configurations on both traces. (The earlier row claimed "LRB spans 55–66% of Belady across its grid" from the **broken** implementation; the repaired grid spans 41.9–86.4%, so no point estimate there is citable and the claim is retired. That artifact is kept at `experiments/superseded/lrb_sweep.json`.) | `python3 scripts/run_lrb_sweep.py` (~2.5 h) | `experiments/lrb_sweep.json` |
 | **LRB retraction, regenerated from code**: the retracted column (`tail_truncation`) and both repairs at all eight operating points; reproduces the stored table in all 32 cells (§AO.3) | `python3 scripts/run_lrb_retraction.py` | `experiments/lrb_retraction.json` |
-| **Reachable ceiling, one frame, split-swept, with the synthetic control**: 84.4% / 87.6% unreachable at the midpoint (75.0–95.7% / 77.4–96.6% across splits) on production; 54.6% (29.4–77.9%) on the synthetic control | `python3 scripts/run_reachable_ceiling.py` | `experiments/reachable_ceiling.json` |
+| **Historical; withdrawn as an interpretation (§AZ)** — **Reachable ceiling, one frame, split-swept, with the synthetic control**: 84.4% / 87.6% unreachable at the midpoint (75.0–95.7% / 77.4–96.6% across splits) on production; 54.6% (29.4–77.9%) on the synthetic control | `python3 scripts/run_reachable_ceiling.py` | `experiments/reachable_ceiling.json` |
 | **Reachable share by trace length** (§V-B, §AS): long-horizon effect | `python3 scripts/run_reachable_by_length.py` | `experiments/reachable_by_length.json` |
-| **External replication** (§V-C, §AT, §AU): Alibaba's four Bailian traces (16-token blocks, corrected bill): split protocol leaves 80.6–97.7% unreachable at the midpoint; the hazard arm reaches 1.5–15.2× the split ceiling with all actions, 1.9–3.9× on three traces and 0 on thinking with tier-only actions | `make reproduce-external` (downloads several GB) | `experiments/bailian_reachable_birthx.json`, `bailian_hazard_birthx.json` |
+| **Historical; the ratios to the ceiling are withdrawn (§AZ)** — **External replication** (§V-C, §AT, §AU): Alibaba's four Bailian traces (16-token blocks, corrected bill): split protocol leaves 80.6–97.7% unreachable at the midpoint; the hazard arm reaches 1.5–15.2× the split ceiling with all actions, 1.9–3.9× on three traces and 0 on thinking with tier-only actions | `make reproduce-external` (downloads several GB) | `experiments/bailian_reachable_birthx.json`, `bailian_hazard_birthx.json` |
 | **Split-instant sensitivity** (not cited by the paper; kept as a robustness record): linear ≈ GBDT to within 0.4 pts at all 10 configurations; captured in [+0.4%, +6.0%] of the full gap; oracle gap 70–87%. (Regenerated 2026-10-16. The earlier artifact gave 81–92% because it predated the 512-token block-size fix, not because of the belief scale; it was missing from `DEPENDS_ON`, so the staleness guard never saw it.) | `python3 scripts/run_split_sensitivity.py` | `experiments/split_sensitivity.json` |
 | **Reactive tiering on the agentic source** (§V-F): working-set threshold (35% of Belady at a 1% tier → 99% at 10%) and the eviction-signal inversion (LRU 0.83–0.96 of Belady at 5%, LFU 0.29–0.31) | `python3 scripts/run_reactive_kvct.py` | `experiments/reactive_kvct_sweep.json` |
 | **Sampling study** (Table 3, §V-E; Table 2's agentic headroom 68–73%): four randomized draws at 20 and 40 conversations; observed captured ranges [−858, +78] and [−166, +66] (tier-speed tie-break restored, 2026-10-20) | `python3 scripts/run_sampling_study.py --sizes 20,40 --draws 4` | `experiments/sampling_study.json` |
@@ -215,8 +221,9 @@ Checking while logged in tests your own access, not a reviewer's.
 - **§A cost-model independent** — reuse distributions, AUCs, hit rates. These are properties of the
   traces and would not move if the cost tables changed. The paper's conclusions rest here.
 - **§B cost-model dependent** — anything expressed as weighted placement cost, including "headroom".
-  The simulator's latency/token/promotion tables are illustrative placeholders; the calibration gate
-  against a real vLLM+LMCache deployment has **not** been passed. Read these as shape, not magnitude.
+  The paper's placement results use a declared latency table and are rerun under per-block costs
+  measured in vLLM + LMCache on one A100 host (§BE, `run_measured_table.py`). That is a tier probe, not a
+  replay of the policies in the serving stack: the replays are an additive per-block cost model.
 - **§C not exercised** — the representation and timing axes. The traces record KV-block accesses only.
 - **§D/§E/§F/§G** — invalidated, corrected, re-measured at full scale, and the sensitivity sweep.
   All kept deliberately, each with the defect or the change described.
@@ -242,7 +249,8 @@ not just in prose:
 | Placement tie rules identical in **all three** routines (numerator and denominator) | `sequential.place_with_beliefs` / `prefix_greedy_cost` / `_oracle_cost` — fixing one of three let a ratio be built from two different rules; its only symptom was two artifacts disagreeing (§W) |
 | A constant belief must not outrank a learned one | `sequential.quantile_match` mid-rank ties, `run_belief_controls.py` — this control caught its own harness |
 | A learner whose labels have no variance must fail loudly, not silently randomize | `lrb.py` raises on zero label variance (§V) |
-| Artifacts must not outlive the code that produced them | `check_paper_numbers.py::DEPENDS_ON`, plus a guard asserting every artifact read is declared there |
+| Artifacts must not outlive the code that produced them | `check_paper_numbers.py::DEPENDS_ON`, plus a guard asserting every artifact read is declared there. `experiments/.provenance.json` records the SHA-256 of every `src/stoa` module an artifact declares **and of its producer script and every script that one imports** (`verify.producer_scripts`); a recorded digest is compared whatever the timestamps say (§BJ: before, a module edited but left older than its artifact passed). Not tracked: input artifacts a producer reads, command-line arguments, and the data files beyond their checksums |
+| A third-party sample must come from a fixed population | `data/kvct_SHA256SUMS` pins the 200 kv-cache-tester files (upstream commit 94f6046); `stoa.kvct` draws only from that list and raises on a missing or altered file; each sampling draw records its file names (§BJ) |
 | Figure coverage is derived from `\includegraphics`, not maintained beside it | `stoa.verify.figure_coverage_gaps` — four of five freshness rules had aimed at figures the paper does not contain, and rules aimed at nothing never fire (§AM) |
 | **Figures** must not outlive the artifacts they plot | `stoa.verify.stale_figures` — the paper embeds the PDF, not the JSON, so corrected text can ship beside an uncorrected plot (§AD) |
 | The built PDF must not outlive its sources | `stoa.verify.stale_paper_pdf` — a correction in the `.tex` is not a correction until the PDF a reviewer reads is rebuilt |
@@ -251,12 +259,14 @@ not just in prose:
 | Retracted values must not appear outside a retracting paragraph | `stoa.verify.unmarked_superseded(scope="paragraph")` — the 68 numeric checks are *presence* tests; with 90% and 53% injected into the abstract every one still passed (§AH) |
 | **Every guard above is itself tested**, in both directions | `tests/test_verify.py`, 73 tests, mutation-checked — four guards had lived in a script with no tests, where a refactor could delete one silently (§AG) |
 
-`pytest -q` runs all **319** tests, including the leakage guards and the fast/reference equivalence
+`pytest -q` runs all **325** tests, including the leakage guards and the fast/reference equivalence
 check, in about 2 min 45 s.
 
 ## 7. Known limitations
 
-- Cost tables are uncalibrated (see §4); no real-system deployment was performed. The hardware-derived
+- The cost model is additive per block: no overlap, queueing or batching. Per-block costs were measured
+  on one A100 host (tier probe, §BE) but no policy was replayed in a serving stack, the remote RDMA tier
+  was not measured (its price is swept, §BJ), and the replay has no discard-and-recompute action. The hardware-derived
   sweep (`run_calibration_sensitivity.py`) puts headroom at 54.9–97.8%, and the cost-weight sweep
   (`run_weight_sensitivity.py`) keeps the unreachable share at 79.3–97.1%.
 - kv-cache-tester reactive results now sweep tier size over 20 and 40 pooled conversations (up to 7.9M
@@ -275,7 +285,7 @@ The claim table above is complete but not ordered by cost. These four commands a
 cheapest first. The first needs no data, no network and no credentials.
 
 ```bash
-make verify           # ~4 min   319 tests + every paper number against its artifact
+make verify           # ~4 min   325 tests + every paper number against its artifact
 make data-check       # instant  are the traces present and the right length?
 make reproduce-fast   # ~40 min  the central claims, regenerated from the Mooncake traces
 make reproduce-full   # ~6 h     the above plus the LRB hyperparameter sweep
@@ -295,6 +305,7 @@ representation pilot). They cannot be bit-reproduced even with a key — `temper
 not the served weights. The shipped artifacts hold aggregate results only (no prompts or response ids), and
 the paper does not cite them: `check_paper_numbers.py` skips them as not in this paper.
 
-Everything else is CPU-only and free. `pyproject.toml` keeps loose bounds so the package stays
+Everything else runs on CPU and is free, except the two raw GPU measurements of §1, whose results are
+committed. `pyproject.toml` keeps loose bounds so the package stays
 installable; `requirements-lock.txt` is the provenance record of the exact versions every number
 came from.

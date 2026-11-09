@@ -3,13 +3,14 @@
 On production KV-cache traces, nearly every block a placement policy can see at a split is never read
 again; the few that are fit in the fast tiers, and the rest of the reuse falls on blocks it has not seen. How an evaluation orders these blocks
 without evidence decides what it reports: the same clairvoyant split-time reference reaches 15--20\% of
-the oracle's advantage or 76--78\% (tier-only), depending on a tie rule that none of the KV-cache
-evaluations we read states and that LRU-K left to a subsidiary policy in 1993. Knowing which seen blocks
-are dead is worth as much as knowing every seen block's future; a parameter-free rule that parks blocks
+the oracle's advantage or 76--78\% (tier-only), depending on a tie rule that a split-time evaluation has to
+state and that LRU-K left to a subsidiary policy in 1993. While the live blocks fit in the
+fastest tier, knowing which seen blocks are dead is worth as much as knowing every seen block's future; a parameter-free rule that parks blocks
 seen once behind new ones recovers about half of that, and an estimated prior a little more, on workloads
 where the prefix points that way. Online, recency does the same job better when moving a block is free,
 and at the move prices we measured, under every way of billing a move we tried, none of the replayed
-policies that move blocks beats a static frequency heuristic on the production traces. Reactive replacement, including the
+policies that move blocks beats a static frequency heuristic on the production traces in an additive cost
+model, unless moves to the remote tier we could not measure cost under a quarter of a read plus a write. Reactive replacement, including the
 designs built for one-hit wonders, stays within a few points of plain rules.
 
 For whoever evaluates a memory scheduler next, the practical content is short: report the tie rule for

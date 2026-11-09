@@ -9,8 +9,10 @@ F5_liu2025lmcache,zhang2026polarkv}. From a database perspective this is buffer 
 type~\cite{pan2025dbperspective}: pages are immutable once written, a page's first access is a
 compulsory miss (its KV is computed, not read), and a miss on a cached page costs a transfer rather
 than a recomputation. Multi-tier buffer managers have long treated the movement between tiers as a
-device-priced policy decision~\cite{canim2010ssdbufferpool,zhou2021spitfire,wu2019anna}; most KV-cache
-studies do not (below).
+device-priced policy decision~\cite{canim2010ssdbufferpool,zhou2021spitfire,wu2019anna}; Spitfire, for
+one, migrates lazily and with tunable probabilities, and may bypass a tier, because a move has a price.
+Most KV-cache studies do not price moves (below); the ski-rental and cascade-aware rules of
+\Cref{sec:online} are the simplest members of that lazy-migration family.
 
 \paragraph{Replacement and admission} LRU-K~\cite{oneil1993lruk} ranks pages by the time of their
 $K$-th most recent reference and states the case this paper turns on: ``The only time the choice is
@@ -34,23 +36,31 @@ study & when it decides & bound reported & moves priced \\
 CachedAttention~\cite{gao2024cachedattention} & online; warm-up on 10K turns, evaluate on the next 42K & none & storage, not moves \\
 Mooncake~\cite{qin2024mooncake} & online, LRU store & infinite cache & in scheduling, not eviction \\
 KVCache in the wild~\cite{wang2025kvcachewild} & online & infinite cache & ``negligible'' \\
-Fancy eviction~\cite{liu2026fancyeviction} & simulated online & Belady & no \\
+Fancy eviction~\cite{liu2026fancyeviction} & simulated online & Belady, compute-aware & compute, not moves \\
 PolarKV~\cite{zhang2026polarkv} & online LRU, background offload & none & budget, not moves \\
 Baleen~\cite{S12_wong2024baleen} & trained on day 1, tested after & episode OPT & flash writes \\
 \midrule
 this work & split instant and online replay & references with stated tie rules & measured; five ledgers \\
 \bottomrule
 \end{tabular}
-\caption{How cache studies close to ours evaluate, from each paper's evaluation section. None states
-how it orders blocks with no evidence.}
+\caption{How cache studies close to ours evaluate, from each paper's evaluation section. All evaluate online
+policies, whose own admission rule orders new blocks; none uses a split-time reference, the setting where
+the tie rule of \Cref{sec:ties} decides the result.}
 \label{tab:protocols}
 \end{table}
 
 \paragraph{How KV-cache placement is evaluated} \Cref{tab:protocols} lists the closest studies. They
 warm a cache on a prefix of the trace and measure on the rest, or bound a policy by an infinite cache
-or by Belady's offline optimum, and none of those we read says how blocks without evidence are ordered
-when the measurement starts. Movement between tiers is assumed free, hidden behind computation, or priced
+or by Belady's offline optimum. Their policies are online, so a policy's own admission rule orders the
+blocks it has not seen, and we do not claim that their reported numbers move with our tie rule. The tie
+rule decides a different kind of result: a split-time placement analysis, or a reference for how much
+of an oracle's advantage a predictor could reach, which is the evaluation this paper first ran
+(\Cref{sec:ties}). Movement between tiers is assumed free, hidden behind computation, or priced
 as provisioning, with Baleen's flash-write budget the exception. A concurrent study of fourteen eviction
 policies on production prefix-cache traces~\cite{liu2026fancyeviction} finds plain LRU within 0.4 points
-of the best online policy at a 1\,TiB pool and Belady far above all of them; it neither costs
-moves nor varies how the measurement starts, which are the two things this paper varies.
+of the best online policy at a 1\,TiB pool and Belady far above all of them. It overlaps ours in three
+observations: block lifetimes are bounded by sessions, early frequency predicts whether a block is reused
+at all, and quick demotion helps only where one-hit traffic dominates. It prices recomputation, not moves
+between tiers, and does not vary how the measurement starts. What this paper adds is the tie rule's effect
+on a reference, a ladder that prices what each part of an oracle's knowledge is worth, and the price and
+ledger of a move.

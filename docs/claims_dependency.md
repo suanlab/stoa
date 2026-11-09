@@ -2549,3 +2549,91 @@ prefix sessions would make it circular); confidence intervals (deterministic rep
 reordering §V-H/§V-J (page budget allows it, deferred to the author).
 
 Defects in the paper's catalogue: **twenty-nine**; retracted claims: four.
+
+## §BJ — a five-reviewer VLDB simulation (REVIEW_VLDB.md, 2026-11-09): what each finding became
+
+Five AI reviewer agents (contribution, method, systems, workloads, reproducibility) read commit 386b088;
+the summary leaned Weak Reject (two Weak Reject, three Borderline). The review file is the author's and is
+not part of this artifact. Each finding, and what it became:
+
+**Claims that were wrong or wider than their test (fixed in the text).**
+- *traceB "gains least"* (§5.4). The estimated prior gains 34.2% on traceB and 0.0% on thinking. A sentence
+  contradicted another artifact while every number check passed (catalogued: Unchecked summaries, now 3;
+  thirty defects). The checker now asserts the ordering.
+- *"Not stationary."* Robbins' identity and Good–Turing need the independent reference model (stationary
+  Poisson), not stationarity alone; a reviewer's exact counterexample (a phase-randomized periodic stream)
+  is stationary and fails the identity. §5.4 is retitled and says the test rejects the independent
+  reference model.
+- *Shuffle scope.* One shuffle (seed 0) certified the control. Twenty shuffles: ρ₁ 0.86–1.24 / 0.90–1.31,
+  Good–Turing within 0.04 on production; for k ≥ 3, 0.16–4.0 — too few blocks for the identity to be tight.
+  The text now says so.
+- *Online claims beyond the model.* "Serving confirms" and "moves do not pay" are statements about an
+  additive per-block model with no overlap, queueing, batching or recompute action; the text says so,
+  §3 and §7 state it, and §5.7 says the policies were not replayed in the stack.
+- *Related work.* Liu et al. (arXiv 2609.28870, read in full) already report session-bounded lifetimes,
+  early frequency predicting whether a block is reused at all, and limited benefit of quick demotion; the
+  background now credits all three, the table says it prices compute not moves, and the contribution is
+  narrowed to the tie rule's effect on a reference, the evidence ladder, and the price and ledger of a move.
+  The table caption now says all listed studies evaluate online policies, which order unseen blocks by
+  their own admission rule, and that we do not claim their numbers move with our tie rule.
+
+**New measurements** (each registered or reported as exploratory in its script).
+- *Capacity regime* (`run_ties_by_capacity.py`, scales 0.1–1.5, adds dead-known). Deadness = every visible
+  future is exact while the live visible blocks (7,248 / 4,901) fit the GPU slots (18,279 / 18,330); with up
+  to 4x as many live blocks as slots the gap is ≤ 1.9 points on production; on synthetic (1.8–27x) ranking
+  the live blocks is worth 17–70 points. The tie swing is 9.7–72.3 points (smallest at a tenth); the
+  seen-once rule gains nothing at a tenth. Scale 1 still reproduces ceiling_ties.json exactly.
+- *Window at fixed bytes* (`run_horizon.py`, `fixed_capacity_rows`; reproduces the reviewer's independent
+  90.21 / 76.22 / 66.37 / 47.48). The reference still falls 90.2→47.5 / 90.6→45.5; tie swing 40–56 points;
+  but the seen-once rule loses 16.5 / 12.4% at 7.5 min when the tiers are sized for the full trace.
+- *Chunk shuffles* (registered before running): ρ₁ with 1,000-request chunks 0.75 / 0.85 (100: 0.84 / 1.10;
+  3,000: 0.51 / 0.53). Registered reading: not local structure; drift on toolagent, neither on
+  conversation. The departure needs order kept over thousands of requests; long sessions and drift are
+  not separated.
+- *One physical ledger* (`run_physical_ledger.py`). Static placements put new blocks on the remote tier for
+  free while LRU pays for every demotion (the reviewer's audit: static heuristic places all 82,659 /
+  84,465 creations on remote). Every policy is now billed for each new block's GPU→creation-tier store and
+  every static policy for its split rearrangement, prices split into GPU↔host (measured class) and
+  everything else. A share of each ledger's own oracle gap is undefined here — with stores and
+  rearrangement billed the static oracle can cost more than the heuristic (the first run's assert caught
+  it) — so shares use the access-only gap, as the online shares already did. In the measured band
+  (uniform price): LRU −46 to −333% on production, second-hit −275 to −892%, oracle ≤ 65%, and realizing
+  the seen-once rule −37 to −160%: the ladder measures the value of knowing deadness, not of moving blocks
+  after the fact. With GPU↔host at 0.75 and remote/disk free, LRU gains +20.4 / +20.8% under write-through
+  (matching the reviewer's +20.40 / +20.76); it pays only if remote moves cost < 0.02–0.23 of read+write
+  (never under reread, never with GPU↔host at 1.87). The online conclusion is now stated as conditional on
+  the unmeasured remote price. Legacy shares are reproduced to 0.01 points (asserted).
+- *LRB seeds* (`run_lrb_seeds.py`, registered: the "below ARC at all eight" claim survives only if no seed
+  of either repair reaches ARC at the 2% tier). **Rejected.** In three of four trace–repair pairs one or two
+  of ten seeds reach or pass ARC (by ≤ 0.34 points of Belady); conversation spread up to 6.4 points. The
+  paper now claims only that LRB does not beat ARC, and that it is ≥ 9 points below at five of the other
+  six points; toolagent 20% (1.3–1.4 points) is inside the seed spread. Seed 0 reproduces
+  lrb_retraction.json (asserted).
+
+**Artifact and provenance.**
+- *Digest gated on mtime* (`verify.stale_artifacts`): a module edited but older than its artifact passed
+  (reviewer's probe reproduced). Recorded digests are now always compared; test added.
+- *Producer scripts untracked*: provenance now records the digest of each artifact's producer and every
+  script it imports (`verify.producer_scripts`). Making `artifact_deps.py` a reader (it names every artifact)
+  exposed nine artifacts with programmatic names that had passed the producer guard only because
+  artifact_deps.py named them, and three that did not declare `environment.py` (unchanged since 2026-08-20,
+  before all three were generated). Both fixed.
+- *kv-cache-tester acquisition*: pinned to upstream 94f6046 (all 200 local files match its blobs);
+  `data/kvct_SHA256SUMS`; the population is the manifest, not the directory; missing or altered files raise;
+  draws record file names. Regenerated source_stats / reactive_kvct_sweep (byte-identical) and
+  sampling_study (identical but for the new per-draw file lists).
+- *Behaviour-neutral edits, verified*: `attainable_ceiling`'s docstring no longer calls it a causal ceiling
+  (AST identical without docstrings); `run_reactive_cost.replay` records creation tiers (reactive_cost,
+  migration_ledger, measured_table, ski_rental regenerated byte-identical); irm_departure_bailian identical
+  but for two config keys.
+- *GPU environment*: `requirements-gpu.txt` (vLLM 0.11.0, torch 2.8.0+cu128, transformers 4.57.6,
+  LMCache 0.3.9, model revision 6a6f4aa…); the probe now records versions via importlib.metadata (the old
+  one wrote LMCache "unknown"), the model repo and revision, and redacted LMCache settings. Docs that
+  still said "CPU only" or "no serving measurement" are corrected; ceiling-era rows are marked historical.
+
+**Not done.** An external evaluator re-run (none uses a split-time reference — now stated rather than
+implied); replaying policies in vLLM+LMCache under load; a discard/recompute action; a frozen new-date
+holdout; prefix-selected plain rules; seeds for LeCaR/CACHEUS. The public release still lags the local
+commit; publishing it needs the author's approval.
+
+Defects in the paper's catalogue: **thirty**; retracted claims: four.

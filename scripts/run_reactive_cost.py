@@ -109,6 +109,8 @@ def replay(policy, init_tier, is_new, slots, cm, events, w, ledger=None):
                 insert_top(b, None)
             elif policy == "second-hit":
                 place_free(b, fastest=False)
+            if ledger is not None:                         # where the creation landed (run_physical_ledger.py)
+                ledger.setdefault("created_in", Counter())[where[b]] += 1
             continue
         t = where[b]
         cost += cm["per"][tiers[t]]

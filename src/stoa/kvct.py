@@ -23,9 +23,17 @@ which is the setting a tiering policy actually runs in.
 
 Download (no GPU):
     python3 -c "from stoa.kvct import download; download(200)"
+
+Acquisition is pinned and fails closed (review 2026-11-09, R5; notebook BJ). Files come from upstream
+commit `UPSTREAM_COMMIT`, not the moving `master`; `data/kvct_SHA256SUMS` lists the 200 files the paper
+uses with their SHA-256 (all 200 match the upstream blobs at that commit); the sampled universe is that
+list, never whatever `trace_*.json` happens to sit in the directory; and a missing, truncated or altered
+file raises instead of being skipped. Before this, a seed drew from a different population in a
+directory with 739 files than in one with 200, and a corrupt file vanished silently.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import random
@@ -38,28 +46,48 @@ from .credit import AccessTrace
 from .environment import ItemState, Representation, Tier
 from .traces import Workload
 
-BASE_URL = "https://raw.githubusercontent.com/callanjfox/kv-cache-tester/master/traces/"
+UPSTREAM_COMMIT = "94f6046dfd9c0c8bc0cdb24a5aa6579bac8669bf"     # 2026-07-12
+BASE_URL = f"https://raw.githubusercontent.com/callanjfox/kv-cache-tester/{UPSTREAM_COMMIT}/traces/"
 DEFAULT_DIR = "data/kvct"
+MANIFEST = Path(__file__).resolve().parents[2] / "data" / "kvct_SHA256SUMS"
+
+
+def manifest(path: Path | None = None) -> dict[str, str]:
+    """file name -> SHA-256 of every conversation the paper uses, in file order."""
+    path = Path(path) if path is not None else MANIFEST
+    if not path.exists():
+        raise FileNotFoundError(f"{path} is missing: the kv-cache-tester universe is not defined without it")
+    out = {}
+    for line in path.read_text().splitlines():
+        if line.strip():
+            digest, name = line.split()
+            out[name] = digest
+    return out
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 BYTES_PER_TOKEN = 2 * 2 * 32 * 128 * 2 // 1024      # illustrative; calibrate in M0-3
 
 
 def download(n: int = 200, out_dir: str = DEFAULT_DIR, workers: int = 16) -> int:
-    """Fetch the first `n` conversation traces. Returns how many are present."""
+    """Fetch the first `n` files of the manifest from the pinned commit and verify each one's SHA-256.
+    Returns how many are present and verified; raises if any cannot be fetched or does not match."""
     Path(out_dir).mkdir(parents=True, exist_ok=True)
+    want = list(manifest().items())[:n]
 
-    def one(i: int) -> bool:
-        name = f"trace_{i:04d}.json"
+    def one(item) -> str | None:
+        name, digest = item
         path = Path(out_dir) / name
-        if path.exists() and path.stat().st_size > 100:
-            return True
-        try:
+        if not (path.exists() and _sha256(path) == digest):
             urllib.request.urlretrieve(BASE_URL + name, path)
-            return True
-        except Exception:
-            return False
+        return None if _sha256(path) == digest else name
 
     with ThreadPoolExecutor(workers) as ex:
-        return sum(ex.map(one, range(1, n + 1)))
+        bad = [b for b in ex.map(one, want) if b]
+    if bad:
+        raise RuntimeError(f"{len(bad)} kv-cache-tester files do not match the manifest: {bad[:5]}")
+    return len(want)
 
 
 def _iter_conversations(path_dir: str, limit: int | None = None,
@@ -74,7 +102,12 @@ def _iter_conversations(path_dir: str, limit: int | None = None,
     additionally skips the first N files so successive draws can be made disjoint by
     construction.
     """
-    files = sorted(Path(path_dir).glob("trace_*.json"))
+    want = manifest()
+    files = [Path(path_dir) / name for name in sorted(want)]
+    missing = [f.name for f in files if not f.exists()]
+    if missing:
+        raise FileNotFoundError(f"{len(missing)} kv-cache-tester files of the manifest are absent from "
+                                f"{path_dir} (first: {missing[:3]}); run stoa.kvct.download()")
     files = files[offset:]
     if seed is not None:
         rng = random.Random(seed)
@@ -82,10 +115,11 @@ def _iter_conversations(path_dir: str, limit: int | None = None,
     elif limit is not None:
         files = files[:limit]
     for f in files:
-        try:
-            yield json.loads(f.read_text())
-        except Exception:
-            continue                                  # skip a truncated download
+        if _sha256(f) != want[f.name]:
+            raise ValueError(f"{f} does not match its manifest SHA-256: truncated or altered")
+        conv = json.loads(f.read_text())
+        conv.setdefault("_file", f.name)
+        yield conv
 
 
 def load_kvct(path_dir: str = DEFAULT_DIR, limit: int | None = None,
@@ -148,8 +182,10 @@ def load_kvct_with_meta(path_dir: str = DEFAULT_DIR, limit: int | None = None,
     docs/claims_dependency.md §D.
     """
     events: list[tuple[float, str, list[str]]] = []
+    files: list[str] = []
     for conv in _iter_conversations(path_dir, limit, seed, offset):
         cid = conv.get("id", "c")
+        files.append(conv["_file"])
         for req in conv.get("requests", []):
             hs = req.get("hash_ids") or []
             if hs:
@@ -179,7 +215,7 @@ def load_kvct_with_meta(path_dir: str = DEFAULT_DIR, limit: int | None = None,
     traces = {b: AccessTrace(item_id=b, access_steps=s) for b, s in steps.items()}
     accesses.sort(key=lambda x: x[0])
     wl = Workload(items=items, accesses=accesses, traces=traces)
-    return wl, {"wall": wall, "conv_of": conv_of, "conv_steps": dict(conv_steps)}
+    return wl, {"wall": wall, "conv_of": conv_of, "conv_steps": dict(conv_steps), "files": files}
 
 
 def wallclock_stats(path_dir: str = DEFAULT_DIR, limit: int | None = None) -> dict:

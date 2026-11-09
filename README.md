@@ -40,7 +40,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-lock.txt      # exact versions the paper's numbers came from, FIRST
 pip install -e . --no-deps                # then the package itself, without re-resolving them
 
-pytest -q                                  # 319 tests, ~3 min
+pytest -q                                  # 325 tests, ~3 min
 python3 scripts/check_paper_numbers.py     # every paper number vs its artifact
 ```
 
@@ -63,7 +63,7 @@ claim to a command and an artifact.
 | `paper/` | LaTeX source (official PVLDB template; the ICDE version is `main_icde.tex`, an earlier PVLDB version `main_pvldb.tex`) |
 | `docs/CONVENTIONS.md` | architecture, commands, and the conventions the codebase holds itself to |
 | `docs/claims_dependency.md` | the lab notebook: every claim, what it depends on, and what was retracted |
-| `tests/` | 319 tests, most of which pin a specific defect we hit |
+| `tests/` | 325 tests, most of which pin a specific defect we hit |
 
 ## What is hand-rolled, and why it matters
 
@@ -77,9 +77,10 @@ The cost is that our GBDT is not `HistGradientBoostingRegressor`, and we say so 
 
 ## Read this before trusting a number
 
-The paper's §V-G catalogues **twenty-seven measurement defects whose only symptom was a plausible
-number**; `docs/claims_dependency.md` records each one, with its fix and the guard that now catches it.
-Five claims were retracted (the paper counts three; two predate its framing). Two of the retractions
+The paper's §6 catalogues **thirty measurement defects whose only symptom was a plausible number**;
+`docs/claims_dependency.md` records each one, with its fix and the guard that now catches it. The paper
+counts **four retracted claims**: three in its "Retracted claims" row and the split-time "ceiling" (§AZ).
+Two earlier retractions predate the paper's framing and are counted only here. Two of the retractions
 were found by adversarial review *after* the error catalogue had been written. Two further sub-claims
 were falsified by a re-verification pass, and later withdrawn with two more readings when an audit
 found that the arrival-time experiment had leaked future information into its labels and belief
@@ -101,8 +102,9 @@ thing from this repository, take the habit of asking what a number's denominator
   evaluation (a rolling window or a fixed post-arrival horizon), which this artifact does not contain.
 - The timing axis of the formulation is not exercised at all; the representation axis only as an
   underpowered pilot.
-- No live vLLM+LMCache deployment was measured. Cost tables are derived from stated hardware
-  assumptions and swept, not calibrated.
+- Per-block costs were measured in vLLM 0.11 + LMCache 0.3.9 on one A100 host (a tier probe, notebook
+  §BE), and the results are rerun under them; no policy was replayed inside the serving stack, and the
+  remote RDMA tier was not measured (its price is swept, §BJ).
 
 ## Licence
 

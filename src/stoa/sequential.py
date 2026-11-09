@@ -256,17 +256,18 @@ def place_with_beliefs(wl: Workload, believed: dict[str, float],
 
 def attainable_ceiling(wl: Workload, scored_ids, sim: TieringSimulator | None = None,
                        weights: RewardWeights | None = None, split_frac: float = 0.5) -> float:
-    """Cost of the best placement a CAUSAL policy could reach, given what it can see.
+    """Cost of the split-time REFERENCE: true futures for the visible blocks, zero for the rest.
 
-    The hindsight oracle ranks every block in the trace, including blocks that do not exist
-    yet at the split instant. A model cannot: feature construction can only describe blocks
-    with at least one pre-split access. Scoring a policy against an oracle that ranks the
-    unseeable makes the denominator mostly unreachable -- on our traces 97% of it -- and any
-    policy then looks flat no matter how well it ranks what it CAN see.
+    NOT an upper bound, and not a ceiling (notebook AZ; paper section 5.2). A dead visible block
+    and a new block both get belief 0, so their order is a tie rule: this function breaks it by
+    item order, putting every visible block -- dead ones included -- ahead of every new one (the
+    "dead-first" rule). Parking the dead ones last (`run_ceiling_ties.dead_last`) moves the result
+    from 20.4% / 15.3% to 77.8% / 76.2% of the oracle's advantage (tier-only), and an exhaustive
+    search over small workloads beats both. The name is historical; it is kept so the artifacts
+    that call it regenerate unchanged. An earlier docstring called it "the best placement a CAUSAL
+    policy could reach" and "the correct ceiling"; both readings are retracted.
 
-    This is the clairvoyant belief restricted to `scored_ids`: perfect knowledge of the
-    future for every block the policy could have had an opinion about, and nothing for the
-    rest. It is the correct ceiling for `captured`.
+    `scored_ids` are the blocks given their true future; every other block gets 0.
     """
     sim = sim or TieringSimulator()
     st = max(1, wl.time_split(split_frac))

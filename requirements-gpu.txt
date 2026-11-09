@@ -1,0 +1,20 @@
+# The environment that produced the two raw GPU measurements (notebooks §AX, §BE). Not needed for
+# anything else: every replay, ladder and sweep runs on CPU from requirements-lock.txt.
+#
+# Host: one NVIDIA A100 80GB PCIe (Gen4 x16), NVIDIA driver with CUDA 12.8; Python 3.12.16.
+# vLLM 0.33 requires CUDA 13 and did not run on this driver; this combination is the one that did.
+#
+#   python3.12 -m venv env128 && . env128/bin/activate
+#   pip install -r requirements-gpu.txt --extra-index-url https://download.pytorch.org/whl/cu128
+#
+# Model: deepseek-ai/DeepSeek-R1-Distill-Llama-8B at revision 6a6f4aa4197940add57724a7707d069478df56b1
+# (the Llama-3-8B attention shape), e.g.
+#   huggingface-cli download deepseek-ai/DeepSeek-R1-Distill-Llama-8B --revision 6a6f4aa4197940add57724a7707d069478df56b1
+#
+# Runs (one free GPU; CUDA_VISIBLE_DEVICES pins it):
+#   python3 scripts/measure_tier_costs.py --dir <disk-tier dir> --out run.json
+#   python3 scripts/measure_serving_tiers.py --mode {none,cpu,disk} [--disk-cold] --model <snapshot path>
+vllm==0.11.0
+torch==2.8.0
+transformers==4.57.6
+lmcache==0.3.9

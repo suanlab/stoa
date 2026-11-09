@@ -21,42 +21,49 @@ actions, where it was trained) is more than half of the way there, against the s
 evaluation that does not state its tie rule does not say which one it reports.
 
 Separating what the oracle knows shows what placement has to get right. On the production traces,
-knowing \emph{which} seen blocks are dead is worth as much as knowing every seen block's future
-(\Cref{sec:ladder}). The prefix approximates it: a block seen once is dead with probability 0.95 and
+knowing \emph{which} seen blocks are dead is worth as much as knowing every seen block's future, because
+the live ones fit in the fastest tier; where they do not, as on the synthetic control, ranking them
+matters again (\Cref{sec:ladder}). The prefix approximates it: a block seen once is dead with probability 0.95 and
 0.97, and a rule that parks seen-once blocks behind new ones, with no parameters, captures 39.2\% and
 43.3\% of the advantage; an estimated prior for new blocks captures 47.0\% and 51.7\%, and on three of
-Alibaba's four serving traces it points the same way (\Cref{sec:arrival}). The reason is that KV reuse
-is not stationary: estimators that assume a stationary reference process hold on our traces once their
-requests are shuffled, but on the traces as recorded they overpredict a seen block's reuse 3.7 to 8.4
-times, consistent with blocks being created and abandoned with sessions (\Cref{sec:why}).
+Alibaba's four serving traces it points the same way (\Cref{sec:arrival}). Counts mislead because KV
+reuse departs from the independent reference model: estimators that assume it hold on our traces once
+their requests are shuffled, but on the traces as recorded they overpredict a seen block's reuse 3.7 to
+8.4 times, consistent with the session-bounded lifetimes Liu et al.\ measured~\cite{liu2026fancyeviction}
+(\Cref{sec:why}).
 
 Static analysis assumes that a block, once placed, stays. Replayed online, plain recency does the same job
 better: a multi-tier LRU captures 84.5\% and 87.7\% when moving a block is free, more than any arrival-time
 policy (\Cref{sec:online}). Whether anything that moves blocks pays is set by the price of a move, which
 KV-cache studies usually assume away (\Cref{tab:protocols}). We measured it on one A100 host: a move
 between GPU and host memory costs 0.75--1.87 times one read plus one write, at least 2.5 times the price
-at which any policy that moves blocks stops paying, and under every way of billing a move we tried, none of
-the replayed policies that move blocks beats a static frequency heuristic on the production traces. A
-serving stack (vLLM with LMCache) on the same host confirms it under its own costs and adds that loading a
-block from a cold rotational disk costs more than recomputing it (\Cref{sec:serving}). Reactive
+at which any policy that moves blocks stops paying. In an additive cost model, under every way of billing a
+move we tried, and with every policy also billed for storing each new block from the GPU, none of the
+replayed policies that move blocks beats a static frequency heuristic on the production traces, unless a
+move to the remote tier, which we could not measure, costs less than about a quarter of a read plus a
+write. The per-block costs of a serving stack (vLLM with LMCache) on the same host give the same answer,
+and loading a block from a cold rotational disk there costs more than recomputing it (\Cref{sec:serving}). Reactive
 replacement, finally, stays within a few points of plain rules: the adaptive family (ARC, LeCaR, CACHEUS)
-beats the best plain rule by at most 4.6 points of Belady, a learned LRB stays below ARC, and S3-FIFO,
-SIEVE and W-TinyLFU stay below the best plain rule everywhere (\Cref{sec:reaction}).
+beats the best plain rule chosen per operating point by at most 4.6 points of Belady, a learned LRB does
+not beat ARC, and S3-FIFO, SIEVE and W-TinyLFU stay below that per-point best everywhere
+(\Cref{sec:reaction}).
 
 \paragraph{Contributions}
 \begin{itemize}
   \item \textbf{(C1) What an evaluation has to fix.} The decision instant, information set, billing of
   creations, references, tie rule for blocks without evidence, and the price and ledger of a move, each
-  stated and swept (\Cref{sec:defs}); none of the KV-cache studies we read states the tie rule
-  (\Cref{tab:protocols}).
+  stated and swept (\Cref{sec:defs}). The tie rule decides split-time references, which none of the
+  online KV-cache studies we read uses (\Cref{tab:protocols}).
   \item \textbf{(C2) Findings on production traces}, replicated on Alibaba's traces where the data allow:
-  the tie rule moves a clairvoyant reference by 48--63 points; deadness, not ranking, is what placement has
-  to get right, and a parameter-free prefix rule recovers about half of what knowing it is worth; at the
-  move prices we measured nothing that moves blocks pays; modern one-hit-wonder policies do not beat plain
-  rules.
+  the tie rule moves a clairvoyant reference by 48--63 points; while the live blocks fit in the fast
+  tier, deadness, not ranking, is what placement has to get right, and a parameter-free prefix rule
+  recovers about half of what knowing it is worth; at the move prices we measured, none of the replayed
+  policies that move blocks pays unless remote moves are nearly free; modern one-hit-wonder policies do not
+  beat the best plain rule chosen per operating point.
   \item \textbf{(C3) An artifact and a record.} Every number regenerates from public traces, on CPU except the GPU
-  timings, and a checker fails on drift; the twenty-nine defects that each produced a plausible number on the way here,
-  four of them retracted claims, are catalogued with the control that catches each (\Cref{sec:lessons}).
+  timings, and a checker fails on drift; the thirty defects that each produced a plausible number on the way here,
+  four of them retracted claims, are catalogued with the control that catches each (\Cref{sec:lessons}),
+  as a record of one project rather than an estimate of how often such defects occur.
 \end{itemize}
 
 {\sloppy\paragraph{Artifact} Every result in this paper except the GPU timings is regenerated on CPU, without a paid API, by the

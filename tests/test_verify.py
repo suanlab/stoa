@@ -354,6 +354,18 @@ def test_changed_content_is_reported_with_both_digests(tmp_path):
     assert len(out) == 1 and "was generated from" in out[0]
 
 
+def test_changed_content_older_than_the_artifact_is_still_reported(tmp_path):
+    """A timestamp-preserving copy can leave an edited module older than its artifact; the
+    recorded digest must still be compared (review 2026-11-09, R5)."""
+    exp, src = tmp_path / "experiments", tmp_path / "src"
+    m = _write(src / "mod.py", "version = 1\n", age=OLD)
+    manifest = {"a.json": {"mod.py": verify.module_digest(m)}}
+    _write(src / "mod.py", "version = 2\n", age=OLD)
+    _write(exp / "a.json", age=NOW)
+    out = verify.stale_artifacts({"a.json": ("mod.py",)}, exp, src, manifest=manifest)
+    assert len(out) == 1 and "was generated from" in out[0]
+
+
 def test_absent_provenance_still_reports_and_says_it_rests_on_mtime(tmp_path):
     """A provenance check that silently degrades is worse than one that reports what it sees."""
     exp, src = tmp_path / "experiments", tmp_path / "src"

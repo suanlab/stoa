@@ -14,6 +14,20 @@ what happens after the split (0.5, equal halves by request), for k = 1..5:
 Control: the same trace with its requests in random order (seed 0), which makes the reference stream
 exchangeable; there rho_k should be near 1. Pre-registered (ADVISE H1): rejected if two or more of the
 four Alibaba traces have rho_1 >= 0.8; expected below 0.5 for every k <= 5 on production.
+
+What the test can and cannot say (review 2026-11-09, R4): Robbins' identity needs a stationary POISSON
+(independent reference) stream, not stationarity alone; a stationary but serially dependent stream can
+fail it too. So a departure here rejects the independent reference model, and the shuffle removes
+session structure, bursts and drift at once. Two further controls (§BJ), Mooncake only:
+
+  shuffle seeds   the full shuffle with seeds 0-19: the spread of rho_k and of the Good-Turing gap
+  chunk shuffles  requests cut into consecutive chunks of C requests (C = 100, 1000, 3000), chunks put in
+                  random order (seed 0), order kept inside each chunk: structure shorter than a chunk
+                  survives, drift across the trace does not
+
+Registered before running the chunk shuffles: the departure is local structure (sessions, bursts) if
+rho_1 stays below 0.5 with 1000-request chunks on both production traces; it is drift across the trace
+if rho_1 reaches 0.8 there; in between, neither.
 Usage: python3 scripts/run_irm_departure.py [--bailian]
 """
 from __future__ import annotations
@@ -34,6 +48,8 @@ from stoa.traces import AccessTrace, Workload  # noqa: E402
 MOONCAKE = {n: f"data/mooncake_{n}_trace.jsonl" for n in ("conversation", "toolagent", "synthetic")}
 BAILIAN = {n: f"data/bailian_{n}_mooncake.jsonl" for n in ("traceA", "traceB", "coder", "thinking")}
 K = (1, 2, 3, 4, 5)
+SEEDS = tuple(range(20))
+CHUNKS = (100, 1000, 3000)
 
 
 def shuffled(wl: Workload, seed: int = 0) -> Workload:
@@ -41,6 +57,20 @@ def shuffled(wl: Workload, seed: int = 0) -> Workload:
     are unchanged and only the order (hence stationarity) changes."""
     steps = sorted({t for t, _ in wl.accesses})
     perm = dict(zip(steps, random.Random(seed).sample(steps, len(steps))))
+    acc = sorted((perm[t], i) for t, i in wl.accesses)
+    tr = {}
+    for t, i in acc:
+        tr.setdefault(i, []).append(t)
+    return Workload(items=wl.items, accesses=acc,
+                    traces={i: AccessTrace(item_id=i, access_steps=s) for i, s in tr.items()})
+
+
+def chunk_shuffled(wl: Workload, chunk: int, seed: int = 0) -> Workload:
+    """Consecutive runs of `chunk` requests moved as units into random order; order inside a run kept."""
+    steps = sorted({t for t, _ in wl.accesses})
+    chunks = [steps[i:i + chunk] for i in range(0, len(steps), chunk)]
+    random.Random(seed).shuffle(chunks)
+    perm = dict(zip([t for c in chunks for t in c], steps))
     acc = sorted((perm[t], i) for t, i in wl.accesses)
     tr = {}
     for t, i in acc:
@@ -80,14 +110,28 @@ def main() -> int:
     if bail:
         mc.BLOCK_TOKENS = 16
     out = {"config": {"split": 0.5, "k": list(K), "control": "requests shuffled, seed 0",
+                      "shuffle_seeds": list(SEEDS), "chunks_requests": list(CHUNKS),
                       "registered": "rejected if >= 2 of 4 Alibaba traces have rho_1 >= 0.8"}, "traces": {}}
     for name, path in traces.items():
         wl = mc.load_mooncake(str(ROOT / path))
         rec = {"as_recorded": analyse(wl)}
         if not bail or name == "traceA":
             rec["shuffled_control"] = analyse(shuffled(wl))
+        if not bail:
+            per_seed = [analyse(shuffled(wl, seed)) for seed in SEEDS]
+            rho = {k: [r["rho"] for a in per_seed for r in a["by_k"] if r["k"] == k] for k in K}
+            gap = [round(a["good_turing_missing_mass"] - a["post_split_access_share_new"], 4) for a in per_seed]
+            rec["shuffle_seeds"] = {"seeds": list(SEEDS),
+                                    "rho_range": {str(k): [min(v), max(v)] for k, v in rho.items() if v},
+                                    "gt_minus_actual_range": [min(gap), max(gap)]}
+            rec["chunk_shuffles"] = {str(c): analyse(chunk_shuffled(wl, c)) for c in CHUNKS}
+            print(name, "seeds", rec["shuffle_seeds"]["rho_range"], "GT gap", rec["shuffle_seeds"]["gt_minus_actual_range"],
+                  "chunks", {c: [(r["k"], r["rho"]) for r in v["by_k"]][:2] for c, v in rec["chunk_shuffles"].items()},
+                  flush=True)
         out["traces"][name] = rec
         for kk, v in rec.items():
+            if kk in ("shuffle_seeds", "chunk_shuffles"):
+                continue
             print(name, kk, "GT", v["good_turing_missing_mass"], "new share", v["post_split_access_share_new"],
                   [(r["k"], r["rho"]) for r in v["by_k"]], flush=True)
     dest = ROOT / "experiments" / ("irm_departure_bailian.json" if bail else "irm_departure.json")

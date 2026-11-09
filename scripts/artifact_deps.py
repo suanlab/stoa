@@ -9,6 +9,24 @@ was executed) and a bad pattern to ship (audit L2). Both scripts now import it.
 fails the check rather than exempting an artifact from staleness tracking.
 """
 
+# Scripts that read artifacts without producing them, and producers whose output name is built
+# programmatically. Shared by the producer guard and by producer-script provenance (notebook BJ).
+READERS = ("check_paper_numbers.py", "make_figures.py", "record_provenance.py", "artifact_deps.py",
+           "record_pdf_build.py")
+PRODUCERS = {"reactive_real_full_lrb.json": "run_reactive_real.py",
+             "capacity_ladder_fixed.json": "run_capacity_ladder.py",
+             # names built with f-strings or passed as --out (see the Makefile); before artifact_deps.py
+             # joined READERS it named every artifact and so passed, wrongly, as their producer
+             "kvct_placement_n70.json": "train_kvct_placement.py",
+             "kvct_placement_n100.json": "train_kvct_placement.py",
+             "kvct_placement_n150.json": "train_kvct_placement.py",
+             "hazard_prior.json": "run_hazard_prior.py",
+             "hazard_prior_rescaled.json": "run_hazard_prior.py",
+             "hazard_prior_tier_rescaled.json": "run_hazard_prior.py",
+             "arrival_admission_reuse.json": "run_arrival_admission.py",
+             "prefix_features.json": "run_prefix_features.py",
+             "prefix_features_tier.json": "run_prefix_features.py"}
+
 DEPENDS_ON = {
     # artifact -> modules whose behaviour it encodes. Audited against each producing script's
     # direct imports by verify.producer_problems, which is how the omissions below were found:
@@ -41,7 +59,7 @@ DEPENDS_ON = {
     "kvct_placement_n100.json": ("traces.py", "kvct.py", "sequential.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py"),
     "kvct_placement_n150.json": ("traces.py", "kvct.py", "sequential.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py"),
     # 2026-10-19 experiments (notebook AS)
-    "hazard_prior.json": ("traces.py", "sequential.py", "mooncake.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py"),
+    "hazard_prior.json": ("traces.py", "sequential.py", "mooncake.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py", "environment.py"),
     "hazard_prior_tier.json": ("traces.py", "sequential.py", "mooncake.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py", "environment.py", "causal.py"),
     "arrival_admission_reuse.json": ("traces.py", "sequential.py", "mooncake.py", "causal.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py"),
     "tier_only_reuse.json": ("traces.py", "sequential.py", "mooncake.py", "causal.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py", "environment.py"),
@@ -62,15 +80,17 @@ DEPENDS_ON = {
     "reuse_split.json": ("traces.py", "mooncake.py"),
     "evidence_ladder_bailian.json": ("traces.py", "sequential.py", "mooncake.py", "simulator.py", "environment.py"),
     "ceiling_ties.json": ("traces.py", "sequential.py", "mooncake.py", "simulator.py", "environment.py", "eval/oracle.py"),
+    "physical_ledger.json": ("traces.py", "sequential.py", "mooncake.py", "simulator.py", "environment.py", "eval/oracle.py"),
+    "lrb_seeds.json": ("traces.py", "lrb.py", "eval/online.py", "mooncake.py"),
     "ties_by_capacity.json": ("traces.py", "sequential.py", "mooncake.py", "simulator.py", "environment.py", "eval/oracle.py"),
     "modern_baselines.json": ("eval/online.py", "modern.py", "mooncake.py", "traces.py", "simulator.py"),
     "evidence_ladder.json": ("traces.py", "sequential.py", "mooncake.py", "simulator.py", "environment.py"),
     "measured_migration.json": (),
     "migration_ledger.json": ("traces.py", "sequential.py", "mooncake.py", "causal.py", "simulator.py", "environment.py", "credit.py", "eval/oracle.py", "gnn.py"),
     "reactive_cost.json": ("traces.py", "sequential.py", "mooncake.py", "causal.py", "simulator.py", "environment.py", "credit.py", "eval/oracle.py", "gnn.py"),
-    "hazard_prior_rescaled.json": ("traces.py", "sequential.py", "mooncake.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py"),
+    "hazard_prior_rescaled.json": ("traces.py", "sequential.py", "mooncake.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py", "environment.py"),
     "hazard_prior_tier_rescaled.json": ("traces.py", "sequential.py", "mooncake.py", "credit.py", "eval/oracle.py", "gnn.py", "simulator.py", "environment.py"),
-    "prefix_features.json": ("traces.py", "sequential.py", "mooncake.py", "causal.py", "simulator.py"),
+    "prefix_features.json": ("traces.py", "sequential.py", "mooncake.py", "causal.py", "simulator.py", "environment.py"),
     "prefix_features_tier.json": ("traces.py", "sequential.py", "mooncake.py", "causal.py", "simulator.py", "environment.py"),
     "unreachability_law.json": ("traces.py", "mooncake.py"),
     "online_admission.json": ("traces.py", "sequential.py", "mooncake.py", "causal.py", "simulator.py", "environment.py", "credit.py", "eval/oracle.py", "gnn.py"),

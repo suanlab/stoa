@@ -19,7 +19,7 @@ SHELL := /bin/bash
 .PHONY: reproduce-external help verify reproduce-fast reproduce-full reproduce-llm figures paper clean data-check
 
 help:
-	@echo "make verify          — 319 tests + every paper number against its artifact (no data needed)"
+	@echo "make verify          — 325 tests + every paper number against its artifact (no data needed)"
 	@echo "make data-check      — are the traces present and the right length?"
 	@echo "make reproduce-fast  — regenerate the central claims from the Mooncake traces (~40 min)"
 	@echo "make reproduce-full  — the above plus the LRB hyperparameter sweep (~6 h)"
@@ -86,6 +86,7 @@ reproduce-fast: data-check
 	$(PY) scripts/run_horizon.py
 	$(PY) scripts/run_ski_rental.py
 	$(PY) scripts/run_session_age.py
+	$(PY) scripts/run_physical_ledger.py
 	# Figures are byte-deterministic, so regenerating them from reproduced artifacts leaves the
 	# committed PDF build manifest valid; without this step the figure guard reports them stale.
 	$(PY) scripts/make_figures.py
@@ -96,6 +97,7 @@ reproduce-full: reproduce-fast
 	$(PY) scripts/run_evidence_ladder.py
 	$(PY) scripts/run_ceiling_ties.py
 	$(PY) scripts/run_ties_by_capacity.py
+	$(PY) scripts/run_lrb_seeds.py
 	$(PY) scripts/run_reservation.py
 	$(PY) scripts/run_reactive_real.py --lrb
 	$(PY) scripts/run_lrb_retraction.py

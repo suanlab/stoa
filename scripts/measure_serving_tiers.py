@@ -174,17 +174,32 @@ def main() -> int:
             return f"unavailable ({type(e).__name__})"
     import torch
     import vllm
+    from importlib.metadata import PackageNotFoundError, version
+
+    def _ver(pkg):
+        try:
+            return version(pkg)
+        except PackageNotFoundError:
+            return "not installed"
+    # A Hugging Face cache path is .../models--<org>--<name>/snapshots/<revision>: keep both parts, so a
+    # rerun can pin the same weights (review 2026-11-09, R5: only the revision's basename was kept).
+    parts = Path(a.model).parts
+    repo = next((q[len("models--"):].replace("--", "/") for q in parts if q.startswith("models--")), a.model)
+    rev = parts[-1] if "snapshots" in parts else "unknown"
     out = {"mode": a.mode, "model": Path(a.model).name if "/" in a.model else a.model,
+           "model_repo": repo, "model_revision": rev,
            "lengths": list(LENGTHS), "suffix_tokens": SUFFIX, "reps": a.reps, "results": res,
            "env": {"vllm": vllm.__version__, "torch": torch.__version__, "python": platform.python_version(),
+                   "transformers": _ver("transformers"), "cuda": torch.version.cuda,
                    "gpu": torch.cuda.get_device_name(0),
                    "nvidia_smi": _cmd(["nvidia-smi", "--query-gpu=index,name,pcie.link.gen.current,"
                                        "pcie.link.width.current,utilization.gpu,memory.used",
                                        "--format=csv,noheader"])}}
     if a.mode != "none":
-        import lmcache
-        out["env"]["lmcache"] = getattr(lmcache, "__version__", "unknown")
-        out["lmcache_env"] = {k: v for k, v in os.environ.items() if k.startswith("LMCACHE_") and "DISK" not in k}
+        out["env"]["lmcache"] = _ver("lmcache")      # lmcache has no __version__; the old probe wrote "unknown"
+        secret = ("KEY", "TOKEN", "SECRET", "PASSWORD")
+        out["lmcache_env"] = {k: ("<redacted>" if any(x in k for x in secret) else v)
+                              for k, v in os.environ.items() if k.startswith("LMCACHE_")}
     if a.mode == "disk":
         out["disk_mount"] = _cmd(["findmnt", "-no", "SOURCE,FSTYPE", "-T", a.disk_dir])
         out["disk_cpu_buffer_gb"] = a.disk_cpu_buffer_gb

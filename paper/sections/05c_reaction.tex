@@ -92,14 +92,20 @@ toolagent    & 2\%  & 68.8--69.0 & 70.7 & yes \\
 \bottomrule
 \end{tabular}
 \end{center}
-\noindent{\footnotesize Percent of Belady. The band spans two repairs of the truncation bug: subsampling
+\noindent{\footnotesize Percent of Belady, seed 0. The band spans two repairs of the truncation bug: subsampling
 all accumulated rows, and dropping rows older than the memory window first. We adopt the second, which is
 what a ``sliding memory window'' means.}
 
 \medskip
 \noindent \textbf{What the band supports.} The two repairs agree to within 2.1 points at every operating
-point, and \textbf{LRB is below ARC at all eight operating points under both.} That ordering is the claim
-we make; the numbers are context for it. Both repairs and the retracted behaviour are selectable in the
+point, and with seed 0 LRB is below ARC at all eight operating points under both. LRB samples its
+eviction candidates and training rows at random, so we reran both repairs with ten seeds at the 2\% tier,
+where the margins are smallest. The criterion we registered kept the ordering only if no seed reached ARC;
+in three of the four trace--repair pairs one or two of ten seeds reach or pass it there, by at most 0.3
+points of Belady, and the seeds spread LRB over up to 6.4 points on conversation. At that tier LRB and ARC are indistinguishable. The
+claim we keep is narrower: \textbf{LRB does not beat ARC}, and it is below ARC by 9 points or more at five
+of the other six operating points, more than the seed spread; at toolagent's 20\% tier the margin is 1.4
+points, inside it. Both repairs and the retracted behaviour are selectable in the
 artifact, so the band is regenerated rather than reported. We do not claim the band bounds every
 reasonable reimplementation: a third repair produced in an AI-agent review we ran (see the Acknowledgments)
 reported a figure at the 10\% conversation tier above our band but still below ARC; since
@@ -133,6 +139,6 @@ result show, reaching for a more sophisticated policy does not by itself resolve
   per-operating-point best-of-seven envelope, an oracle over policies rather than a policy. Diamonds are
   ARC, which meets the envelope at 5\% on both traces and at 10\% on conversation but falls short
   elsewhere; crosses are the
-  LRB-style learned policy, which is below ARC everywhere.}
+  LRB-style learned policy (seed 0), which is below ARC everywhere; other seeds reach ARC at the 2\% tier.}
   \label{fig:reactive}
 \end{figure}

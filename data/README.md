@@ -67,7 +67,10 @@ python3 -c "from stoa.eval.locomo import load_locomo; load_locomo()"
 
 ## kv-cache-tester (needed for Table 2, Table 3 and §V-F)
 
-Anonymized agentic-coding conversations from `github.com/callanjfox/kv-cache-tester`.
+Anonymized agentic-coding conversations from `github.com/callanjfox/kv-cache-tester`, pinned to upstream
+commit `94f6046dfd9c0c8bc0cdb24a5aa6579bac8669bf` (2026-07-12). `data/kvct_SHA256SUMS` lists the 200 files
+the paper uses with their SHA-256; `download` fetches them from that commit and verifies each one, and the
+loader draws only from that list and raises on a missing or altered file.
 
 ```bash
 python3 -c "from stoa.kvct import download; download(200)"

@@ -1,7 +1,14 @@
 \section{Limitations}
 \label{sec:limits}
 Costs were measured on one host, with one model and one serving stack (\Cref{sec:serving}); its disk is
-rotational and it has no NVMe and no RDMA fabric, so the remote tier's cost is swept rather than measured.
+rotational and it has no NVMe and no RDMA fabric, so the remote tier's cost is swept rather than measured,
+and the online conclusion holds only if a remote move costs at least about a quarter of a read plus a write
+(\Cref{sec:online}). The bill is additive and per block: it has no overlap of moves with computation or
+idle link time, no queueing or batching, and no discard-and-recompute action, and we did not replay the
+policies inside a serving stack, so none of our results is a statement about latency or throughput under
+load. The replay counts tiers in block slots: at the 64\,MiB block we timed, the GPU tier's 18{,}279 slots
+would be a 1.1\,TiB pool, and applying one host's per-block price to a pool of that size assumes that
+transfers scale with blocks.
 The results use a declared per-tier latency table and are rerun under the measured one; its GPU:CPU
 latency ratio is 1:10 where five derived device classes give 1:80 to 1:250, except a deliberately flat one,
 a raw copy on our A100 host measures 1:58, and the serving stack, where a GPU-resident block still costs
@@ -12,13 +19,15 @@ not rerun the ladder or the online replays under the derived tables, and 6 of th
 reorder the hierarchy in a way our fixed capacities cannot express.
 
 Every placement result is a single deterministic run with no confidence interval, though the split,
-trace length, tier capacities, cost weights, tie rule, action space and billing are swept rather than
-fixed, and the ladder, the stationarity test and the age rules are replicated on Alibaba's four traces. The sources
+trace length, evaluation window, tier capacities, cost weights, tie rule, action space and billing are swept
+rather than fixed; the randomized controls are repeated (twenty request shuffles, ten LRB seeds at the
+tightest tier; LeCaR and CACHEUS, also randomized, are single runs), and the ladder, the stationarity test and the age rules are replicated on Alibaba's four traces. The sources
 are KV-block hash streams from transformer prefix caching: independent in provenance, not in mechanism,
 and we cannot separate workload character from vendor, date or block size. The estimated prior fixes one
 pseudo-split, its count bins and its age quartiles; rescaling for its half-prefix counts moves it by at most
 0.6 points on the production traces. Our LRB, LeCaR, CACHEUS, S3-FIFO, SIEVE and W-TinyLFU are rebuilt from
 their papers, not the authors' artifacts (CACHEUS's CR-LFU expert approximated by LFU, W-TinyLFU's sketch by
 exact aged counts), and uniform block sizes remove one of LRB's advantages over LRU, so their results are
-statements about this workload rather than about these designs. Hawkeye and Mockingjay are not run: a KV
+statements about this workload rather than about these designs. The best plain rule they are compared
+with is chosen per operating point in hindsight; we did not test choosing it from the prefix. Hawkeye and Mockingjay are not run: a KV
 block hash carries no analogue of the program counter their predictors are indexed by.

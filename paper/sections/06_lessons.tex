@@ -1,11 +1,12 @@
 \section{What the Measurement Took}
 \label{sec:lessons}
-Twenty-nine defects produced plausible numbers that matched their artifacts on the way here
+Thirty defects produced plausible numbers that matched their artifacts on the way here
 (\Cref{tab:defects}), and four of them were claims we had to retract: the three in the row of that name
 and the tie rule. Most were found by re-verification passes after the
 paper passed every check it defined for itself; two by an adversarial review and five by an audit, both
 run with AI agents (see the Acknowledgments), one by a later review that asked whether our reference
-was an upper bound, and the last by a reviewer's question about action spaces. The artifact's lab notebook records each with its fix.
+was an upper bound, and the last two by later AI-agent reviews. The catalogue records one project; it is
+not an estimate of how often such defects occur elsewhere. The artifact's lab notebook records each with its fix.
 
 \begin{table*}[t]
 \centering\footnotesize
@@ -27,8 +28,10 @@ Believing a report (1) & an edit script printed success after matching nothing &
 Stale derived or parallel surfaces (3) & artifacts older than the code that made them; figures fifteen
 days older than their data; a notebook stating a falsified claim & content-hash provenance; figure and
 PDF manifests; banners on records \\
-Unchecked summaries (2) & a sentence misquoted a checked band's width; a ratio set a ranker's gain
-with all actions against a rule's tier-only gain (``about a fifth'', in fact a third to a half) & spans
+Unchecked summaries (3) & a sentence misquoted a checked band's width; a ratio set a ranker's gain
+with all actions against a rule's tier-only gain (``about a fifth'', in fact a third to a half); a
+sentence said the estimated prior gains least on the trace closest to the independent reference model,
+where another trace's artifact shows no gain at all & spans
 and maxima asserted; withdrawn values must be absent; ratios computed in one action space \\
 Unverified interventions (1) & a mutation whose target string was absent ``passed'' & interventions
 asserted to apply; guards tested both ways \\
@@ -45,7 +48,7 @@ creations billed as reads (the gap inflated about three times) & a causal module
 conventions swept; billable access defined in one place \\
 \bottomrule
 \end{tabular}
-\caption{The twenty-nine measurement defects, by mechanism. Each produced a plausible number that matched
+\caption{The thirty measurement defects, by mechanism. Each produced a plausible number that matched
 its artifact.}
 \label{tab:defects}
 \end{table*}

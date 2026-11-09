@@ -8,8 +8,9 @@ traces are never read again, and 88.8--96.0\% across splits from 0.3 to 0.7 (64.
 control). The few that are read again, 7{,}248 and 4{,}901 blocks, carry 45.7\% and 74.5\% of the
 billable post-split reuse, and new blocks the rest, 54.3\% and 25.4\%. A policy that places blocks by
 their prefix counts therefore fills the fast tiers mostly with blocks that will not be used, ahead of the
-blocks it has not seen yet. Dead and new blocks alike give a split-time policy no evidence of future use:
-a count that will not grow, or no count at all.
+blocks it has not seen yet. A policy cannot tell the dead blocks from the live ones; what it sees is a
+count that will not grow, or for a new block no count at all. A reference that knows the visible futures
+gives dead and new blocks the same belief, zero.
 
 \subsection{The reference is set by a tie rule}
 \label{sec:ties}
@@ -47,9 +48,9 @@ same, all actions & 15.6 / 50.8 & 12.4 / 49.4 & 45.4 / 62.7 \\
 
 \medskip
 \noindent With tier-only actions the rule moves the reference by 48--63 points across splits on the
-production traces, and by 30--72 points when the three bounded tiers are scaled together from a quarter
+production traces, and by 10--72 points when the three bounded tiers are scaled together from a tenth
 to one and a half times their sizes; the swing is smallest at the smallest tiers, where the reference
-with dead blocks last reaches only 53--56\% (the synthetic control moves by 0--40 points). In serving
+with dead blocks last reaches only 42--48\% (the synthetic control moves by 0--40 points). In serving
 units, under the declared latencies the oracle's advantage is 32.6 and 16.2\,ms of block reads per
 request after the split, so the rule moves the reference by 18.7 and 9.9\,ms per request.
 
@@ -90,19 +91,26 @@ oracle & 100 & 100 & 100 \\
 
 \medskip
 \noindent On the production traces, knowing only \emph{which} visible blocks are dead is worth as
-much as knowing every visible block's future, to the hundredth of a point: the live visible blocks are few enough that their order
-does not matter. What remains, 22--24\%, is the order among new blocks. The prefix approximates deadness
+much as knowing every visible block's future, to the hundredth of a point. That is a regime, not a law:
+the 7{,}248 and 4{,}901 live visible blocks fit in the GPU tier's 18{,}279 and 18{,}330 slots, so their
+order cannot matter. Shrinking the tiers until up to four times as many live blocks as GPU slots remain
+opens a gap of at most 1.9 points; on the synthetic control, with 1.8--27 times as many, ranking the live
+blocks is worth 17--70 points. What remains, 22--24\%, is the order among new blocks. The prefix approximates deadness
 well: a block seen once before the split is dead with probability 0.95 and 0.97, and seen-once blocks are
 78--80\% of the dead ones. Parking them behind new blocks, a rule with no parameters, captures 39.2\%
-and 43.3\% (25.6--52.3\% across splits); the estimated prior of \Cref{sec:arrival}, which places new blocks
+and 43.3\% (25.6--52.3\% across splits). Liu et al.\ observe that early frequency predicts whether a
+block is reused at all~\cite{liu2026fancyeviction}; the ladder prices that observation inside a
+placement. The estimated prior of \Cref{sec:arrival}, which places new blocks
 between seen-twice and seen-three-times, captures 47.0\% and 51.7\%. On the synthetic control fewer blocks
 are dead (57--72\%), seen once is a weaker sign of it, and the same rule captures 7.5--15.4\%. The
-rule also needs room: with the bounded tiers scaled to a quarter of their sizes it captures 14.1\% and
-16.4\% on the production traces.
+rule also needs room: with the bounded tiers at a quarter of their sizes it captures 14.1\% and 16.4\% on
+the production traces, at a tenth nothing.
 
 The static assignment is realized by one rearrangement at the split, which the static bill does not
 charge, and by admitting each new block on creation into the tier the assignment reserved for it.
-\Cref{sec:online} replays arrival-time policies from the heuristic's placement and charges their moves.
+Charging both at the measured move prices (\Cref{sec:online}), the seen-once rule loses 37--160\% against
+the heuristic: what the ladder measures is the value of knowing which blocks are dead, not of moving
+blocks after the fact to act on it.
 
 The pattern replicates on Alibaba's four Qwen serving traces~\cite{wang2025kvcachewild} (16-token blocks,
 split 0.5, tier-only): 87.5--95.8\% of visible blocks are dead, the reference moves from 2.3--18.3\% with

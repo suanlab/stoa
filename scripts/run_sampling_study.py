@@ -72,7 +72,7 @@ def one_draw(n_convs: int, seed: int, feature_set: str):
     rg = predict_counts(fit_regression(Xtr, [y_cnt[i] for i in tr]), Xte)
     c = place_with_beliefs_at(wl, {ids[i]: v for i, v in zip(te, rg)}, split)
     return {"auc": a, "captured": 100.0 * (c_pref - c) / span,
-            "headroom": 100.0 * span / c_pref, "eval_blocks": len(te)}
+            "headroom": 100.0 * span / c_pref, "eval_blocks": len(te), "files": meta["files"]}
 
 
 # Student-t two-sided 97.5% quantiles, df = 1..9. Needed because the normal quantile 1.96
@@ -137,7 +137,10 @@ def main() -> None:
                      # The honest summary at n=4: no distributional assumption.
                      "captured_observed_min": round(clo, 2),
                      "captured_observed_max": round(chi, 2),
-                     "per_draw_captured": [round(r["captured"], 2) for r in res]})
+                     "per_draw_captured": [round(r["captured"], 2) for r in res],
+                     # which conversations each draw used (notebook BJ): the population is the
+                     # manifest in data/kvct_SHA256SUMS, so these names fix every draw exactly
+                     "per_draw_files": [r["files"] for r in res]})
 
     print(f"\nRead the spread, not the point. With {args.draws} draws a parametric interval")
     print("rests on a normality assumption the data cannot support, so the OBSERVED RANGE is")
@@ -145,7 +148,8 @@ def main() -> None:
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({"config": {"draws": args.draws, "features": args.features,
-                                          "sampling": "random by seed, conversation-disjoint fit/eval"},
+                                          "sampling": "random by seed, conversation-disjoint fit/eval",
+                                          "population": "data/kvct_SHA256SUMS (kv-cache-tester at 94f6046)"},
                                "rows": rows}, indent=2))
     print(f"wrote {out}")
 
