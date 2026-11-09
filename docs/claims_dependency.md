@@ -2491,3 +2491,61 @@ vs the block-age rule 30.5 / 31.1% (precision 0.978 / 0.997, recall 0.527 / 0.52
 0.525): within a point, as expected once reading a block reads its prefix. The registered rejection (≥ 3
 points below) did not occur. The first version used the chain root and crashed on an empty set; that run
 wrote nothing.
+
+## §BI — inspection pass (2026-11-09): an independent PVLDB-style review, two defects, one sweep
+
+An independent review agent read the paper as a PVLDB EA&B reviewer (lean weak reject). Its findings and
+what each became:
+
+**Two defects, each with a plausible number.**
+
+- *A ratio across action spaces* (catalogued: Unchecked summaries, now 2). §V-H said the strongest ranker
+  "gains 8.2% and 7.4% … about a fifth of what the parameter-free seen-once rule gains". The ranker ladder
+  (`capacity_ladder_fixed.json`) runs with all actions; the seen-once figure (39.2 / 43.3%) is tier-only.
+  In one space, all actions, the rule gains 17.9 / 23.1%, and the ratio is 0.46 / 0.32: a third to a half.
+  The checker now asserts the ratio from both artifacts in the same space.
+- *The retracted-headline guard read one line at a time.* `verify.unmarked_superseded` (paragraph scope)
+  missed "out of a / split-time policy's reach" wrapped across a line, so the introduction restated the
+  §AZ-retracted headline unmarked while the guard passed (the abstract passed only because its paragraph
+  happened to contain "retracted"). Paragraphs are now rejoined; `test_superseded_phrase_wrapped_across_lines_is_flagged`.
+  The abstract and introduction no longer quote the retracted phrase; §V-A marks it where it explains it.
+
+**Factual contradictions fixed.** "no production policy pays once a move costs more than 0.28" now names
+the ledger policies; ski rental's 0.30 is stated against the band (less than half of 0.75) and the
+introduction's comparison is to the largest break-even of any policy (2.5x, was "10x the arrival-time
+gain", which was the 70%-retention threshold, a second meaning of "break-even" now named as such).
+"More than any policy difference we measured" (§V-A) was false and is gone. "None … beats a static
+frequency heuristic" is scoped to the production traces everywhere (synthetic second-hit is positive under
+two ledgers). "Every number on CPU" now excepts the GPU timings. "Exactly as much" is "to the hundredth of
+a point", on production. "Thirty years ago" is 1993. The S3-FIFO/SIEVE mechanism sentence claimed a reason
+we never measured; it now says what the data show (S3-FIFO and W-TinyLFU beat LRU and ARC at the tightest
+tier, asserted) and that we did not isolate why they miss the best plain rule. The third LRB repair (§AO.4)
+is said to be below ARC, without its unshippable figure. The non-stationarity mechanism is stated as
+consistent-with, and the missing session-preserving shuffle is named.
+
+**New measurements** (`run_ties_by_capacity.py`, ~75 s). The three bounded tiers scaled together by
+0.25 / 0.5 / 1 / 1.5 (disk unbounded), tier-only, split 0.5. Scale 1 reproduces `ceiling_ties.json`
+exactly (asserted). The tie rule moves the reference 30.4–72.3 points on production, smallest at the
+smallest tiers (dead-last there only 55.7 / 53.4%); synthetic 0–40.4. The seen-once rule needs room: 14.1 /
+16.4% at scale 0.25, 39–53% elsewhere. In serving units, under the declared table the oracle's advantage is
+32.6 / 16.2 ms of block reads per post-split request (6,016 / 11,805 requests), so the tie rule moves the
+reference by 18.7 / 9.9 ms per request.
+
+**Stakes (the reviewer's main request).** No external evaluation states a tie rule we could re-run, so the
+paper shows the flip on its own ladder: the strongest ranker (MLP, all actions) is 52.6 / 59.5% of the way
+to the dead-first reference and 16.2 / 14.9% of the way to the dead-last one: "past halfway" or "about a
+sixth", from the same placements. The first reading is the one an earlier version published.
+
+**Wording.** Defined: split (a request index), declared table (values), all actions, headroom, fill-once,
+online share's denominator (static; an online share could exceed 100%), how a static assignment is realized
+(one rearrangement at the split, unbilled, plus fill-on-creation). Arms → policies. The magnitude effect
+(22–381 points) is explained: with all actions a belief picks the representation, with tier-only only order
+counts. Pre-registration is stated as what the repository can show (criterion in the docstring, committed
+with the result: unchanged since, not proven prior).
+
+**Not done, and why.** Re-running an external KV-placement evaluation under both tie rules (none states one
+or ships a split-time reference); a session-preserving shuffle (the traces carry no session ids; §BH's
+prefix sessions would make it circular); confidence intervals (deterministic replays; the sweeps stand in);
+reordering §V-H/§V-J (page budget allows it, deferred to the author).
+
+Defects in the paper's catalogue: **twenty-nine**; retracted claims: four.

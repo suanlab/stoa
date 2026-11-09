@@ -401,6 +401,14 @@
     "simulator.py": "9efcbde0ab8d4f4330cbb1886ff560419baa62591b59a7a8154050b558a92359",
     "traces.py": "9b0d127bca5bc1db76d5818916c2b668f4fe9c10768b06acd77e9eef49999ccb"
   },
+  "ties_by_capacity.json": {
+    "environment.py": "89785be4c02498077c291a84d5944f1e5aaf02335542ca9c6db0311c32d7e0cc",
+    "eval/oracle.py": "d7f20602eba894da4cad6829de925764fc700bcc96ec9dce80c9d5ca3d6302c2",
+    "mooncake.py": "f082d010bd27e66fa3a37ad3828195c39fc38812e3af46f568eac264343d3dc1",
+    "sequential.py": "064f7480580757c896d75f53245801332732649dfa288fb0f4002c50243ddc1d",
+    "simulator.py": "9efcbde0ab8d4f4330cbb1886ff560419baa62591b59a7a8154050b558a92359",
+    "traces.py": "9b0d127bca5bc1db76d5818916c2b668f4fe9c10768b06acd77e9eef49999ccb"
+  },
   "unreachability_law.json": {
     "mooncake.py": "f082d010bd27e66fa3a37ad3828195c39fc38812e3af46f568eac264343d3dc1",
     "traces.py": "9b0d127bca5bc1db76d5818916c2b668f4fe9c10768b06acd77e9eef49999ccb"

@@ -292,6 +292,16 @@ def test_superseded_value_in_a_bare_paragraph_is_flagged():
     assert len(out) == 1
 
 
+def test_superseded_phrase_wrapped_across_lines_is_flagged():
+    """A phrase broken by a line wrap escaped the per-line scan (notebook BI)."""
+    vals = {"out of a split-time policy's reach": "retracted headline"}
+    text = "which reads as most of it being out of a\nsplit-time policy's reach.\n\nNext paragraph.\n"
+    out = verify.unmarked_superseded(text, vals, markers=verify.PAPER_MARKERS, scope="paragraph")
+    assert len(out) == 1 and ":1 " in out[0]
+    marked = "An earlier version reported it was out of a\nsplit-time policy's reach; we retract it.\n"
+    assert verify.unmarked_superseded(marked, vals, markers=verify.PAPER_MARKERS, scope="paragraph") == []
+
+
 def test_paragraph_scope_accepts_a_marker_after_the_value():
     """Within one paragraph order carries no meaning: the paper's retractions read
     'described that same band as X --- the repairs disagree by Y'."""

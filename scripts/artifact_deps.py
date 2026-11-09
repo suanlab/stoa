@@ -62,6 +62,7 @@ DEPENDS_ON = {
     "reuse_split.json": ("traces.py", "mooncake.py"),
     "evidence_ladder_bailian.json": ("traces.py", "sequential.py", "mooncake.py", "simulator.py", "environment.py"),
     "ceiling_ties.json": ("traces.py", "sequential.py", "mooncake.py", "simulator.py", "environment.py", "eval/oracle.py"),
+    "ties_by_capacity.json": ("traces.py", "sequential.py", "mooncake.py", "simulator.py", "environment.py", "eval/oracle.py"),
     "modern_baselines.json": ("eval/online.py", "modern.py", "mooncake.py", "traces.py", "simulator.py"),
     "evidence_ladder.json": ("traces.py", "sequential.py", "mooncake.py", "simulator.py", "environment.py"),
     "measured_migration.json": (),

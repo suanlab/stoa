@@ -9,39 +9,39 @@ the rest against a hindsight reference. This paper is about what that evaluation
 production KV traces the choices it makes silently decide what it reports.
 
 Most blocks such an evaluation shows a policy are already dead. On two production Mooncake traces,
-\textbf{92.8\% and 95.0\%} of the blocks seen before the midpoint are never read again; the few that are
-fit in the fastest tier, and the rest of the reuse falls on blocks the policy has not seen. Dead and unseen
-blocks give a split-time policy no evidence of future use, and a reference that gives both the same belief
-orders them by a tie rule, the case LRU-K left to a ``subsidiary policy''~\cite{oneil1993lruk}.
-Earlier versions of this paper broke that tie by item order and reported that most of a hindsight oracle's
-advantage is out of a split-time policy's reach: a clairvoyant split-time reference reached \textbf{20.4\%
-and 15.3\%} of it. Parking the dead blocks behind the new ones costs them nothing, and the same reference
-reaches \textbf{77.8\% and 76.2\%} (\Cref{sec:ties}). Neither is an upper bound; the tie rule was the
-headline.
+\textbf{92.8\% and 95.0\%} of the blocks seen before the split, the request halfway through the trace,
+are never read again. Dead and unseen blocks give a split-time policy no evidence of future use, and a
+reference that gives both the same belief orders them by a tie rule, the case LRU-K left to a
+``subsidiary policy''~\cite{oneil1993lruk}. With tier-only actions, a clairvoyant split-time reference
+that breaks the tie by item order, putting the dead blocks first, reaches \textbf{20.4\% and 15.3\%} of a
+hindsight oracle's advantage, which suggests that a split-time policy can reach little of it; parking the dead blocks behind the new ones costs them nothing, and the same reference reaches
+\textbf{77.8\% and 76.2\%} (\Cref{sec:ties}). The swing holds across splits and tier capacities, and it
+is not a detail: measured against the first reference, the strongest learned ranker we trained (with all
+actions, where it was trained) is more than half of the way there, against the second about a sixth. Neither reference is an upper bound, and an
+evaluation that does not state its tie rule does not say which one it reports.
 
-Separating what the oracle knows shows what placement has to get right. Knowing \emph{which} seen blocks
-are dead is worth exactly as much as knowing every seen block's future (\Cref{sec:ladder}). The prefix
-approximates it: a block seen once is dead with probability 0.95 and 0.97, and a rule that parks seen-once
-blocks behind new ones, with no parameters, captures 39.2\% and 43.3\% of the advantage; an estimated prior
-for new blocks captures 47.0\% and 51.7\%, and on three of Alibaba's four serving traces it points the
-same way (\Cref{sec:arrival}). A better ranker of the seen blocks, by contrast, gains at most 8.2\% and
-7.4\% (\Cref{sec:capacity}). The reason is that KV reuse is not stationary:
-estimators that assume a stationary reference process, exact on our traces once their requests are
-shuffled, overpredict a seen block's reuse 3.7 to 8.4 times on the traces as recorded, because blocks are
-created and abandoned with sessions (\Cref{sec:why}).
+Separating what the oracle knows shows what placement has to get right. On the production traces,
+knowing \emph{which} seen blocks are dead is worth as much as knowing every seen block's future
+(\Cref{sec:ladder}). The prefix approximates it: a block seen once is dead with probability 0.95 and
+0.97, and a rule that parks seen-once blocks behind new ones, with no parameters, captures 39.2\% and
+43.3\% of the advantage; an estimated prior for new blocks captures 47.0\% and 51.7\%, and on three of
+Alibaba's four serving traces it points the same way (\Cref{sec:arrival}). The reason is that KV reuse
+is not stationary: estimators that assume a stationary reference process hold on our traces once their
+requests are shuffled, but on the traces as recorded they overpredict a seen block's reuse 3.7 to 8.4
+times, consistent with blocks being created and abandoned with sessions (\Cref{sec:why}).
 
 Static analysis assumes that a block, once placed, stays. Replayed online, plain recency does the same job
 better: a multi-tier LRU captures 84.5\% and 87.7\% when moving a block is free, more than any arrival-time
 policy (\Cref{sec:online}). Whether anything that moves blocks pays is set by the price of a move, which
-KV-cache studies usually assume away (\Cref{tab:protocols}). We measured it on an A100 host: a move between
-GPU and host memory costs 0.75--1.87 times one read plus one write, at least 10 times what the arrival-time
-gain could afford, and under every way of billing a move we tried, none of the replayed policies that move
-blocks beats a static frequency heuristic. A serving stack (vLLM with LMCache) on the same host confirms
-it under its own costs and adds that loading a block from a cold rotational disk costs more than
-recomputing it (\Cref{sec:serving}). Reactive replacement, finally, stays within a few points of
-plain rules: the adaptive family (ARC, LeCaR, CACHEUS) beats the best plain rule by at most 4.6 points of
-Belady, a learned LRB stays below ARC, and S3-FIFO, SIEVE and W-TinyLFU stay below the best plain rule
-everywhere, because most blocks never produce the second access these designs act on (\Cref{sec:reaction}).
+KV-cache studies usually assume away (\Cref{tab:protocols}). We measured it on one A100 host: a move
+between GPU and host memory costs 0.75--1.87 times one read plus one write, at least 2.5 times the price
+at which any policy that moves blocks stops paying, and under every way of billing a move we tried, none of
+the replayed policies that move blocks beats a static frequency heuristic on the production traces. A
+serving stack (vLLM with LMCache) on the same host confirms it under its own costs and adds that loading a
+block from a cold rotational disk costs more than recomputing it (\Cref{sec:serving}). Reactive
+replacement, finally, stays within a few points of plain rules: the adaptive family (ARC, LeCaR, CACHEUS)
+beats the best plain rule by at most 4.6 points of Belady, a learned LRB stays below ARC, and S3-FIFO,
+SIEVE and W-TinyLFU stay below the best plain rule everywhere (\Cref{sec:reaction}).
 
 \paragraph{Contributions}
 \begin{itemize}
@@ -51,14 +51,15 @@ everywhere, because most blocks never produce the second access these designs ac
   (\Cref{tab:protocols}).
   \item \textbf{(C2) Findings on production traces}, replicated on Alibaba's traces where the data allow:
   the tie rule moves a clairvoyant reference by 48--63 points; deadness, not ranking, is what placement has
-  to get right, and a parameter-free prefix rule recovers about half of it; at measured move prices
-  nothing that moves blocks pays; modern one-hit-wonder policies do not beat plain rules.
-  \item \textbf{(C3) An artifact and a record.} Every number regenerates on CPU from public traces and a
-  checker fails on drift; the twenty-eight defects that each produced a plausible number on the way here,
+  to get right, and a parameter-free prefix rule recovers about half of what knowing it is worth; at the
+  move prices we measured nothing that moves blocks pays; modern one-hit-wonder policies do not beat plain
+  rules.
+  \item \textbf{(C3) An artifact and a record.} Every number regenerates from public traces, on CPU except the GPU
+  timings, and a checker fails on drift; the twenty-nine defects that each produced a plausible number on the way here,
   four of them retracted claims, are catalogued with the control that catches each (\Cref{sec:lessons}).
 \end{itemize}
 
-{\sloppy\paragraph{Artifact} Every result in this paper is regenerated on CPU, without a paid API, by the
+{\sloppy\paragraph{Artifact} Every result in this paper except the GPU timings is regenerated on CPU, without a paid API, by the
 released package at \url{\artifacturl}; \texttt{make verify} re-derives each one from its stored result
 in a few minutes; \texttt{make reproduce-full} regenerates them from the public Mooncake and
 kv-cache-tester traces, \texttt{make reproduce-external} the Alibaba replication, and the block-move

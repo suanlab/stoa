@@ -3,7 +3,9 @@
 The alternative to forecasting is to react. On the full Mooncake traces, reactive tiering
 reaches 75--99\% of Belady's hit rate on the toolagent trace and 40--94\% on open-ended conversation
 using LRU, LFU or a fill-once cache alone; admitting the adaptive and learned policies below widens the
-per-operating-point envelope only to 76--99\% and 42--94\% (\Cref{fig:reactive}).
+per-operating-point envelope only to 76--99\% and 42--94\% (\Cref{fig:reactive}). This section's metric is
+a single cache's hit rate as a fraction of Belady's, with no move price, not the captured share of the
+sections before it.
 
 The interesting question is not the envelope --- that is an oracle over policies, not something anyone
 deploys --- but whether any \emph{single} policy attains it, and whether the adaptive designs built for
@@ -30,8 +32,9 @@ toolagent    & 2\%  & 74.9 & 70.7 & \textbf{75.8} & 73.9 \\
 \bottomrule
 \end{tabular}
 \end{center}
-\noindent{\footnotesize Percent of Belady's hit rate. ``Best pure'' is the better of LRU, LFU and a
-fill-once cache at that operating point.}
+\noindent{\footnotesize Percent of Belady's hit rate. ``Best pure'' is the best of LRU, LFU and a
+fill-once cache (which admits blocks until it is full and never evicts) at that operating point, itself a choice
+among policies, so the comparison is conservative for the adaptive designs.}
 
 \medskip
 \noindent Across eight operating points and four designs, \textbf{the best adaptive or learned policy
@@ -41,7 +44,7 @@ then plain LRU on conversation, LeCaR on toolagent. That is the substantive find
 the whole adaptive-replacement family collapses into a band a few points wide, well short of the oracle
 at the small tiers where the decision actually matters.
 
-The diagnostics say why, and the reason is specific to KV workloads. Every policy in this family adapts
+The diagnostics suggest why. Every policy in this family adapts
 on a \emph{ghost hit} (a miss on a block it recently evicted), whether it updates a split (ARC) or
 an expert weight (LeCaR, CACHEUS). But 76--78\% of blocks in these traces are never reused at all, so
 most evictions are correct and produce no signal. Measured, ARC receives an adaptation signal on
@@ -55,8 +58,9 @@ The designs built for one-hit wonders do no better. S3-FIFO~\cite{yang2023s3fifo
 SIEVE~\cite{zhang2024sieve} and W-TinyLFU~\cite{einziger2017tinylfu}, reimplemented from their papers
 (W-TinyLFU with exact, periodically halved counts in place of its sketch), stay below the best pure rule at
 all eight operating points, by 0.1 to 8.9 points of Belady; the closest is W-TinyLFU at the tightest tier.
-Quick demotion and frequency-gated admission act on a block's second access, which most KV blocks never
-have.
+Quick demotion does what it was designed for: at the tightest tier S3-FIFO and W-TinyLFU beat LRU and ARC on
+both traces. What they do not beat is the best plain rule chosen per operating point, and we did not
+isolate why.
 
 \paragraph{And the learned cache policy loses to both --- but only as a range} The natural learned
 baseline is LRB~\cite{S6_song2020lrb}, which learns a relaxed-Belady objective from
@@ -98,7 +102,8 @@ point, and \textbf{LRB is below ARC at all eight operating points under both.} T
 we make; the numbers are context for it. Both repairs and the retracted behaviour are selectable in the
 artifact, so the band is regenerated rather than reported. We do not claim the band bounds every
 reasonable reimplementation: a third repair produced in an AI-agent review we ran (see the Acknowledgments)
-reported a higher figure, and since its code is not ours to ship, we neither reproduce nor rely on it.
+reported a figure at the 10\% conversation tier above our band but still below ARC; since
+its code is not ours to ship, we neither reproduce nor rely on it.
 
 The mechanism appears to be the one that limits ARC, seen from the other side. LRB learns from labels the
 trace supplies when a sampled block is requested again; a block that never returns yields a
@@ -116,7 +121,7 @@ conversation and 77.6--86.4\% on toolagent, below ARC's 77.5\% and 92.3\% at eve
 is too wide to quote one LRB number, but not wide enough to reach ARC.
 
 
-The eviction signal also inverts by source. On the agent traces LRU reaches 0.83--0.96 of Belady at a 5\%
+The eviction signal also inverts by source. On the agentic kv-cache-tester traces LRU reaches 0.83--0.96 of Belady at a 5\%
 tier while LFU stays near 0.29--0.31; on Mooncake the ordering reverses below the working-set knee. An
 eviction policy tuned on one source is a poor default for the other --- and, as both the ARC and the LRB
 result show, reaching for a more sophisticated policy does not by itself resolve the choice.

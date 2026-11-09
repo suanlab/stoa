@@ -331,7 +331,7 @@ if _el and _rs and _ct and _hz and _hzt:
         assert abs(r["published_ceiling_pct"] - L(r["trace"], "visible-dead-first", r["actions"])) < 0.01, r
         assert abs(r["dead_last_ceiling_pct"] - L(r["trace"], "visible-dead-last", r["actions"])) < 0.01, r
     _toy = _ct["toys"]["tier"]
-    claim("exhaustive toys", f"visible blocks beats the published convention in {_toy['published_above_exhaustive']} "
+    claim("exhaustive toys", f"visible blocks beats the dead-first reference in {_toy['published_above_exhaustive']} "
           f"and the dead-last one in {_toy['dead_last_above_exhaustive']}", "", "ceiling_ties")
     # the ladder table
     _hzv = {t: HZ(t, _hzt["rows"]) for t in T}
@@ -483,7 +483,7 @@ if _rv and _sa:
           f"{_T5['toolagent']['mean_future_new']:.2f} accesses)", "", "reservation")
     _rs5 = _rv["toys"]["tier"]["recovered_share"]
     assert _rs5 >= 0.5, "H5 registered: confirmed on toys (tier-only)"
-    claim("newsvendor recovered share", f"recovers {100*_rs5:.1f}\\% of the gap to the exhaustive search", "", "reservation")
+    claim("newsvendor recovered share", f"closes {100*_rs5:.1f}\\% of the gap between the dead-last reference and the exhaustive search", "", "reservation")
     _S8 = {r["trace"]: r["captured_pct"] for r in _sa["rows"]}
     assert all(_S8[t]["block-old-last"] - _S8[t]["session-old-last"] < 3 for t in PROD), "H8 registered rejection"
     assert all(abs(_S8[t]["block-old-last"] - _S8[t]["session-old-last"]) < 1 for t in PROD), "the paper says under a point"
@@ -491,6 +491,52 @@ if _rv and _sa:
           f"against {_S8['conversation']['block-old-last']:.1f}\\% and {_S8['toolagent']['block-old-last']:.1f}\\%)", "", "session_age")
     _ag = {r["trace"]: r["captured_pct"] for r in load("age_rules.json")["rows"]}
     assert all(abs(_ag[t]["old-last"] - _S8[t]["block-old-last"]) < 0.01 for t in PROD), "two block-age rules disagree"
+
+# The tie rule across tier capacities, its size in ms, and what it does to a ranker (V-A; notebook BI)
+_tc = load("ties_by_capacity.json")
+if _tc and _el and _ct:
+    print("\nties by capacity (ties_by_capacity.json)")
+    _R = [r for r in _tc["rows"] if r["trace"] in PROD]
+    _base = {r["trace"]: r for r in _R if r["scale"] == 1.0}
+    _ctr = {(r["trace"], r["actions"]): r for r in _ct["rows"]}
+    assert all(_base[t]["captured_pct"]["dead-first"] == _ctr[(t, "tier")]["published_ceiling_pct"]
+               and _base[t]["captured_pct"]["dead-last"] == _ctr[(t, "tier")]["dead_last_ceiling_pct"] for t in PROD), \
+        "the capacity sweep at our capacities disagrees with ceiling_ties.json"
+    _sw = [r["tie_rule_swing"] for r in _R]
+    claim("tie-rule swing across capacities", f"by {min(_sw):.0f}--{max(_sw):.0f} points when the three bounded tiers",
+          "", "ties_by_capacity")
+    _small = [r for r in _R if r["scale"] == min(_tc["config"]["scales"])]
+    assert all(r["tie_rule_swing"] == min(x["tie_rule_swing"] for x in _R if x["trace"] == r["trace"]) for r in _small), \
+        "the paper says the swing is smallest at the smallest tiers"
+    _dl = sorted(r["captured_pct"]["dead-last"] for r in _small)
+    claim("dead-last at the smallest tiers", f"reaches only {_dl[0]:.0f}--{_dl[-1]:.0f}\\%", "", "ties_by_capacity")
+    _syn = [r["tie_rule_swing"] for r in _tc["rows"] if r["trace"] == "synthetic"]
+    claim("synthetic swing across capacities", f"moves by {min(_syn):.0f}--{max(_syn):.0f} points", "", "ties_by_capacity")
+    _ms = {t: _base[t]["oracle_advantage_ms_per_request"] for t in PROD}
+    claim("oracle advantage in ms", f"{_ms['conversation']:.1f} and {_ms['toolagent']:.1f}\\,ms of block reads per",
+          "", "ties_by_capacity")
+    _msw = {t: _ms[t] * _base[t]["tie_rule_swing"] / 100 for t in PROD}
+    claim("tie rule in ms", f"by {_msw['conversation']:.1f} and {_msw['toolagent']:.1f}\\,ms per request", "",
+          "ties_by_capacity")
+    _so = {r["trace"]: r["captured_pct"]["seen-once-last"] for r in _small}
+    claim("seen-once at the smallest tiers", f"captures {_so['conversation']:.1f}\\% and {_so['toolagent']:.1f}\\%",
+          "", "ties_by_capacity")
+    # A ranker against each reference (all actions, where the ladder was trained)
+    _lad = {(r["eval"], r["rung"]): r for r in load("capacity_ladder_fixed.json")["results"]}
+    _ela = {r["trace"]: r["captured_pct"] for r in _el["rows"] if r["split"] == 0.5 and r["actions"] == "all"}
+    _mlp = {t: _lad[(t, "mlp")]["captured_pct"] for t in PROD}
+    assert all(abs(_lad[(t, "ceiling")]["captured_pct"] - _ela[t]["visible-dead-first"]) < 0.01 for t in PROD), \
+        "the ladder's reference is not the dead-first one"
+    claim("ranker vs dead-first reference", f"{_lad[('conversation', 'mlp')]['captured_of_attainable_pct']:.1f}\\% and "
+          f"{_lad[('toolagent', 'mlp')]['captured_of_attainable_pct']:.1f}\\% of the way", "", "capacity_ladder_fixed")
+    _vs = {t: 100 * _mlp[t] / _ela[t]["visible-dead-last"] for t in PROD}
+    claim("ranker vs dead-last reference", f"{_vs['conversation']:.1f}\\% and\n{_vs['toolagent']:.1f}\\% of the way",
+          "", "capacity_ladder_fixed + evidence_ladder")
+    assert all(_lad[(t, "mlp")]["captured_of_attainable_pct"] > 50 for t in PROD), "the paper says more than half"
+    assert all(1 / 7.5 < _vs[t] / 100 < 1 / 5 for t in PROD), "the paper says about a sixth"
+    claim("seen-once, all actions", f"({_ela['conversation']['seen-once-last']:.1f}\\% and\n"
+          f"{_ela['toolagent']['seen-once-last']:.1f}\\%", "", "evidence_ladder")
+    assert all(0.3 <= _mlp[t] / _ela[t]["seen-once-last"] <= 0.5 for t in PROD), "the paper says a third to a half"
 
 # Ski rental (H3) and predicting the break-even price (H4) (V-D; notebook BG)
 _sk = load("ski_rental.json")
@@ -605,7 +651,7 @@ if True:
         free = max(r["online_captured_pct"] for r in prod_oa if r["migration_cost_model"] == "zero")
         priced = max(r["online_captured_pct"] for r in prod_oa if r["migration_cost_model"] == "read+write")
         assert priced <= 0.0 + 1e-9, "the paper says no arm beats the heuristic once a move costs a read and a write"
-        claim("online, free migration", f"arrival-time arms capture up to {free:.1f}\\%", "", "online_admission")
+        claim("online, free migration", f"arrival-time policies capture up to {free:.1f}\\%", "", "online_admission")
         _h70 = {r["trace"]: r["alpha_at_70pct_of_static"] for r in _oa["rows"] if r["trace"] in PROD
                 and r["arm"] == "hazard-new" and r["policy"] == "onestep" and r["migration_cost_model"] == "read+write"
                 and r["tie"] == "new-behind"}
@@ -625,9 +671,7 @@ if True:
               "", "measured_migration")
         claim("measured demotion to disk", f"costs {min(_dk):.2f}--{max(_dk):.2f} times", "", "measured_migration")
         _x = min(_gc + _dk) / max(_mm["hazard_break_even_alpha70"].values())
-        claim("measured price over break-even", f"at least {int(_x)} times the estimated prior's break-even", "",
-              "measured_migration")
-        claim("measured price over break-even, intro", f"at least {int(_x)} times what the arrival-time", "",
+        claim("measured price over break-even", f"at least {int(_x)} times that 70\\% threshold", "",
               "measured_migration")
         claim("measured run count", f"{['', 'one', 'two', 'three', 'four', 'five', 'six'][_mm['config']['n_runs']]} runs",
               "", "measured_migration")
@@ -645,10 +689,19 @@ if True:
               "migration_ledger")
         _a0 = [v["ledgers"][l]["alpha_0"] for r in _pr for v in r["policies"].values() for l in _LED
                if v["ledgers"][l]["alpha_0"] is not None]
-        claim("max break-even multiple, production", f"more than\n{max(_a0):.2f} of the assumed price", "",
+        claim("max break-even multiple, production", f"more than {max(_a0):.2f} of the\nread-plus-write price", "",
               "migration_ledger")
         if _mm:
             assert max(_a0) < min(_gc + _dk), "a production policy breaks even inside the measured price range"
+        if _mm and _sk:
+            _sko = max(_sk["traces"][t]["break_even_observed"]["ski"] for t in PROD)
+            claim("ski break-even vs measured band", f"even its {_sko:.2f} is less than half of the lowest price we measured",
+                  "", "ski_rental")
+            assert _sko < min(_gc) / 2
+            _x2 = min(_gc) / max(max(_a0), _sko)
+            claim("measured price over any break-even, intro",
+                  f"at least {_x2:.1f} times the price at which any policy that moves", "",
+                  "measured_migration + migration_ledger + ski_rental")
         _pos = [(r["trace"], p, l, v["ledgers"][l]["captured_pct"]) for r in _ml["rows"]
                 for p, v in r["policies"].items() for l in _LED if v["ledgers"][l]["captured_pct"] > 0]
         assert {(t, p) for t, p, _, _ in _pos} == {("synthetic", "second-hit")}, f"positive rows changed: {_pos}"
@@ -798,6 +851,10 @@ if _mb and _rx2:
                 _closest = (_pure - _best, max(("s3fifo", "sieve", "wtinylfu"), key=lambda k: _m[k + "_over_belady"]),
                             _m["cache_frac"])
     assert min(_gaps) > 0, "a modern baseline beat the best pure rule"
+    for _t in ("conversation", "toolagent"):
+        _m0 = min(_mb["traces"][_t]["rows"], key=lambda r: r["cache_frac"])
+        assert all(_m0[k + "_over_belady"] > max(_m0["lru_over_belady"], _m0["arc_over_belady"]) for k in ("s3fifo", "wtinylfu")), \
+            "the paper says S3-FIFO and W-TinyLFU beat LRU and ARC at the tightest tier"
     assert _closest[1] == "wtinylfu" and _closest[2] == min(r["cache_frac"] for r in _mb["traces"]["toolagent"]["rows"])
     claim("modern baselines below best pure", f"by {min(_gaps):.1f} to {max(_gaps):.1f} points of Belady", "",
           "modern_baselines")
@@ -1094,7 +1151,7 @@ REQUIRED = ("reactive_real_full_lrb.json", "headroom_by_length.json", "lrb_retra
             "evidence_ladder_bailian.json", "prefix_validity.json", "serving_tiers_a100.json",
             "measured_table.json", "irm_departure.json", "irm_departure_bailian.json", "eval_window.json",
             "age_rules.json", "age_rules_bailian.json", "ski_rental.json", "reservation.json",
-            "session_age.json")
+            "session_age.json", "ties_by_capacity.json")
 missing = [n for n in REQUIRED if not (EXP / n).exists()]
 if missing:
     failures.append("artifacts absent, so their claims went unchecked: " + ", ".join(missing))

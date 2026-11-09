@@ -22,7 +22,7 @@ simulator or a trace, never against an LLM.
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements-lock.txt   # every package pinned, transitive ones included
 pip install -e . --no-deps             # the package itself, without re-resolving the pins
-pytest -q                    # 318 tests, ~3 min; torch-gated tests skip cleanly without torch
+pytest -q                    # 319 tests, ~3 min; torch-gated tests skip cleanly without torch
 
 # Or, without the lock (looser, not the reference versions):
 #   pip install -e ".[dev,rl,eval,figures]"
@@ -181,6 +181,7 @@ Checking while logged in tests your own access, not a reviewer's.
 | **Why: non-stationary reuse** (§V-B, §BF): H1 Robbins/Good–Turing vs actual reuse with a shuffled-order control; H6 dead share and ladder vs evaluation window; H2 age-based rules (registered rule rejected) | `python3 scripts/run_irm_departure.py [--bailian]`, `run_horizon.py`, `run_age_rules.py [--bailian]` | `experiments/irm_departure*.json`, `eval_window.json`, `age_rules*.json` |
 | **Ski rental and predicted break-even** (§V-D, §BG): rent-or-buy promotion across a price grid; H3 rejected (−40.7 to −97.2% in the measured band); cascade-aware variant −4.1 to −16.8%; prefix-replay break-even 19–33% low | `python3 scripts/run_ski_rental.py` (~1 min) | `experiments/ski_rental.json` |
 | **Reservation and sessions** (§V-A, §V-B, §BH): newsvendor reference (visible futures + mean arrival future) recovers 52.4% of the dead-last-to-exhaustive gap on toys and equals dead-last on production; session-level age within a point of block age | `python3 scripts/run_reservation.py` (~7 min), `run_session_age.py` (~1 min) | `experiments/reservation.json`, `session_age.json` |
+| **Tie rule across capacities** (§V-A, §BI): the bounded tiers scaled together by 0.25–1.5; the tie rule moves the reference 30–72 points on production (smallest at the smallest tiers); the oracle's advantage is 32.6 / 16.2 ms of block reads per post-split request at our capacities | `python3 scripts/run_ties_by_capacity.py` (~2 min) | `experiments/ties_by_capacity.json` |
 | **Modern baselines** (§V-E, §BB): S3-FIFO, SIEVE, W-TinyLFU beside Belady, LRU and ARC at the four tier sizes; never above the best plain rule | `python3 scripts/run_modern_baselines.py` (~1 min) | `experiments/modern_baselines.json` |
 | **Exposure confound**: blocks arriving in the first quarter see 2.3–4.6x the future reuse of the last quarter; arrival order alone predicts reuse at AUC 0.55–0.58; the leaky design's training labels had 34.3% / 46.3% of their mass after the cut | `python3 scripts/run_arrival_diagnostics.py` | `experiments/arrival_diagnostics.json` |
 | **Cost-weight sensitivity**: unreachable share 79.3–97.1% under tenfold changes to λ_L and λ_B, one at a time | `python3 scripts/run_weight_sensitivity.py` | `experiments/weight_sensitivity.json` |
@@ -250,7 +251,7 @@ not just in prose:
 | Retracted values must not appear outside a retracting paragraph | `stoa.verify.unmarked_superseded(scope="paragraph")` — the 68 numeric checks are *presence* tests; with 90% and 53% injected into the abstract every one still passed (§AH) |
 | **Every guard above is itself tested**, in both directions | `tests/test_verify.py`, 73 tests, mutation-checked — four guards had lived in a script with no tests, where a refactor could delete one silently (§AG) |
 
-`pytest -q` runs all **318** tests, including the leakage guards and the fast/reference equivalence
+`pytest -q` runs all **319** tests, including the leakage guards and the fast/reference equivalence
 check, in about 2 min 45 s.
 
 ## 7. Known limitations
@@ -274,7 +275,7 @@ The claim table above is complete but not ordered by cost. These four commands a
 cheapest first. The first needs no data, no network and no credentials.
 
 ```bash
-make verify           # ~4 min   318 tests + every paper number against its artifact
+make verify           # ~4 min   319 tests + every paper number against its artifact
 make data-check       # instant  are the traces present and the right length?
 make reproduce-fast   # ~40 min  the central claims, regenerated from the Mooncake traces
 make reproduce-full   # ~6 h     the above plus the LRB hyperparameter sweep

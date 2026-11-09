@@ -278,6 +278,26 @@ def unmarked_superseded(text: str, values: Mapping[str, str], label: str = "note
                     f"{label}:{i + 1} states the superseded value {val} ({what}) in a section "
                     "carrying no SUPERSEDED/RETRACTED marker. Add a banner rather than editing "
                     "the record.")
+    if scope == "paragraph":
+        # The scan above reads one line at a time, so a value the paper wrapped across a line
+        # break escaped it: the abstract and introduction restated the retracted section V-B
+        # headline unmarked while the guard passed (notebook BI). Paragraphs are rejoined here.
+        para, start = [], 0
+        for i, line in enumerate(lines + [""]):
+            if line.strip():
+                if not para:
+                    start = i
+                para.append(line)
+                continue
+            if para:
+                joined = " ".join(x.strip() for x in para)
+                for val, what in values.items():
+                    if (" ".join(val.split()) in joined and not any(val in x for x in para)
+                            and not any(m.lower() in joined.lower() for m in markers)):
+                        out.append(
+                            f"{label}:{start + 1} states the superseded value {val} ({what}) across a "
+                            "line break in a paragraph carrying no SUPERSEDED/RETRACTED marker.")
+            para = []
     return out
 
 

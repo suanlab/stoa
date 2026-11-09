@@ -15,11 +15,12 @@ a count that will not grow, or no count at all.
 \label{sec:ties}
 A natural reference for split-time policies gives every visible block its true future count and every
 new block zero, and places them greedily~(\Cref{sec:defs}). Its dead visible blocks also get zero, and
-which of two zero-belief blocks goes first is a tie rule. Earlier versions of this paper broke the tie by
-item order, which puts every visible block ahead of every new one, and reported that this reference reaches
-only 15.6\% and 12.4\% of the oracle's advantage, the rest being ``out of a split-time policy's reach''.
-Parking the dead blocks behind the new ones instead costs them nothing --- they are never read --- and
-the same reference reaches:
+which of two zero-belief blocks goes first is a tie rule. A stable sort in item order puts every visible
+block ahead of every new one, and the reference then reaches 20.4\% and 15.3\% of the oracle's advantage
+with tier-only actions (15.6\% and 12.4\% with all actions), which reads as most of the advantage being
+out of a split-time policy's reach, the conclusion an earlier version of this paper drew and that we
+retract (\Cref{sec:lessons}). Parking the dead blocks behind the new ones instead costs them
+nothing --- they are never read --- and the same reference reaches:
 
 \begin{center}\footnotesize\setlength{\tabcolsep}{3.5pt}
 \begin{tabular}{@{}lrrr@{}}
@@ -45,17 +46,27 @@ same, all actions & 15.6 / 50.8 & 12.4 / 49.4 & 45.4 / 62.7 \\
 \end{figure}
 
 \medskip
-\noindent The convention moves the reference by 48--63 points across splits on the production traces
-(tier-only), more than any policy difference we measured. Neither version is an upper bound for the
-policies it stands for: on 200 random ten-block workloads an exhaustive search over placements of the
-visible blocks beats the published convention in 90 and the dead-last one in 83, by reserving fast
-slots for arrivals, which needs knowledge of the arrivals. Knowing only the arrivals' average does not
-lift the reference: parking every visible block whose future is below the mean future of the new blocks
-(0.35 and 0.34 accesses) parks exactly the dead ones on the production traces, so the dead-last reference
-is already what a split-time reference can build from the arrival distribution; on the small workloads
-the same rule recovers 52.4\% of the gap to the exhaustive search. We therefore report both and call
-neither a ceiling. The headline of earlier versions, that most of the oracle's advantage is out of a split-time
-policy's reach, was this tie rule.
+\noindent With tier-only actions the rule moves the reference by 48--63 points across splits on the
+production traces, and by 30--72 points when the three bounded tiers are scaled together from a quarter
+to one and a half times their sizes; the swing is smallest at the smallest tiers, where the reference
+with dead blocks last reaches only 53--56\% (the synthetic control moves by 0--40 points). In serving
+units, under the declared latencies the oracle's advantage is 32.6 and 16.2\,ms of block reads per
+request after the split, so the rule moves the reference by 18.7 and 9.9\,ms per request.
+
+The rule decides how a result reads. The strongest ranker of \Cref{sec:capacity}, an MLP trained with
+all actions, gains 8.2\% and 7.4\% of the oracle's advantage: 52.6\% and 59.5\% of the way to the
+reference with dead blocks first, a learned model past halfway to what looks reachable, but 16.2\% and
+14.9\% of the way to the reference with them last.
+
+Neither reference is an upper bound for the policies it stands for: on 200 random ten-block workloads an
+exhaustive search over placements of the visible blocks beats the dead-first reference in 90 and the
+dead-last one in 83, by reserving fast slots for arrivals, which needs knowledge of the arrivals. Knowing
+only the arrivals' average does not lift the reference on the production traces: parking every visible
+block whose future is below the mean future of the new blocks (0.35 and 0.34 accesses) parks exactly the
+dead ones there, so the dead-last reference is already the one a split-time policy can build from the
+arrival distribution. On the small workloads the average does help: the same rule closes 52.4\% of the gap
+between the dead-last reference and the exhaustive search. We therefore report both references and call
+neither a ceiling.
 
 \subsection{Knowing which seen blocks are dead is most of the prize}
 \label{sec:ladder}
@@ -78,14 +89,20 @@ oracle & 100 & 100 & 100 \\
 \end{center}
 
 \medskip
-\noindent On the production traces, knowing only \emph{which} visible blocks are dead is worth exactly as
-much as knowing every visible block's future: the live visible blocks are few enough that their order
+\noindent On the production traces, knowing only \emph{which} visible blocks are dead is worth as
+much as knowing every visible block's future, to the hundredth of a point: the live visible blocks are few enough that their order
 does not matter. What remains, 22--24\%, is the order among new blocks. The prefix approximates deadness
 well: a block seen once before the split is dead with probability 0.95 and 0.97, and seen-once blocks are
 78--80\% of the dead ones. Parking them behind new blocks, a rule with no parameters, captures 39.2\%
 and 43.3\% (25.6--52.3\% across splits); the estimated prior of \Cref{sec:arrival}, which places new blocks
 between seen-twice and seen-three-times, captures 47.0\% and 51.7\%. On the synthetic control fewer blocks
-are dead (57--72\%), seen once is a weaker sign of it, and the same rule captures 7.5--15.4\%.
+are dead (57--72\%), seen once is a weaker sign of it, and the same rule captures 7.5--15.4\%. The
+rule also needs room: with the bounded tiers scaled to a quarter of their sizes it captures 14.1\% and
+16.4\% on the production traces.
+
+The static assignment is realized by one rearrangement at the split, which the static bill does not
+charge, and by admitting each new block on creation into the tier the assignment reserved for it.
+\Cref{sec:online} replays arrival-time policies from the heuristic's placement and charges their moves.
 
 The pattern replicates on Alibaba's four Qwen serving traces~\cite{wang2025kvcachewild} (16-token blocks,
 split 0.5, tier-only): 87.5--95.8\% of visible blocks are dead, the reference moves from 2.3--18.3\% with

@@ -4,9 +4,12 @@ Does a better model of the visible blocks pay inside a split-time protocol? We t
 rankers on one production trace and evaluate on the other, with every rung's scores quantile-matched
 onto one magnitude multiset so that only the order varies. Placement improves monotonically with
 ranking quality, from the frequency heuristic, which $\log$(count) reproduces exactly, to an MLP with
-cross-trace AUC 0.82 and 0.93, but the strongest model gains 8.2\% and 7.4\% of the oracle's
-advantage, about a fifth of what the parameter-free seen-once rule gains by moving blocks without
-evidence behind new ones (\Cref{sec:ladder}). The magnitude attached to an identical order moves the
+cross-trace AUC 0.82 and 0.93, but with all actions, the space the ladder was trained in, the strongest
+model gains 8.2\% and 7.4\% of the oracle's advantage, a third to a half of what the parameter-free
+seen-once rule gains in the same space by moving blocks without evidence behind new ones (17.9\% and
+23.1\%; \Cref{sec:ladder}). The magnitude attached to an identical order moves the
 result more than the order does: running each rung on its own score scale and on the common multiset
-differs by \textbf{22 to 381 points} of the reference. A ``fraction captured'' is not a quantity until
+differs by \textbf{22 to 381 points} of the reference, because with all actions a placement reads
+magnitudes as well as order: a block's belief decides which representation it can afford, not only its
+rank. With tier-only actions the fastest tier with room is always the cheapest, and only the order counts. A ``fraction captured'' is not a quantity until
 its magnitude convention is stated.

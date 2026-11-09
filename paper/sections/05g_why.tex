@@ -1,6 +1,6 @@
 \subsection{Why: KV reuse is not stationary}
 \label{sec:why}
-Buffer-management theory from A0 to LRU-K assumes that each page is referenced by a stationary process.
+Buffer-management theory from the A0 policy to LRU-K~\cite{oneil1993lruk} assumes that each page is referenced by a stationary process.
 Under that assumption two estimators need nothing but the counts: Robbins' identity predicts the mean
 future count of a block seen $k$ times from the number of blocks seen $k$ and $k{+}1$ times, and
 Good--Turing's missing mass predicts the share of accesses that go to blocks not yet seen. Both hold on
@@ -11,9 +11,11 @@ our traces once their requests are shuffled into random order: the ratio of actu
 blocks receive 82.2\% and 57.4\% of the accesses after the split where the missing mass predicts 50.1\% and
 36.4\%. Three of Alibaba's four traces depart the same way (0.19--0.31 for blocks seen once); the fourth,
 traceB, is nearly stationary (0.71), and it is where the estimated prior gains least. The synthetic
-control departs the other way (1.95). A KV block is created with a session and stops being read when the
-session ends, so its count says more about how long it has been alive than about how often it will be
-read: the population is born and dies rather than being sampled.
+control departs the other way (1.95), for reasons we did not examine. The departure is what one expects if
+a KV block is created with a session and stops being read when the session ends: its count then says
+more about how long it has been alive than about how often it will be read, and the population is born
+and dies rather than being sampled. A request shuffle removes session structure and any drift over the
+trace at once; we did not run a shuffle that keeps sessions intact, which would separate the two.
 
 Two consequences follow, and we tested both. If blocks die with sessions, they die quickly, and the dead
 share should not depend much on how long the evaluation waits. It does not: with the split at a quarter
@@ -23,7 +25,9 @@ the end. The window's length is nonetheless one more convention for the referenc
 of the oracle's advantage falls on blocks created inside it, and the reference with dead blocks last falls
 from 89.7\% to 47.5\% on conversation, while the tie rule still moves it by 38--52 points at every length.
 Second, a block's age should mark it as dead better than its count. It does, but that is not enough: the
-rule we registered in advance, parking blocks seen at most twice and older than the median, parks blocks
+rule we registered in advance,\footnote{A registered rule or criterion is written, before the first run,
+into the docstring of the script that tests it. Script and result were committed together, so the
+repository shows that the criterion has not changed since, not that it preceded the run.} parking blocks seen at most twice and older than the median, parks blocks
 that are dead 98.0\% and 99.9\% of the time but reaches only half of the dead ones, and captures 28.0\% and
 28.8\%, less than the seen-once rule. Parking the oldest three quarters, which we tried afterwards,
 captures 49.0\% and 50.4\%, but on Alibaba's traces it beats the seen-once rule on two, falls below it on

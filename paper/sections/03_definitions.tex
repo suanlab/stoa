@@ -20,13 +20,14 @@ size; we did not check the adaptive policies.
 
 \paragraph{Cost} An access to a block on tier $t$ costs $\lambda_L\,\ell_t$ plus a context-token term
 that does not depend on the tier, with $\lambda_L = 0.1$ per ms and per-tier read latencies $\ell_t$
-from a declared table (\Cref{sec:limits}). We report every result with \emph{tier-only} actions: a KV
-block is moved, not re-encoded. The artifact's cost model also lets a placement change a block's
-representation and timing; we report that space only to show how much a model-dependent action space
-moves the numbers.
+from a declared table: 0.2, 2, 6 and 12\,ms for GPU, host, remote and disk (\Cref{sec:limits}). We report
+results with \emph{tier-only} actions unless we say otherwise: a KV block is moved, not re-encoded. The
+artifact's cost model also lets a placement change a block's representation and when that change is paid
+for; we call that space \emph{all actions} and report it only where noted, to show how much a
+model-dependent action space moves the numbers.
 
-\paragraph{The split instant} An offline evaluation picks a split $s$, lets the policy observe the trace
-before $s$, and bills the placement on the accesses at or after $s$. A block is \emph{visible} if it was
+\paragraph{The split instant} An offline evaluation picks a split $s$, a request index (the midpoint
+unless stated), lets the policy observe the requests before $s$, and bills the placement on the accesses at or after $s$. A block is \emph{visible} if it was
 accessed before $s$ and \emph{new} otherwise. Features, labels, the train/evaluation cut and the bill all
 use the same $s$; an earlier version of our arrival experiment used two, and leaked.
 

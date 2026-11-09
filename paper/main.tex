@@ -49,21 +49,24 @@ Block: What Split-Instant Evaluation Hides in KV-Cache Placement [Experiment, An
 \email{suanlee@semyung.ac.kr}
 
 \begin{abstract}
-KV-cache placement across GPU, host, remote and storage tiers is evaluated by replaying traces, and the
-choices such an evaluation fixes silently decide what it reports. On two production Mooncake traces,
+KV-cache placement across GPU, host, remote and storage tiers is evaluated by replaying traces, and
+choices such an evaluation leaves implicit decide what it reports. On two production Mooncake traces,
 92.8\% and 95.0\% of the blocks seen before the evaluation split are never read again; with the blocks not
 yet created, they give a placement policy no evidence of future use, and how an evaluation orders them is
-a tie rule. Under the rule earlier versions of this paper used, a clairvoyant split-time reference reaches
-20.4\% and 15.3\% of a hindsight oracle's advantage, suggesting most of it is out of a split-time policy's
-reach; with the dead blocks parked behind new ones the same reference reaches 77.8\% and 76.2\%. Knowing
-which seen blocks are dead is worth as much as knowing their whole future, and a parameter-free rule that
-parks blocks seen once behind new ones recovers 39.2\% and 43.3\% (47.0\% and 51.7\% with an estimated
-prior, which three of four Alibaba serving traces support). Online, a multi-tier LRU captures 84.5\% and
-87.7\% when moving a block is free, but at the move prices we measured on an A100 host, 0.75--1.87 times one
-read plus one write, and under five ways of billing a move, none of the replayed policies that move blocks
-beats a static frequency heuristic. Reactive replacement, S3-FIFO, SIEVE and W-TinyLFU included, stays
-within a few points of plain rules. An artifact regenerates every number on CPU, and we catalogue the
-twenty-eight defects, four of them retracted claims, that produced plausible numbers on the way.
+a tie rule. With the dead blocks ordered ahead of new ones, a clairvoyant split-time reference reaches
+20.4\% and 15.3\% of a hindsight oracle's advantage, which suggests that a split-time policy can reach
+little of it; with them behind new ones, the same reference reaches 77.8\% and 76.2\%
+(tier-only actions). The swing holds across splits and tier capacities, and it decides whether a learned
+ranker is more than half of the way to the reference or a sixth. Knowing which seen blocks are dead is worth as
+much as knowing their whole future, and a parameter-free rule that parks blocks seen once behind new ones
+recovers 39.2\% and 43.3\% (47.0\% and 51.7\% with an estimated prior, which three of four Alibaba serving
+traces support). Online, a multi-tier LRU captures 84.5\% and 87.7\% when moving a block is free, but at
+the move prices we measured on one A100 host, 0.75--1.87 times one read plus one write, and under five
+ways of billing a move, none of the replayed policies that move blocks beats a static frequency heuristic
+on the production traces. Reactive replacement, S3-FIFO, SIEVE and W-TinyLFU included, stays within a
+few points of plain rules. An artifact regenerates every number from public traces, on CPU except the GPU
+timings, and we catalogue the twenty-nine defects, four of them retracted claims, that produced plausible
+numbers on the way.
 \end{abstract}
 
 \maketitle

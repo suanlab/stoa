@@ -18,19 +18,21 @@ workload.
 \subsection{Online: recency, and the price of a move}
 \label{sec:online}
 Static analysis assumes a block, once placed, stays. Replayed online from the heuristic's starting
-state with tier-only actions, the same arrival-time arms capture up to 57.3\% when moving a resident is
-free. Plain recency does better on the same bill: a multi-tier LRU that moves every accessed block to the
+state with tier-only actions, the same arrival-time policies capture up to 57.3\% when moving a placed block
+is free. Plain recency does better on the same bill: a multi-tier LRU that moves every accessed block to the
 fastest tier captures \textbf{84.5\% and 87.7\%}; caching a block only on its second access captures
-$-6.2$\% and $-2.8$\%. Ranking unseen blocks first is a weaker form of recency.
+$-6.2$\% and $-2.8$\%. Online shares keep the static denominator, the static oracle's advantage over the
+heuristic, so they compare policies on one scale; an online policy is not bounded by a static oracle, and
+its share could exceed 100\%. Creations are unbilled for every policy, online or static.
 
 Whether either pays is set by the price of a move. Billed one read plus one write per move, LRU falls to
-$-400.5$\% and $-401.4$\%, no replayed arrival arm beats the static heuristic, and the estimated prior
+$-400.5$\% and $-401.4$\%, no replayed arrival-time policy beats the static heuristic, and the estimated prior
 keeps 70\% of its static gain only if a move costs at most 7.3\% and 7.2\% of that price. We timed the
 price on one host (an A100 80GB on PCIe Gen4 x16, six runs, a 64\,MiB Mooncake block of an 8B-class
 model): a move between GPU and host memory costs 0.75--1.87 times the read-plus-write price, whether it
 blocks serving or overlaps it, because the two copy directions did not overlap on this host and a
 background move took the link time of a load; a demotion to the host's rotational disk costs 0.90--1.46
-times. Every measured price is at least 10 times the estimated prior's break-even.
+times. Every measured price is at least 10 times that 70\% threshold.
 
 \begin{figure}[t]
   \centering
@@ -44,16 +46,17 @@ times. Every measured price is at least 10 times the estimated prior's break-eve
 The conclusion does not depend on how the hierarchy bills a move. Crediting the serving read to a
 promotion, keeping clean lower copies of immutable blocks, or writing every block through to host memory
 at creation (the last two without charging the copies' space) leaves LRU at $-401.4$\% to $-353.2$\%,
-and no production policy pays once a move costs more than 0.28 of the assumed price; most of LRU's moves
+and none of these policies pays on the production traces once a move costs more than 0.28 of the
+read-plus-write price (the price at which its share reaches zero); most of LRU's moves
 demote blocks just created, which have no copy below. Only on the synthetic control does a moving policy
 pay, cache-on-second-hit under the two copy-keeping ledgers (2.6\% and 4.5\%). The remote tier, which
-receives most of the arrival arms' online demotions, could not be measured.
+receives most of the arrival-time policies' online demotions, could not be measured.
 
 Moving a block only once it has paid for the move does not change this. A ski-rental policy promotes a
 block when the extra cost of its accesses from a slower tier reaches the price of the move, the rule that
 is 2-competitive for one block's rent-or-buy decision~\cite{karlin1988snoopy}. It breaks even at 0.27 and
 0.30 of the read-plus-write price, later than LRU (0.17 and 0.18), but at every price in the measured band
-it loses 40.7--97.2\%. Each promotion into a full GPU tier forces 1.94 and 1.95 demotions on average, 62\% of
+it loses 40.7--97.2\%; even its 0.30 is less than half of the lowest price we measured. Each promotion into a full GPU tier forces 1.94 and 1.95 demotions on average, 62\% of
 its move cost, and the rent-or-buy rule does not see them. Counting that cascade in the threshold, which
 we tried afterwards, cuts the loss to 4.1--16.8\% but not to zero. The break-even price can be estimated
 from the past: replaying a policy on the trace before the split puts it 19 to 33\% below the value observed
