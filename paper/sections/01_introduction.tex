@@ -46,20 +46,25 @@ and loading a block from a cold rotational disk there costs more than recomputin
 replacement, finally, stays within a few points of plain rules: the adaptive family (ARC, LeCaR, CACHEUS)
 beats the best plain rule chosen per operating point by at most 4.6 points of Belady, a learned LRB does
 not beat ARC, and S3-FIFO, SIEVE and W-TinyLFU stay below that per-point best everywhere
-(\Cref{sec:reaction}).
+(\Cref{sec:reaction}). The same holds for evaluations other than ours. The open simulator of a recent
+eviction study counts a cached block as a hit even behind a block that missed; counted the way vLLM and SGLang
+match a request, which stops at its first miss, its headline compute-aware policy goes from 10.4 points ahead
+of LRU to 19.6 points behind (\Cref{sec:matching}).
 
 \paragraph{Contributions}
 \begin{itemize}
   \item \textbf{(C1) What an evaluation has to fix.} The decision instant, information set, billing of
   creations, references, tie rule for blocks without evidence, and the price and ledger of a move, each
-  stated and swept (\Cref{sec:defs}). The tie rule decides split-time references, which none of the
+  stated and swept (\Cref{sec:defs}), plus the rule that decides which cached blocks count as hits. The tie
+  rule decides split-time references, which none of the
   online KV-cache studies we read uses (\Cref{tab:protocols}).
   \item \textbf{(C2) Findings on production traces}, replicated on Alibaba's traces where the data allow:
   the tie rule moves a clairvoyant reference by 48--63 points; while the live blocks fit in the fast
   tier, deadness, not ranking, is what placement has to get right, and a parameter-free prefix rule
   recovers about half of what knowing it is worth; at the move prices we measured, none of the replayed
   policies that move blocks pays unless remote moves are nearly free; modern one-hit-wonder policies do not
-  beat the best plain rule chosen per operating point.
+  beat the best plain rule chosen per operating point; and a published simulator's headline reverses under the
+  matching rule serving engines implement.
   \item \textbf{(C3) An artifact and a record.} Every number regenerates from public traces, on CPU except the GPU
   timings, and a checker fails on drift; the thirty defects that each produced a plausible number on the way here,
   four of them retracted claims, are catalogued with the control that catches each (\Cref{sec:lessons}),

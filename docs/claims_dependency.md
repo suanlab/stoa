@@ -2649,3 +2649,55 @@ here. Not re-run since their scripts changed: `bailian_reachable_birthx.json` (e
 a608c16 records the artifacts as byte-reproducible), the retracted `kvct_placement_n{70,100,150}.json`,
 and `prefix_features*.json`, `admission_filter.json`, `unreachability_law.json`, which the paper does not
 cite. For those the record certifies the scripts, not a rerun.
+
+## §BK — a published evaluator's headline and the matching rule serving engines implement (2026-11-17)
+
+Context: the five-reviewer simulation (§BJ) asked for an external evaluation whose conclusion an unstated or
+unrealistic convention changes (R1). PrefixSim (cacheMon/PrefixSim, the open simulator of "When Fancy Eviction
+Fails", arXiv 2609.28870) states in doc/design.md that "a block after a miss still counts": a resident block of
+a request is a hit even behind a block that missed. The same document says vLLM and SGLang stop matching at a
+request's first miss and "would save less wherever the policy leaves a gap". Its README and the paper's headline
+is that RandomCompute, a compute-aware policy, saves 10.4 points more prefill compute than LRU at 16k blocks
+(24 GiB) on the freeinference trace.
+
+What we did (`scripts/run_prefixsim_audit.py`, `scripts/patches/prefixsim_first_miss.patch`):
+- Pinned PrefixSim at 160d5f8 (libCacheSim 3fa480b) and its HF dataset at revision ba89a34 (CC-BY-4.0, not
+  redistributed; trace SHA-256 pinned).
+- The patch adds a second score to phase 1 (the match): hits up to the request's first miss. The cache's
+  behaviour is untouched; only the count differs. PrefixSim once had such a metric (`prefix_hit_ratio`) and
+  removed it in favour of a hole-length dump; we did not find why.
+- Registered before running: the headline does not survive first-miss scoring if the lead falls below 1 point
+  or reverses, and survives if it stays at 5 or more.
+- Ten policies × five cache sizes × both traces, PrefixSim's own cost model.
+
+Results (`experiments/prefixsim_matching.json`):
+- **Reversed.** At 16k blocks on freeinference, RandomCompute − LRU goes from +10.4 to −19.6 points. On chutes it
+  goes from +0.9 to −14.3. BeladyCompute (offline) falls from 73.5% to 36.1%, below LRU's 53.3%.
+- LRU and the hit-count Belady lose nothing at any size. ARC loses at most 1.0 point; S3-FIFO and SIEVE lose up
+  to 5.1 and 4.2. The compute-aware family (RandomCompute, partial-node, GDSF-Compute, BeladyCompute) loses
+  29–40 points at 16k. The difference shrinks with the cache, to about 1.5 points at 256k.
+- **The patch is checked against PrefixSim's own `--dump-holes`.** The hits after each request's first hole,
+  summed from the dump, equal block_hit_ratio − prefix_block_hit_ratio to 1e-6 for LRU, RandomCompute and
+  partial-node (0, 0.216080, 0.208512).
+- **Partial-node is not exempt.** It cuts holes per request from 9.3 to 1.06 (LRU 0.93), the diagnostic
+  PrefixSim's documentation reports for it. Yet 11.4% of its requests have a hole early in a long prefix, and
+  the hits behind those holes are 20.9% of blocks, against RandomCompute's 21.6%. Holes per request
+  understates the loss under first-miss matching.
+
+Fairness, stated in the paper: the convention is documented, and the study itself names the fragmentation
+("holes") and proposes partial-node eviction and an engine change that recomputes holes in place. Its headline
+holds for such an engine and reverses on stock vLLM/SGLang matching. What we add is the size and sign of
+that dependence, and the partial-node measurement under first-miss scoring.
+
+Consequence for our own results (§7): our replays of ARC, LeCaR, CACHEUS, LRB, S3-FIFO, SIEVE and W-TinyLFU bill
+blocks independently and were never checked for hits behind a missed block. PrefixSim's numbers suggest an
+optimism of up to about 1 point for ARC and about 5 for S3-FIFO at tight caches. That does not change the
+direction of our §5.10 claims, which already place these policies at or below plain rules.
+
+Process notes:
+- The first README-reproduction attempt timed out: caches smaller than a trace's largest request make PrefixSim
+  load the whole trace (~13 GiB), so the sweep ran 8-wide (~3 h on the 2.7 GHz Xeon).
+- An end-to-end `setup` run failed only because the toolchain environment's Python lacked huggingface_hub.
+  Rerun with the system Python; the docstring now says so.
+- A `git stash` used to check a build baseline could not be popped, because the stashed build had changed two
+  tracked build outputs. Recovered by restoring those two files and popping; nothing was lost.

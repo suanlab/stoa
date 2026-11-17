@@ -960,6 +960,53 @@ if _mb and _rx2:
     claim("modern baselines below best pure", f"by {min(_gaps):.1f} to {max(_gaps):.1f} points of Belady", "",
           "modern_baselines")
 
+# --- a published evaluator and its matching rule (section 5.10; notebook BK) --------------------------------
+_pm = load("prefixsim_matching.json")
+if _pm:
+    print("\nPrefixSim matching rule (prefixsim_matching.json)")
+    _PM = {(r["trace"], r["cache_blocks"], r["algo"]): r for r in _pm["rows"]}
+    _cs = lambda t, s, a, first: 100 * _PM[(t, s, a)]["prefix_compute_saving_ratio" if first else "compute_saving_ratio"]
+    _lead = lambda t, s, first: _cs(t, s, "random_compute", first) - _cs(t, s, "lru", first)
+    K16 = 16384
+    assert _lead("freeinference", K16, True) < 1, "registered: the headline survives first-miss scoring"
+    claim("PrefixSim headline lead", f"RandomCompute) saves {_lead('freeinference', K16, False):.1f} points more prefill "
+          "compute than LRU", "", "prefixsim_matching")
+    claim("abstract: gain and loss", f"policy's {_lead('freeinference', K16, False):.1f}-point gain over LRU into a "
+          f"{-_lead('freeinference', K16, True):.1f}-point loss", "", "prefixsim_matching")
+    claim("intro: ahead and behind", f"goes from {_lead('freeinference', K16, False):.1f} points ahead\nof LRU to "
+          f"{-_lead('freeinference', K16, True):.1f} points behind", "", "prefixsim_matching")
+    claim("loss on both traces", f"becomes a loss of {-_lead('freeinference', K16, True):.1f} points on\nfreeinference "
+          f"and {-_lead('chutes', K16, True):.1f} on chutes", "", "prefixsim_matching")
+    for label, a in (("LRU", "lru"), ("Belady (hits)", "belady"), ("RandomCompute", "random_compute"),
+                     ("BeladyCompute (offline)", "belady_compute")):
+        cells = []
+        for t in ("freeinference", "chutes"):
+            for first in (False, True):
+                v = f"{_cs(t, K16, a, first):.1f}"
+                cells.append(f"\\textbf{{{v}}}" if first and a in ("random_compute",) or
+                             (first and a == "belady_compute" and t == "freeinference") else v)
+        claim(f"matching table: {label}", f"{label} & " + " & ".join(cells) + " \\\\", "", "prefixsim_matching")
+    for a in ("lru", "belady"):
+        assert all(abs(_PM[k]["compute_saving_ratio"] - _PM[k]["prefix_compute_saving_ratio"]) < 1e-9
+                   for k in _PM if k[2] == a), f"the paper says {a} loses nothing"
+    assert _cs("freeinference", K16, "belady_compute", True) < _cs("freeinference", K16, "lru", True), \
+        "the paper says the compute-aware oracle falls below LRU on freeinference"
+    _H = _pm["holes"]
+    for a, h in _H.items():
+        r = _PM[("freeinference", K16, a)]
+        assert abs(h["hits_after_first_hole_share_of_blocks"] - (r["block_hit_ratio"] - r["prefix_block_hit_ratio"])) <= 1e-6, \
+            f"{a}: the hole dump and the patch disagree beyond 1e-6"
+    claim("holes per request", f"cuts holes\nper request from {_H['random_compute']['holes_per_request']:.1f} to "
+          f"{_H['partial_node_random_compute']['holes_per_request']:.2f}, close to LRU's "
+          f"{_H['lru']['holes_per_request']:.2f}", "", "prefixsim_matching")
+    claim("hits behind a hole", f"({100*_H['partial_node_random_compute']['hits_after_first_hole_share_of_blocks']:.1f}\\% "
+          f"of blocks are hits only behind a\nhole, against {100*_H['random_compute']['hits_after_first_hole_share_of_blocks']:.1f}\\%)",
+          "", "prefixsim_matching")
+    claim("difference at 256k", f"to {-_lead('freeinference', 262144, True):.1f} points at 256k blocks", "", "prefixsim_matching")
+    _drop = lambda a: max(_cs(t, K16, a, False) - _cs(t, K16, a, True) for t in ("freeinference", "chutes"))
+    claim("limits: ARC and S3-FIFO", f"costs ARC at most {_drop('arc'):.1f} point and S3-FIFO {_drop('s3fifo'):.1f} at the "
+          "tightest cache", "", "prefixsim_matching")
+
 # --- capacity ladder, causal magnitude scale (section 5.3, audit H2) ---------------------------
 def _sg(v):
     return "0.0" if round(v, 1) == 0 else f"{v:+.1f}"
@@ -1248,7 +1295,8 @@ REQUIRED = ("reactive_real_full_lrb.json", "headroom_by_length.json", "lrb_retra
             "evidence_ladder_bailian.json", "prefix_validity.json", "serving_tiers_a100.json",
             "measured_table.json", "irm_departure.json", "irm_departure_bailian.json", "eval_window.json",
             "age_rules.json", "age_rules_bailian.json", "ski_rental.json", "reservation.json",
-            "session_age.json", "ties_by_capacity.json", "physical_ledger.json", "lrb_seeds.json")
+            "session_age.json", "ties_by_capacity.json", "physical_ledger.json", "lrb_seeds.json",
+            "prefixsim_matching.json")
 missing = [n for n in REQUIRED if not (EXP / n).exists()]
 if missing:
     failures.append("artifacts absent, so their claims went unchecked: " + ", ".join(missing))

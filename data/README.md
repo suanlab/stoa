@@ -82,6 +82,13 @@ has a spread an order of magnitude wider than any effect), and the eviction-sign
 (`run_reactive_kvct.py`). `make reproduce-full` runs all three; `make verify` and `make reproduce-fast`
 run without it.
 
+## PrefixSim's production traces (optional: §V-K, the matching-rule audit)
+
+Two traces released with "When Fancy Eviction Fails" (Liu, Yu, Yang 2026): `freeinference` and `chutes`, in
+PrefixSim's lcp format, from the Hugging Face dataset `harvardMadsys/2026_prefixcache` at revision
+`ba89a343a048073dda72617bb6087910da6214d0` (CC-BY-4.0). Not redistributed here. `scripts/run_prefixsim_audit.py
+setup DIR` downloads them into `DIR` and checks their SHA-256 against the values pinned in the script.
+
 ## Alibaba Qwen Bailian KV traces (optional: the external replication cited in the paper's §V-C)
 
 Four anonymized two-hour traces from `github.com/alibaba-edu/qwen-bailian-usagetraces-anon`

@@ -7,6 +7,7 @@
 #   make verify          seconds, no data, no network   -- does the shipped artifact hold together?
 #   make reproduce-fast  ~40 min, Mooncake traces only  -- the central claims, from scratch
 #   make reproduce-full  ~6 h,    + the LRB sweep       -- everything CPU-only
+#   make reproduce-prefixsim ~3 h, + a C++ toolchain, ~0.3 GB -- a third-party simulator on its own traces
 #   make reproduce-llm   ~3 h,    + OPENAI_API_KEY, ~$5 -- the two claims that cannot be free
 #
 # `verify` is the one to run first and the one that fails loudest. It needs Python and poppler-utils
@@ -16,13 +17,14 @@
 PY ?= python3
 SHELL := /bin/bash
 
-.PHONY: reproduce-external help verify reproduce-fast reproduce-full reproduce-llm figures paper clean data-check
+.PHONY: reproduce-external reproduce-prefixsim help verify reproduce-fast reproduce-full reproduce-llm figures paper clean data-check
 
 help:
 	@echo "make verify          — 325 tests + every paper number against its artifact (no data needed)"
 	@echo "make data-check      — are the traces present and the right length?"
 	@echo "make reproduce-fast  — regenerate the central claims from the Mooncake traces (~40 min)"
 	@echo "make reproduce-full  — the above plus the LRB hyperparameter sweep (~6 h)"
+	@echo "make reproduce-prefixsim — PrefixSim on its own traces with first-miss scoring (~3 h, C++ toolchain)"
 	@echo "make reproduce-llm   — the two LoCoMo claims; needs OPENAI_API_KEY, costs about \$$5"
 	@echo "make figures paper   — redraw figures, rebuild the PDF"
 	@echo ""
@@ -122,6 +124,16 @@ reproduce-external:
 	$(PY) scripts/run_evidence_ladder.py --bailian
 	$(PY) scripts/run_irm_departure.py --bailian
 	$(PY) scripts/run_age_rules.py --bailian
+	$(PY) scripts/check_paper_numbers.py
+
+# A third-party simulator on its own public traces (section 5.10, notebook BK): builds PrefixSim at a pinned
+# commit with one scoring patch, downloads its two traces at a pinned revision (~0.3 GB, SHA-256 checked),
+# and runs ~3 h on 8 jobs. Needs CMake, Ninja, pkg-config, glib, zstd, xxhash (see the script's docstring).
+PREFIXSIM_DIR ?= /tmp/stoa-prefixsim
+reproduce-prefixsim:
+	$(PY) scripts/run_prefixsim_audit.py setup $(PREFIXSIM_DIR)
+	$(PY) scripts/run_prefixsim_audit.py run $(PREFIXSIM_DIR) --jobs 8
+	$(PY) scripts/run_prefixsim_audit.py collect $(PREFIXSIM_DIR)
 	$(PY) scripts/check_paper_numbers.py
 
 # --- tier 3: the two claims that need a paid third-party API --------------------------------

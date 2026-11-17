@@ -125,7 +125,9 @@ paper reads — an earlier revision had two such files diverge silently.
 | §5.1–5.3 Blocks without evidence | dead shares, tie-rule references (incl. the newsvendor reference), evidence ladder (`evidence_ladder.json`, `ceiling_ties.json`, `reuse_split.json`, `reservation.json`) |
 | §5.4 Why: KV reuse is not stationary | Robbins / Good–Turing vs a shuffled-order control, evaluation window, age and session rules (`irm_departure*.json`, `eval_window.json`, `age_rules*.json`, `session_age.json`) |
 | §5.5–5.7 Arrival, online, serving | estimated prior, recency, measured move price, five ledgers, ski rental, vLLM + LMCache serving costs and the measured latency table (`ski_rental.json`, `serving_tiers_a100.json`, `measured_table.json`) |
-| §5.8–5.10 Ranking, reaction, sampling | capacity ladder, ARC/LeCaR/CACHEUS/LRB + S3-FIFO/SIEVE/W-TinyLFU, the sampling retraction |
+| §5.8–5.9 Ranking, reaction | capacity ladder, ARC/LeCaR/CACHEUS/LRB + S3-FIFO/SIEVE/W-TinyLFU |
+| §5.10 A published evaluator and its matching rule | PrefixSim on its own traces: counted as vLLM/SGLang match, RandomCompute's +10.4-point lead over LRU becomes −19.6 (`run_prefixsim_audit.py`) |
+| §5.11 Sampling | the sampling retraction |
 | §6 What the measurement took | thirty defects, four retracted claims |
 
 Every number in the paper is asserted against its artifact by `../scripts/check_paper_numbers.py`; run it

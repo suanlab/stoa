@@ -61,6 +61,7 @@ policies on production prefix-cache traces~\cite{liu2026fancyeviction} finds pla
 of the best online policy at a 1\,TiB pool and Belady far above all of them. It overlaps ours in three
 observations: block lifetimes are bounded by sessions, early frequency predicts whether a block is reused
 at all, and quick demotion helps only where one-hit traffic dominates. It prices recomputation, not moves
-between tiers, and does not vary how the measurement starts. What this paper adds is the tie rule's effect
+between tiers, does not vary how the measurement starts, and counts a cached block as a hit even behind a
+missed one (\Cref{sec:matching}). What this paper adds is the tie rule's effect
 on a reference, a ladder that prices what each part of an oracle's knowledge is worth, and the price and
 ledger of a move.

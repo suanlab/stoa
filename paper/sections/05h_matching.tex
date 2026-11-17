@@ -1,0 +1,43 @@
+\subsection{A published evaluator and its matching rule}
+\label{sec:matching}
+The conventions an evaluation fixes are not ours alone. PrefixSim, the open simulator of a recent study of
+fourteen eviction policies on production prefix-cache traces~\cite{liu2026fancyeviction}, counts a cached
+block as a hit even when an earlier block of the same request missed; its documentation says so, and notes
+that vLLM and SGLang stop matching at a request's first miss. Under that count, a compute-aware policy that
+evicts cheap, shallow, long-idle blocks (RandomCompute) saves 10.4 points more prefill compute than LRU at the
+study's tightest cache, its headline. We added a second count to the same match, hits up to each request's
+first miss, leaving the cache's behaviour unchanged, and checked it against the simulator's own record of each
+request's missing runs: the two agree to $10^{-6}$ for every policy recorded. Before running, we registered
+that the headline survives if the lead stays at 5 points or more and does not if it falls below one
+(\Cref{tab:matching}).
+
+\begin{table}[t]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+& \multicolumn{2}{c}{freeinference} & \multicolumn{2}{c}{chutes} \\
+\cmidrule(lr){2-3}\cmidrule(l){4-5}
+16k blocks & all hits & to first miss & all hits & to first miss \\
+\midrule
+LRU & 53.3 & 53.3 & 60.0 & 60.0 \\
+Belady (hits) & 60.9 & 60.9 & 67.6 & 67.6 \\
+RandomCompute & 63.8 & \textbf{33.7} & 60.8 & \textbf{45.7} \\
+BeladyCompute (offline) & 73.5 & \textbf{36.1} & 68.7 & 62.8 \\
+\bottomrule
+\end{tabular}
+\caption{Percent of prefill compute saved by PrefixSim at its published commit on its two public traces,
+16k blocks of Qwen3-Coder-30B's KV (24\,GiB), its cost model, counting every resident block as a hit or
+only the hits before a request's first miss.}
+\label{tab:matching}
+\end{table}
+
+\noindent Counted the way the engines match, RandomCompute's lead becomes a loss of 19.6 points on
+freeinference and 14.3 on chutes, and even the compute-aware offline oracle falls below LRU on freeinference.
+LRU and the hit-count Belady lose nothing: a request that reads a block reads its whole prefix, so recency
+never keeps a block whose parent it has evicted. The compute-aware policies evict the cheap blocks at the front
+of a prefix and strand the expensive ones behind them. The partial-node variant the study proposes cuts holes
+per request from 9.3 to 1.06, close to LRU's 0.93, yet loses as much (20.9\% of blocks are hits only behind a
+hole, against 21.6\%): one hole early in a long prefix is enough. The study is explicit about holes and
+proposes an engine change that recomputes them in place; its headline holds for such an engine and reverses on
+today's. The difference shrinks as the cache grows, to 1.5 points at 256k blocks. Which hits count is one more
+convention an evaluation fixes, and here it decides the sign of the result.

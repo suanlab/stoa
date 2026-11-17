@@ -29,5 +29,8 @@ pseudo-split, its count bins and its age quartiles; rescaling for its half-prefi
 their papers, not the authors' artifacts (CACHEUS's CR-LFU expert approximated by LFU, W-TinyLFU's sketch by
 exact aged counts), and uniform block sizes remove one of LRB's advantages over LRU, so their results are
 statements about this workload rather than about these designs. The best plain rule they are compared
-with is chosen per operating point in hindsight; we did not test choosing it from the prefix. Hawkeye and Mockingjay are not run: a KV
+with is chosen per operating point in hindsight; we did not test choosing it from the prefix. Our replays of
+these policies bill blocks independently and, unlike LRU and Belady, were not checked for hits behind a missed
+block; on PrefixSim's traces that matching costs ARC at most 1.0 point and S3-FIFO 5.1 at the tightest cache
+(\Cref{sec:matching}), so our numbers for them may be optimistic by a similar margin. Hawkeye and Mockingjay are not run: a KV
 block hash carries no analogue of the program counter their predictors are indexed by.

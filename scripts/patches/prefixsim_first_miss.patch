@@ -1,0 +1,76 @@
+diff --git a/src/main.cpp b/src/main.cpp
+index 026a411..ed432e4 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -363,6 +363,8 @@ void report(FILE *out, const std::string &algorithm, const Options &opts,
+       static_cast<long long>(stats.n_self_evictions),
+       static_cast<long long>(stats.n_unexpected_evictions),
+       static_cast<long long>(stats.n_unobserved_eviction_rounds));
++  fprintf(out, " prefix_block_hit_ratio=%.6f prefix_compute_saving_ratio=%.6f",
++          stats.prefix_block_hit_ratio(), stats.prefix_compute_saving_ratio());
+   if (!opts.replay_deepest_first) fprintf(out, " replay=prefix-order");
+   fprintf(out, "\n");
+ }
+diff --git a/src/simulator.cpp b/src/simulator.cpp
+index 50ce662..bd86e4b 100644
+--- a/src/simulator.cpp
++++ b/src/simulator.cpp
+@@ -312,6 +312,7 @@ bool Simulator::serve(const Request &request, std::string &error) {
+   // exactly as the request found it. Nothing in phases 2 and 3 can change it.
+   resident_.assign(n_pos, 0);
+   missing_.clear();
++  bool before_first_miss = true;  // STOA C2 audit: engine-style matching
+ 
+   for (size_t i = 0; i < n_pos; ++i) {
+     const int64_t cost = config_.cost_model.cost(static_cast<int64_t>(i));
+@@ -331,8 +332,13 @@ bool Simulator::serve(const Request &request, std::string &error) {
+     if (hit) {
+       ++stats_.n_block_hits;
+       stats_.saved_cost += cost;
++      if (before_first_miss) {
++        ++stats_.n_prefix_hits;
++        stats_.prefix_saved_cost += cost;
++      }
+     } else {
+       missing_.insert(request.blocks[i]);
++      before_first_miss = false;
+     }
+   }
+ 
+diff --git a/src/simulator.hpp b/src/simulator.hpp
+index ee93bbc..f5fbf23 100644
+--- a/src/simulator.hpp
++++ b/src/simulator.hpp
+@@ -44,6 +44,10 @@ struct Stats {
+       0;  ///< Blocks already resident when the request arrived.
+   double total_cost = 0.0;  ///< Sum of block_cost() over all blocks.
+   double saved_cost = 0.0;  ///< Sum of block_cost() over hit blocks.
++  /// STOA C2 audit: the same hits counted as vLLM/SGLang match them, up to the
++  /// request's first miss only (scoring only; cache dynamics unchanged).
++  int64_t n_prefix_hits = 0;
++  double prefix_saved_cost = 0.0;
+ 
+   // ---- diagnostics ----
+   int64_t n_evictions = 0;  ///< Objects evicted during phase 2.
+@@ -67,6 +71,12 @@ struct Stats {
+   double compute_saving_ratio() const {
+     return total_cost > 0.0 ? saved_cost / total_cost : 0.0;
+   }
++  double prefix_block_hit_ratio() const {
++    return n_blocks ? static_cast<double>(n_prefix_hits) / static_cast<double>(n_blocks) : 0.0;
++  }
++  double prefix_compute_saving_ratio() const {
++    return total_cost > 0.0 ? prefix_saved_cost / total_cost : 0.0;
++  }
+ 
+   /// What the run did between `earlier`, a snapshot of the same run, and now.
+   Stats since(const Stats &earlier) const {
+@@ -77,6 +87,8 @@ struct Stats {
+     d.n_block_hits = n_block_hits - earlier.n_block_hits;
+     d.total_cost = total_cost - earlier.total_cost;
+     d.saved_cost = saved_cost - earlier.saved_cost;
++    d.n_prefix_hits = n_prefix_hits - earlier.n_prefix_hits;
++    d.prefix_saved_cost = prefix_saved_cost - earlier.prefix_saved_cost;
+     d.n_evictions = n_evictions - earlier.n_evictions;
+     d.n_self_evictions = n_self_evictions - earlier.n_self_evictions;
+     d.n_unexpected_evictions =

@@ -76,6 +76,8 @@ DEPENDS_ON = {
     "age_rules.json": ("traces.py", "sequential.py", "mooncake.py", "simulator.py", "environment.py"),
     "age_rules_bailian.json": ("traces.py", "sequential.py", "mooncake.py", "simulator.py", "environment.py"),
     "serving_tiers_a100.json": (),
+    # third-party simulator (PrefixSim, pinned and patched) on its public traces; no module of ours
+    "prefixsim_matching.json": (),
     "measured_table.json": ("traces.py", "sequential.py", "mooncake.py", "simulator.py", "environment.py", "eval/oracle.py", "causal.py", "credit.py", "gnn.py"),
     "reuse_split.json": ("traces.py", "mooncake.py"),
     "evidence_ladder_bailian.json": ("traces.py", "sequential.py", "mooncake.py", "simulator.py", "environment.py"),
