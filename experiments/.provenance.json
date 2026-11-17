@@ -417,6 +417,9 @@
   "prefix_validity.json": {
     "scripts/run_prefix_validity.py": "f71bccfc62feb02c6c852b9721581e94361bd94e909c6e6d38e0dc0a6aeab533"
   },
+  "prefixsim_matching.json": {
+    "scripts/run_prefixsim_audit.py": "ffbf43cc7963fe64d6b8ff21605b08cef10ba0880954a4bf3ac9191b353a2a80"
+  },
   "reachable_by_length.json": {
     "mooncake.py": "f082d010bd27e66fa3a37ad3828195c39fc38812e3af46f568eac264343d3dc1",
     "scripts/run_reachable_by_length.py": "115124523fac858724f7cf956434002d7b99731342326cac38b2ca912d79145d",
