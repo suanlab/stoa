@@ -1007,6 +1007,47 @@ if _pm:
     claim("limits: ARC and S3-FIFO", f"costs ARC at most {_drop('arc'):.1f} point and S3-FIFO {_drop('s3fifo'):.1f} at the "
           "tightest cache", "", "prefixsim_matching")
 
+# --- an independent implementation of the reaction policies (section 5.9; notebook BL) --------------
+_pq, _rq, _mq = load("prefixsim_mooncake.json"), load("reactive_real_full_lrb.json"), load("modern_baselines.json")
+if _pq and _rq and _mq:
+    print("\nlibCacheSim on our traces (prefixsim_mooncake.json)")
+    _LQ = {(r["trace"], r["cache_frac"], r["algo"]): r for r in _pq["rows"]}
+    _theirs = lambda t, f, a, first=False: 100 * _LQ[(t, f, a)]["prefix_block_hit_ratio" if first else "block_hit_ratio"] / \
+        _LQ[(t, f, "belady")]["block_hit_ratio"]
+    _ours = {}
+    for t in ("conversation", "toolagent"):
+        for r, m in zip(_rq["traces"][t]["rows"], _mq["traces"][t]["rows"]):
+            f, b = r["cache_frac"], r["belady"]
+            _ours[t, f] = {"lru": r["lru"] / b, "lfu": r["h2o"] / b, "fill": r["static"] / b, "arc": r["arc"] / b,
+                           "lecar": r["lecar"] / b, "cacheus": r["cacheus"] / b, "s3fifo": m["s3fifo_over_belady"],
+                           "sieve": m["sieve_over_belady"], "wtinylfu": m["wtinylfu_over_belady"]}
+    _FR = sorted({k[1] for k in _ours})
+    _diff = lambda a: [100 * _ours[k][a] - _theirs(k[0], k[1], a) for k in _ours]
+    claim("lru/arc/sieve agree", f"Its LRU, ARC and SIEVE agree with ours\nwithin {max(abs(x) for a in ('lru', 'arc', 'sieve') for x in _diff(a)):.1f} "
+          f"points of Belady and its CACHEUS within {max(abs(x) for x in _diff('cacheus')):.1f}", "", "prefixsim_mooncake")
+    claim("lfu lower", f"it scores up to {max(_diff('lfu')):.1f} points lower; LeCaR and W-TinyLFU, which use\nfrequency, "
+          f"score up to {max(_diff('lecar')):.1f} and {max(_diff('wtinylfu')):.1f} lower, and its S3-FIFO "
+          f"{max(_diff('s3fifo')):.1f} lower at the largest tier", "", "prefixsim_mooncake")
+    assert max(_ours, key=lambda k: 100 * _ours[k]["s3fifo"] - _theirs(k[0], k[1], "s3fifo"))[1] == max(_FR)
+    _plain = lambda t, f: max(_theirs(t, f, "lru"), _theirs(t, f, "lfu"))
+    _adapt = lambda t, f: max(_theirs(t, f, a) for a in ("arc", "lecar", "cacheus"))
+    f0 = min(_FR)
+    claim("in-cache best plain at 2%", f"falls to {_plain('conversation', f0):.1f}\\% and {_plain('toolagent', f0):.1f}\\% of "
+          "Belady", "", "prefixsim_mooncake")
+    _g0 = max(_adapt(t, f0) - _plain(t, f0) for t in ("conversation", "toolagent"))
+    claim("adaptive gain at 2%", f"up to {_g0:.1f} points, and S3-FIFO beats it on both traces", "", "prefixsim_mooncake")
+    assert all(_theirs(t, f0, "s3fifo") > _plain(t, f0) for t in ("conversation", "toolagent"))
+    claim("intro: at the tightest tier", f"({_g0:.1f} at the tightest tier when it does not)", "", "prefixsim_mooncake")
+    _up = [f for f in _FR if f > f0]
+    claim("agree from 5%", f"the\nadaptive gain staying within {max(_adapt(t, f) - _plain(t, f) for t in ('conversation', 'toolagent') for f in _up):.1f} "
+          "points", "", "prefixsim_mooncake")
+    assert all(_theirs(t, f, a) <= _plain(t, f) for t in ("conversation", "toolagent") for f in _up
+               for a in ("s3fifo", "sieve", "wtinylfu")), "the paper says no one-hit-wonder design beats it from 5% up"
+    _fm = lambda a: max(_theirs(t, f, a) - _theirs(t, f, a, True) for t in ("conversation", "toolagent") for f in _FR)
+    claim("first-miss on our traces", f"moves libCacheSim's ARC, LeCaR, S3-FIFO and SIEVE by at most "
+          f"{max(_fm(a) for a in ('arc', 'lecar', 's3fifo', 'sieve')):.1f}\npoints on these traces, CACHEUS by {_fm('cacheus'):.1f} "
+          f"and W-TinyLFU by {_fm('wtinylfu'):.1f}", "", "prefixsim_mooncake")
+
 # --- capacity ladder, causal magnitude scale (section 5.3, audit H2) ---------------------------
 def _sg(v):
     return "0.0" if round(v, 1) == 0 else f"{v:+.1f}"
@@ -1296,7 +1337,7 @@ REQUIRED = ("reactive_real_full_lrb.json", "headroom_by_length.json", "lrb_retra
             "measured_table.json", "irm_departure.json", "irm_departure_bailian.json", "eval_window.json",
             "age_rules.json", "age_rules_bailian.json", "ski_rental.json", "reservation.json",
             "session_age.json", "ties_by_capacity.json", "physical_ledger.json", "lrb_seeds.json",
-            "prefixsim_matching.json")
+            "prefixsim_matching.json", "prefixsim_mooncake.json")
 missing = [n for n in REQUIRED if not (EXP / n).exists()]
 if missing:
     failures.append("artifacts absent, so their claims went unchecked: " + ", ".join(missing))

@@ -1,0 +1,673 @@
+{
+  "config": {
+    "prefixsim_commit": "160d5f81724dd9ec28b10d6abb64615e6adbb332",
+    "libcachesim_commit": "3fa480b6894ed1b9f75b8a9c737a2e34c2ca6016",
+    "patch": "scripts/patches/prefixsim_first_miss.patch",
+    "cost_model": "uniform (hit counting)",
+    "traces": {
+      "conversation": "data/mooncake_conversation_trace.jsonl",
+      "toolagent": "data/mooncake_toolagent_trace.jsonl"
+    },
+    "distinct_blocks": {
+      "conversation": 182790,
+      "toolagent": 183300
+    },
+    "fracs": [
+      0.02,
+      0.05,
+      0.1,
+      0.2
+    ],
+    "note": "libCacheSim's LFU resets a block's count when it is evicted; ours keeps it"
+  },
+  "rows": [
+    {
+      "trace": "conversation",
+      "cache_frac": 0.02,
+      "cache_blocks": 3655,
+      "algo": "lru",
+      "block_hit_ratio": 0.079255,
+      "prefix_block_hit_ratio": 0.079255,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.02,
+      "cache_blocks": 3655,
+      "algo": "lfu",
+      "block_hit_ratio": 0.083289,
+      "prefix_block_hit_ratio": 0.083289,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.02,
+      "cache_blocks": 3655,
+      "algo": "arc",
+      "block_hit_ratio": 0.09008,
+      "prefix_block_hit_ratio": 0.089913,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.02,
+      "cache_blocks": 3655,
+      "algo": "lecar",
+      "block_hit_ratio": 0.079539,
+      "prefix_block_hit_ratio": 0.079539,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.02,
+      "cache_blocks": 3655,
+      "algo": "cacheus",
+      "block_hit_ratio": 0.109771,
+      "prefix_block_hit_ratio": 0.101906,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.02,
+      "cache_blocks": 3655,
+      "algo": "s3fifo",
+      "block_hit_ratio": 0.1067,
+      "prefix_block_hit_ratio": 0.1067,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.02,
+      "cache_blocks": 3655,
+      "algo": "sieve",
+      "block_hit_ratio": 0.083373,
+      "prefix_block_hit_ratio": 0.083373,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.02,
+      "cache_blocks": 3655,
+      "algo": "wtinylfu",
+      "block_hit_ratio": 0.070256,
+      "prefix_block_hit_ratio": 0.05983,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.02,
+      "cache_blocks": 3655,
+      "algo": "belady",
+      "block_hit_ratio": 0.311889,
+      "prefix_block_hit_ratio": 0.311889,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.05,
+      "cache_blocks": 9139,
+      "algo": "lru",
+      "block_hit_ratio": 0.195768,
+      "prefix_block_hit_ratio": 0.195768,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.05,
+      "cache_blocks": 9139,
+      "algo": "lfu",
+      "block_hit_ratio": 0.127591,
+      "prefix_block_hit_ratio": 0.127591,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.05,
+      "cache_blocks": 9139,
+      "algo": "arc",
+      "block_hit_ratio": 0.210097,
+      "prefix_block_hit_ratio": 0.210097,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.05,
+      "cache_blocks": 9139,
+      "algo": "lecar",
+      "block_hit_ratio": 0.198267,
+      "prefix_block_hit_ratio": 0.198267,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.05,
+      "cache_blocks": 9139,
+      "algo": "cacheus",
+      "block_hit_ratio": 0.196267,
+      "prefix_block_hit_ratio": 0.192139,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.05,
+      "cache_blocks": 9139,
+      "algo": "s3fifo",
+      "block_hit_ratio": 0.185584,
+      "prefix_block_hit_ratio": 0.185511,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.05,
+      "cache_blocks": 9139,
+      "algo": "sieve",
+      "block_hit_ratio": 0.126738,
+      "prefix_block_hit_ratio": 0.126738,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.05,
+      "cache_blocks": 9139,
+      "algo": "wtinylfu",
+      "block_hit_ratio": 0.137404,
+      "prefix_block_hit_ratio": 0.104808,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.05,
+      "cache_blocks": 9139,
+      "algo": "belady",
+      "block_hit_ratio": 0.366412,
+      "prefix_block_hit_ratio": 0.366412,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.1,
+      "cache_blocks": 18279,
+      "algo": "lru",
+      "block_hit_ratio": 0.278912,
+      "prefix_block_hit_ratio": 0.278912,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.1,
+      "cache_blocks": 18279,
+      "algo": "lfu",
+      "block_hit_ratio": 0.194932,
+      "prefix_block_hit_ratio": 0.194932,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.1,
+      "cache_blocks": 18279,
+      "algo": "arc",
+      "block_hit_ratio": 0.284,
+      "prefix_block_hit_ratio": 0.284,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.1,
+      "cache_blocks": 18279,
+      "algo": "lecar",
+      "block_hit_ratio": 0.279438,
+      "prefix_block_hit_ratio": 0.279438,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.1,
+      "cache_blocks": 18279,
+      "algo": "cacheus",
+      "block_hit_ratio": 0.272676,
+      "prefix_block_hit_ratio": 0.26878,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.1,
+      "cache_blocks": 18279,
+      "algo": "s3fifo",
+      "block_hit_ratio": 0.224399,
+      "prefix_block_hit_ratio": 0.224159,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.1,
+      "cache_blocks": 18279,
+      "algo": "sieve",
+      "block_hit_ratio": 0.194932,
+      "prefix_block_hit_ratio": 0.194932,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.1,
+      "cache_blocks": 18279,
+      "algo": "wtinylfu",
+      "block_hit_ratio": 0.165508,
+      "prefix_block_hit_ratio": 0.142815,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.1,
+      "cache_blocks": 18279,
+      "algo": "belady",
+      "block_hit_ratio": 0.366412,
+      "prefix_block_hit_ratio": 0.366412,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.2,
+      "cache_blocks": 36558,
+      "algo": "lru",
+      "block_hit_ratio": 0.345345,
+      "prefix_block_hit_ratio": 0.345345,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.2,
+      "cache_blocks": 36558,
+      "algo": "lfu",
+      "block_hit_ratio": 0.306943,
+      "prefix_block_hit_ratio": 0.306943,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.2,
+      "cache_blocks": 36558,
+      "algo": "arc",
+      "block_hit_ratio": 0.320319,
+      "prefix_block_hit_ratio": 0.320319,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.2,
+      "cache_blocks": 36558,
+      "algo": "lecar",
+      "block_hit_ratio": 0.344693,
+      "prefix_block_hit_ratio": 0.344693,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.2,
+      "cache_blocks": 36558,
+      "algo": "cacheus",
+      "block_hit_ratio": 0.32513,
+      "prefix_block_hit_ratio": 0.322541,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.2,
+      "cache_blocks": 36558,
+      "algo": "s3fifo",
+      "block_hit_ratio": 0.266055,
+      "prefix_block_hit_ratio": 0.265012,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.2,
+      "cache_blocks": 36558,
+      "algo": "sieve",
+      "block_hit_ratio": 0.306929,
+      "prefix_block_hit_ratio": 0.306929,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.2,
+      "cache_blocks": 36558,
+      "algo": "wtinylfu",
+      "block_hit_ratio": 0.211224,
+      "prefix_block_hit_ratio": 0.194697,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "conversation",
+      "cache_frac": 0.2,
+      "cache_blocks": 36558,
+      "algo": "belady",
+      "block_hit_ratio": 0.366412,
+      "prefix_block_hit_ratio": 0.366412,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.02,
+      "cache_blocks": 3666,
+      "algo": "lru",
+      "block_hit_ratio": 0.36606,
+      "prefix_block_hit_ratio": 0.36606,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.02,
+      "cache_blocks": 3666,
+      "algo": "lfu",
+      "block_hit_ratio": 0.367588,
+      "prefix_block_hit_ratio": 0.367588,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.02,
+      "cache_blocks": 3666,
+      "algo": "arc",
+      "block_hit_ratio": 0.371387,
+      "prefix_block_hit_ratio": 0.371182,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.02,
+      "cache_blocks": 3666,
+      "algo": "lecar",
+      "block_hit_ratio": 0.366897,
+      "prefix_block_hit_ratio": 0.366897,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.02,
+      "cache_blocks": 3666,
+      "algo": "cacheus",
+      "block_hit_ratio": 0.389562,
+      "prefix_block_hit_ratio": 0.381919,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.02,
+      "cache_blocks": 3666,
+      "algo": "s3fifo",
+      "block_hit_ratio": 0.385632,
+      "prefix_block_hit_ratio": 0.385632,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.02,
+      "cache_blocks": 3666,
+      "algo": "sieve",
+      "block_hit_ratio": 0.367561,
+      "prefix_block_hit_ratio": 0.367561,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.02,
+      "cache_blocks": 3666,
+      "algo": "wtinylfu",
+      "block_hit_ratio": 0.360064,
+      "prefix_block_hit_ratio": 0.352721,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.02,
+      "cache_blocks": 3666,
+      "algo": "belady",
+      "block_hit_ratio": 0.528683,
+      "prefix_block_hit_ratio": 0.528683,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.05,
+      "cache_blocks": 9165,
+      "algo": "lru",
+      "block_hit_ratio": 0.449938,
+      "prefix_block_hit_ratio": 0.449938,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.05,
+      "cache_blocks": 9165,
+      "algo": "lfu",
+      "block_hit_ratio": 0.398717,
+      "prefix_block_hit_ratio": 0.398717,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.05,
+      "cache_blocks": 9165,
+      "algo": "arc",
+      "block_hit_ratio": 0.459406,
+      "prefix_block_hit_ratio": 0.459406,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.05,
+      "cache_blocks": 9165,
+      "algo": "lecar",
+      "block_hit_ratio": 0.450903,
+      "prefix_block_hit_ratio": 0.450903,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.05,
+      "cache_blocks": 9165,
+      "algo": "cacheus",
+      "block_hit_ratio": 0.447724,
+      "prefix_block_hit_ratio": 0.445381,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.05,
+      "cache_blocks": 9165,
+      "algo": "s3fifo",
+      "block_hit_ratio": 0.440696,
+      "prefix_block_hit_ratio": 0.440068,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.05,
+      "cache_blocks": 9165,
+      "algo": "sieve",
+      "block_hit_ratio": 0.398588,
+      "prefix_block_hit_ratio": 0.398588,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.05,
+      "cache_blocks": 9165,
+      "algo": "wtinylfu",
+      "block_hit_ratio": 0.409173,
+      "prefix_block_hit_ratio": 0.384018,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.05,
+      "cache_blocks": 9165,
+      "algo": "belady",
+      "block_hit_ratio": 0.552508,
+      "prefix_block_hit_ratio": 0.552508,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.1,
+      "cache_blocks": 18330,
+      "algo": "lru",
+      "block_hit_ratio": 0.507866,
+      "prefix_block_hit_ratio": 0.507866,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.1,
+      "cache_blocks": 18330,
+      "algo": "lfu",
+      "block_hit_ratio": 0.447348,
+      "prefix_block_hit_ratio": 0.447348,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.1,
+      "cache_blocks": 18330,
+      "algo": "arc",
+      "block_hit_ratio": 0.510454,
+      "prefix_block_hit_ratio": 0.510454,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.1,
+      "cache_blocks": 18330,
+      "algo": "lecar",
+      "block_hit_ratio": 0.508266,
+      "prefix_block_hit_ratio": 0.508266,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.1,
+      "cache_blocks": 18330,
+      "algo": "cacheus",
+      "block_hit_ratio": 0.501987,
+      "prefix_block_hit_ratio": 0.49979,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.1,
+      "cache_blocks": 18330,
+      "algo": "s3fifo",
+      "block_hit_ratio": 0.46653,
+      "prefix_block_hit_ratio": 0.466452,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.1,
+      "cache_blocks": 18330,
+      "algo": "sieve",
+      "block_hit_ratio": 0.447434,
+      "prefix_block_hit_ratio": 0.447434,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.1,
+      "cache_blocks": 18330,
+      "algo": "wtinylfu",
+      "block_hit_ratio": 0.427564,
+      "prefix_block_hit_ratio": 0.410821,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.1,
+      "cache_blocks": 18330,
+      "algo": "belady",
+      "block_hit_ratio": 0.552508,
+      "prefix_block_hit_ratio": 0.552508,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.2,
+      "cache_blocks": 36660,
+      "algo": "lru",
+      "block_hit_ratio": 0.54857,
+      "prefix_block_hit_ratio": 0.54857,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.2,
+      "cache_blocks": 36660,
+      "algo": "lfu",
+      "block_hit_ratio": 0.525116,
+      "prefix_block_hit_ratio": 0.525116,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.2,
+      "cache_blocks": 36660,
+      "algo": "arc",
+      "block_hit_ratio": 0.531959,
+      "prefix_block_hit_ratio": 0.531959,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.2,
+      "cache_blocks": 36660,
+      "algo": "lecar",
+      "block_hit_ratio": 0.548187,
+      "prefix_block_hit_ratio": 0.548187,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.2,
+      "cache_blocks": 36660,
+      "algo": "cacheus",
+      "block_hit_ratio": 0.535316,
+      "prefix_block_hit_ratio": 0.532745,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.2,
+      "cache_blocks": 36660,
+      "algo": "s3fifo",
+      "block_hit_ratio": 0.491773,
+      "prefix_block_hit_ratio": 0.491075,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.2,
+      "cache_blocks": 36660,
+      "algo": "sieve",
+      "block_hit_ratio": 0.525031,
+      "prefix_block_hit_ratio": 0.525031,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.2,
+      "cache_blocks": 36660,
+      "algo": "wtinylfu",
+      "block_hit_ratio": 0.453837,
+      "prefix_block_hit_ratio": 0.443125,
+      "unexpected_evictions": 0
+    },
+    {
+      "trace": "toolagent",
+      "cache_frac": 0.2,
+      "cache_blocks": 36660,
+      "algo": "belady",
+      "block_hit_ratio": 0.552508,
+      "prefix_block_hit_ratio": 0.552508,
+      "unexpected_evictions": 0
+    }
+  ]
+}

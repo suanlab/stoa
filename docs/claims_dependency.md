@@ -2701,3 +2701,35 @@ Process notes:
   Rerun with the system Python; the docstring now says so.
 - A `git stash` used to check a build baseline could not be popped, because the stashed build had changed two
   tracked build outputs. Recovered by restoring those two files and popping; nothing was lost.
+
+## §BL — an independent implementation of the reaction policies, and an unstated LFU (2026-11-20)
+
+Prompted by §BK's limitation, which noted that our adaptive replays were never checked for hits behind a missed
+block. We ran our two Mooncake traces through PrefixSim (`run_prefixsim_audit.py mooncake`). The traces were
+converted with its traceConvLLM; access and distinct-block counts are identical to ours. Policies: libCacheSim's
+LRU, LFU, ARC, LeCaR, CACHEUS, S3-FIFO, SIEVE, W-TinyLFU and Belady. Tier sizes: our four (2/5/10/20% of
+distinct blocks). Scoring: hit counting, both counts. Every result is a percent of that implementation's own
+Belady.
+
+What came out (`experiments/prefixsim_mooncake.json`, checked in `check_paper_numbers.py`):
+- **Agreement.** LRU, ARC and SIEVE agree with ours within 0.6 points of Belady, and CACHEUS within 1.9. For
+  example, ARC at conversation 10% is 77.5 in both. This is the first external check of our replay code.
+- **Disagreement, and its cause.** libCacheSim's LFU resets a block's count when it is evicted (its source says
+  so). Ours (`stoa.eval.online`, policy `h2o`) and the frequency experts of our LeCaR and CACHEUS keep counts
+  across evictions. Theirs scores up to 14.7 points lower (conversation 5%: 49.5 → 34.8). LeCaR and W-TinyLFU,
+  which use frequency, are up to 16.8 and 15.7 lower. S3-FIFO is 17.3 lower at the 20% tier; the cause is not
+  isolated, and libCacheSim's S3-FIFO is its authors' own implementation.
+- **Consequence: a defect, catalogued (unstated conventions, now 9; thirty-one in all).** The paper said "LFU"
+  without saying the counts survive eviction. Two §5.9 claims depend on it at the tightest tier: "the adaptive
+  family beats the best plain rule by at most 4.6 points" and "S3-FIFO … stay below the best plain rule".
+  - With in-cache counts, the best plain rule at the 2% tier is 26.7% (conversation) and 69.5% (toolagent)
+    of Belady. The adaptive family beats it by up to 8.5 points, and S3-FIFO beats it on both traces.
+  - From the 5% tier up, the two implementations agree: the adaptive gain stays within 3.9 points and no
+    one-hit-wonder design beats the best plain rule.
+  - The paper now names the convention and states both readings.
+- **First-miss counting on our traces is small.** libCacheSim's ARC, LeCaR, S3-FIFO and SIEVE move by at most
+  0.3 points; CACHEUS by 2.5 and W-TinyLFU by 8.9. The §7 limitation now cites these instead of PrefixSim's
+  own traces alone.
+
+Two numbers in the first draft of the paragraph were eyeballed from a printout (13.1 for the LFU gap, 4.2 for
+the 5%-and-up adaptive gain). The checker rejected both; the artifact gives 14.7 and 3.9.

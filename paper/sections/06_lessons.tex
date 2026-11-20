@@ -1,11 +1,12 @@
 \section{What the Measurement Took}
 \label{sec:lessons}
-Thirty defects produced plausible numbers that matched their artifacts on the way here
+Thirty-one defects produced plausible numbers that matched their artifacts on the way here
 (\Cref{tab:defects}), and four of them were claims we had to retract: the three in the row of that name
 and the tie rule. Most were found by re-verification passes after the
 paper passed every check it defined for itself; two by an adversarial review and five by an audit, both
 run with AI agents (see the Acknowledgments), one by a later review that asked whether our reference
-was an upper bound, and the last two by later AI-agent reviews. The catalogue records one project; it is
+was an upper bound, the next two by later AI-agent reviews, and the last by replaying our policies through an independent
+implementation. The catalogue records one project; it is
 not an estimate of how often such defects occur elsewhere. The artifact's lab notebook records each with its fix.
 
 \begin{table*}[t]
@@ -41,14 +42,15 @@ the other way (tier-only); retracted: ``most of the advantage is out of a split-
 both rules reported; an exhaustive check on small workloads \\
 Emphasis without verification (1) & the headline share sat in no artifact and mixed two references
 (97\% to 95\%, then 84--88\%) & every emphasised number asserted \\
-Leaks and unstated conventions (8) & in the arrival experiment: post-split labels; a cut unlike the bill;
+Leaks and unstated conventions (9) & in the arrival experiment: post-split labels; a cut unlike the bill;
 magnitudes from evaluation blocks' futures; zero beliefs for pre-split blocks; a mixed-scale ceiling; an
 order control that also changed magnitude; unstated tie and action-space conventions (up to 56 points);
-creations billed as reads (the gap inflated about three times) & a causal module with an AST taint test;
+creations billed as reads (the gap inflated about three times); an ``LFU'' that kept counts after eviction,
+unstated, on which two reaction claims at the tightest tier depend & a causal module with an AST taint test;
 conventions swept; billable access defined in one place \\
 \bottomrule
 \end{tabular}
-\caption{The thirty measurement defects, by mechanism. Each produced a plausible number that matched
+\caption{The thirty-one measurement defects, by mechanism. Each produced a plausible number that matched
 its artifact.}
 \label{tab:defects}
 \end{table*}

@@ -24,10 +24,14 @@ Steps (each writes only under DIR, outside the repository, except `collect`):
               largest request load the whole trace, about 13 GiB each), the hole dumps of HOLE_ALGOS at
               HOLE_CACHE on freeinference, and freeinference converted to JSONL for request lengths.
               About 3 hours on 8 jobs of a 2.7 GHz Xeon. `--quick` runs one size and two policies.
+  mooncake DIR  our two Mooncake traces through the same simulator (notebook BL): converted with traceConvLLM,
+              then libCacheSim's own implementations of the plain and adaptive policies of section 5.9 at our four
+              tier sizes (2/5/10/20% of distinct blocks), hit counting (`--cost-model uniform`), both scores.
+              Writes experiments/prefixsim_mooncake.json. Minutes; needs `setup` first and data/ populated.
   collect DIR experiments/prefixsim_matching.json from DIR's logs. It also checks the patch against PrefixSim's
               own hole dump: the hits after each request's first hole, summed from the dump, must equal the
               difference of the two hit ratios for every dumped policy.
-Usage: python3 scripts/run_prefixsim_audit.py {setup,run,collect} DIR [--jobs 8] [--quick]
+Usage: python3 scripts/run_prefixsim_audit.py {setup,run,collect,mooncake} DIR [--jobs 8] [--quick]
 """
 from __future__ import annotations
 
@@ -56,6 +60,10 @@ SIZES = ("16k", "32k", "64k", "128k", "256k")
 HOLE_ALGOS = ("lru", "random_compute", "partial_node_random_compute")
 HOLE_CACHE = 16384
 OUT = ROOT / "experiments" / "prefixsim_matching.json"
+OUT_MOONCAKE = ROOT / "experiments" / "prefixsim_mooncake.json"
+MOONCAKE = {"conversation": "data/mooncake_conversation_trace.jsonl", "toolagent": "data/mooncake_toolagent_trace.jsonl"}
+MOONCAKE_ALGOS = ("lru", "lfu", "arc", "lecar", "cacheus", "s3fifo", "sieve", "wtinylfu", "belady")
+MOONCAKE_FRACS = (0.02, 0.05, 0.10, 0.20)       # run_reactive_real.FRACS: max(1, int(frac * distinct blocks))
 
 
 def sh(cmd, cwd=None):
@@ -183,16 +191,53 @@ def collect(d: Path):
     print("wrote", OUT.relative_to(ROOT))
 
 
+def mooncake(d: Path, jobs: int):
+    src = d / "PrefixSim"
+    conv, sim = src / "_build" / "bin" / "traceConvLLM", src / "_build" / "bin" / "prefixsim"
+    jobs_ = []
+    distinct = {}
+    for t, path in MOONCAKE.items():
+        lcp = d / f"mooncake_{t}.lcp"
+        r = subprocess.run([str(conv), "--input", str(ROOT / path), "--output", str(lcp), "--block-size-tokens", "512"],
+                           capture_output=True, text=True, check=True)
+        distinct[t] = int(re.search(r"(\d+) unique", r.stdout + r.stderr).group(1))
+        for f in MOONCAKE_FRACS:
+            c = max(1, int(f * distinct[t]))
+            jobs_ += [(t, f, c, a, f"{lcp}.zst") for a in MOONCAKE_ALGOS]
+
+    def one(j):
+        t, f, c, a, lcp = j
+        out = subprocess.run([str(sim), "--trace", lcp, "--cache-size", str(c), "--algo", a, "--cost-model", "uniform"],
+                             capture_output=True, text=True, check=True).stdout
+        kv = dict(x.split("=", 1) for x in next(l for l in out.splitlines() if l.startswith("RESULT")).split()[1:]
+                  if "=" in x)
+        return {"trace": t, "cache_frac": f, "cache_blocks": c, "algo": a,
+                "block_hit_ratio": float(kv["block_hit_ratio"]),
+                "prefix_block_hit_ratio": float(kv["prefix_block_hit_ratio"]),
+                "unexpected_evictions": int(kv["n_unexpected_eviction"])}
+    with ThreadPoolExecutor(jobs) as ex:
+        rows = list(ex.map(one, jobs_))
+    assert all(r["unexpected_evictions"] == 0 for r in rows)
+    OUT_MOONCAKE.write_text(json.dumps({
+        "config": {"prefixsim_commit": PREFIXSIM_COMMIT, "libcachesim_commit": LIBCACHESIM_COMMIT,
+                   "patch": "scripts/patches/prefixsim_first_miss.patch", "cost_model": "uniform (hit counting)",
+                   "traces": MOONCAKE, "distinct_blocks": distinct, "fracs": list(MOONCAKE_FRACS),
+                   "note": "libCacheSim's LFU resets a block's count when it is evicted; ours keeps it"},
+        "rows": rows}, indent=2) + "\n")
+    print("wrote", OUT_MOONCAKE.relative_to(ROOT))
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=("setup", "run", "collect"))
+    ap.add_argument("step", choices=("setup", "run", "collect", "mooncake"))
     ap.add_argument("dir")
     ap.add_argument("--jobs", type=int, default=8)
     ap.add_argument("--quick", action="store_true")
     a = ap.parse_args()
     d = Path(a.dir).resolve()
     d.mkdir(parents=True, exist_ok=True)
-    {"setup": lambda: setup(d), "run": lambda: run(d, a.jobs, a.quick), "collect": lambda: collect(d)}[a.step]()
+    {"setup": lambda: setup(d), "run": lambda: run(d, a.jobs, a.quick), "collect": lambda: collect(d),
+     "mooncake": lambda: mooncake(d, a.jobs)}[a.step]()
     return 0
 
 

@@ -134,6 +134,7 @@ reproduce-prefixsim:
 	$(PY) scripts/run_prefixsim_audit.py setup $(PREFIXSIM_DIR)
 	$(PY) scripts/run_prefixsim_audit.py run $(PREFIXSIM_DIR) --jobs 8
 	$(PY) scripts/run_prefixsim_audit.py collect $(PREFIXSIM_DIR)
+	$(PY) scripts/run_prefixsim_audit.py mooncake $(PREFIXSIM_DIR)
 	$(PY) scripts/check_paper_numbers.py
 
 # --- tier 3: the two claims that need a paid third-party API --------------------------------

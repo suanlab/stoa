@@ -2,7 +2,8 @@
 \label{sec:reaction}
 The alternative to forecasting is to react. On the full Mooncake traces, reactive tiering
 reaches 75--99\% of Belady's hit rate on the toolagent trace and 40--94\% on open-ended conversation
-using LRU, LFU or a fill-once cache alone; admitting the adaptive and learned policies below widens the
+using LRU, LFU or a fill-once cache alone (our LFU, like the frequency experts of LeCaR and CACHEUS below,
+keeps a block's count after the block is evicted); admitting the adaptive and learned policies below widens the
 per-operating-point envelope only to 76--99\% and 42--94\% (\Cref{fig:reactive}). This section's metric is
 a single cache's hit rate as a fraction of Belady's, with no move price, not the captured share of the
 sections before it.
@@ -32,8 +33,8 @@ toolagent    & 2\%  & 74.9 & 70.7 & \textbf{75.8} & 73.9 \\
 \bottomrule
 \end{tabular}
 \end{center}
-\noindent{\footnotesize Percent of Belady's hit rate. ``Best pure'' is the best of LRU, LFU and a
-fill-once cache (which admits blocks until it is full and never evicts) at that operating point, itself a choice
+\noindent{\footnotesize Percent of Belady's hit rate. ``Best pure'' is the best of LRU, LFU (counts kept
+after eviction) and a fill-once cache (which admits blocks until it is full and never evicts) at that operating point, itself a choice
 among policies, so the comparison is conservative for the adaptive designs.}
 
 \medskip
@@ -61,6 +62,18 @@ all eight operating points, by 0.1 to 8.9 points of Belady; the closest is W-Tin
 Quick demotion does what it was designed for: at the tightest tier S3-FIFO and W-TinyLFU beat LRU and ARC on
 both traces. What they do not beat is the best plain rule chosen per operating point, and we did not
 isolate why.
+
+\paragraph{An independent implementation} We replayed both traces at the same tier sizes through the
+implementations in libCacheSim, inside PrefixSim (\Cref{sec:matching}). Its LRU, ARC and SIEVE agree with ours
+within 0.6 points of Belady and its CACHEUS within 1.9. Its LFU does not: it forgets a block's count when the
+block is evicted, where ours keeps it, and it scores up to 14.7 points lower; LeCaR and W-TinyLFU, which use
+frequency, score up to 16.8 and 15.7 lower, and its S3-FIFO 17.3 lower at the largest tier. The comparisons in
+this section therefore hold for frequency that remembers evicted blocks. With counts dropped on eviction, the
+best plain rule at the 2\% tier falls to 26.7\% and 69.5\% of Belady, the adaptive family beats it there by
+up to 8.5 points, and S3-FIFO beats it on both traces; from the 5\% tier up the two implementations agree, the
+adaptive gain staying within 3.9 points and no one-hit-wonder design beating the best plain rule. Counting
+only the hits before a request's first miss moves libCacheSim's ARC, LeCaR, S3-FIFO and SIEVE by at most 0.3
+points on these traces, CACHEUS by 2.5 and W-TinyLFU by 8.9.
 
 \paragraph{And the learned cache policy loses to both --- but only as a range} The natural learned
 baseline is LRB~\cite{S6_song2020lrb}, which learns a relaxed-Belady objective from

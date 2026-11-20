@@ -44,7 +44,8 @@ move to the remote tier, which we could not measure, costs less than about a qua
 write. The per-block costs of a serving stack (vLLM with LMCache) on the same host give the same answer,
 and loading a block from a cold rotational disk there costs more than recomputing it (\Cref{sec:serving}). Reactive
 replacement, finally, stays within a few points of plain rules: the adaptive family (ARC, LeCaR, CACHEUS)
-beats the best plain rule chosen per operating point by at most 4.6 points of Belady, a learned LRB does
+beats the best plain rule chosen per operating point by at most 4.6 points of Belady when frequency
+remembers evicted blocks (8.5 at the tightest tier when it does not), a learned LRB does
 not beat ARC, and S3-FIFO, SIEVE and W-TinyLFU stay below that per-point best everywhere
 (\Cref{sec:reaction}). The same holds for evaluations other than ours. The open simulator of a recent
 eviction study counts a cached block as a hit even behind a block that missed; counted the way vLLM and SGLang
@@ -66,7 +67,7 @@ of LRU to 19.6 points behind (\Cref{sec:matching}).
   beat the best plain rule chosen per operating point; and a published simulator's headline reverses under the
   matching rule serving engines implement.
   \item \textbf{(C3) An artifact and a record.} Every number regenerates from public traces, on CPU except the GPU
-  timings, and a checker fails on drift; the thirty defects that each produced a plausible number on the way here,
+  timings, and a checker fails on drift; the thirty-one defects that each produced a plausible number on the way here,
   four of them retracted claims, are catalogued with the control that catches each (\Cref{sec:lessons}),
   as a record of one project rather than an estimate of how often such defects occur.
 \end{itemize}

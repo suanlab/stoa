@@ -128,7 +128,7 @@ paper reads — an earlier revision had two such files diverge silently.
 | §5.8–5.9 Ranking, reaction | capacity ladder, ARC/LeCaR/CACHEUS/LRB + S3-FIFO/SIEVE/W-TinyLFU |
 | §5.10 A published evaluator and its matching rule | PrefixSim on its own traces: counted as vLLM/SGLang match, RandomCompute's +10.4-point lead over LRU becomes −19.6 (`run_prefixsim_audit.py`) |
 | §5.11 Sampling | the sampling retraction |
-| §6 What the measurement took | thirty defects, four retracted claims |
+| §6 What the measurement took | thirty-one defects, four retracted claims |
 
 Every number in the paper is asserted against its artifact by `../scripts/check_paper_numbers.py`; run it
 after regenerating any experiment.
