@@ -95,6 +95,9 @@ Four anonymized two-hour traces from `github.com/alibaba-edu/qwen-bailian-usaget
 (Wang et al., "KVCache Cache in the Wild", USENIX ATC'25), 16-token blocks, Apache-2.0. Not
 redistributed here. `python3 scripts/run_bailian.py --birthx` downloads them into `data/`, converts them
 to the Mooncake schema the loader checks, and writes `experiments/bailian_*_birthx.json`; see notebook §AT.
+The serving replay (§5.8, notebook §BM) turns a slice of `bailian_qwen_traceA_blksz_16.jsonl` into
+token-id prompts with `scripts/serving_replay/make_workload.py`; the workloads are derived data and are
+not committed either, but their SHA-256 digests are in `experiments/write_contract_a6000.json`.
 
 ## Derived caches (never committed, rebuilt on demand)
 

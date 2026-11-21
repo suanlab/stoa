@@ -1,0 +1,54 @@
+\subsection{Admission inside a serving stack}
+\label{sec:contract}
+The additive bill charges a store as a constant paid by the request that creates the block. Whether the
+request pays it depends on the connector's write path: LMCache's in-process connector blocks each step until
+its saves to host memory complete, while vLLM's offloading connector submits them asynchronously. We replayed
+a 1,200-request slice of Alibaba's traceA (the first 400 warm up the caches) open-loop against vLLM 0.11 with
+the same model on one RTX A6000 (PCIe Gen3), at 0.1 to 0.35 times the trace's arrival rate (the full rate
+overloads this GPU), with a fresh server per run and one of three store rules sent with each request: store
+all, store none, or a clairvoyant oracle that skips a request's store when it creates no block read again in
+the slice. To separate the store work admission saves from the hits it saves, a 600-request slice was also
+replayed with a 120\,GB host tier, large enough that both rules reach the same host hit ratio, and with 40\,GB.
+Before the runs we registered that the oracle would lower median time to first token (TTFT) by at least the
+store time it removes when the store blocks, more so under heavier load, and by under 5\% when it does not
+unless the tier's hits change (\Cref{tab:contract}).
+
+\begin{table}[b]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+& & \multicolumn{2}{c}{40\,GB, 1,200 requests} & \multicolumn{2}{c}{120\,GB, 600 requests} \\
+\cmidrule(lr){3-4}\cmidrule(l){5-6}
+load & stores & blocking & async & blocking & async \\
+\midrule
+0.35$\times$ & all & \textbf{2,191} & 1,168 & 980 & 629 \\
+& oracle & 817 & 752 & 660 & 642 \\
+& none & 1,245 & 1,208 & & \\
+0.2$\times$ & all & 358 & 289 & 222 & 202 \\
+& oracle & 202 & 241 & 178 & 204 \\
+& none & 309 & 299 & & \\
+\bottomrule
+\end{tabular}
+\caption{Median TTFT (ms) of the measured requests, vLLM 0.11 on one RTX A6000, storing to a host tier of
+the given size through LMCache 0.3.9 (blocking) or vLLM's offloading connector (async). Without a connector:
+1,240 and 302\,ms.}
+\label{tab:contract}
+\end{table}
+
+\noindent Both predictions held. When the store blocks, storing every block raises median TTFT by 76\% over
+storing none at the heaviest load, above the 1,240\,ms of no connector at all, although its stores take 35.5\,ms per
+request; when it does not, storing everything is 3.3\% faster than storing nothing. At 120\,GB,
+where the two rules' host hit ratios agree (11.3\% of tokens with one connector, 12.2\% with the other), the
+oracle is within 2.1\% of storing everything on the asynchronous path and 32.7\% faster on the blocking one
+(19.7\% at 0.2$\times$). At 40\,GB, storing everything crowds the tier: on the asynchronous path 1.9\% of
+tokens hit there against 13.9\% under the oracle, which therefore helps that path as well, by 36\% at
+0.35$\times$; we registered this exception, from a simulation of the tier, before the first asynchronous run. The two effects do not add: at 0.2$\times$ the blocking path's gain at 40\,GB, 150\,ms, exceeds
+the hit part (the asynchronous gain, 55\,ms) plus the store part (the blocking gain at 120\,GB, 44\,ms). At the
+heaviest load the blocking path thus pays 12 to 27 times the store time an additive bill charges (320\,ms for
+the 26.7 the oracle avoids at 120\,GB, 947\,ms for the 35.5 storing everything adds), and the asynchronous
+path nothing measurable. The write path is one more convention an evaluation fixes,
+and it decides whether admission matters. On this host a block costs 8.3\,ms to store, 5.5 to load from host
+memory and 73.1 to recompute, so storing a new block pays only if it is read again with probability above
+12.5\%. Each cell is one run, its median over 800 or 400 measured requests, on a host whose other GPU served
+another model throughout; we did not repeat runs, so differences of a few percent are within what we cannot
+resolve.

@@ -27,6 +27,12 @@ traces the order it gives **blocks without evidence** decides what it reports. T
   40–94% on conversation; ARC, LeCaR and CACHEUS beat the best of them by at most 4.6 points, LRB stays
   below ARC, and S3-FIFO, SIEVE and W-TinyLFU stay below the best plain rule everywhere
   (`run_modern_baselines.py`, §BB).
+- **The write path decides whether admission matters.** Replayed into vLLM on one RTX A6000, storing every
+  block raises median time to first token by 76% over storing none when the connector blocks on the save
+  (LMCache), and changes it by 3.3% when the save is asynchronous (vLLM's offloading connector); where
+  admission leaves host hits unchanged, a clairvoyant admission rule is 32.7% faster on the first path and
+  within 2.1% on the second. The additive store price is wrong both ways (`run_write_contract.py`,
+  `serving_replay/`, §BM).
 
 A block's creation (its KV is computed) is a compulsory miss and is never billed; billing it as a cache
 read, as earlier versions did, inflated the oracle's advantage about 3x (notebook §AS).
@@ -40,7 +46,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-lock.txt      # exact versions the paper's numbers came from, FIRST
 pip install -e . --no-deps                # then the package itself, without re-resolving them
 
-pytest -q                                  # 325 tests, ~3 min
+pytest -q                                  # 328 tests, ~3 min
 python3 scripts/check_paper_numbers.py     # every paper number vs its artifact
 ```
 
@@ -63,7 +69,7 @@ claim to a command and an artifact.
 | `paper/` | LaTeX source (official PVLDB template; the ICDE version is `main_icde.tex`, an earlier PVLDB version `main_pvldb.tex`) |
 | `docs/CONVENTIONS.md` | architecture, commands, and the conventions the codebase holds itself to |
 | `docs/claims_dependency.md` | the lab notebook: every claim, what it depends on, and what was retracted |
-| `tests/` | 325 tests, most of which pin a specific defect we hit |
+| `tests/` | 328 tests, most of which pin a specific defect we hit |
 
 ## What is hand-rolled, and why it matters
 
@@ -103,8 +109,9 @@ thing from this repository, take the habit of asking what a number's denominator
 - The timing axis of the formulation is not exercised at all; the representation axis only as an
   underpowered pilot.
 - Per-block costs were measured in vLLM 0.11 + LMCache 0.3.9 on one A100 host (a tier probe, notebook
-  §BE), and the results are rerun under them; no policy was replayed inside the serving stack, and the
-  remote RDMA tier was not measured (its price is swept, §BJ).
+  §BE), and the results are rerun under them. Only store admission was replayed inside the serving stack
+  (one RTX A6000, one trace slice, single runs, §BM); no policy that moves blocks was, and the remote RDMA
+  tier was not measured (its price is swept, §BJ).
 
 ## Licence
 

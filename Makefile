@@ -20,7 +20,7 @@ SHELL := /bin/bash
 .PHONY: reproduce-external reproduce-prefixsim help verify reproduce-fast reproduce-full reproduce-llm figures paper clean data-check
 
 help:
-	@echo "make verify          — 325 tests + every paper number against its artifact (no data needed)"
+	@echo "make verify          — 328 tests + every paper number against its artifact (no data needed)"
 	@echo "make data-check      — are the traces present and the right length?"
 	@echo "make reproduce-fast  — regenerate the central claims from the Mooncake traces (~40 min)"
 	@echo "make reproduce-full  — the above plus the LRB hyperparameter sweep (~6 h)"
@@ -82,6 +82,7 @@ reproduce-fast: data-check
 	$(PY) scripts/run_prefix_validity.py
 	$(PY) scripts/run_modern_baselines.py
 	$(PY) scripts/run_serving_tiers.py        # summary from the committed raw serving runs; no GPU needed
+	$(PY) scripts/run_write_contract.py       # summary from the committed raw replay runs (A6000); no GPU needed
 	$(PY) scripts/run_measured_table.py
 	$(PY) scripts/run_irm_departure.py
 	$(PY) scripts/run_age_rules.py

@@ -26,7 +26,7 @@ recomputed from them on CPU. The GPU environment that produced them is in `requi
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements-lock.txt   # every package pinned, transitive ones included
 pip install -e . --no-deps             # the package itself, without re-resolving the pins
-pytest -q                    # 325 tests, ~3 min; torch-gated tests skip cleanly without torch
+pytest -q                    # 328 tests, ~3 min; torch-gated tests skip cleanly without torch
 
 # Or, without the lock (looser, not the reference versions):
 #   pip install -e ".[dev,rl,eval,figures]"
@@ -188,8 +188,9 @@ Checking while logged in tests your own access, not a reviewer's.
 | **Tie rule across capacities** (§V-A, §BI, §BJ): the bounded tiers scaled together by 0.1–1.5; with dead-known and the live-visible/GPU-slot counts (deadness = every visible future while the live blocks fit; ≤1.9 points apart on production past that); the tie rule moves the reference 30–72 points on production (smallest at the smallest tiers); the oracle's advantage is 32.6 / 16.2 ms of block reads per post-split request at our capacities | `python3 scripts/run_ties_by_capacity.py` (~2 min) | `experiments/ties_by_capacity.json` |
 | **One physical ledger; prices by path** (§V-A, §V-D, §BJ): every policy billed for storing each new block from the GPU and every static policy for its split-time rearrangement, prices split into GPU↔host (measured) and remote/disk (unmeasured). In the measured band LRU loses 46–333% on production, realizing the seen-once rule 37–160%; with GPU↔host at 0.75 LRU pays only if remote moves cost under 0.02–0.23 of read+write | `python3 scripts/run_physical_ledger.py` (~2 min) | `experiments/physical_ledger.json` |
 | **LRB seeds** (§V-H, §BJ): both repairs, ten seeds, 2% tier; the registered "below ARC at all eight" fails there (1–2 of 10 seeds reach ARC in three of four trace–repair pairs) | `python3 scripts/run_lrb_seeds.py` (~40 min, 36 workers) | `experiments/lrb_seeds.json` |
-| **A published evaluator's matching rule** (§5.10, §BK): PrefixSim (the open simulator of arXiv 2609.28870) at commit 160d5f8 with `scripts/patches/prefixsim_first_miss.patch`, which adds hits counted up to a request's first miss (vLLM / SGLang matching) beside its own count; both its public traces at dataset revision ba89a34. RandomCompute's lead over LRU at 16k blocks on freeinference: +10.4 → −19.6 points; the patch agrees with PrefixSim's own hole dump to 1e-6 | `make reproduce-prefixsim` (build + ~0.3 GB download + ~3 h on 8 jobs; toolchain in the script's docstring); `collect` alone rebuilds the artifact from a run directory | `experiments/prefixsim_matching.json` |
-| **An independent implementation of the reaction policies** (§5.9, §BL): libCacheSim's LRU, LFU, ARC, LeCaR, CACHEUS, S3-FIFO, SIEVE, W-TinyLFU and Belady on our two Mooncake traces at our four tier sizes, inside PrefixSim, both hit counts. LRU/ARC/SIEVE agree with ours within 0.6 points of Belady; its LFU forgets counts on eviction (ours keeps them) and scores up to 14.7 lower, which reverses two §5.9 claims at the 2% tier only | `python3 scripts/run_prefixsim_audit.py mooncake DIR` after `setup` (seconds) | `experiments/prefixsim_mooncake.json` |
+| **A published evaluator's matching rule** (§5.11, §BK): PrefixSim (the open simulator of arXiv 2609.28870) at commit 160d5f8 with `scripts/patches/prefixsim_first_miss.patch`, which adds hits counted up to a request's first miss (vLLM / SGLang matching) beside its own count; both its public traces at dataset revision ba89a34. RandomCompute's lead over LRU at 16k blocks on freeinference: +10.4 → −19.6 points; the patch agrees with PrefixSim's own hole dump to 1e-6 | `make reproduce-prefixsim` (build + ~0.3 GB download + ~3 h on 8 jobs; toolchain in the script's docstring); `collect` alone rebuilds the artifact from a run directory | `experiments/prefixsim_matching.json` |
+| **An independent implementation of the reaction policies** (§5.10, §BL): libCacheSim's LRU, LFU, ARC, LeCaR, CACHEUS, S3-FIFO, SIEVE, W-TinyLFU and Belady on our two Mooncake traces at our four tier sizes, inside PrefixSim, both hit counts. LRU/ARC/SIEVE agree with ours within 0.6 points of Belady; its LFU forgets counts on eviction (ours keeps them) and scores up to 14.7 lower, which reverses two §5.9 claims at the 2% tier only | `python3 scripts/run_prefixsim_audit.py mooncake DIR` after `setup` (seconds) | `experiments/prefixsim_mooncake.json` |
+| **Store admission inside a serving stack** (§5.8, §BM): a 1,200-request slice of Alibaba traceA (400 warm-up) and a 600-request slice (200) replayed open-loop into vLLM 0.11 + DeepSeek-R1-Distill-Llama-8B on one RTX A6000 (PCIe Gen3), fresh server per run, host tier 40 or 120 GB, through LMCache 0.3.9 (store blocks the step) or vLLM's OffloadingConnector (asynchronous), with store-all / clairvoyant oracle / store-none sent per request; registered predictions held: the blocking path's oracle gain exceeds the store time it removes and grows with load, the asynchronous path's is under 5% where both rules reach the same host hit ratio (120 GB). Per-block prices on that GPU from `measure_serving_tiers.py`: store 8.3, load 5.5, recompute 73.1 ms | raw runs: `scripts/serving_replay/make_workload.py` (workloads from `data/bailian_qwen_traceA_blksz_16.jsonl`; digests in the artifact), then `STOA_ENV=… STOA_HF=… scripts/serving_replay/matrix.sh {1,2} DIR` on a CUDA host (~9 h); summary: `python3 scripts/run_write_contract.py [--collect DIR]` | `experiments/write_contract_a6000.json` |
 | **Modern baselines** (§V-E, §BB): S3-FIFO, SIEVE, W-TinyLFU beside Belady, LRU and ARC at the four tier sizes; never above the best plain rule | `python3 scripts/run_modern_baselines.py` (~1 min) | `experiments/modern_baselines.json` |
 | **Exposure confound**: blocks arriving in the first quarter see 2.3–4.6x the future reuse of the last quarter; arrival order alone predicts reuse at AUC 0.55–0.58; the leaky design's training labels had 34.3% / 46.3% of their mass after the cut | `python3 scripts/run_arrival_diagnostics.py` | `experiments/arrival_diagnostics.json` |
 | **Cost-weight sensitivity**: unreachable share 79.3–97.1% under tenfold changes to λ_L and λ_B, one at a time | `python3 scripts/run_weight_sensitivity.py` | `experiments/weight_sensitivity.json` |
@@ -261,7 +262,7 @@ not just in prose:
 | Retracted values must not appear outside a retracting paragraph | `stoa.verify.unmarked_superseded(scope="paragraph")` — the 68 numeric checks are *presence* tests; with 90% and 53% injected into the abstract every one still passed (§AH) |
 | **Every guard above is itself tested**, in both directions | `tests/test_verify.py`, 73 tests, mutation-checked — four guards had lived in a script with no tests, where a refactor could delete one silently (§AG) |
 
-`pytest -q` runs all **325** tests, including the leakage guards and the fast/reference equivalence
+`pytest -q` runs all **328** tests, including the leakage guards and the fast/reference equivalence
 check, in about 2 min 45 s.
 
 ## 7. Known limitations
@@ -287,7 +288,7 @@ The claim table above is complete but not ordered by cost. These four commands a
 cheapest first. The first needs no data, no network and no credentials.
 
 ```bash
-make verify           # ~4 min   325 tests + every paper number against its artifact
+make verify           # ~4 min   328 tests + every paper number against its artifact
 make data-check       # instant  are the traces present and the right length?
 make reproduce-fast   # ~40 min  the central claims, regenerated from the Mooncake traces
 make reproduce-full   # ~6 h     the above plus the LRB hyperparameter sweep

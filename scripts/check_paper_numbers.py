@@ -961,6 +961,81 @@ if _mb and _rx2:
           "modern_baselines")
 
 # --- a published evaluator and its matching rule (section 5.10; notebook BK) --------------------------------
+_wc = load("write_contract_a6000.json")
+if _wc:
+    print("\nstore admission inside a serving stack (write_contract_a6000.json)")
+    _ws = _wc["summary"]
+    _W = {(r["stage"], r["connector"], r["policy"], r["speed"]): r for r in _ws["rows"]}
+    _p50 = lambda st, c, p, s: _W[(st, c, p, s)]["p50_ms"]                              # noqa: E731
+    _ms = lambda v: f"{v:,.0f}"                                                       # noqa: E731
+    S1, S2, S2b = "stage1_cpu40", "stage2_cpu120", "stage2_cpu40"
+    assert all(_ws["checks"].values()), f"a registered prediction or a stated premise failed: {_ws['checks']}"
+    for s, lab in ((0.35, "0.35$\\times$"), (0.2, "0.2$\\times$")):
+        for p, word in (("store-all", "all"), ("oracle", "oracle"), ("store-none", "none")):
+            cells = [_ms(_p50(S1, "lmcache", p, s)), _ms(_p50(S1, "offload", p, s))]
+            if s == 0.35 and p == "store-all":
+                cells[0] = f"\\textbf{{{cells[0]}}}"
+            cells += ([_ms(_p50(S2, c, p, s)) for c in ("lmcache", "offload")] if p != "store-none" else ["", ""])
+            row = (lab if p == "store-all" else "") + f" & {word} & " + " & ".join(cells) + " \\\\"
+            claim(f"contract table {s} {word}", row.replace("&  &", "& &").replace(" & \\\\", " & \\\\"),
+                  "", "write_contract_a6000")
+    claim("contract caption: no connector", f"Without a connector:\n{_ms(_p50(S1, 'none', 'store-all', 0.35))} and "
+          f"{_ms(_p50(S1, 'none', 'store-all', 0.2))}\\,ms.", "", "write_contract_a6000")
+    claim("above no connector", f"above the {_ms(_p50(S1, 'none', 'store-all', 0.35))}\\,ms of no connector", "",
+          "write_contract_a6000")
+    _up = 100 * (_p50(S1, "lmcache", "store-all", 0.35) / _p50(S1, "lmcache", "store-none", 0.35) - 1)
+    _down = 100 * (1 - _p50(S1, "offload", "store-all", 0.35) / _p50(S1, "offload", "store-none", 0.35))
+    for where, tail in (("abstract", "when the connector blocks"), ("intro", "when the store blocks the step"),
+                        ("section", "at the heaviest load")):
+        what = "TTFT" if where == "section" else "time to first token"
+        claim(f"{where}: store-all over store-none", f"raises median {what} by {_up:.0f}\\% over storing none {tail}",
+              "", "write_contract_a6000")
+    claim("abstract/intro: async change", f"changes it by {_down:.1f}\\% when the", "", "write_contract_a6000")
+    claim("section: async store-all faster", f"storing everything is {_down:.1f}\\% faster than storing nothing", "",
+          "write_contract_a6000")
+    _runs = _wc["runs"]
+    _share = lambda st, c, p, s: 100 * (lambda h: h["host_hit"] / h["tokens"])(           # noqa: E731
+        _runs[f"{st}/{c}_{p}_x{s}"]["hits"])
+    _st = lambda st, p, s: _W[(st, "lmcache", p, s)]["store_ms_per_request"]             # noqa: E731
+    claim("stores per request", f"its stores take {_st(S1, 'store-all', 0.35):.1f}\\,ms per request", "",
+          "write_contract_a6000")
+    claim("equal hits at 120 GB", f"({_share(S2, 'lmcache', 'store-all', 0.35):.1f}\\% of tokens with one connector, "
+          f"{_share(S2, 'offload', 'store-all', 0.35):.1f}\\% with the other)", "", "write_contract_a6000")
+    _g = lambda st, c, s: 100 * (1 - _p50(st, c, "oracle", s) / _p50(st, c, "store-all", s))   # noqa: E731
+    _async = max(abs(_g(S2, "offload", s)) for s in (0.35, 0.2))
+    claim("120 GB: async within, blocking faster", f"within {_async:.1f}\\% of storing everything on the asynchronous "
+          f"path and {_g(S2, 'lmcache', 0.35):.1f}\\% faster on the blocking one\n({_g(S2, 'lmcache', 0.2):.1f}\\% at "
+          "0.2$\\times$)", "", "write_contract_a6000")
+    claim("intro: clairvoyant rule", f"a clairvoyant admission rule is {_g(S2, 'lmcache', 0.35):.1f}\\% faster on the "
+          f"first path and within {_async:.1f}\\% on the\nsecond", "", "write_contract_a6000")
+    claim("40 GB crowding", f"{_share(S1, 'offload', 'store-all', 0.35):.1f}\\% of\ntokens hit there against "
+          f"{_share(S1, 'offload', 'oracle', 0.35):.1f}\\% under the oracle", "", "write_contract_a6000")
+    claim("40 GB async gain", f"by {_g(S1, 'offload', 0.35):.0f}\\% at\n0.35$\\times$", "", "write_contract_a6000")
+    _d = lambda st, c, s: _p50(st, c, "store-all", s) - _p50(st, c, "oracle", s)          # noqa: E731
+    _tot, _hit, _sto = _d(S2b, "lmcache", 0.2), _d(S2b, "offload", 0.2), _d(S2, "lmcache", 0.2)
+    assert _tot > _hit + _sto, "the paper says the two effects do not add at 0.2x"
+    claim("not additive", f"{_ms(_tot)}\\,ms, exceeds\nthe hit part (the asynchronous gain, {_ms(_hit)}\\,ms) plus the "
+          f"store part (the blocking gain at 120\\,GB, {_ms(_sto)}\\,ms)", "", "write_contract_a6000")
+    _sav = _st(S2, "store-all", 0.35) - _st(S2, "oracle", 0.35)
+    _add = _p50(S1, "lmcache", "store-all", 0.35) - _p50(S1, "lmcache", "store-none", 0.35)
+    _lo, _hi = _d(S2, "lmcache", 0.35) / _sav, _add / _st(S1, "store-all", 0.35)
+    claim("multiple of the additive price", f"pays {_lo:.0f} to {_hi:.0f} times the store time an additive bill charges "
+          f"({_ms(_d(S2, 'lmcache', 0.35))}\\,ms for\nthe {_sav:.1f} the oracle avoids at 120\\,GB, {_ms(_add)}\\,ms for "
+          f"the {_st(S1, 'store-all', 0.35):.1f} storing everything adds)", "", "write_contract_a6000")
+    _pb = _ws["per_512_token_block"]
+    claim("A6000 per-block prices", f"a block costs {_pb['cpu_store_ms']:.1f}\\,ms to store, {_pb['cpu_load_ms']:.1f} "
+          f"to load from host\nmemory and {_pb['recompute_ms']:.1f} to recompute", "", "write_contract_a6000")
+    claim("store break-even", f"with probability above\n{100 * _pb['store_break_even_reuse']:.1f}\\%", "",
+          "write_contract_a6000")
+    _wl, _stg = _wc["workloads"], _wc["stages"]
+    claim("replayed slice", f"a {_wl['traceA1200']['requests']:,}-request slice of Alibaba's traceA (the first "
+          f"{_wl['traceA1200']['warmup']} warm up", "", "write_contract_a6000")
+    claim("second slice and tiers", f"a {_wl['traceA600']['requests']}-request slice was also\nreplayed with a "
+          f"{_stg[S2]['host_tier_gb']}\\,GB host tier", "", "write_contract_a6000")
+    claim("table header", f"{_stg[S1]['host_tier_gb']}\\,GB, {_wl['traceA1200']['requests']:,} requests}} & "
+          f"\\multicolumn{{2}}{{c}}{{{_stg[S2]['host_tier_gb']}\\,GB, {_wl['traceA600']['requests']} requests}}",
+          "", "write_contract_a6000")
+
 _pm = load("prefixsim_matching.json")
 if _pm:
     print("\nPrefixSim matching rule (prefixsim_matching.json)")
@@ -1337,7 +1412,7 @@ REQUIRED = ("reactive_real_full_lrb.json", "headroom_by_length.json", "lrb_retra
             "measured_table.json", "irm_departure.json", "irm_departure_bailian.json", "eval_window.json",
             "age_rules.json", "age_rules_bailian.json", "ski_rental.json", "reservation.json",
             "session_age.json", "ties_by_capacity.json", "physical_ledger.json", "lrb_seeds.json",
-            "prefixsim_matching.json", "prefixsim_mooncake.json")
+            "prefixsim_matching.json", "prefixsim_mooncake.json", "write_contract_a6000.json")
 missing = [n for n in REQUIRED if not (EXP / n).exists()]
 if missing:
     failures.append("artifacts absent, so their claims went unchecked: " + ", ".join(missing))

@@ -79,6 +79,7 @@ DEPENDS_ON = {
     # third-party simulator (PrefixSim, pinned and patched) on its public traces; no module of ours
     "prefixsim_matching.json": (),
     "prefixsim_mooncake.json": (),
+    "write_contract_a6000.json": (),
     "measured_table.json": ("traces.py", "sequential.py", "mooncake.py", "simulator.py", "environment.py", "eval/oracle.py", "causal.py", "credit.py", "gnn.py"),
     "reuse_split.json": ("traces.py", "mooncake.py"),
     "evidence_ladder_bailian.json": ("traces.py", "sequential.py", "mooncake.py", "simulator.py", "environment.py"),

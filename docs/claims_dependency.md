@@ -2733,3 +2733,82 @@ What came out (`experiments/prefixsim_mooncake.json`, checked in `check_paper_nu
 
 Two numbers in the first draft of the paragraph were eyeballed from a printout (13.1 for the LFU gap, 4.2 for
 the 5%-and-up adaptive gain). The checker rejected both; the artifact gives 14.7 and 3.9.
+
+## §BM — store admission replayed inside a serving stack: the write path decides (2026-11-21/22)
+
+The bill has been additive since the start: a store costs the creating request a constant (§BE measured it,
+2.94 ms per 512-token block on the A100). The review simulation's strongest rejection (§BJ, R3) was that
+nothing had been replayed inside a stack. This pass replays the one decision a serving stack exposes per
+request, whether to store a request's new KV, through two connectors with different write paths, both
+in vLLM 0.11.0:
+- LMCache 0.3.9 in-process (`LMCacheConnectorV1`). Its `wait_for_save` blocks until the save to host
+  memory completes; per-request skip via `kv_transfer_params["lmcache.skip_save"]`.
+- vLLM's `OffloadingConnector`. Its `wait_for_save` only submits `transfer_async`. It has no per-request
+  skip, so `scripts/serving_replay/skipstore_connector.py` adds one. For a request carrying
+  `stoa.skip_store`, it advances the next-to-store index before the stock `_get_reqs_to_store` runs; all
+  else is stock.
+
+**Harness** (`scripts/serving_replay/`, copied byte-identical from what ran except `run_one.sh`'s host
+paths; digests in the artifact):
+- `make_workload.py` maps each 16-token hash id of Alibaba's traceA to a fixed pseudo-random token run, which
+  keeps the prefix structure. It also marks `store_oracle`: the request creates a block that is read again
+  later in the slice. The oracle is clairvoyant, an upper bound for admission, not a deployable rule.
+- `client.py` replays open-loop at a fraction of the trace's arrival rate, streams, and records TTFT.
+- `run_one.sh` starts a fresh server per run, so no cache state crosses runs.
+- Model: DeepSeek-R1-Distill-Llama-8B, `--gpu-memory-utilization 0.53` (KV pool about 8.9 GiB), LMCache
+  chunk 256.
+
+**Host.** The A100 host of §BE became unavailable: all four GPUs were taken by other accounts' jobs, which we
+did not touch. The runs moved to an RTX A6000 48 GB host (PCIe Gen3 x16) using one GPU. The host's other GPU
+served another vLLM model at full utilisation throughout; that is a measurement condition, the same for every
+run.
+- Calibration (300 requests, no connector): p50 TTFT 122/139/230/567 ms at 0.05/0.1/0.2/0.35× the
+  arrival rate. 1× overloads this GPU (TTFT 37–43 s), so the matrix uses 0.1/0.2/0.35×.
+- The skip takes effect: GPU blocks handed to the offloader were 33,965 (store-all), 24,167 (oracle) and 0
+  (store-none).
+- The hit counters (`STOA_HITS`) were added to the connector before its first matrix run. They count; they
+  change no behaviour.
+
+**Registered before the runs** (research notes, dated; the notes are outside this repository):
+- 2026-11-16 (b): blocking path. The oracle's p50 gain is at least the store time it removes and grows with
+  load.
+- 2026-11-16 (c): asynchronous path. Under 5%, unless the host tier's hits change.
+- 2026-11-21 22:00, before any offload run of the matrix. A chunk-level LRU simulation of the slice put
+  store-all's host hits at about half the oracle's at 40 GB. So (c′) registered that the oracle would help
+  the asynchronous path through hits at 40 GB.
+- Stage 2, 22:10. A 600-request slice where 120 GB equalises the two rules' host hits in simulation: (c)
+  in its original form at 120 GB, and "blocking gain > asynchronous gain" at 40 GB.
+
+**What came out** (`experiments/write_contract_a6000.json`, `run_write_contract.py`; §5.8, Table 3):
+- **(b) held.** Oracle gains of 59/156/1,375 ms (0.1/0.2/0.35×, 40 GB) and 44/320 ms (120 GB) against 26–31
+  ms of store time removed per request. They grow with load.
+- **(c) held where it applies.** At 120 GB the host hit ratios agree within 0.1 point (11.3% LMCache, 12.2%
+  offload). The asynchronous oracle is within 2.1% of store-all; the blocking one is 19.7–32.7% faster.
+- **(c′) held.** At 40 GB store-all's host hits fall to 1.9% against 13.9%, and the asynchronous oracle is
+  36% faster at 0.35×. The pollution is worse than the simulation predicted, probably because the GPU
+  cache takes the short reuse first [inference].
+- **The contract alone.** Store-all minus store-none at 0.35× is +947 ms (+76%) on the blocking path, above
+  no connector at all (1,240 ms), for 35.5 ms of store per request. On the asynchronous path it is −3.3%.
+- **Not additive.** The hit part (asynchronous gain at 40 GB) plus the store part (blocking gain at 120 GB)
+  is 570 against 542 ms at 0.35×, but 98 against 150 ms at 0.2×.
+- **A6000 per-block prices** (`measure_serving_tiers.py`, same GPU): store 8.34, host load 5.49, recompute
+  73.09 ms. So a store pays above a 12.5% reuse probability.
+
+**Caught before the paper, not catalogued** (the precedent of §BL's two eyeballed numbers; none reached a
+committed claim):
+1. The probe's store-time-per-request divided warm-up stores by the measured count. On the smoke run that
+   gave 15.0 instead of 11.4 ms. Fixed with the first measured lookup's timestamp as the boundary, before any
+   matrix number was read.
+2. The research notes said the 120 GB host hits agreed "to the fourth decimal". The collector's equality
+   check failed: offload at 0.2× is 0.1215 against 0.1220. The check now has a stated 0.1-point tolerance.
+3. The notes called the two effects "roughly additive" from the 0.35× point alone. 0.2× is superadditive.
+   The paper says they do not add.
+4. 946.5 ms was written as 946; the value is 946.511, so 947. The checker derives it from the unrounded
+   p50s.
+
+**Not tested here.**
+- Moves. No policy that moves blocks was replayed, so registered prediction (d) is untested. On an
+  asynchronous write path the write half of a move may cost a request nothing; §7 now says the move
+  conclusions do not account for that.
+- Prediction (a), the sign of the store-on-second-access rule.
+- The scope is one host, one model, one trace, p50 only, and single runs.
