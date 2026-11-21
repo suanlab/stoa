@@ -612,5 +612,8 @@
     "sequential.py": "afe6b13657345dc1a2ba3d16ce6838f3859427cc63da88a1e7336a185a9cce39",
     "simulator.py": "9efcbde0ab8d4f4330cbb1886ff560419baa62591b59a7a8154050b558a92359",
     "traces.py": "9b0d127bca5bc1db76d5818916c2b668f4fe9c10768b06acd77e9eef49999ccb"
+  },
+  "write_contract_a6000.json": {
+    "scripts/run_write_contract.py": "21b8a162e284cab4c35e472ebf5fd50dc37ad92c1836b0da06d13f2b75555825"
   }
 }
