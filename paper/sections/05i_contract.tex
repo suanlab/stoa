@@ -45,10 +45,23 @@ tokens hit there against 13.9\% under the oracle, which therefore helps that pat
 0.35$\times$; we registered this exception, from a simulation of the tier, before the first asynchronous run. The two effects do not add: at 0.2$\times$ the blocking path's gain at 40\,GB, 150\,ms, exceeds
 the hit part (the asynchronous gain, 55\,ms) plus the store part (the blocking gain at 120\,GB, 44\,ms). At the
 heaviest load the blocking path thus pays 12 to 27 times the store time an additive bill charges (320\,ms for
-the 26.7 the oracle avoids at 120\,GB, 947\,ms for the 35.5 storing everything adds), and the asynchronous
+the 26.7 the oracle avoids at 120\,GB, 947\,ms for the 35.5 storing everything adds), and vLLM's asynchronous
 path nothing measurable. The write path is one more convention an evaluation fixes,
 and it decides whether admission matters. On this host a block costs 8.3\,ms to store, 5.5 to load from host
 memory and 73.1 to recompute, so storing a new block pays only if it is read again with probability above
 12.5\%. Each cell is one run, its median over 800 or 400 measured requests, on a host whose other GPU served
-another model throughout; we did not repeat runs, so differences of a few percent are within what we cannot
-resolve.
+another model throughout; a second run of each 120\,GB cell at 0.35$\times$ moved it by 0.8--5.8\% and kept
+both comparisons (asynchronous $-2.1$ then $+2.1$\%, blocking 32.7 then 31.6\%).
+
+\paragraph{A second engine} SGLang 0.5.10's hierarchical cache fixes its write path per server: write-through
+stores each new block asynchronously when it is created, write-back stores a block, blocking, when it leaves the
+GPU, and a selective write-through is documented to store a block on its second access. With the same GPU
+pool, slice and loads, we registered from a simulation of those semantics that the selective rule would store
+almost nothing and act like no host tier; three of our four predictions failed. The engine counts a request's
+own completion as a second access, so the selective rule stores every request that decodes more than one token,
+and at 120\,GB all three rules cache 26.4\% of prompt tokens (14.3\% without the tier). What differs is
+\emph{when}: storing at completion rather than at creation lowers median TTFT at 0.35$\times$ by 22.6, 16.6
+and 17.4\% in three runs, and by 32.8 and 26.5\% with SGLang's direct transfers in place of its copy kernels,
+though both rules store asynchronously; we did not find the cause. Blocking write-back costs 1.5\,ms at
+0.35$\times$ and 20.5 at 0.2$\times$, against the growing penalty we predicted. A policy's name is not its
+write path, and an asynchronous store is free on one engine and not on another.

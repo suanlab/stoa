@@ -5,8 +5,8 @@ rotational and it has no NVMe and no RDMA fabric, so the remote tier's cost is s
 and the online conclusion holds only if a remote move costs at least about a quarter of a read plus a write
 (\Cref{sec:online}). The bill is additive and per block: it has no overlap of moves with computation or
 idle link time, no queueing or batching, and no discard-and-recompute action. The only rules we replayed inside a serving
-stack are three store-admission rules, on a second host (\Cref{sec:contract}), and they show the additive
-store price wrong in both directions; none of the placement or move results is a statement about latency
+stack are three store-admission rules in vLLM and three write rules in SGLang, on a second host and one trace
+(\Cref{sec:contract}), and they show the additive store price wrong in both directions; none of the placement or move results is a statement about latency
 under load, and on an asynchronous write path the write half of a move may cost a request nothing, which
 the move conclusions do not account for. The replay counts tiers in block slots: at the 64\,MiB block we timed, the GPU tier's 18{,}279 slots
 would be a 1.1\,TiB pool, and applying one host's per-block price to a pool of that size assumes that

@@ -61,3 +61,14 @@ def test_committed_artifact_rederives_and_its_checks_hold():
     d = json.loads(wc.OUT.read_text())
     assert wc.summarize(d) == d["summary"]
     assert all(d["summary"]["checks"].values())
+
+
+def test_sglang_runs_count_cached_tokens_of_measured_answered_requests(tmp_path):
+    recs = [{"i": 0, "warmup": True, "ttft_ms": 5.0, "err": None, "prompt_tokens": 100, "cached_tokens": 100},
+            {"i": 1, "warmup": False, "ttft_ms": 7.0, "err": None, "prompt_tokens": 200, "cached_tokens": 50},
+            {"i": 2, "warmup": False, "ttft_ms": None, "err": "ServerDisconnectedError()", "prompt_tokens": None,
+             "cached_tokens": None}]
+    stem = tmp_path / "sgl_write_through_x0.35"
+    Path(f"{stem}.jsonl").write_text("".join(json.dumps(r) + "\n" for r in recs))
+    run = wc.parse_sgl(stem)
+    assert run == {"ttft_ms": [7.0, None], "errors": 1, "prompt_tokens": 200, "cached_tokens": 50}

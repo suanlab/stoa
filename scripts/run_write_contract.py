@@ -17,7 +17,11 @@ DIR/stage2_cpu40, and the two workload files, for their digests) into experiment
 per-request TTFTs of the measured requests, LMCache's logged store costs, and per-request hit tokens from
 both connectors' logs. DIR/tiers holds measure_serving_tiers.py's runs on the same GPU (none.json,
 cpu.json, and cpu.log for LMCache's logged costs), the host's per-block prices as §BE derived them for
-the A100. Without --collect it re-derives the summary from that file; no GPU needed.
+the A100. DIR/sglang holds SGLang 0.5.10.post1 HiCache runs (cpu0: no HiCache; cpu40, cpu120: host tier
+size) of its three write policies, and DIR/rep the replicates at 120 GB and 0.35x (SGLang pairs, one more run
+of each vLLM cell, and SGLang pairs with cudaMemcpy transfers). SGLang reports one cached-token count per
+request (GPU and host together), read from the response's usage. Without --collect it re-derives the summary
+from that file; no GPU needed.
 
 Hit tokens per request are the GPU-local prefix hit and the host-tier hit at the request's last lookup:
 LMCache logs both ("LMCache hit tokens", "need to load"); the offloading connector logs them through
@@ -42,7 +46,8 @@ LOOKUP = re.compile(TS + r"Reqid: (\S+), Total tokens (\d+), LMCache hit tokens:
 OFFHIT = re.compile(r"STOA_HITS reqs=\d+ measured_reqs=(\d+) measured_tokens=(\d+) measured_gpu_hit=(\d+) "
                     r"measured_host_hit=(\d+)")
 SKIP = re.compile(r"STOA_SKIPSTORE calls=\d+ store_jobs=\d+ stored_gpu_blocks=(\d+) skipped_reqs=\d+")
-HARNESS = ("client.py", "skipstore_connector.py", "make_workload.py")
+HARNESS = ("client.py", "skipstore_connector.py", "make_workload.py", "client_sgl.py")
+SGL_POLICIES = ("write_through", "write_through_selective", "write_back")
 
 
 def sha256(p: Path) -> str:
@@ -77,6 +82,15 @@ def parse_run(stem: Path, warm: int) -> dict:
     return run
 
 
+def parse_sgl(stem: Path) -> dict:
+    recs = [json.loads(line) for line in open(f"{stem}.jsonl")]
+    meas = [r for r in recs if not r["warmup"]]
+    ok = [r for r in meas if r["ttft_ms"] is not None]
+    return {"ttft_ms": [r["ttft_ms"] for r in meas], "errors": sum(1 for r in recs if r["err"]),
+            "prompt_tokens": sum(r["prompt_tokens"] or 0 for r in ok),
+            "cached_tokens": sum(r["cached_tokens"] or 0 for r in ok)}
+
+
 def collect(d: Path) -> None:
     runs = {}
     for stage, (_s, _cap, _wl, warm) in STAGES.items():
@@ -92,6 +106,12 @@ def collect(d: Path) -> None:
                            "sha256": sha256(d / f"{name}.jsonl"), "requests": len(rows), "warmup": len(rows) - len(meas),
                            "span_s": round(rows[-1]["t"] - rows[0]["t"], 1),
                            "oracle_store_share_measured": round(sum(r["store_oracle"] for r in meas) / len(meas), 4)}
+    for f in sorted((d / "sglang").glob("cpu*/sgl_*.jsonl")) + sorted((d / "rep").glob("*/sgl_*.jsonl")):
+        stem = f.with_suffix("")
+        runs[str(stem.relative_to(d))] = parse_sgl(stem)
+    for f in sorted((d / "rep").glob("vllm_*/*.jsonl")):
+        stem = f.with_suffix("")
+        runs[str(stem.relative_to(d))] = parse_run(stem, 200)
     tiers = {m: json.loads((d / "tiers" / f"{m}.json").read_text()) for m in ("none", "cpu")}
     for t in tiers.values():
         t.pop("lmcache_env", None)
@@ -105,6 +125,9 @@ def collect(d: Path) -> None:
         "producer": "scripts/serving_replay/matrix.sh on one RTX A6000 48 GB (PCIe Gen3 x16, driver 570.133.07; "
                     "GPU 0 of the same host ran another vLLM server at full utilisation throughout); "
                     "assembled by run_write_contract.py --collect",
+        "stack_sglang": {"sglang": "0.5.10.post1", "torch": "2.9.1+cu128", "flashinfer": "0.6.7.post3",
+                         "max_total_tokens": 73000, "page_size": 1, "attention_backend": "flashinfer",
+                         "hicache_io_backend": "kernel (rep/io_direct: direct)", "chunked_prefill_size": 4096},
         "stack": {"vllm": "0.11.0", "lmcache": "0.3.9", "torch": "2.8.0",
                   "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-8B@6a6f4aa4197940add57724a7707d069478df56b1",
                   "gpu_memory_utilization": 0.53, "lmcache_chunk_tokens": 256, "max_model_len": 24576},
@@ -127,6 +150,8 @@ def summarize(d: dict) -> dict:
     rows = {}
     for key, r in d["runs"].items():
         stage = key.split("/")[0]
+        if stage not in STAGES:
+            continue
         t = [x for x in r["ttft_ms"] if x is not None]
         h = r["hits"]
         rows[(stage, r["connector"], r["policy"], r["speed"])] = {
@@ -194,6 +219,61 @@ def summarize(d: dict) -> dict:
     pb["store_break_even_reuse"] = round(pb["cpu_store_ms"] / (pb["recompute_ms"] - pb["gpu_marginal_ms"]
                                                                - pb["cpu_load_ms"]), 4)
     out["per_512_token_block"] = pb
+
+    # SGLang HiCache: p50 and cached share per (host GB, write policy, speed); the host part estimated against
+    # no HiCache at the same load (same GPU pool)
+    sg = {}
+    for key, r in d["runs"].items():
+        if not key.startswith("sglang/"):
+            continue
+        cap = int(key.split("/")[1][3:])
+        pol, sp = key.split("/")[2][4:].rsplit("_x", 1)
+        sg[(cap, pol, float(sp))] = {"p50_ms": pct([x for x in r["ttft_ms"] if x is not None], 0.5),
+                                     "cached_share": r["cached_tokens"] / r["prompt_tokens"], "errors": r["errors"]}
+    for (cap, pol, sp), v in sg.items():
+        v["host_share_est"] = None if pol == "none" else v["cached_share"] - sg[(0, "none", sp)]["cached_share"]
+    out["sglang_rows"] = [{"host_gb": k[0], "policy": k[1], "speed": k[2], **v} for k, v in sorted(sg.items())]
+    rel = lambda a, b: 100 * (a - b) / b                                             # noqa: E731
+    p = lambda c, q, s: sg[(c, q, s)]["p50_ms"]                                      # noqa: E731
+    h = lambda c, q, s: sg[(c, q, s)]["host_share_est"]                              # noqa: E731
+    # registered before the runs from a simulation of the documented semantics (a write on the second access);
+    # recorded as outcomes, three of them failures
+    out["sglang_registered"] = {
+        "S1_selective_host_hits_below_a_fifth": {"held": all(h(120, "write_through_selective", s) * 5
+                                                             <= min(h(120, q, s) for q in ("write_through", "write_back"))
+                                                             for s in (0.35, 0.2))},
+        "S2_selective_slower_by_5pct_at_120gb": {
+            "pct": {str(s): round(rel(p(120, "write_through_selective", s), p(120, "write_through", s)), 1)
+                    for s in (0.35, 0.2)}},
+        "S3_write_back_penalty_grows_with_load": {
+            "ms": {str(s): round(p(120, "write_back", s) - p(120, "write_through", s), 1) for s in (0.35, 0.2)}},
+        "S4_host_hits_below_4pct_at_40gb": {"held": all(h(40, q, 0.35) < 0.04 for q in SGL_POLICIES)}}
+    r2 = out["sglang_registered"]
+    r2["S2_selective_slower_by_5pct_at_120gb"]["held"] = all(v >= 5 for v in r2["S2_selective_slower_by_5pct_at_120gb"]["pct"].values())
+    m3 = r2["S3_write_back_penalty_grows_with_load"]["ms"]
+    r2["S3_write_back_penalty_grows_with_load"]["held"] = m3["0.35"] > m3["0.2"] > 0
+
+    # replicates at 120 GB, 0.35x
+    def p50(key):
+        return pct([x for x in d["runs"][key]["ttft_ms"] if x is not None], 0.5)
+    pairs = {"kernel": [[p50("sglang/cpu120/sgl_write_through_x0.35"), p50("sglang/cpu120/sgl_write_through_selective_x0.35")]]
+             + [[p50(f"rep/sgl_r{i}/sgl_write_through_x0.35"), p50(f"rep/sgl_r{i}/sgl_write_through_selective_x0.35")]
+                for i in (1, 2)],
+             "direct": [[p50(f"rep/io_direct/sgl_write_through_x0.35_direct_r{i}"),
+                         p50(f"rep/io_direct/sgl_write_through_selective_x0.35_direct_r{i}")] for i in (1, 2)]}
+    out["sglang_write_timing"] = {k: {"pairs_ms": v, "selective_faster_pct": [round(100 * (1 - b / a), 1) for a, b in v]}
+                                  for k, v in pairs.items()}
+    vr = {f"{c}/{q}": (g("stage2_cpu120", c, q, 0.35)["p50_ms"], p50(f"rep/vllm_r1/{c}_{q}_x0.35"))
+          for c in ("lmcache", "offload") for q in ("store-all", "oracle")}
+    sgr = {q: [p50(f"sglang/cpu120/sgl_{q}_x0.35")] + [p50(f"rep/sgl_r{i}/sgl_{q}_x0.35") for i in (1, 2)]
+           for q in ("write_through", "write_through_selective")}
+    moves = [abs(b / a - 1) for a, b in vr.values()] + [abs(x / v[0] - 1) for v in sgr.values() for x in v[1:]]
+    out["replicates"] = {
+        "vllm_120gb_0.35": {k: {"first_ms": a, "replicate_ms": b} for k, v in vr.items() for a, b in [v]},
+        "rerun_moves_pct": [round(100 * min(moves), 1), round(100 * max(moves), 1)],
+        "async_oracle_gain_pct": [round(100 * (1 - vr["offload/oracle"][i] / vr["offload/store-all"][i]), 1) for i in (0, 1)],
+        "blocking_oracle_gain_pct": [round(100 * (1 - vr["lmcache/oracle"][i] / vr["lmcache/store-all"][i]), 1)
+                                     for i in (0, 1)]}
     return out
 
 
@@ -208,7 +288,11 @@ def main() -> int:
         print(f"{r['stage']:<14} {r['connector']:<8} {r['policy']:<10} {r['speed']:>5} p50 {r['p50_ms']:>8.1f} "
               f"host hit {r['host_hit_share']}")
     print(json.dumps({k: s[k] for k in ("store_all_minus_store_none", "lmcache_store_ms_saved_per_request",
-                                        "checks", "decomposition_stage2", "per_512_token_block")}, indent=1))
+                                        "checks", "decomposition_stage2", "per_512_token_block",
+                                        "sglang_registered", "sglang_write_timing", "replicates")}, indent=1))
+    for r in s["sglang_rows"]:
+        print(f"sglang {r['host_gb']:>4} {r['policy']:<24} {r['speed']:>5} p50 {r['p50_ms']:>8.1f} "
+              f"cached {r['cached_share']:.4f}")
     return 0
 
 

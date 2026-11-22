@@ -2812,3 +2812,45 @@ committed claim):
   conclusions do not account for that.
 - Prediction (a), the sign of the store-on-second-access rule.
 - The scope is one host, one model, one trace, p50 only, and single runs.
+
+### §BM, continued — a second engine, replicates, and three failed registrations (2026-11-22/23)
+
+**SGLang 0.5.10.post1 HiCache.** Same host, same GPU pool (`--max-total-tokens 73000`), traceA600, 0.35×
+and 0.2×, host tier 40 or 120 GB. FlashInfer JIT-compiles the kernels it does not ship for the A6000, so the
+env needs `ninja` and `CUDA_HOME`. Three write policies, as the code implements them (`hiradix_cache.py`):
+- `write_through`: store each new node asynchronously when it is inserted.
+- `write_back`: store a node when the GPU evicts it; `evict()` blocks until those writes complete.
+- `write_through_selective`: store when a node's `hit_count` reaches 2.
+
+**Registered before the runs** (research notes, 2026-11-22), from `serving_replay/sim_hicache.py`, which simulates the
+documented semantics (a write on the second access):
+- S1: the selective rule stores almost nothing (14 chunks) and acts like no host tier.
+- S2: write-through beats it by at least 5% at 120 GB (u = 0.48, far below u*).
+- S3: write-back's blocking penalty at equal hits grows with load.
+- S4: below 4% host hits for every policy at 40 GB.
+
+**Outcome: S1, S2 and S3 failed; S4 held** (`summary.sglang_registered`).
+- **The cause is the engine, found afterwards in its code.** A request is inserted into the radix tree twice:
+  after prefill (`cache_unfinished_req`) and on completion (`cache_finished_req`). The second insert walks
+  the same nodes and raises `hit_count` to 2. So the selective rule stores every request that decodes more
+  than one token, at its completion. Every request here decodes 2–64 tokens.
+  - All three rules cache 26.4% of prompt tokens at 120 GB, against 14.3% without the tier.
+  - The simulation was right about the documented rule and wrong about this implementation. A policy's
+    name is not its write path. This is the same lesson as §BL's LFU, from the other side.
+- **Write timing matters with equal hits and an asynchronous store.** Storing at completion rather than at
+  insertion lowers p50 at 120 GB and 0.35× by 22.6, 16.6 and 17.4% in three runs, and by 3.8% at 0.2×.
+  - Hypothesis: the copy kernels (`io_backend=kernel`) compete with prefill for SMs. Tested with
+    `--hicache-io-backend direct`: everything is about 4× slower, and the gap is 32.8 and 26.5%. The
+    hypothesis is not supported; the cause is not found.
+  - This qualifies "an asynchronous store costs nothing". That holds for vLLM's offloading connector
+    (−2.1/+2.1%), not as a property of asynchrony.
+- **Write-back** costs 1.5 ms (0.35×) and 20.5 ms (0.2×) over write-through at 120 GB. That is the reverse
+  of S3's ordering. At 40 GB and 0.35× it costs 77 ms (+10%).
+
+**Replicates** (120 GB, 0.35×): a second run of each vLLM cell moved it by 0.8–5.8% (LMCache store-all
+980 → 922 ms). Both comparisons held: asynchronous oracle −2.1 then +2.1%, blocking 32.7 then 31.6%. The
+registered 5% threshold for (c) is the size of the run-to-run noise. "Within 5%" is therefore all the
+asynchronous result can claim.
+
+**Not catalogued, caught before the paper:** the research notes put the largest rerun move at 5.9%,
+computed by hand; the collector gives 5.8% (922.377/979.596).

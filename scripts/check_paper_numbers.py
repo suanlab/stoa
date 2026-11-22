@@ -1035,6 +1035,33 @@ if _wc:
     claim("table header", f"{_stg[S1]['host_tier_gb']}\\,GB, {_wl['traceA1200']['requests']:,} requests}} & "
           f"\\multicolumn{{2}}{{c}}{{{_stg[S2]['host_tier_gb']}\\,GB, {_wl['traceA600']['requests']} requests}}",
           "", "write_contract_a6000")
+    _rp = _ws["replicates"]
+    claim("rerun spread", f"moved it by {_rp['rerun_moves_pct'][0]:.1f}--{_rp['rerun_moves_pct'][1]:.1f}\\%", "",
+          "write_contract_a6000")
+    _ag, _bg = _rp["async_oracle_gain_pct"], _rp["blocking_oracle_gain_pct"]
+    _sg = lambda v: f"${v:+.1f}$".replace("$+", "$+").replace("$-", "$-")              # noqa: E731
+    claim("rerun keeps both comparisons", f"(asynchronous {_sg(_ag[0])} then {_sg(_ag[1])}\\%, blocking "
+          f"{_bg[0]:.1f} then {_bg[1]:.1f}\\%)", "", "write_contract_a6000")
+    assert all(abs(x) < 5 for x in _ag) and all(x > 25 for x in _bg), "the paper says the rerun kept both comparisons"
+    _SG = {(r["host_gb"], r["policy"], r["speed"]): r for r in _ws["sglang_rows"]}
+    _c120 = [100 * _SG[(120, q, sp)]["cached_share"] for q in ("write_through", "write_through_selective", "write_back")
+             for sp in (0.35, 0.2)]
+    assert max(_c120) - min(_c120) < 0.1, "the paper says all three SGLang rules cache the same share at 120 GB"
+    claim("SGLang cached share", f"all three rules cache {_c120[0]:.1f}\\% of prompt tokens "
+          f"({100 * _SG[(0, 'none', 0.35)]['cached_share']:.1f}\\% without the tier)", "", "write_contract_a6000")
+    _reg = _ws["sglang_registered"]
+    _failed = sum(not v["held"] for v in _reg.values())
+    claim("SGLang registered failures", f"{['zero', 'one', 'two', 'three', 'four'][_failed]} of our "
+          f"{['zero', 'one', 'two', 'three', 'four'][len(_reg)]} predictions failed", "", "write_contract_a6000")
+    _wt = _ws["sglang_write_timing"]
+    _k, _dr = _wt["kernel"]["selective_faster_pct"], _wt["direct"]["selective_faster_pct"]
+    claim("SGLang write timing", f"by {_k[0]:.1f}, {_k[1]:.1f}\nand {_k[2]:.1f}\\% in three runs, and by {_dr[0]:.1f} and "
+          f"{_dr[1]:.1f}\\% with SGLang's direct transfers", "", "write_contract_a6000")
+    claim("intro: SGLang write timing", f"lowers median latency by {min(_k):.0f}--{max(_k):.0f}\\% with the same\nhits",
+          "", "write_contract_a6000")
+    _wb = _reg["S3_write_back_penalty_grows_with_load"]["ms"]
+    claim("SGLang write-back", f"Blocking write-back costs {_wb['0.35']:.1f}\\,ms at\n0.35$\\times$ and "
+          f"{_wb['0.2']:.1f} at 0.2$\\times$", "", "write_contract_a6000")
 
 _pm = load("prefixsim_matching.json")
 if _pm:

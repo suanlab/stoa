@@ -48,7 +48,9 @@ pays for it depends on the connector's write path. On a trace slice replayed int
 raises median time to first token by 76\% over storing none when the store blocks the step (LMCache), and
 changes it by 3.3\% when the store is asynchronous (vLLM's offloading connector); where admission leaves
 hits unchanged, a clairvoyant admission rule is 32.7\% faster on the first path and within 2.1\% on the
-second (\Cref{sec:contract}). Reactive
+second. In SGLang, a write rule documented to store a block on its second access stores every block, and
+storing at a request's completion rather than at its prefill lowers median latency by 17--23\% with the same
+hits (\Cref{sec:contract}). Reactive
 replacement, finally, stays within a few points of plain rules: the adaptive family (ARC, LeCaR, CACHEUS)
 beats the best plain rule chosen per operating point by at most 4.6 points of Belady when frequency
 remembers evicted blocks (8.5 at the tightest tier when it does not), a learned LRB does
