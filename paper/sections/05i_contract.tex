@@ -4,8 +4,7 @@ The additive bill charges a store as a constant paid by the request that creates
 request pays it depends on the connector's write path: LMCache's in-process connector blocks each step until
 its saves to host memory complete, while vLLM's offloading connector submits them asynchronously. We replayed
 a 1,200-request slice of Alibaba's traceA (the first 400 warm up the caches) open-loop against vLLM 0.11 with
-the same model on one RTX A6000 (PCIe Gen3), at 0.1 to 0.35 times the trace's arrival rate (the full rate
-overloads this GPU), with a fresh server per run and one of three store rules sent with each request: store
+the same model on one RTX A6000 (PCIe Gen3), at 0.1 to 0.35 times the trace's arrival rate, with a fresh server per run and one of three store rules sent with each request: store
 all, store none, or a clairvoyant oracle that skips a request's store when it creates no block read again in
 the slice. To separate the store work admission saves from the hits it saves, a 600-request slice was also
 replayed with a 120\,GB host tier, large enough that both rules reach the same host hit ratio, and with 40\,GB.
@@ -44,9 +43,11 @@ oracle is within 2.1\% of storing everything on the asynchronous path and 32.7\%
 tokens hit there against 13.9\% under the oracle, which therefore helps that path as well, by 36\% at
 0.35$\times$; we registered this exception, from a simulation of the tier, before the first asynchronous run. The two effects do not add: at 0.2$\times$ the blocking path's gain at 40\,GB, 150\,ms, exceeds
 the hit part (the asynchronous gain, 55\,ms) plus the store part (the blocking gain at 120\,GB, 44\,ms). At the
-heaviest load the blocking path thus pays 12 to 27 times the store time an additive bill charges (320\,ms for
-the 26.7 the oracle avoids at 120\,GB, 947\,ms for the 35.5 storing everything adds), and vLLM's asynchronous
-path nothing measurable. The write path is one more convention an evaluation fixes,
+heaviest load the blocking path thus pays 12 to 27 times the store time an additive bill charges, and vLLM's
+asynchronous path nothing measurable. The median we registered falls between short and long prompts, whose latencies
+differ steeply, and moves more than the mean; under the mean, storing everything adds 51.1\% when the store blocks and
+$-4.1$\% when it does not, and the blocking gain is 3.1 to 47.3 times the store time removed. The write
+path is one more convention an evaluation fixes,
 and it decides whether admission matters. On this host a block costs 8.3\,ms to store, 5.5 to load from host
 memory and 73.1 to recompute, so storing a new block pays only if it is read again with probability above
 12.5\%. Each cell is one run, its median over 800 or 400 measured requests, on a host whose other GPU served
@@ -61,7 +62,7 @@ almost nothing and act like no host tier; three of our four predictions failed. 
 own completion as a second access, so the selective rule stores every request that decodes more than one token,
 and at 120\,GB all three rules cache 26.4\% of prompt tokens (14.3\% without the tier). What differs is
 \emph{when}: storing at completion rather than at creation lowers median TTFT at 0.35$\times$ by 22.6, 16.6
-and 17.4\% in three runs, and by 32.8 and 26.5\% with SGLang's direct transfers in place of its copy kernels,
+and 17.4\% in three runs (the mean by 8.8\% in each), and by 32.8 and 26.5\% with SGLang's direct transfers in place of its copy kernels,
 though both rules store asynchronously; we did not find the cause. Blocking write-back costs 1.5\,ms at
 0.35$\times$ and 20.5 at 0.2$\times$, against the growing penalty we predicted. A policy's name is not its
 write path, and an asynchronous store is free on one engine and not on another.

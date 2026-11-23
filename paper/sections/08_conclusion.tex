@@ -1,18 +1,17 @@
 \section{Conclusion}
 \label{sec:conclusion}
 On production KV-cache traces, nearly every block a placement policy can see at a split is never read
-again; the few that are fit in the fast tiers, and the rest of the reuse falls on blocks it has not seen. How an evaluation orders these blocks
-without evidence decides what it reports: the same clairvoyant split-time reference reaches 15--20\% of
-the oracle's advantage or 76--78\% (tier-only), depending on a tie rule that a split-time evaluation has to
-state and that LRU-K left to a subsidiary policy in 1993. While the live blocks fit in the
-fastest tier, knowing which seen blocks are dead is worth as much as knowing every seen block's future; a parameter-free rule that parks blocks
-seen once behind new ones recovers about half of that, and an estimated prior a little more, on workloads
-where the prefix points that way. Online, recency does the same job better when moving a block is free,
-and at the move prices we measured, under every way of billing a move we tried, none of the replayed
-policies that move blocks beats a static frequency heuristic on the production traces in an additive cost
-model, unless moves to the remote tier we could not measure cost under a quarter of a read plus a write. Reactive replacement, including the
-designs built for one-hit wonders, stays within a few points of plain rules.
+again, and how an evaluation orders these blocks without evidence decides what it reports: the same
+clairvoyant split-time reference reaches 15--20\% of the oracle's advantage or 76--78\% (tier-only),
+depending on a tie rule LRU-K left to a subsidiary policy in 1993. While the live blocks fit in the fastest
+tier, knowing which seen blocks are dead is worth as much as knowing their whole future, and a
+parameter-free rule recovers about half of that. In an additive cost model, at the move prices we measured,
+none of the replayed policies that move blocks beats a static frequency heuristic unless remote moves cost
+under a quarter of a read plus a write, and reactive replacement stays within a few points of plain rules.
+Inside a serving stack the additive price itself fails: what storing a block costs a request is set by the
+connector's write path, and on one engine by when an asynchronous store runs.
 
 For whoever evaluates a memory scheduler next, the practical content is short: report the tie rule for
-blocks without evidence, sweep every convenience choice, bill creations as compulsory misses, and measure or
-bound what a move costs. The artifact implements each as a default.
+blocks without evidence, the matching rule and the write path, sweep every convenience choice, bill
+creations as compulsory misses, and measure or bound what a move costs. The artifact implements each as a
+default.

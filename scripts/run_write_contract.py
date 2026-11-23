@@ -274,6 +274,30 @@ def summarize(d: dict) -> dict:
         "async_oracle_gain_pct": [round(100 * (1 - vr["offload/oracle"][i] / vr["offload/store-all"][i]), 1) for i in (0, 1)],
         "blocking_oracle_gain_pct": [round(100 * (1 - vr["lmcache/oracle"][i] / vr["lmcache/store-all"][i]), 1)
                                      for i in (0, 1)]}
+    # The median of a bimodal latency (short prompts answered in ~150 ms, long ones in seconds) moves more than
+    # the mean when the median falls between the modes; the registered statistic stays the median, and these
+    # are reported beside it: the mean, and the median of per-request ratios (same requests, same order)
+    def robust(base, alt):
+        a, b = d["runs"][base]["ttft_ms"], d["runs"][alt]["ttft_ms"]
+        both = [(x, y) for x, y in zip(a, b) if x is not None and y is not None]
+        ma, mb = sum(x for x, _ in both) / len(both), sum(y for _, y in both) / len(both)
+        ratios = sorted(y / x for x, y in both)
+        return {"mean_pct": round(100 * (mb / ma - 1), 1), "mean_diff_ms": round(mb - ma, 1),
+                "paired_median_ratio_pct": round(100 * (ratios[len(ratios) // 2] - 1), 1)}
+    S1 = "stage1_cpu40"
+    rb = {"store_all_vs_none/lmcache@0.35": robust(f"{S1}/lmcache_store-none_x0.35", f"{S1}/lmcache_store-all_x0.35"),
+          "store_all_vs_none/offload@0.35": robust(f"{S1}/offload_store-none_x0.35", f"{S1}/offload_store-all_x0.35")}
+    for st in STAGES:
+        for c in ("lmcache", "offload"):
+            for sp in ((0.35, 0.2, 0.1) if st == S1 else (0.35, 0.2)):
+                rb[f"oracle_vs_all/{st}/{c}@{sp}"] = robust(f"{st}/{c}_store-all_x{sp}", f"{st}/{c}_oracle_x{sp}")
+    for k, base in (("first", "sglang/cpu120"), ("r1", "rep/sgl_r1"), ("r2", "rep/sgl_r2")):
+        rb[f"sglang_selective_vs_write_through/{k}@0.35"] = robust(f"{base}/sgl_write_through_x0.35",
+                                                                   f"{base}/sgl_write_through_selective_x0.35")
+    out["robust"] = rb
+    out["b_mean_gain_over_store_removed"] = {
+        k: round(-rb[f"oracle_vs_all/{k.split('@')[0]}/lmcache@{k.split('@')[1]}"]["mean_diff_ms"] / v, 1)
+        for k, v in saved.items()}
     return out
 
 

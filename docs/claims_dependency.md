@@ -2854,3 +2854,27 @@ asynchronous result can claim.
 
 **Not catalogued, caught before the paper:** the research notes put the largest rerun move at 5.9%,
 computed by hand; the collector gives 5.8% (922.377/979.596).
+
+**The median overstated several effects (found 2026-11-24, after 88406a2 was pushed).** Every §BM comparison
+was registered, and reported, on p50 TTFT. Pairing the same requests across two runs showed that
+SGLang's write-timing gap is 11–51 ms per request in every prompt-length class, a mean of 8.8% in each run,
+while the median moved 17–23%.
+- Latency rises steeply with prompt length: on the 600-request slice, 152 ms below 1,024 tokens against
+  1,333 ms above 4,096 (vLLM offload, 0.35×). The median falls between the two groups, so a small uniform
+  shift moves it a lot.
+- `run_write_contract.py` now reports, for every comparison, the mean and the median of per-request ratios
+  (`summary.robust`). Every registered comparison keeps its sign under the mean:
+  - store-all vs store-none: blocking +51.1% (median +76%), asynchronous −4.1%;
+  - oracle at 120 GB: blocking −21.3%, asynchronous −0.9%;
+  - oracle on the asynchronous path at 40 GB: −24.7% (median −36%);
+  - (b) under the mean: the blocking gain is 3.1–47.3 times the store time removed.
+- The paper keeps the registered median, gives the mean beside it, and says why the two differ. The
+  introduction's SGLang sentence now leads with the mean.
+- The numbers were true medians, so this is not catalogued as a defect. It is the reason a latency effect
+  in this paper now carries a mean.
+
+To keep the body at 12 pages, two cuts and one rewrite:
+- Dropped the millisecond breakdown behind "12 to 27 times"; the numbers are in the artifact.
+- Dropped "(the full rate overloads this GPU)"; the calibration is above in this section.
+- Rewrote the conclusion shorter; it now names the matching rule and the write path among what an
+  evaluation has to report.

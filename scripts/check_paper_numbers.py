@@ -1019,9 +1019,8 @@ if _wc:
     _sav = _st(S2, "store-all", 0.35) - _st(S2, "oracle", 0.35)
     _add = _p50(S1, "lmcache", "store-all", 0.35) - _p50(S1, "lmcache", "store-none", 0.35)
     _lo, _hi = _d(S2, "lmcache", 0.35) / _sav, _add / _st(S1, "store-all", 0.35)
-    claim("multiple of the additive price", f"pays {_lo:.0f} to {_hi:.0f} times the store time an additive bill charges "
-          f"({_ms(_d(S2, 'lmcache', 0.35))}\\,ms for\nthe {_sav:.1f} the oracle avoids at 120\\,GB, {_ms(_add)}\\,ms for "
-          f"the {_st(S1, 'store-all', 0.35):.1f} storing everything adds)", "", "write_contract_a6000")
+    claim("multiple of the additive price", f"pays {_lo:.0f} to {_hi:.0f} times the store time an additive bill charges, "
+          "and vLLM's", "", "write_contract_a6000")
     _pb = _ws["per_512_token_block"]
     claim("A6000 per-block prices", f"a block costs {_pb['cpu_store_ms']:.1f}\\,ms to store, {_pb['cpu_load_ms']:.1f} "
           f"to load from host\nmemory and {_pb['recompute_ms']:.1f} to recompute", "", "write_contract_a6000")
@@ -1055,13 +1054,30 @@ if _wc:
           f"{['zero', 'one', 'two', 'three', 'four'][len(_reg)]} predictions failed", "", "write_contract_a6000")
     _wt = _ws["sglang_write_timing"]
     _k, _dr = _wt["kernel"]["selective_faster_pct"], _wt["direct"]["selective_faster_pct"]
-    claim("SGLang write timing", f"by {_k[0]:.1f}, {_k[1]:.1f}\nand {_k[2]:.1f}\\% in three runs, and by {_dr[0]:.1f} and "
-          f"{_dr[1]:.1f}\\% with SGLang's direct transfers", "", "write_contract_a6000")
-    claim("intro: SGLang write timing", f"lowers median latency by {min(_k):.0f}--{max(_k):.0f}\\% with the same\nhits",
-          "", "write_contract_a6000")
+    claim("SGLang write timing", f"by {_k[0]:.1f}, {_k[1]:.1f}\nand {_k[2]:.1f}\\% in three runs", "", "write_contract_a6000")
+    claim("SGLang direct transfers", f"and by {_dr[0]:.1f} and {_dr[1]:.1f}\\% with SGLang's direct transfers", "",
+          "write_contract_a6000")
+    claim("intro: SGLang median", f"(the median by\n{min(_k):.0f}--{max(_k):.0f}\\%) with the same hits", "",
+          "write_contract_a6000")
     _wb = _reg["S3_write_back_penalty_grows_with_load"]["ms"]
     claim("SGLang write-back", f"Blocking write-back costs {_wb['0.35']:.1f}\\,ms at\n0.35$\\times$ and "
           f"{_wb['0.2']:.1f} at 0.2$\\times$", "", "write_contract_a6000")
+    _rb, _bm = _ws["robust"], _ws["b_mean_gain_over_store_removed"]
+    _sm = lambda v: f"${v:.1f}$" if v < 0 else f"{v:.1f}"                              # noqa: E731
+    claim("means beside medians", f"storing everything adds {_rb['store_all_vs_none/lmcache@0.35']['mean_pct']:.1f}\\% "
+          f"when the store blocks and\n{_sm(_rb['store_all_vs_none/offload@0.35']['mean_pct'])}\\% when it does not, "
+          f"and the blocking gain is {min(_bm.values()):.1f} to {max(_bm.values()):.1f} times the store time removed",
+          "", "write_contract_a6000")
+    assert all(v > 1 for v in _bm.values()), "registered (b) under the mean: gain at least the store time removed"
+    assert abs(_rb["oracle_vs_all/stage2_cpu120/offload@0.35"]["mean_pct"]) < 5 and \
+        _rb["oracle_vs_all/stage2_cpu120/lmcache@0.35"]["mean_pct"] < -5 and \
+        _rb["oracle_vs_all/stage1_cpu40/offload@0.35"]["mean_pct"] < 0, "the comparisons keep their sign under the mean"
+    _sgm = {round(_rb[f"sglang_selective_vs_write_through/{k}@0.35"]["mean_pct"], 1) for k in ("first", "r1", "r2")}
+    assert len(_sgm) == 1, "the paper says the mean moved by the same amount in each SGLang run"
+    claim("SGLang mean, section", f"(the mean by {-_sgm.pop():.1f}\\% in each)", "", "write_contract_a6000")
+    claim("SGLang mean, intro", f"lowers mean latency by "
+          f"{-_rb['sglang_selective_vs_write_through/first@0.35']['mean_pct']:.1f}\\% (the median by", "",
+          "write_contract_a6000")
 
 _pm = load("prefixsim_matching.json")
 if _pm:

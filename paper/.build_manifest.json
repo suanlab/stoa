@@ -1,5 +1,5 @@
 {
-  "pdf": "c511dd54ae64949e482afde8b84c83ffb09ab4db6b6cc489616b84717172bb08",
+  "pdf": "92c0b91e6e813d64464fbec034d1a509ca6eebf477d718c61638de9fb573dda4",
   "sources": {
     "../docs/references.bib": "9617204a9c2212846692cb170e83cfa2c9174991b7765cf7342fe9068b6c922b",
     "ACM-Reference-Format.bst": "0590db3b8d255a3af91982ab710f3ace5fcaa52434020c9af8a4f141b00b68f3",
@@ -19,7 +19,7 @@
     "figs/fig_ties.pdf": "40f98ae61b8c74b91bbd83f7e98a5e584cb98e48c1fb39aae6f86b8309ec642c",
     "main.tex": "f18952a950eaee17fba244b6a3a6717edfe11e8660639de2d81615a14220324e",
     "pvldb.sty": "52ad3948f3231b31d2ac90f470c1759e7f96add7b577ec4e267dfbdc87fc4eb2",
-    "sections/01_introduction.tex": "895f9bcbf9422f6b543cbeee46a422edf394c7f643181a3415d5838913302443",
+    "sections/01_introduction.tex": "7b097e8a49b56b71d2819fc022a878d695225132a60de931762670b4034907f8",
     "sections/02_background.tex": "e2684a41e40ba1d37b79fa268e335cfb3257daa642650cf743a75fde2affd1f5",
     "sections/03_definitions.tex": "71413944601dd61fd0801d04eeca4451cf2a2e6389a229a223902b292932b1db",
     "sections/04_workloads.tex": "7c60ecda39d88dd1c70cd213a010bf675eafd823d82396a9cebd99d56cca7e96",
@@ -31,10 +31,10 @@
     "sections/05f_serving.tex": "6c7212730a8af50b52fea96945e8576c9b5a85d8ce1eb065c78f5ee252ffe63f",
     "sections/05g_why.tex": "c60dcca5be4995f0b071e8305351ba2948af2d8b8777a6b9a69591c47e8d5481",
     "sections/05h_matching.tex": "8f2b5510f4bbde42e5f0ed28b1c9b427478ff5acb8503a6fc4bb9abcdb46c91b",
-    "sections/05i_contract.tex": "fbc25fdbf92db33547716b091836b8104f9c51398f9cb905e9bb38a9be526113",
+    "sections/05i_contract.tex": "bf07f57facb8fe9745c40751a174166753e2cc38f283f9a70be41b4397387d51",
     "sections/06_lessons.tex": "2bfc6d61b52a45398c35730eaee588f66f56280b3c0f73863c9f4112720cd0d3",
     "sections/07_limits.tex": "343d5dc8c9435df3e80fdc131692795f899b7c5a0117dc938f7a030e0ae28006",
-    "sections/08_conclusion.tex": "bf942f5dc0c4c761a5706b1be6f51f3114c586c0195fb18518f9c070fb82ce8b",
+    "sections/08_conclusion.tex": "36aac4147985a0090ba76f5548c4fb35eed70b0f6c4043d520be41110caef65a",
     "sections/table2_regimes.tex": "605357e51143145f72542b464e831c3b0a3e65d7afa5e4fd626a4da87a444493",
     "sections/table3_kvct.tex": "916b2e21c5d0574551bebc163a1f7452252bc91155061bbfca2378701697be3d"
   }
