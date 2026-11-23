@@ -981,18 +981,32 @@ if _wc:
                   "", "write_contract_a6000")
     claim("contract caption: no connector", f"Without a connector:\n{_ms(_p50(S1, 'none', 'store-all', 0.35))} and "
           f"{_ms(_p50(S1, 'none', 'store-all', 0.2))}\\,ms.", "", "write_contract_a6000")
-    claim("above no connector", f"above the {_ms(_p50(S1, 'none', 'store-all', 0.35))}\\,ms of no connector", "",
-          "write_contract_a6000")
+    assert _p50(S1, "lmcache", "store-all", 0.35) > _p50(S1, "none", "store-all", 0.35), \
+        "the paper says storing everything through the blocking path is above no connector at all"
     _up = 100 * (_p50(S1, "lmcache", "store-all", 0.35) / _p50(S1, "lmcache", "store-none", 0.35) - 1)
     _down = 100 * (1 - _p50(S1, "offload", "store-all", 0.35) / _p50(S1, "offload", "store-none", 0.35))
-    for where, tail in (("abstract", "when the connector blocks"), ("intro", "when the store blocks the step"),
-                        ("section", "at the heaviest load")):
-        what = "TTFT" if where == "section" else "time to first token"
-        claim(f"{where}: store-all over store-none", f"raises median {what} by {_up:.0f}\\% over storing none {tail}",
-              "", "write_contract_a6000")
-    claim("abstract/intro: async change", f"changes it by {_down:.1f}\\% when the", "", "write_contract_a6000")
-    claim("section: async store-all faster", f"storing everything is {_down:.1f}\\% faster than storing nothing", "",
+    _rb_early = _ws["robust"]
+    _sm_early = lambda v: f"${v:.1f}$" if v < 0 else f"{v:.1f}"                        # noqa: E731
+    claim("abstract: near saturation", f"storing every block raises median time to first token by {_up:.0f}\\% over "
+          "storing none when the connector\nblocks on the save and stays within run-to-run noise", "", "write_contract_a6000")
+    claim("intro: near saturation", f"storing\nevery block raises median time to first token by {_up:.0f}\\% over storing "
+          "none when the store blocks the step", "", "write_contract_a6000")
+    _up2 = _ws["store_all_minus_store_none"]["lmcache@0.2"]["pct"]
+    claim("section: store-all over none, both loads", f"raise median TTFT by {_up:.0f}\\% over\nstoring none "
+          f"({_up2:.1f}\\% at 0.2$\\times$)", "", "write_contract_a6000")
+    claim("saturation baseline", f"where median TTFT is already {_ms(_p50(S1, 'none', 'store-all', 0.35))}\\,ms without a\n"
+          f"connector against {_ms(_p50(S1, 'none', 'store-all', 0.2))} at 0.2$\\times$", "", "write_contract_a6000")
+    claim("section: async within noise", f"on the asynchronous path the difference, {_down:.1f}\\%, is within the "
+          "run-to-run spread", "", "write_contract_a6000")
+    assert _down < _ws["replicates"]["rerun_moves_pct"][1], "the paper says the async difference is within the rerun spread"
+    _bx = _ws["blocking_multiple_of_store_time"]
+    claim("blocking multiples", f"pays {min(_bx['median@0.35']):.0f} to {max(_bx['median@0.35']):.0f} times as much near "
+          f"saturation and {min(_bx['median@0.2']):.1f} to {max(_bx['median@0.2']):.1f} times at 0.2$\\times$", "",
           "write_contract_a6000")
+    claim("means beside medians", f"storing everything\nadds {_rb_early['store_all_vs_none/lmcache@0.35']['mean_pct']:.1f}"
+          f"\\% when the store blocks and {_sm_early(_rb_early['store_all_vs_none/offload@0.35']['mean_pct'])}\\% when "
+          f"it does not, and the multiples near saturation are {min(_bx['mean@0.35']):.0f} to "
+          f"{max(_bx['mean@0.35']):.0f}", "", "write_contract_a6000")
     _runs = _wc["runs"]
     _share = lambda st, c, p, s: 100 * (lambda h: h["host_hit"] / h["tokens"])(           # noqa: E731
         _runs[f"{st}/{c}_{p}_x{s}"]["hits"])
@@ -1012,19 +1026,13 @@ if _wc:
           f"{_share(S1, 'offload', 'oracle', 0.35):.1f}\\% under the oracle", "", "write_contract_a6000")
     claim("40 GB async gain", f"by {_g(S1, 'offload', 0.35):.0f}\\% at\n0.35$\\times$", "", "write_contract_a6000")
     _d = lambda st, c, s: _p50(st, c, "store-all", s) - _p50(st, c, "oracle", s)          # noqa: E731
-    _tot, _hit, _sto = _d(S2b, "lmcache", 0.2), _d(S2b, "offload", 0.2), _d(S2, "lmcache", 0.2)
-    assert _tot > _hit + _sto, "the paper says the two effects do not add at 0.2x"
-    claim("not additive", f"{_ms(_tot)}\\,ms, exceeds\nthe hit part (the asynchronous gain, {_ms(_hit)}\\,ms) plus the "
-          f"store part (the blocking gain at 120\\,GB, {_ms(_sto)}\\,ms)", "", "write_contract_a6000")
     _sav = _st(S2, "store-all", 0.35) - _st(S2, "oracle", 0.35)
     _add = _p50(S1, "lmcache", "store-all", 0.35) - _p50(S1, "lmcache", "store-none", 0.35)
     _lo, _hi = _d(S2, "lmcache", 0.35) / _sav, _add / _st(S1, "store-all", 0.35)
-    claim("multiple of the additive price", f"pays {_lo:.0f} to {_hi:.0f} times the store time an additive bill charges, "
-          "and vLLM's", "", "write_contract_a6000")
     _pb = _ws["per_512_token_block"]
-    claim("A6000 per-block prices", f"a block costs {_pb['cpu_store_ms']:.1f}\\,ms to store, {_pb['cpu_load_ms']:.1f} "
-          f"to load from host\nmemory and {_pb['recompute_ms']:.1f} to recompute", "", "write_contract_a6000")
-    claim("store break-even", f"with probability above\n{100 * _pb['store_break_even_reuse']:.1f}\\%", "",
+    claim("A6000 per-block prices", f"stores\nin {_pb['cpu_store_ms']:.1f}\\,ms, loads from host memory in {_pb['cpu_load_ms']:.1f} and recomputes in "
+          f"{_pb['recompute_ms']:.1f}", "", "write_contract_a6000")
+    claim("store break-even", f"pays above a {100 * _pb['store_break_even_reuse']:.1f}\\% chance", "",
           "write_contract_a6000")
     _wl, _stg = _wc["workloads"], _wc["stages"]
     claim("replayed slice", f"a {_wl['traceA1200']['requests']:,}-request slice of Alibaba's traceA (the first "
@@ -1035,12 +1043,18 @@ if _wc:
           f"\\multicolumn{{2}}{{c}}{{{_stg[S2]['host_tier_gb']}\\,GB, {_wl['traceA600']['requests']} requests}}",
           "", "write_contract_a6000")
     _rp = _ws["replicates"]
-    claim("rerun spread", f"moved it by {_rp['rerun_moves_pct'][0]:.1f}--{_rp['rerun_moves_pct'][1]:.1f}\\%", "",
-          "write_contract_a6000")
     _ag, _bg = _rp["async_oracle_gain_pct"], _rp["blocking_oracle_gain_pct"]
     _sg = lambda v: f"${v:+.1f}$".replace("$+", "$+").replace("$-", "$-")              # noqa: E731
-    claim("rerun keeps both comparisons", f"(asynchronous {_sg(_ag[0])} then {_sg(_ag[1])}\\%, blocking "
-          f"{_bg[0]:.1f} then {_bg[1]:.1f}\\%)", "", "write_contract_a6000")
+    _rv = _rp["stage1_0.35_reversed_order"]
+    assert all(x < -50 for x in _rv["lmcache_oracle_over_all_pct"]) and all(x < -30 for x in _rv["offload_oracle_over_all_pct"]), \
+        "the reversed-order rerun keeps the oracle comparisons"
+    _mv = (min(_rp["rerun_moves_pct"][0], _rv["moves_pct"][0]), max(_rp["rerun_moves_pct"][1], _rv["moves_pct"][1]))
+    _ag = _rp["async_oracle_gain_pct"]
+    claim("reruns", f"moved cells by\n{_mv[0]:.1f}--{_mv[1]:.1f}\\% and kept every comparison (storing everything over none: "
+          f"${_rv['lmcache_all_over_none_pct'][1]:+.1f}$\\% blocking, ${_rv['offload_all_over_none_pct'][1]:.1f}$\\% "
+          f"asynchronous;\nthe asynchronous oracle at 120\\,GB: ${_ag[0]:+.1f}$ then ${_ag[1]:+.1f}$\\%)", "",
+          "write_contract_a6000")
+    assert all(abs(x) < 5 for x in _ag), "asynchronous oracle within 5% in both runs"
     assert all(abs(x) < 5 for x in _ag) and all(x > 25 for x in _bg), "the paper says the rerun kept both comparisons"
     _SG = {(r["host_gb"], r["policy"], r["speed"]): r for r in _ws["sglang_rows"]}
     _c120 = [100 * _SG[(120, q, sp)]["cached_share"] for q in ("write_through", "write_through_selective", "write_back")
@@ -1055,28 +1069,29 @@ if _wc:
     _wt = _ws["sglang_write_timing"]
     _k, _dr = _wt["kernel"]["selective_faster_pct"], _wt["direct"]["selective_faster_pct"]
     claim("SGLang write timing", f"by {_k[0]:.1f}, {_k[1]:.1f}\nand {_k[2]:.1f}\\% in three runs", "", "write_contract_a6000")
-    claim("SGLang direct transfers", f"and by {_dr[0]:.1f} and {_dr[1]:.1f}\\% with SGLang's direct transfers", "",
-          "write_contract_a6000")
     claim("intro: SGLang median", f"(the median by\n{min(_k):.0f}--{max(_k):.0f}\\%) with the same hits", "",
           "write_contract_a6000")
     _wb = _reg["S3_write_back_penalty_grows_with_load"]["ms"]
+    _sgr = {(r["host_gb"], r["policy"], r["speed"]): r["p50_ms"] for r in _ws["sglang_rows"]}
     claim("SGLang write-back", f"Blocking write-back costs {_wb['0.35']:.1f}\\,ms at\n0.35$\\times$ and "
-          f"{_wb['0.2']:.1f} at 0.2$\\times$", "", "write_contract_a6000")
+          f"{_wb['0.2']:.1f} at 0.2$\\times$ at 120\\,GB", "", "write_contract_a6000")
+    assert _sgr[(40, "write_back", 0.35)] > _sgr[(0, "none", 0.35)], "the paper says write-back at 40 GB is slower than none"
+    claim("SGLang write-back at 40 GB", f"({_ms(_sgr[(40, 'write_back', 0.35)])} against {_ms(_sgr[(0, 'none', 0.35)])}"
+          "\\,ms)", "", "write_contract_a6000")
+    claim("SGLang timing at 0.2x", f"the median by {-_reg['S2_selective_slower_by_5pct_at_120gb']['pct']['0.2']:.1f}\\% at "
+          "0.2$\\times$", "", "write_contract_a6000")
+    assert all(x > 0 for x in _dr), "the paper says the gap persists with direct transfers"
     _rb, _bm = _ws["robust"], _ws["b_mean_gain_over_store_removed"]
     _sm = lambda v: f"${v:.1f}$" if v < 0 else f"{v:.1f}"                              # noqa: E731
-    claim("means beside medians", f"storing everything adds {_rb['store_all_vs_none/lmcache@0.35']['mean_pct']:.1f}\\% "
-          f"when the store blocks and\n{_sm(_rb['store_all_vs_none/offload@0.35']['mean_pct'])}\\% when it does not, "
-          f"and the blocking gain is {min(_bm.values()):.1f} to {max(_bm.values()):.1f} times the store time removed",
-          "", "write_contract_a6000")
     assert all(v > 1 for v in _bm.values()), "registered (b) under the mean: gain at least the store time removed"
     assert abs(_rb["oracle_vs_all/stage2_cpu120/offload@0.35"]["mean_pct"]) < 5 and \
         _rb["oracle_vs_all/stage2_cpu120/lmcache@0.35"]["mean_pct"] < -5 and \
         _rb["oracle_vs_all/stage1_cpu40/offload@0.35"]["mean_pct"] < 0, "the comparisons keep their sign under the mean"
     _sgm = {round(_rb[f"sglang_selective_vs_write_through/{k}@0.35"]["mean_pct"], 1) for k in ("first", "r1", "r2")}
     assert len(_sgm) == 1, "the paper says the mean moved by the same amount in each SGLang run"
-    claim("SGLang mean, section", f"(the mean by {-_sgm.pop():.1f}\\% in each)", "", "write_contract_a6000")
+    claim("SGLang mean, section", f"(the mean by {-_sgm.pop():.1f}\\% in each;", "", "write_contract_a6000")
     claim("SGLang mean, intro", f"lowers mean latency by "
-          f"{-_rb['sglang_selective_vs_write_through/first@0.35']['mean_pct']:.1f}\\% (the median by", "",
+          f"{-_rb['sglang_selective_vs_write_through/first@0.35']['mean_pct']:.1f}\\% at the heavier load", "",
           "write_contract_a6000")
 
 _pm = load("prefixsim_matching.json")

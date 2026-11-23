@@ -64,9 +64,10 @@ traces support). Online, a multi-tier LRU captures 84.5\% and 87.7\% when moving
 the move prices we measured on one A100 host, 0.75--1.87 times one read plus one write, and under five
 ways of billing a move, none of the replayed policies that move blocks beats a static frequency heuristic
 on the production traces in an additive cost model, even when every policy is billed for storing new
-blocks, unless moves to the remote tier, which we could not measure, cost under a quarter of that. Replayed inside vLLM, the
-additive store price is wrong both ways: storing every block raises median time to first token by 76\% over
-storing none when the connector blocks on the save, and changes it by 3.3\% when the save is asynchronous. Reactive replacement, S3-FIFO, SIEVE and W-TinyLFU included, stays within a
+blocks, unless moves to the remote tier, which we could not measure, cost under a quarter of that. Replayed inside vLLM near
+saturation, storing every block raises median time to first token by 76\% over storing none when the connector
+blocks on the save and stays within run-to-run noise when the save is asynchronous: the additive store price is
+wrong both ways. Reactive replacement, S3-FIFO, SIEVE and W-TinyLFU included, stays within a
 few points of plain rules. On the public simulator of a recent eviction study, counting hits the way vLLM and
 SGLang match them turns a compute-aware policy's 10.4-point gain over LRU into a 19.6-point loss. An artifact regenerates every number from public traces, on CPU except the GPU
 timings, and we catalogue the thirty-one defects, four of them retracted claims, that produced plausible

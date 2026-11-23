@@ -8,7 +8,7 @@ the same model on one RTX A6000 (PCIe Gen3), at 0.1 to 0.35 times the trace's ar
 all, store none, or a clairvoyant oracle that skips a request's store when it creates no block read again in
 the slice. To separate the store work admission saves from the hits it saves, a 600-request slice was also
 replayed with a 120\,GB host tier, large enough that both rules reach the same host hit ratio, and with 40\,GB.
-Before the runs we registered that the oracle would lower median time to first token (TTFT) by at least the
+Before the runs we predicted that the oracle would lower median time to first token (TTFT) by at least the
 store time it removes when the store blocks, more so under heavier load, and by under 5\% when it does not
 unless the tier's hits change (\Cref{tab:contract}).
 
@@ -34,35 +34,38 @@ the given size through LMCache 0.3.9 (blocking) or vLLM's offloading connector (
 \label{tab:contract}
 \end{table}
 
-\noindent Both predictions held. When the store blocks, storing every block raises median TTFT by 76\% over
-storing none at the heaviest load, above the 1,240\,ms of no connector at all, although its stores take 35.5\,ms per
-request; when it does not, storing everything is 3.3\% faster than storing nothing. At 120\,GB,
-where the two rules' host hit ratios agree (11.3\% of tokens with one connector, 12.2\% with the other), the
+\noindent Both predictions held. Near saturation (0.35$\times$, where median TTFT is already 1,240\,ms without a
+connector against 302 at 0.2$\times$), a blocking store makes storing every block raise median TTFT by 76\% over
+storing none (15.8\% at 0.2$\times$), above no connector at all, although its stores take 35.5\,ms per
+request; on the asynchronous path the difference, 3.3\%, is within the run-to-run spread below. At 120\,GB,
+where the two rules' host hits agree (11.3\% of tokens with one connector, 12.2\% with the other), the
 oracle is within 2.1\% of storing everything on the asynchronous path and 32.7\% faster on the blocking one
 (19.7\% at 0.2$\times$). At 40\,GB, storing everything crowds the tier: on the asynchronous path 1.9\% of
-tokens hit there against 13.9\% under the oracle, which therefore helps that path as well, by 36\% at
-0.35$\times$; we registered this exception, from a simulation of the tier, before the first asynchronous run. The two effects do not add: at 0.2$\times$ the blocking path's gain at 40\,GB, 150\,ms, exceeds
-the hit part (the asynchronous gain, 55\,ms) plus the store part (the blocking gain at 120\,GB, 44\,ms). At the
-heaviest load the blocking path thus pays 12 to 27 times the store time an additive bill charges, and vLLM's
-asynchronous path nothing measurable. The median we registered falls between short and long prompts, whose latencies
-differ steeply, and moves more than the mean; under the mean, storing everything adds 51.1\% when the store blocks and
-$-4.1$\% when it does not, and the blocking gain is 3.1 to 47.3 times the store time removed. The write
-path is one more convention an evaluation fixes,
-and it decides whether admission matters. On this host a block costs 8.3\,ms to store, 5.5 to load from host
-memory and 73.1 to recompute, so storing a new block pays only if it is read again with probability above
-12.5\%. Each cell is one run, its median over 800 or 400 measured requests, on a host whose other GPU served
-another model throughout; a second run of each 120\,GB cell at 0.35$\times$ moved it by 0.8--5.8\% and kept
-both comparisons (asynchronous $-2.1$ then $+2.1$\%, blocking 32.7 then 31.6\%).
+tokens hit there against 13.9\% under the oracle, which therefore helps that path too, by 36\% at
+0.35$\times$, as we had predicted from a simulation of the tier. Against the store time an additive bill
+charges, the blocking path pays 12 to 27 times as much near saturation and 1.4 to 1.7 times at 0.2$\times$:
+the excess is queueing, and it grows with load. The median we registered falls between short and long
+prompts, whose latencies differ steeply, and moves more than the mean: under the mean, storing everything
+adds 51.1\% when the store blocks and $-4.1$\% when it does not, and the multiples near saturation are 11 to 28.
+Each cell is one run, its median over 800 or 400 measured requests, on a host whose other GPU served another
+model throughout; second runs of every 0.35$\times$ cell, in reverse order for the first slice, moved cells by
+0.8--5.8\% and kept every comparison (storing everything over none: $+66.0$\% blocking, $-0.5$\% asynchronous;
+the asynchronous oracle at 120\,GB: $-2.1$ then $+2.1$\%). The write path is one more
+convention an evaluation fixes, and it decides whether admission matters. Per 512-token block this host stores
+in 8.3\,ms, loads from host memory in 5.5 and recomputes in 73.1, so under the additive price storing a new
+block pays above a 12.5\% chance that it is read again.
 
 \paragraph{A second engine} SGLang 0.5.10's hierarchical cache fixes its write path per server: write-through
 stores each new block asynchronously when it is created, write-back stores a block, blocking, when it leaves the
 GPU, and a selective write-through is documented to store a block on its second access. With the same GPU
-pool, slice and loads, we registered from a simulation of those semantics that the selective rule would store
+pool, slice and loads, we predicted from a simulation of those semantics that the selective rule would store
 almost nothing and act like no host tier; three of our four predictions failed. The engine counts a request's
 own completion as a second access, so the selective rule stores every request that decodes more than one token,
 and at 120\,GB all three rules cache 26.4\% of prompt tokens (14.3\% without the tier). What differs is
-\emph{when}: storing at completion rather than at creation lowers median TTFT at 0.35$\times$ by 22.6, 16.6
-and 17.4\% in three runs (the mean by 8.8\% in each), and by 32.8 and 26.5\% with SGLang's direct transfers in place of its copy kernels,
-though both rules store asynchronously; we did not find the cause. Blocking write-back costs 1.5\,ms at
-0.35$\times$ and 20.5 at 0.2$\times$, against the growing penalty we predicted. A policy's name is not its
+\emph{when}: storing at completion rather than at creation lowers median TTFT at 120\,GB and 0.35$\times$ by
+22.6, 16.6 and 17.4\% in three runs (the mean by 8.8\% in each; the median by 3.8\% at 0.2$\times$), and the gap
+persists with SGLang's direct transfers in place of its copy kernels, though both rules store asynchronously;
+we did not find the cause. Blocking write-back costs 1.5\,ms at
+0.35$\times$ and 20.5 at 0.2$\times$ at 120\,GB, against the growing penalty we predicted, but at 40\,GB and
+0.35$\times$ it is slower than no hierarchical cache at all (827 against 653\,ms). A policy's name is not its
 write path, and an asynchronous store is free on one engine and not on another.

@@ -28,12 +28,13 @@ traces the order it gives **blocks without evidence** decides what it reports. T
   below ARC, and S3-FIFO, SIEVE and W-TinyLFU stay below the best plain rule everywhere
   (`run_modern_baselines.py`, §BB).
 - **The write path decides whether admission matters.** Replayed into vLLM on one RTX A6000, storing every
-  block raises median time to first token by 76% over storing none when the connector blocks on the save
-  (LMCache), and changes it by 3.3% when the save is asynchronous (vLLM's offloading connector); where
+  block raises median time to first token near saturation by 76% over storing none (mean 51%; 16% at a lighter
+  load) when the connector blocks on the save (LMCache), and stays within run-to-run noise when the save is
+  asynchronous (vLLM's offloading connector); where
   admission leaves host hits unchanged, a clairvoyant admission rule is 32.7% faster on the first path and
   within 2.1% on the second. The additive store price is wrong both ways. In SGLang, a write rule documented to
   store a block on its second access stores every block, and storing at a request's completion rather than at
-  its prefill lowers median latency by 17–23% with the same hits (`run_write_contract.py`, `serving_replay/`, §BM).
+  its prefill lowers mean latency by 8.8% at the heavier load (median 17–23%) with the same hits (`run_write_contract.py`, `serving_replay/`, §BM).
 
 A block's creation (its KV is computed) is a compulsory miss and is never billed; billing it as a cache
 read, as earlier versions did, inflated the oracle's advantage about 3x (notebook §AS).

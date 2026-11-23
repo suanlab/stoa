@@ -2765,7 +2765,8 @@ run.
 - Calibration (300 requests, no connector): p50 TTFT 122/139/230/567 ms at 0.05/0.1/0.2/0.35× the
   arrival rate. 1× overloads this GPU (TTFT 37–43 s), so the matrix uses 0.1/0.2/0.35×.
 - The skip takes effect: GPU blocks handed to the offloader were 33,965 (store-all), 24,167 (oracle) and 0
-  (store-none).
+  (store-none) on the 300-request smoke slice at 0.35×. The matrix's own counts are in the artifact
+  (stage 1, 0.35×: 148,333 / 38,919 / 0).
 - The hit counters (`STOA_HITS`) were added to the connector before its first matrix run. They count; they
   change no behaviour.
 
@@ -2878,3 +2879,45 @@ To keep the body at 12 pages, two cuts and one rewrite:
 - Dropped "(the full rate overloads this GPU)"; the calibration is above in this section.
 - Rewrote the conclusion shorter; it now names the matching rule and the write path among what an
   evaluation has to report.
+
+**An independent review of §5.8 (2026-11-24).** A fresh agent recomputed every number in the section from the
+raw `runs` and found no arithmetic error. It confirmed the following problems, all fixed in the paper unless
+noted:
+1. **The 76% and "wrong both ways" had no load qualifier.** They hold near saturation (0.35×, where no
+   connector already gives 1,240 ms against 302 at 0.2×). At 0.2× storing everything adds 15.8%, and the
+   blocking path pays 1.4–1.7 times the store time an additive bill charges, against 12–27 times near
+   saturation. The excess is queueing. The abstract and introduction now say "near saturation".
+2. **"12 to 27" (median) and "3.1 to 47.3" (mean) covered different cells.** The 47.3 came from a 40 GB
+   cell where hits also change. Both statistics are now reported on the same two equal-hit comparisons: 12–27
+   under the median, 11–28 under the mean (`summary.blocking_multiple_of_store_time`).
+3. **"The two effects do not add"** rested on one load and a slice that is not in the table. It is out of
+   the paper.
+4. **The asynchronous store-all over store-none difference (3.3%) is inside the rerun spread** (0.8–5.8%).
+   The paper now says so. The fixed run order (store-all before oracle in every stage) confounded policy with
+   time. Stage 1 at 0.35× was rerun in reverse order (`rep/stage1_r1`): cells moved 1.0–4.7%; storing everything
+   over storing none is +66.0% (blocking; first run +76.0%) and −0.5% (asynchronous; −3.3%); the oracle gains are
+   −61.5% and −36.8% (−62.7%, −35.6%). Order does not drive the result.
+5. **Collector bug: the offload hit line is not the total.** `skipstore_connector.py` prints `STOA_HITS`
+   every 100 scheduler calls, so the last line can miss up to 9 of 800 requests. Item 2 of "Caught before
+   the paper" above was therefore wrong in its cause.
+   - At 120 GB and 0.2× both rules have exactly 115,936 host-hit tokens. The oracle's line covers 397 of
+     400 requests, which alone makes 0.1220 against 0.1215.
+   - The check now compares hit counts, records each run's coverage (`hit_coverage`), and asserts coverage of
+     at least 98%. The tolerance is gone.
+6. **SGLang results were reported selectively.** At 40 GB and 0.35×, write-back (827 ms) is slower than no
+   HiCache (653 ms); the paper now says so. The 8.8% timing effect is at 120 GB and 0.35×, and 3.8% of the
+   median at 0.2×; the paper says where. The direct-transfer runs are in an overloaded regime (about 4× slower),
+   so the paper no longer quotes their percentages, only that the gap persists.
+7. **The 12.5% break-even uses the additive price** that the section argues against. It is now labelled as
+   such, per 512-token block.
+8. **"Registered" claimed more than the artifact shows.** The predictions were written in research notes that
+   are not in this repository. The paper now says "predicted before the runs".
+   - The (c′) note was written at 22:00 KST. Stage 1 runs no connector first, then the LMCache cells. The
+     first LMCache run (store-all, 0.35×) was in flight at 22:00, and no LMCache log had been read. This
+     cannot be shown from the artifact.
+9. **Minor.**
+   - Hit accounting uses each request's last lookup, so after a preemption a request's own blocks can count
+     as hits. This is not corrected; GPU-hit share rises with load (LMCache store-all: 14.3% at 0.2×, 20.4% at
+     0.35×).
+   - Client send lag is now kept per run (`max_send_lag_s`, at most 6.5 ms).
+   - `pct()` takes the upper median for even n.

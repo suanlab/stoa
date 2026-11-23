@@ -2,7 +2,8 @@
 
 Its numbers come from log lines: a request can be looked up more than once (the last lookup is the one
 it was served with), stores carry no request id (only those after the first measured request's lookup
-count), and the offloading connector's hit line is cumulative (the last one is the total).
+count), and the offloading connector's hit line is cumulative, printed every 100 scheduler calls (the last one is the
+most complete, and can miss a run's final few requests; the collector records that coverage).
 """
 import json
 import sys
@@ -30,9 +31,9 @@ def _write(tmp_path, name, recs, log):
 
 
 def test_lmcache_warmup_boundary_last_lookup_and_stores(tmp_path):
-    recs = [{"i": 0, "warmup": True, "ttft_ms": 5.0, "err": None},
-            {"i": 1, "warmup": False, "ttft_ms": 7.0, "err": None},
-            {"i": 2, "warmup": False, "ttft_ms": None, "err": "ServerDisconnectedError()"}]
+    recs = [{"i": 0, "warmup": True, "ttft_ms": 5.0, "err": None, "lag_s": 0.001},
+            {"i": 1, "warmup": False, "ttft_ms": 7.0, "err": None, "lag_s": 0.001},
+            {"i": 2, "warmup": False, "ttft_ms": None, "err": "ServerDisconnectedError()", "lag_s": 0.002}]
     log = [_lookup("2026-11-21 10:00:00,000", "a", 512, 0, -16),
            _store("2026-11-21 10:00:00,500", 512, "4.0"),         # the warm-up request's store: not counted
            _lookup("2026-11-21 10:00:01,000", "b", 1024, 0, 0),
@@ -47,7 +48,7 @@ def test_lmcache_warmup_boundary_last_lookup_and_stores(tmp_path):
 
 
 def test_offload_reads_the_last_cumulative_line(tmp_path):
-    recs = [{"i": 0, "warmup": False, "ttft_ms": 3.0, "err": None}]
+    recs = [{"i": 0, "warmup": False, "ttft_ms": 3.0, "err": None, "lag_s": 0.001}]
     log = ["STOA_SKIPSTORE calls=100 store_jobs=5 stored_gpu_blocks=40 skipped_reqs=1",
            "STOA_HITS reqs=3 measured_reqs=1 measured_tokens=100 measured_gpu_hit=10 measured_host_hit=20",
            "STOA_SKIPSTORE calls=200 store_jobs=9 stored_gpu_blocks=70 skipped_reqs=2",
@@ -64,11 +65,12 @@ def test_committed_artifact_rederives_and_its_checks_hold():
 
 
 def test_sglang_runs_count_cached_tokens_of_measured_answered_requests(tmp_path):
-    recs = [{"i": 0, "warmup": True, "ttft_ms": 5.0, "err": None, "prompt_tokens": 100, "cached_tokens": 100},
-            {"i": 1, "warmup": False, "ttft_ms": 7.0, "err": None, "prompt_tokens": 200, "cached_tokens": 50},
-            {"i": 2, "warmup": False, "ttft_ms": None, "err": "ServerDisconnectedError()", "prompt_tokens": None,
+    recs = [{"i": 0, "warmup": True, "ttft_ms": 5.0, "err": None, "lag_s": 0.001, "prompt_tokens": 100, "cached_tokens": 100},
+            {"i": 1, "warmup": False, "ttft_ms": 7.0, "err": None, "lag_s": 0.001, "prompt_tokens": 200, "cached_tokens": 50},
+            {"i": 2, "warmup": False, "ttft_ms": None, "err": "ServerDisconnectedError()", "lag_s": 0.002, "prompt_tokens": None,
              "cached_tokens": None}]
     stem = tmp_path / "sgl_write_through_x0.35"
     Path(f"{stem}.jsonl").write_text("".join(json.dumps(r) + "\n" for r in recs))
     run = wc.parse_sgl(stem)
-    assert run == {"ttft_ms": [7.0, None], "errors": 1, "prompt_tokens": 200, "cached_tokens": 50}
+    assert run == {"ttft_ms": [7.0, None], "errors": 1, "max_send_lag_s": 0.002, "prompt_tokens": 200,
+                   "cached_tokens": 50}

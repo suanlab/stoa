@@ -25,7 +25,9 @@ from that file; no GPU needed.
 
 Hit tokens per request are the GPU-local prefix hit and the host-tier hit at the request's last lookup:
 LMCache logs both ("LMCache hit tokens", "need to load"); the offloading connector logs them through
-`serving_replay/skipstore_connector.py` (STOA_HITS). Stores carry no request id, so LMCache's store time
+`serving_replay/skipstore_connector.py` (STOA_HITS), cumulatively every 100 scheduler calls, so the last line
+can miss the last few requests of a run (at most 9 of 800 here): `hits.reqs` against the measured count is its
+coverage, and shares are over the covered requests. Stores carry no request id, so LMCache's store time
 is counted from the first measured request's lookup on (a few warm-up requests may still be in flight).
 """
 from __future__ import annotations
@@ -60,7 +62,8 @@ def parse_run(stem: Path, warm: int) -> dict:
     log = Path(f"{stem}.server.log").read_text(errors="ignore")
     run = {"connector": conn, "policy": policy, "speed": float(speed),
            "ttft_ms": [r["ttft_ms"] for r in recs if not r["warmup"]],   # None: the request failed
-           "errors": sum(1 for r in recs if r["err"]), "hits": None}
+           "errors": sum(1 for r in recs if r["err"]), "hits": None,
+           "max_send_lag_s": max(r["lag_s"] for r in recs)}
     if conn == "lmcache":
         looks = LOOKUP.findall(log)
         first, last = {}, {}
@@ -87,6 +90,7 @@ def parse_sgl(stem: Path) -> dict:
     meas = [r for r in recs if not r["warmup"]]
     ok = [r for r in meas if r["ttft_ms"] is not None]
     return {"ttft_ms": [r["ttft_ms"] for r in meas], "errors": sum(1 for r in recs if r["err"]),
+            "max_send_lag_s": max(r["lag_s"] for r in recs),
             "prompt_tokens": sum(r["prompt_tokens"] or 0 for r in ok),
             "cached_tokens": sum(r["cached_tokens"] or 0 for r in ok)}
 
@@ -112,6 +116,9 @@ def collect(d: Path) -> None:
     for f in sorted((d / "rep").glob("vllm_*/*.jsonl")):
         stem = f.with_suffix("")
         runs[str(stem.relative_to(d))] = parse_run(stem, 200)
+    for f in sorted((d / "rep").glob("stage1_r*/*.jsonl")):     # traceA1200: 400 warm-up requests
+        stem = f.with_suffix("")
+        runs[str(stem.relative_to(d))] = parse_run(stem, 400)
     tiers = {m: json.loads((d / "tiers" / f"{m}.json").read_text()) for m in ("none", "cpu")}
     for t in tiers.values():
         t.pop("lmcache_env", None)
@@ -161,7 +168,8 @@ def summarize(d: dict) -> dict:
             "gpu_hit_share": round(h["gpu_hit"] / h["tokens"], 4) if h else None,
             "store_ms_per_request": round(r["lmcache_store"]["ms_measured"] / len(r["ttft_ms"]), 2)
             if "lmcache_store" in r else None,
-            "offload_stored_gpu_blocks": r.get("offload_stored_gpu_blocks")}
+            "offload_stored_gpu_blocks": r.get("offload_stored_gpu_blocks"),
+            "hit_coverage": round(h["reqs"] / len(r["ttft_ms"]), 4) if h else None}
     g = lambda *k: rows[k]                                                          # noqa: E731
 
     def gain(stage, conn, speed, base="store-all", alt="oracle"):
@@ -197,10 +205,13 @@ def summarize(d: dict) -> dict:
         "blocking_gain_exceeds_async_gain_at_40gb": all(
             og[f"{st}/lmcache@{s}"]["ms"] > og[f"{st}/offload@{s}"]["ms"] for st in ("stage1_cpu40", "stage2_cpu40")
             for s in (0.35, 0.2)),
-        # within 0.1 point of the measured tokens (offload at 0.2x: 0.1215 vs 0.1220)
-        "equal_host_hits_at_120gb": all(abs(g("stage2_cpu120", c, "store-all", s)["host_hit_share"]
-                                            - g("stage2_cpu120", c, "oracle", s)["host_hit_share"]) <= 0.001
-                                        for c in ("lmcache", "offload") for s in (0.35, 0.2))}
+        # the host-hit token counts are identical; the shares differ only where a run's last STOA_HITS line
+        # covers fewer requests (offload at 0.2x: 397 of 400, 0.1220 against 0.1215)
+        "equal_host_hits_at_120gb": all(d["runs"][f"stage2_cpu120/{c}_store-all_x{s}"]["hits"]["host_hit"]
+                                        == d["runs"][f"stage2_cpu120/{c}_oracle_x{s}"]["hits"]["host_hit"]
+                                        for c in ("lmcache", "offload") for s in (0.35, 0.2)),
+        "hit_lines_cover_98pct": all(r["hits"]["reqs"] >= 0.98 * len(r["ttft_ms"]) for r in d["runs"].values()
+                                     if r.get("hits") and "reqs" in r["hits"])}
     # do the hit part (async gain at 40 GB) and the store part (blocking gain at 120 GB) add up to the
     # blocking gain at 40 GB? (at 0.35x within 5%; at 0.2x the blocking gain is larger than the sum)
     out["decomposition_stage2"] = {
@@ -268,7 +279,23 @@ def summarize(d: dict) -> dict:
     sgr = {q: [p50(f"sglang/cpu120/sgl_{q}_x0.35")] + [p50(f"rep/sgl_r{i}/sgl_{q}_x0.35") for i in (1, 2)]
            for q in ("write_through", "write_through_selective")}
     moves = [abs(b / a - 1) for a, b in vr.values()] + [abs(x / v[0] - 1) for v in sgr.values() for x in v[1:]]
+    # stage 1 at 0.35x rerun in the reverse of the original order (policy and time no longer aligned)
+    s1r = {}
+    if any(k.startswith("rep/stage1_r1/") for k in d["runs"]):
+        cells = [("none", "store-all"), ("lmcache", "store-all"), ("lmcache", "oracle"), ("lmcache", "store-none"),
+                 ("offload", "store-all"), ("offload", "oracle"), ("offload", "store-none")]
+        first = {c: g("stage1_cpu40", c[0], c[1], 0.35)["p50_ms"] for c in cells}
+        again = {c: p50(f"rep/stage1_r1/{c[0]}_{c[1]}_x0.35") for c in cells}
+        cmp_ = lambda t, c, x, y: round(100 * (t[(c, x)] / t[(c, y)] - 1), 1)        # noqa: E731
+        s1r = {"p50_ms": {f"{c[0]}/{c[1]}": [first[c], again[c]] for c in cells},
+               "moves_pct": [round(100 * min(abs(again[c] / first[c] - 1) for c in cells), 1),
+                             round(100 * max(abs(again[c] / first[c] - 1) for c in cells), 1)],
+               "lmcache_all_over_none_pct": [cmp_(t, "lmcache", "store-all", "store-none") for t in (first, again)],
+               "offload_all_over_none_pct": [cmp_(t, "offload", "store-all", "store-none") for t in (first, again)],
+               "lmcache_oracle_over_all_pct": [cmp_(t, "lmcache", "oracle", "store-all") for t in (first, again)],
+               "offload_oracle_over_all_pct": [cmp_(t, "offload", "oracle", "store-all") for t in (first, again)]}
     out["replicates"] = {
+        "stage1_0.35_reversed_order": s1r,
         "vllm_120gb_0.35": {k: {"first_ms": a, "replicate_ms": b} for k, v in vr.items() for a, b in [v]},
         "rerun_moves_pct": [round(100 * min(moves), 1), round(100 * max(moves), 1)],
         "async_oracle_gain_pct": [round(100 * (1 - vr["offload/oracle"][i] / vr["offload/store-all"][i]), 1) for i in (0, 1)],
@@ -295,6 +322,18 @@ def summarize(d: dict) -> dict:
         rb[f"sglang_selective_vs_write_through/{k}@0.35"] = robust(f"{base}/sgl_write_through_x0.35",
                                                                    f"{base}/sgl_write_through_selective_x0.35")
     out["robust"] = rb
+    # what the blocking path pays per ms of store time an additive bill charges, on the two equal-hit
+    # comparisons: the oracle at 120 GB (per ms it avoids) and store-all over store-none at 40 GB (per ms it adds)
+    def multiples(sp, stat):
+        if stat == "median":
+            o = g("stage2_cpu120", "lmcache", "store-all", sp)["p50_ms"] - g("stage2_cpu120", "lmcache", "oracle", sp)["p50_ms"]
+            a = g(S1, "lmcache", "store-all", sp)["p50_ms"] - g(S1, "lmcache", "store-none", sp)["p50_ms"]
+        else:
+            o = -rb[f"oracle_vs_all/stage2_cpu120/lmcache@{sp}"]["mean_diff_ms"]
+            a = robust(f"{S1}/lmcache_store-none_x{sp}", f"{S1}/lmcache_store-all_x{sp}")["mean_diff_ms"]
+        return [round(o / saved[f"stage2_cpu120@{sp}"], 2), round(a / g(S1, "lmcache", "store-all", sp)["store_ms_per_request"], 2)]
+    out["blocking_multiple_of_store_time"] = {f"{st}@{sp}": multiples(sp, st) for st in ("median", "mean")
+                                              for sp in (0.35, 0.2)}
     out["b_mean_gain_over_store_removed"] = {
         k: round(-rb[f"oracle_vs_all/{k.split('@')[0]}/lmcache@{k.split('@')[1]}"]["mean_diff_ms"] / v, 1)
         for k, v in saved.items()}
