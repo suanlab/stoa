@@ -140,11 +140,6 @@ conversation and 77.6--86.4\% on toolagent, below ARC's 77.5\% and 92.3\% at eve
 is too wide to quote one LRB number, but not wide enough to reach ARC.
 
 
-The eviction signal also inverts by source. On the agentic kv-cache-tester traces LRU reaches 0.83--0.96 of Belady at a 5\%
-tier while LFU stays near 0.29--0.31; on Mooncake the ordering reverses below the working-set knee. An
-eviction policy tuned on one source is a poor default for the other --- and, as both the ARC and the LRB
-result show, reaching for a more sophisticated policy does not by itself resolve the choice.
-
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{fig_reactive.pdf}

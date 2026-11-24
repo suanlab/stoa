@@ -1,4 +1,4 @@
-\section{Blocks Without Evidence}
+\section{Convention 1: The Tie Rule for Blocks Without Evidence}
 \label{sec:evidence}
 
 \subsection{Most blocks a policy can see are dead}
@@ -48,9 +48,12 @@ same, all actions & 15.6 / 50.8 & 12.4 / 49.4 & 45.4 / 62.7 \\
 
 \medskip
 \noindent With tier-only actions the rule moves the reference by 48--63 points across splits on the
-production traces, and by 10--72 points when the three bounded tiers are scaled together from a tenth
-to one and a half times their sizes; the swing is smallest at the smallest tiers, where the reference
-with dead blocks last reaches only 42--48\% (the synthetic control moves by 0--40 points). In serving
+production traces, and by 1--72 points when the three bounded tiers are scaled together from a twentieth
+to one and a half times their sizes (the synthetic control moves by 0--40 points). The swing needs a fast
+tier that is large beside the live visible blocks. Our GPU tier, 18{,}279 slots of 64\,MiB, is a pooled tier;
+at a twentieth, 913 and 916 slots, about one 80\,GB GPU's worth of KV, the swing is 1.2 and 5.2 points, the
+reference with dead blocks last reaches only 42--52\%, and knowing deadness falls 8.6 and 5.1 points short of
+knowing every visible future. In serving
 units, under the declared latencies the oracle's advantage is 32.6 and 16.2\,ms of block reads per
 request after the split, so the rule moves the reference by 18.7 and 9.9\,ms per request.
 
@@ -93,9 +96,9 @@ oracle & 100 & 100 & 100 \\
 \noindent On the production traces, knowing only \emph{which} visible blocks are dead is worth as
 much as knowing every visible block's future, to the hundredth of a point. That is a regime, not a law:
 the 7{,}248 and 4{,}901 live visible blocks fit in the GPU tier's 18{,}279 and 18{,}330 slots, so their
-order cannot matter. Shrinking the tiers until up to four times as many live blocks as GPU slots remain
-opens a gap of at most 1.9 points; on the synthetic control, with 1.8--27 times as many, ranking the live
-blocks is worth 17--70 points. What remains, 22--24\%, is the order among new blocks. The prefix approximates deadness
+order cannot matter. Shrinking the tiers until up to eight times as many live blocks as GPU slots remain
+opens a gap of at most 8.6 points; on the synthetic control, with 1.8--54 times as many, ranking the live
+blocks is worth 17--75 points. What remains, 22--24\%, is the order among new blocks. The prefix approximates deadness
 well: a block seen once before the split is dead with probability 0.95 and 0.97, and seen-once blocks are
 78--80\% of the dead ones. Parking them behind new blocks, a rule with no parameters, captures 39.2\%
 and 43.3\% (25.6--52.3\% across splits). Liu et al.\ observe that early frequency predicts whether a

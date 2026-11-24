@@ -43,7 +43,7 @@ from stoa.mooncake import load_mooncake  # noqa: E402
 from train_session_features import parse_requests  # noqa: E402
 
 TRACES = {n: f"data/mooncake_{n}_trace.jsonl" for n in ("conversation", "toolagent", "synthetic")}
-SCALES = (0.1, 0.25, 0.5, 1.0, 1.5)
+SCALES = (0.05, 0.1, 0.25, 0.5, 1.0, 1.5)  # 0.05: about one 80 GB GPU of KV in 64 MiB slots
 FINITE = (Tier.GPU, Tier.CPU, Tier.REMOTE_RDMA)
 
 

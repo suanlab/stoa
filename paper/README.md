@@ -2,8 +2,9 @@
 
 **Target (2026-10-20): PVLDB Volume 20 (VLDB 2027), research track, Experiment, Analysis & Benchmark
 (EA&B).** Monthly deadlines on the 1st at 5 PM PT, with a mandatory abstract by the 25th of the month
-before. Title: *The Unseen Block: What Split-Instant Evaluation Hides in KV-Cache Placement [Experiment,
-Analysis & Benchmark]*. It was retitled on 2026-10-20 from "Decide on Arrival: Placement Timing Beats
+before. Title: *The Unseen Block: How Evaluation Conventions Decide KV-Cache Results [Experiment, Analysis &
+Benchmark]* (retitled 2026-11-24 from "… What Split-Instant Evaluation Hides in KV-Cache Placement", notebook
+BN). It was first retitled on 2026-10-20 from "Decide on Arrival: Placement Timing Beats
 Placement Prediction on Production KV Traces", which the corrected results no longer support. The
 target moved from ICDE 2027 (EAB, round 2), whose IEEE-formatted version is kept as `main_icde.tex`; it
 was never submitted. The paper reports what an offline evaluation of KV-block placement has to fix. On the production Mooncake

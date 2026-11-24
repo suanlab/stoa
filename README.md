@@ -1,7 +1,7 @@
 # STOA — Storage & Tiered Orchestration for Agents
 
-Reproducibility package for **"The Unseen Block: What Split-Instant Evaluation
-Hides in KV-Cache Placement"** (prepared for PVLDB Volume 20 / VLDB 2027, Experiment, Analysis & Benchmark category).
+Reproducibility package for **"The Unseen Block: How Evaluation Conventions
+Decide KV-Cache Results"** (prepared for PVLDB Volume 20 / VLDB 2027, Experiment, Analysis & Benchmark category).
 
 The paper asks what an evaluation of KV-cache tiering has to fix, and measures three conventions that such
 evaluations leave unstated and that each reverse a conclusion: the **tie rule** for blocks without evidence,

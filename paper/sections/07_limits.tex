@@ -16,7 +16,7 @@ latency ratio is 1:10 where five derived device classes give 1:80 to 1:250, exce
 a raw copy on our A100 host measures 1:58, and the serving stack, where a GPU-resident block still costs
 attention time, about 1:5. Deriving the table from three attention shapes and five device classes puts
 the headroom, the share of the heuristic's cost the oracle saves, at 55--98\%, which contains the 92\% the
-declared table gives in the same run (\Cref{tab:regimes} averages two traces to 93\%), but we did
+declared table gives in the same run (93.5\% and 91.8\% on the two traces, \Cref{sec:sources}), but we did
 not rerun the ladder or the online replays under the derived tables, and 6 of the 15 configurations
 reorder the hierarchy in a way our fixed capacities cannot express.
 

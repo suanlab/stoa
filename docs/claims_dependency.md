@@ -2964,3 +2964,42 @@ agent reviewed the whole paper as a PVLDB EA&B reviewer. Verdict: **Major revisi
 - Add "hit counting" and "write path" columns to Table 1.
 - Free about 230 column-lines by moving sampling (§5.12), most of the LRB detail, Figure 3 and the
   full-width defects table into the artifact.
+
+### §BN, continued — the restructure, and the tie rule at one GPU's worth of KV (2026-11-24)
+
+**The author's decisions** (asked directly): full restructure, title "The Unseen Block: How Evaluation
+Conventions Decide KV-Cache Results", and four experiments (more write-path runs, moves inside a stack,
+realistic tier sizes, the SGLang cause).
+
+**Realistic tier sizes** (`run_ties_by_capacity.py`, scale 0.05 added). The GPU tier is 10% of distinct blocks:
+18,279 slots of 64 MiB, about 1.1 TiB, a pooled tier. One 80 GB GPU holds about 60 GiB of KV, roughly 913–916
+slots, which is a scale of 0.05. At that scale:
+
+| | conversation | toolagent |
+|---|---|---|
+| tie-rule swing (default scale: 48–63 points) | 1.2 points | 5.2 points |
+| reference with dead blocks last | 51.9% | 42.4% |
+| knowing deadness falls short of knowing every visible future by | 8.6 points | 5.1 points |
+| seen-once rule captures | 0 | 0 |
+| live visible blocks per GPU slot | 7.9 | 5.4 |
+
+**The review's tier-size objection is confirmed.** The tie rule decides the reference only while the fast tier
+is large beside the live visible blocks. The abstract's "persists across … tier capacities" was false below a
+quarter of our sizes. Corrected in the abstract, introduction and §5 ("at one GPU's worth of KV it nearly
+vanishes"), and "up to four times as many live blocks … at most 1.9 points" is now "eight times … 8.6". Seven
+new or changed checks read these from `ties_by_capacity.json`.
+
+**Restructure, stage 1:**
+- §3 now defines the three conventions, each in its own paragraph. The prefix-matching material moved there
+  from the trace paragraph, and the additive-bill sentence moved into the write-path paragraph.
+- Section order: §5 tie rule (dead, ties, ladder, why, ranker, arrival), §6 matching rule, §7 write path
+  (serving prices, admission in a stack), §8 with the conventions fixed (online moves, reaction).
+- `05b_online.tex` is split into `05b1_arrival.tex` and `05b2_online.tex`.
+- Cut to fit 12 pages; the artifacts remain:
+  - the sampling section and Table 3 (kv-cache-tester sorted-prefix runs);
+  - the kv-cache-tester column of Table 2 (the Mooncake statistics are now a sentence in §4, and Table 2 is
+    gone);
+  - the "eviction signal inverts by source" paragraph.
+- §4 now names PrefixSim's traces and the A6000 host.
+- Removed `.tex` files are deleted. The checker greps every file in `sections/`, so an un-`\input` file would
+  still have satisfied its checks; it did, until they were deleted.

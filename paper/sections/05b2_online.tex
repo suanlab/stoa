@@ -1,20 +1,3 @@
-\subsection{Deciding at arrival}
-\label{sec:arrival}
-A policy need not wait for a split: it can rank each block when it is created, against the blocks already
-placed. The decision that matters is the same one: where a block with no history ranks against a block
-seen once. Every block in a static analysis gets a belief that reads nothing after its own creation;
-beliefs are placed in one capacity-constrained assignment. Ranking new blocks among themselves (by
-arrival order, by a learned score from session context, or at random) moves the result by at most 5.3
-points; moving them ahead of or behind equal-count visible blocks moves it by 14--29 points. An \emph{estimated
-prior} replaces that tie rule: at a pseudo-split halfway through the prefix, blocks born after it are
-reused before the real split more than blocks already seen once (0.52 against 0.30 on conversation), so
-new blocks are placed between count 2 and count 3. It captures 47.0\% and 51.7\% with tier-only actions
-(58.2\% and 61.1\% with all actions), and nothing on the synthetic control with tier-only actions. On Alibaba's four Qwen
-serving traces~\cite{wang2025kvcachewild} (16-token blocks) it captures 54.3\%, 34.2\% and 45.9\% on three
-and 0.0\% on the fourth (thinking), where the prefix rates seen-once blocks above new ones. The direction
-the prefix gives is a regularity of these workloads, not a law, and the estimate has to be checked per
-workload.
-
 \subsection{Online: recency, and the price of a move}
 \label{sec:online}
 Static analysis assumes a block, once placed, stays. Replayed online from the heuristic's starting

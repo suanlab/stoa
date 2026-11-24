@@ -6,6 +6,7 @@ Store policies, sent per request in `kv_transfer_params` (each connector reads i
   store-all   nothing sent
   store-none  skip the store of every request
   oracle      skip the store of a request iff it creates no block read again later in the slice
+  long-prompt skip the store of a request shorter than 2,048 tokens (a causal rule; notebook BM)
 Usage: client.py WORKLOAD.jsonl OUT.jsonl --url http://127.0.0.1:8100 --model M --speed 1.0 --policy oracle
 """
 from __future__ import annotations
@@ -19,7 +20,8 @@ import aiohttp
 
 
 def skip(row, policy):
-    return policy == "store-none" or (policy == "oracle" and not row["store_oracle"])
+    return (policy == "store-none" or (policy == "oracle" and not row["store_oracle"])
+            or (policy == "long-prompt" and len(row["prompt"]) < 2048))
 
 
 async def one(session, url, model, row, policy, t_start, out):
@@ -77,7 +79,7 @@ def main() -> int:
     ap.add_argument("--url", default="http://127.0.0.1:8100")
     ap.add_argument("--model", required=True)
     ap.add_argument("--speed", type=float, default=1.0)
-    ap.add_argument("--policy", choices=("store-all", "store-none", "oracle"), required=True)
+    ap.add_argument("--policy", choices=("store-all", "store-none", "oracle", "long-prompt"), required=True)
     asyncio.run(main_async(ap.parse_args()))
     return 0
 

@@ -17,7 +17,8 @@ reference that gives both the same belief orders them by a tie rule, the case LR
 ``subsidiary policy''~\cite{oneil1993lruk}. With tier-only actions, a clairvoyant split-time reference
 that breaks the tie by item order, putting the dead blocks first, reaches \textbf{20.4\% and 15.3\%} of a
 hindsight oracle's advantage, which suggests that a split-time policy can reach little of it; parking the dead blocks behind the new ones costs them nothing, and the same reference reaches
-\textbf{77.8\% and 76.2\%} (\Cref{sec:ties}). The swing holds across splits and tier capacities, and it
+\textbf{77.8\% and 76.2\%} (\Cref{sec:ties}). The swing holds across splits, and across tier capacities while the fast tier is large beside the live
+blocks; at one GPU's worth of KV it nearly vanishes. Where it holds, it
 is not a detail: measured against the first reference, the strongest learned ranker we trained (with all
 actions, where it was trained) is more than half of the way there, against the second about a sixth. Neither reference is an upper bound, and an
 evaluation that does not state its tie rule does not say which one it reports.
@@ -71,7 +72,7 @@ of LRU to 19.6 points behind (\Cref{sec:matching}).
   rule decides split-time references, which none of the
   online KV-cache studies we read uses (\Cref{tab:protocols}).
   \item \textbf{(C2) Findings on production traces}, replicated on Alibaba's traces where the data allow:
-  the tie rule moves a clairvoyant reference by 48--63 points; while the live blocks fit in the fast
+  the tie rule moves a clairvoyant reference by 48--63 points with a pooled fast tier; while the live blocks fit in the fast
   tier, deadness, not ranking, is what placement has to get right, and a parameter-free prefix rule
   recovers about half of what knowing it is worth; at the move prices we measured, none of the replayed
   policies that move blocks pays unless remote moves are nearly free; modern one-hit-wonder policies do not

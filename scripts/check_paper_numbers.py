@@ -30,14 +30,32 @@ if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 from stoa import verify  # noqa: E402
 
-_RAW = " ".join(p.read_text() for p in
-                [ROOT / "paper" / "main.tex", *sorted((ROOT / "paper" / "sections").glob("*.tex"))])
+def _paper_sources() -> list[Path]:
+    """main.tex and every file it \\inputs, recursively: what the build reads. Globbing sections/ instead
+    let a file dropped from main.tex keep satisfying its checks (notebook BN)."""
+    out, todo = [], [ROOT / "paper" / "main.tex"]
+    while todo:
+        f = todo.pop(0)
+        if f in out or not f.exists():
+            continue
+        out.append(f)
+        for m in re.findall(r"^[^%\n]*\\input\{([^}]+)\}", f.read_text(), re.M):
+            todo.append(ROOT / "paper" / (m if m.endswith(".tex") else m + ".tex"))
+    return out
+
+
+PAPER_SOURCES = _paper_sources()
+_RAW = " ".join(p.read_text() for p in PAPER_SOURCES)
 # Collapse runs of whitespace. LaTeX table columns are padded for readability in the source,
 # so an otherwise-correct needle fails on cosmetic alignment -- which teaches you to ignore
 # the checker. Whitespace is the one difference that never changes a number.
 TEX = re.sub(r"\s+", " ", _RAW)
 
 failures: list[str] = []
+_orphans = sorted(set((ROOT / "paper" / "sections").glob("*.tex")) - set(PAPER_SOURCES))
+if _orphans:
+    failures.append("section files the build does not read (delete them or \\input them): "
+                    + ", ".join(o.name for o in _orphans))
 checked = 0
 
 
@@ -240,17 +258,8 @@ if d:
             for c in d["contrasts"] if c["mode"] == "summary"]
     claim("summary discordant pairs", ", ".join(disc), ", ".join(disc), "discordant")
 
-# --- sampling study: no parametric interval may be claimed at n=4 --------------------
-d = load("sampling_study.json")
-if d:
-    print("\nsampling study (experiments/sampling_study.json)")
-    for r in d["rows"]:
-        claim(f"observed range at {r['convs']} conversations",
-              f"${r['captured_observed_min']:.0f}$ and $+{r['captured_observed_max']:.0f}$",
-              f"[{r['captured_observed_min']:+.0f}, {r['captured_observed_max']:+.0f}]",
-              "captured_observed_min/max")
-        n = r["draws"]
-        assert n < 30, "with this many draws a parametric interval would be defensible again"
+# --- sampling study (cut from the paper 2026-11-24, notebook BN; the artifact keeps it) ---------------
+if True:
     # Guard: the discarded z-based figures must not reappear anywhere in the paper.
     for stale in ("$\\pm126$ points", "$\\pm660$"):
         if stale in TEX and "earlier revision" not in TEX:
@@ -546,6 +555,15 @@ if _tc and _el and _ct:
         "the paper says the swing is smallest at the smallest tiers"
     _dl = sorted(r["captured_pct"]["dead-last"] for r in _small)
     claim("dead-last at the smallest tiers", f"reaches only {_dl[0]:.0f}--{_dl[-1]:.0f}\\%", "", "ties_by_capacity")
+    _one = {r["trace"]: r for r in _small}
+    claim("one GPU's worth of slots", f"at a twentieth, {_one['conversation']['gpu_slots']} and "
+          f"{_one['toolagent']['gpu_slots']} slots", "", "ties_by_capacity")
+    claim("swing and gap at one GPU", f"the swing is {_one['conversation']['tie_rule_swing']:.1f} and "
+          f"{_one['toolagent']['tie_rule_swing']:.1f} points", "", "ties_by_capacity")
+    claim("deadness short of futures at one GPU", f"knowing deadness falls "
+          f"{_one['conversation']['deadness_vs_futures_gap']:.1f} and {_one['toolagent']['deadness_vs_futures_gap']:.1f} "
+          "points short", "", "ties_by_capacity")
+    assert min(_tc["config"]["scales"]) == 0.05, "the paper calls the smallest scale a twentieth"
     _syn = [r["tie_rule_swing"] for r in _tc["rows"] if r["trace"] == "synthetic"]
     claim("synthetic swing across capacities", f"moves by {min(_syn):.0f}--{max(_syn):.0f} points", "", "ties_by_capacity")
     _ms = {t: _base[t]["oracle_advantage_ms_per_request"] for t in PROD}
@@ -557,7 +575,7 @@ if _tc and _el and _ct:
     _q = {r["trace"]: r["captured_pct"]["seen-once-last"] for r in _R if r["scale"] == 0.25}
     claim("seen-once at a quarter", f"captures {_q['conversation']:.1f}\\% and {_q['toolagent']:.1f}\\% on\nthe production",
           "", "ties_by_capacity")
-    assert all(abs(r["captured_pct"]["seen-once-last"]) < 0.05 for r in _small), "the paper says nothing at a tenth"
+    assert all(abs(r["captured_pct"]["seen-once-last"]) < 0.05 for r in _R if r["scale"] == 0.1), "the paper says nothing at a tenth"
     # where knowing deadness equals knowing every visible future (notebook BJ)
     _b1 = {r["trace"]: r for r in _R if r["scale"] == 1.0}
     _pool = _b1["conversation"]["gpu_slots"] * 64 * 2**20 / 2**40
@@ -568,7 +586,7 @@ if _tc and _el and _ct:
           + f"{_b1['toolagent']['gpu_slots']:,}".replace(",", "{,}") + " slots", "", "ties_by_capacity")
     assert all(r["deadness_vs_futures_gap"] == 0 for r in _R if r["live_visible"] <= r["gpu_slots"])
     _over = [r for r in _R if r["live_visible"] > r["gpu_slots"]]
-    assert 3.5 < max(r["live_visible"] / r["gpu_slots"] for r in _over) < 4.5, "the paper says up to four times"
+    assert 7.5 < max(r["live_visible"] / r["gpu_slots"] for r in _over) < 8.5, "the paper says up to eight times"
     claim("deadness gap past the boundary", f"opens a gap of at most {max(r['deadness_vs_futures_gap'] for r in _over):.1f} points",
           "", "ties_by_capacity")
     _sy = [r for r in _tc["rows"] if r["trace"] == "synthetic"]
@@ -808,23 +826,16 @@ _ss = load("source_stats.json")
 _sm = load("sampling_study.json")
 _hb = load("headroom_by_length.json")
 if _ss and _sm and _hb:
-    print("\nTable 2 (experiments/source_stats.json, sampling_study.json)")
-    mc, kv = _ss["mooncake"], _ss["kvct"]["40"]
-    claim("Table 2 one-time", f"{100*mc['conversation']['one_time_frac']:.1f} / "
-          f"{100*mc['toolagent']['one_time_frac']:.1f}\\% & {100*kv['one_time_frac']:.0f}\\%", "", "source_stats")
-    claim("Table 2 mean reuse", f"{mc['conversation']['mean_reuse']:.1f} / {mc['toolagent']['mean_reuse']:.1f} & "
-          f"{kv['mean_reuse']:.0f}", "", "source_stats")
-    claim("Table 2 blocks/request", f"{mc['conversation']['blocks_per_request']:.0f} / "
-          f"{mc['toolagent']['blocks_per_request']:.0f} & $\\sim${round(kv['blocks_per_request'], -2):,.0f}"
-          .replace(",", "{,}"), "", "source_stats")
-    assert kv["requests"] == 4215
-    hs = sorted(r["headroom_mean"] for r in _sm["rows"])
-    claim("Table 2 agentic headroom", f"& {hs[0]:.0f}--{hs[-1]:.0f}\\% \\\\", "", "sampling_study means")
-    ot = [v["one_time_frac"] * 100 for v in _ss["kvct"].values()]
-    claim("agentic one-time range", f"ranges {min(ot):.1f}--{max(ot):.0f}\\% over 20--200", "", "kvct sizes")
+    print("\nworkload statistics (source_stats.json, headroom_by_length.json); Table 2 folded into section 4")
+    mc = _ss["mooncake"]
+    claim("one-time share", f"production traces {100*mc['conversation']['one_time_frac']:.1f} and "
+          f"{100*mc['toolagent']['one_time_frac']:.1f}\\% of blocks are touched exactly once", "", "source_stats")
+    claim("mean reuse and blocks per request", f"a block is read {mc['conversation']['mean_reuse']:.1f} and "
+          f"{mc['toolagent']['mean_reuse']:.1f} times on\naverage, a request reads {mc['conversation']['blocks_per_request']:.0f} "
+          f"and {mc['toolagent']['blocks_per_request']:.0f} blocks", "", "source_stats")
     full = {r["trace"]: r["headroom_pct"] for r in _hb["rows"] if r["full_trace"]}
-    claim("Table 2 Mooncake headroom pair", f"({full['conversation']:.1f}\\% and {full['toolagent']:.1f}\\%)",
-          "", "headroom_by_length")
+    claim("headroom pair", f"the hindsight oracle saves {full['conversation']:.1f}\\% and {full['toolagent']:.1f}\\% of the "
+          "frequency\nheuristic's cost", "", "headroom_by_length")
     _otf = [100 * _ss["mooncake"][t]["one_time_frac"] for t in ("conversation", "toolagent")]
     claim("reaction: whole-trace singletons", f"But {min(_otf):.0f}--{max(_otf):.0f}\\% of the blocks in these traces "
           "are accessed only once in the whole trace", "", "source_stats")
@@ -832,22 +843,8 @@ if _ss and _sm and _hb:
 # Table 3's left column (retracted sorted-prefix runs, the record of the reversal): every cell from
 # an artifact. "+87%" at 70 was the classifier variant beside regression values; "-9%" at 100 had no
 # shipped artifact (2026-10-19 second pass).
-_t3 = {40: load("kvct_placement_fixed.json"), 70: load("kvct_placement_n70.json"),
-       100: load("kvct_placement_n100.json"), 150: load("kvct_placement_n150.json")}
-if all(_t3.values()):
-    print("\nTable 3, sorted-prefix column (kvct_placement_*.json)")
-    for n, dd in _t3.items():
-        v = [r["regression_headroom_pct"] for r in dd["results"] if r["features"] == "block+session+think"][0]
-        claim(f"Table 3 {n} conversations", f"{n} conversations & ${v:+.0f}\\%$", v, "regression, all features")
-
-# The eviction-signal inversion (section V-F): it quoted a superseded artifact until 2026-10-19.
-_kv = load("reactive_kvct_sweep.json")
-if _kv:
-    at5 = [r for r in _kv["rows"] if r["cache_frac"] == 0.05]
-    lru = [r["lru"] / r["belady"] for r in at5]
-    lfu = [r["h2o"] / r["belady"] for r in at5]
-    claim("kvct LRU / LFU at 5%", f"LRU reaches {min(lru):.2f}--{max(lru):.2f} of Belady at a 5\\%\ntier "
-          f"while LFU stays near {min(lfu):.2f}--{max(lfu):.2f}", "", "reactive_kvct_sweep @ 5%")
+# Table 3 (sorted-prefix kv-cache-tester runs) and the kv-cache-tester eviction-signal inversion were cut
+# from the paper on 2026-11-24 (notebook BN); their artifacts remain in experiments/.
 
 # --- the retracted claims must not reappear ----------------------------------------
 RETRACTED = [
@@ -1257,9 +1254,7 @@ if d:
           f"toolagent, {_tex(full['toolagent']['requests'])}",
           f"{full['conversation']['requests']} / {full['toolagent']['requests']}", "full_trace rows")
     _h = round((full["conversation"]["headroom_pct"] + full["toolagent"]["headroom_pct"]) / 2)
-    claim("Table 2 headroom at full length", f"heuristic vs.\\ oracle & {_h}\\%",
-          f"{full['conversation']['headroom_pct']} / {full['toolagent']['headroom_pct']}",
-          "full_trace rows, rounded")
+    assert _h == 93, "the limits section rounds the two-trace headroom to the 93.5/91.8 pair quoted in section 4"
 
 PROSE_FILES = ("README.md", "paper/README.md", "REPRODUCIBILITY.md")
 _elh = load("evidence_ladder.json")
@@ -1337,7 +1332,7 @@ SUPERSEDED_IN_PAPER = {
     "84.4\\% and 87.6\\%": "the 'unreachable share', a tie rule (section AZ)",
     "out of a split-time policy's reach": "the retracted section V-B headline (section AZ)",
 }
-for _tex in [ROOT / "paper" / "main.tex", *sorted((ROOT / "paper" / "sections").glob("*.tex"))]:
+for _tex in PAPER_SOURCES:
     failures += verify.unmarked_superseded(
         _tex.read_text(), SUPERSEDED_IN_PAPER,
         label=str(_tex.relative_to(ROOT)), markers=verify.PAPER_MARKERS, scope="paragraph")
@@ -1398,7 +1393,7 @@ failures += verify.stale_figures(FIG_SOURCES, FIGS, EXP)
 # not match what the paper embeds. `fig_architecture` (a schematic, no longer embedded since §IV was
 # compressed) stays declared data-free, because an exemption on the record is not an omission.
 failures += verify.figure_coverage_gaps(
-    [ROOT / "paper" / "main.tex", *sorted((ROOT / "paper" / "sections").glob("*.tex"))],
+    PAPER_SOURCES,
     FIG_SOURCES, data_free=("fig_architecture.pdf",))
 
 # The last edge of the chain: a correction in the .tex is not a correction until the PDF is
@@ -1421,11 +1416,11 @@ failures += verify.author_block_problems(_paper / "main.tex")
 failures += verify.leaked_annotations(_paper / "main.pdf")
 failures += verify.type3_fonts(_paper / "main.pdf")
 _cited = set()
-for _t in [_paper / "main.tex", *sorted((_paper / "sections").glob("*.tex"))]:
+for _t in PAPER_SOURCES:
     for _m in re.findall(r"\\cite[a-z]*\{([^}]*)\}", _t.read_text()):
         _cited |= {k.strip() for k in _m.split(",")}
 failures += verify.citation_hygiene((ROOT / "docs" / "references.bib").read_text(), _cited)
-PDF_SOURCES = [_paper / "main.tex", *sorted((_paper / "sections").glob("*.tex")),
+PDF_SOURCES = [*PAPER_SOURCES,
                *[FIGS / f for f in FIG_SOURCES], ROOT / "docs" / "references.bib",
                # the vendored PVLDB template: a template update changes the PDF too
                *(_paper / f for f in ("acmart.cls", "pvldb.sty", "ACM-Reference-Format.bst"))]
@@ -1439,7 +1434,7 @@ failures += verify.stale_paper_pdf(
 # numbers that were in artifacts and never asked the reverse question -- which is how the
 # paper's headline 97% sat unbacked in §5.2.
 failures += verify.unbacked_emphasised_numbers(
-    [ROOT / "paper" / "main.tex", *sorted((ROOT / "paper" / "sections").glob("*.tex"))],
+    PAPER_SOURCES,
     " ".join(_ASSERTED),
     allow=(
         # Definitional, not measured: these come from the formulation or the venue, not a run.
