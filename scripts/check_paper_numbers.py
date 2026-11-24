@@ -289,6 +289,9 @@ if _el and _rs and _ct and _hz and _hzt:
                for r in _el["rows"] if r["trace"] in PROD), "dead-known != visible-dead-last on production"
     dead = [ER(t)["dead_visible_pct"] for t in PROD]
     claim("dead share, bold", f"\\textbf{{{dead[0]:.1f}\\% and {dead[1]:.1f}\\%}}", "", "evidence_ladder")
+    _so = {r["trace"]: r["captured_pct"]["seen-once-last"] for r in _el["rows"] if r["split"] == 0.5 and r["actions"] == "all"}
+    claim("ranking: seen-once with all actions", f"({_so['conversation']:.1f}\\% and\n{_so['toolagent']:.1f}\\% with all "
+          "actions; the ladder", "", "evidence_ladder")
     claim("dead share, abstract", f"{dead[0]:.1f}\\% and {dead[1]:.1f}\\% of the blocks seen before", "", "evidence_ladder")
     _ds = [r["dead_visible_pct"] for r in _el["rows"] if r["trace"] in PROD]
     claim("dead share across splits", f"and {min(_ds):.1f}--{max(_ds):.1f}\\% across splits", "", "evidence_ladder")
@@ -637,9 +640,6 @@ if _sk:
     _chi = max(_T[t]["ski_cascade_max_in_band"] for t in PROD)
     assert _chi < 0, "the paper says counting the cascade does not reach zero"
     claim("cascade-aware ski in band", f"cuts the loss to {-_chi:.1f}--{-_clo:.1f}\\% but not to zero", "", "ski_rental")
-    _err = [100 * (1 - _T[t]["break_even_predicted"][p] / _T[t]["break_even_observed"][p]) for t in PROD for p in ("lru", "ski")]
-    assert all(e > 0 for e in _err), "the paper says the prefix estimate is low in every case"
-    claim("H4 prediction error", f"puts it {min(_err):.0f} to {max(_err):.0f}\\% below the value observed", "", "ski_rental")
 
 # Prefix validity of independent-block billing (III; notebook BD)
 _pv = load("prefix_validity.json")
@@ -773,8 +773,7 @@ if True:
             assert max(_a0) < min(_gc + _dk), "a production policy breaks even inside the measured price range"
         if _mm and _sk:
             _sko = max(_sk["traces"][t]["break_even_observed"]["ski"] for t in PROD)
-            claim("ski break-even vs measured band", f"even its {_sko:.2f} is less than half of the lowest price we measured",
-                  "", "ski_rental")
+            # the sentence was cut for space (notebook BN); its premise stays asserted
             assert _sko < min(_gc) / 2
             _x2 = min(_gc) / max(max(_a0), _sko)
             claim("measured price over any break-even, intro",
@@ -826,6 +825,9 @@ if _ss and _sm and _hb:
     full = {r["trace"]: r["headroom_pct"] for r in _hb["rows"] if r["full_trace"]}
     claim("Table 2 Mooncake headroom pair", f"({full['conversation']:.1f}\\% and {full['toolagent']:.1f}\\%)",
           "", "headroom_by_length")
+    _otf = [100 * _ss["mooncake"][t]["one_time_frac"] for t in ("conversation", "toolagent")]
+    claim("reaction: whole-trace singletons", f"But {min(_otf):.0f}--{max(_otf):.0f}\\% of the blocks in these traces "
+          "are accessed only once in the whole trace", "", "source_stats")
 
 # Table 3's left column (retracted sorted-prefix runs, the record of the reversal): every cell from
 # an artifact. "+87%" at 70 was the classifier variant beside regression values; "-9%" at 100 had no

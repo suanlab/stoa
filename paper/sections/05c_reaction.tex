@@ -47,7 +47,7 @@ at the small tiers where the decision actually matters.
 
 The diagnostics suggest why. Every policy in this family adapts
 on a \emph{ghost hit} (a miss on a block it recently evicted), whether it updates a split (ARC) or
-an expert weight (LeCaR, CACHEUS). But 76--78\% of blocks in these traces are never reused at all, so
+an expert weight (LeCaR, CACHEUS). But 76--78\% of the blocks in these traces are accessed only once in the whole trace, so
 most evictions are correct and produce no signal. Measured, ARC receives an adaptation signal on
 \textbf{3.5--7.3\% of misses}; the regret-based policies read the same channel, which is why they land
 in the same band rather than above it. What signal it does get is not merely sparse but, at

@@ -34,5 +34,5 @@ statements about this workload rather than about these designs. The best plain r
 with is chosen per operating point in hindsight; we did not test choosing it from the prefix. Our replays of
 these policies bill blocks independently; libCacheSim's implementations of them, counted to a request's first
 miss on our traces, move by at most a few points (\Cref{sec:reaction}), and on PrefixSim's own traces that
-matching costs ARC at most 1.0 point and S3-FIFO 5.1 at the tightest cache (\Cref{sec:matching}). Hawkeye and Mockingjay are not run: a KV
+matching costs ARC at most 1.0 point and S3-FIFO 5.1 at the tightest cache (artifact of \Cref{sec:matching}). Hawkeye and Mockingjay are not run: a KV
 block hash carries no analogue of the program counter their predictors are indexed by.

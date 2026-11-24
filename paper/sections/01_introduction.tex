@@ -7,7 +7,7 @@ Which tier holds which block is a buffer-management decision~\cite{pan2025dbpers
 such decision it is evaluated by replaying a trace: let a policy observe part of it, place blocks, and bill
 the rest against a hindsight reference. This paper is about what that evaluation has to fix, because on
 production KV traces the choices it makes silently decide what it reports. We measure three such
-conventions, and each reverses a conclusion: the tie rule for blocks without evidence, the rule that decides
+conventions, and each reverses a conclusion (one of them our own earlier headline): the tie rule for blocks without evidence, the rule that decides
 which cached blocks count as hits, and the write path that decides what a store costs a request.
 
 Most blocks such an evaluation shows a policy are already dead. On two production Mooncake traces,

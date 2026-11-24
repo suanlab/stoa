@@ -19,7 +19,7 @@ engine reuses a block only behind its whole prefix. On these traces a block's id
 without exception among 288{,}500 and 409{,}616 block positions, so every access to a block is an access to
 its prefix, and a policy whose priority grows with recency or count keeps a block's prefix at least as well
 placed as the block. Replayed in prefix order, LRU and Belady show no hit whose prefix missed at any tier
-size; we did not check the adaptive policies.
+size; an independent implementation checks the adaptive ones (\Cref{sec:reaction}).
 
 \paragraph{Cost} An access to a block on tier $t$ costs $\lambda_L\,\ell_t$ plus a context-token term
 that does not depend on the tier, with $\lambda_L = 0.1$ per ms and per-tier read latencies $\ell_t$

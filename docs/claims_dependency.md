@@ -2921,3 +2921,46 @@ noted:
      0.35×).
    - Client send lag is now kept per run (`max_send_lag_s`, at most 6.5 ms).
    - `pct()` takes the upper median for even n.
+
+## §BN — a whole-paper review under the new framing (2026-11-24)
+
+After the abstract was reframed around three conventions (tie rule, matching rule, write path), a fresh
+agent reviewed the whole paper as a PVLDB EA&B reviewer. Verdict: **Major revision**. Its five objections:
+
+1. **The move headline uses the additive bill that §5.8 refutes.** The abstract now says the additive model
+   "charges a move's write even where an asynchronous path would hide it". The experiment that would answer
+   it is not run: replay the moving policies inside a stack with an asynchronous connector.
+2. **The tie rule reverses only our own earlier headline.** The abstract and introduction now say so ("one
+   of them our own earlier headline"). A published split-time or fraction-of-oracle analysis it affects has
+   not been found.
+3. **Tier sizes.** The GPU tier is 1.1 TiB in 64 MiB slots, and "deadness is the whole prize" depends on the
+   live blocks fitting there. This is already stated in §7. Not answered: the ladder at byte-realistic
+   per-GPU capacities.
+4. **Write-path evidence is thin:** single runs plus one rerun, one trace, a clairvoyant oracle. Not answered
+   beyond the reruns of §BM.
+5. **Matching is an engine-semantics disagreement, not an error.** §5.11 already says the study's headline
+   holds for its proposed engine. Text unchanged.
+
+**Sentence-level findings, all fixed:**
+- The abstract's ranker clause mixed action spaces. It now says "with all actions".
+- §3 said the adaptive policies were not checked for hits behind a miss; §5.10's independent implementation
+  checks them.
+- §5.4 cited the seen-once rule's all-actions gains (17.9% and 23.1%) to a table that is tier-only, and no
+  check covered them. The citation is now correct, and a check reads them from `evidence_ladder.json`
+  (split 0.5, `actions: all`).
+- §5.10's "76–78% of blocks are never reused at all" had no check and sat beside 92.8–95.0% dead without a
+  denominator. It now says "accessed only once in the whole trace" and is checked against
+  `source_stats.json` (`one_time_frac`).
+- §7 cited ARC 1.0 / S3-FIFO 5.1 to a section that does not show them; it now cites that section's artifact.
+- §5.12's "every other result is a single draw" is now "most".
+
+**Cut for space:**
+- From the ski-rental paragraph, "even its 0.30 is less than half of the lowest price we measured".
+- From the ski-rental paragraph, the H4 sentence (the prefix estimate of the break-even, 19–33% low). Its
+  check is removed; `ski_rental.json` still holds it.
+
+**Proposed, not done; the author's decision:**
+- Restructure §3 and §5 around the three conventions and retitle.
+- Add "hit counting" and "write path" columns to Table 1.
+- Free about 230 column-lines by moving sampling (§5.12), most of the LRB detail, Figure 3 and the
+  full-width defects table into the artifact.
