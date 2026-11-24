@@ -6,7 +6,9 @@ instead of recomputing it~\cite{qin2024mooncake,gao2024cachedattention,F5_liu202
 Which tier holds which block is a buffer-management decision~\cite{pan2025dbperspective}, and like every
 such decision it is evaluated by replaying a trace: let a policy observe part of it, place blocks, and bill
 the rest against a hindsight reference. This paper is about what that evaluation has to fix, because on
-production KV traces the choices it makes silently decide what it reports.
+production KV traces the choices it makes silently decide what it reports. We measure three such
+conventions, and each reverses a conclusion: the tie rule for blocks without evidence, the rule that decides
+which cached blocks count as hits, and the write path that decides what a store costs a request.
 
 Most blocks such an evaluation shows a policy are already dead. On two production Mooncake traces,
 \textbf{92.8\% and 95.0\%} of the blocks seen before the split, the request halfway through the trace,

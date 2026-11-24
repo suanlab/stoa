@@ -49,29 +49,27 @@ Block: What Split-Instant Evaluation Hides in KV-Cache Placement [Experiment, An
 \email{suanlee@semyung.ac.kr}
 
 \begin{abstract}
-KV-cache placement across GPU, host, remote and storage tiers is evaluated by replaying traces, and
-choices such an evaluation leaves implicit decide what it reports. On two production Mooncake traces,
-92.8\% and 95.0\% of the blocks seen before the evaluation split are never read again. A reference that
-knows the seen blocks' futures gives them the same belief as blocks not yet created, zero, and how an
-evaluation orders the two is a tie rule. With the dead blocks ordered ahead of new ones, a clairvoyant split-time reference reaches
-20.4\% and 15.3\% of a hindsight oracle's advantage, which suggests that a split-time policy can reach
-little of it; with them behind new ones, the same reference reaches 77.8\% and 76.2\%
-(tier-only actions). The swing persists across splits, evaluation windows and tier capacities, and it decides whether a learned
-ranker is more than half of the way to the reference or a sixth. While the live blocks fit in the fastest
-tier, knowing which seen blocks are dead is worth as much as knowing their whole future, and a parameter-free rule that parks blocks seen once behind new ones
-recovers 39.2\% and 43.3\% (47.0\% and 51.7\% with an estimated prior, which three of four Alibaba serving
-traces support). Online, a multi-tier LRU captures 84.5\% and 87.7\% when moving a block is free, but at
-the move prices we measured on one A100 host, 0.75--1.87 times one read plus one write, and under five
-ways of billing a move, none of the replayed policies that move blocks beats a static frequency heuristic
-on the production traces in an additive cost model, even when every policy is billed for storing new
-blocks, unless moves to the remote tier, which we could not measure, cost under a quarter of that. Replayed inside vLLM near
-saturation, storing every block raises median time to first token by 76\% over storing none when the connector
-blocks on the save and stays within run-to-run noise when the save is asynchronous: the additive store price is
-wrong both ways. Reactive replacement, S3-FIFO, SIEVE and W-TinyLFU included, stays within a
-few points of plain rules. On the public simulator of a recent eviction study, counting hits the way vLLM and
-SGLang match them turns a compute-aware policy's 10.4-point gain over LRU into a 19.6-point loss. An artifact regenerates every number from public traces, on CPU except the GPU
-timings, and we catalogue the thirty-one defects, four of them retracted claims, that produced plausible
-numbers on the way.
+KV-cache tiering is evaluated by replaying traces, and conventions such an evaluation leaves unstated decide
+what it reports. We measure three, and each reverses a conclusion. \emph{Tie rule:} on two production Mooncake
+traces, 92.8\% and 95.0\% of the blocks seen before the evaluation split are never read again; a reference that
+knows their futures gives them the same belief as blocks not yet created, zero, and with the dead blocks ordered
+ahead of new ones a clairvoyant split-time reference reaches 20.4\% and 15.3\% of a hindsight oracle's
+advantage and behind them the same reference reaches 77.8\% and 76.2\% (tier-only actions), a swing that persists across splits, windows
+and tier capacities and decides whether a learned ranker is more than half of the way to the reference or a
+sixth. \emph{Matching rule:} on the public simulator of a recent eviction study, counting hits the way vLLM and
+SGLang match them turns a compute-aware policy's 10.4-point gain over LRU into a 19.6-point loss. \emph{Write
+path:} replayed inside vLLM near saturation, storing every block raises median time to first token by 76\% over
+storing none when the connector blocks on the save and stays within run-to-run noise when the save is
+asynchronous, so the additive store price is wrong both ways, and in SGLang a write rule documented to store a
+block on its second access stores every block. With these fixed, knowing which seen blocks are dead is worth as
+much as knowing their whole future while the live blocks fit in the fastest tier, and a parameter-free rule
+that parks blocks seen once behind new ones recovers 39.2\% and 43.3\% (47.0\% and 51.7\% with an estimated
+prior); at the move prices we measured on one A100 host, 0.75--1.87 times one read plus one write, and under
+five ways of billing a move, none of the replayed policies that move blocks beats a static frequency heuristic
+in an additive cost model unless remote moves cost under a quarter of that; and reactive replacement, S3-FIFO,
+SIEVE and W-TinyLFU included, stays within a few points of plain rules. An artifact regenerates every number
+from public traces, on CPU except the GPU timings, and we catalogue the thirty-one defects, four of them
+retracted claims, that produced plausible numbers on the way.
 \end{abstract}
 
 \maketitle

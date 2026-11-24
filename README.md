@@ -3,8 +3,10 @@
 Reproducibility package for **"The Unseen Block: What Split-Instant Evaluation
 Hides in KV-Cache Placement"** (prepared for PVLDB Volume 20 / VLDB 2027, Experiment, Analysis & Benchmark category).
 
-The paper asks what an offline evaluation of KV-block placement has to fix, and finds that on production
-traces the order it gives **blocks without evidence** decides what it reports. The short version:
+The paper asks what an evaluation of KV-cache tiering has to fix, and measures three conventions that such
+evaluations leave unstated and that each reverse a conclusion: the **tie rule** for blocks without evidence,
+the **matching rule** that decides which cached blocks count as hits, and the **write path** that decides what
+a store costs a request. The short version:
 
 - **Most blocks a policy can see are dead.** On the two production Mooncake traces, **92.8% and 95.0%** of
   the blocks seen before the midpoint split are never read again (88.8–96.0% across splits); the few live
