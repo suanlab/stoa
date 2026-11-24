@@ -3017,3 +3017,22 @@ nothing.
   tiering through LMCache's blocking stores is 76.7% slower (2,191 ms).
 - No static placement was replayed inside a stack; vLLM offers no way to pin a split-time assignment. The
   static-versus-moving comparison inside a stack remains open.
+
+**Table 1 gains "which hits count" and "what a store costs" (2026-11-24).** An agent read the six studies and
+quoted each one's evaluation text with section and page. Every cell is a short label of a quote:
+
+| study | which hits count | what a store costs |
+|---|---|---|
+| CachedAttention | a whole session ("either all used or none", §3.3.2) | overlapped with compute, measured (§3.2.2, §4.3.2) |
+| Mooncake | prefix to first miss ("compared one by one … prefix match length", §4.1) | overlapped with prefill (§3.1, Fig. 14) |
+| KVCache in the Wild | prefix via vLLM ("production systems only treat cache hits by prefix matches", §5) | asynchronous swap, "negligible" (§4.1) |
+| Fancy eviction | every resident block (§2.2, §4.4, §5.2) | not charged ("uniform cost model", §3.2) |
+| PolarKV | prefix via a chained hash (§4.1) | measured end to end; whether the engine-side RDMA write blocks is not stated (§4.2–4.3) |
+| Baleen | a whole IO ("hit only occurs if all segments are present", §3.4) | flash-write budget (§2.3, §5) |
+
+- Confidence is medium for KVCache in the Wild's hit counting: it is implied by running vLLM, and the
+  hit-rate formula does not say how a mid-request miss is handled.
+- PolarKV's author list in `references.bib` matches the paper; Hao Chen is the corresponding author, which
+  likely explains vldb.org's file name `p4480-chen.pdf`.
+- Extracts are in the session scratchpad, not the repository.
+- The table is now full-width (`table*`), which moved it to page 4 and saved space.

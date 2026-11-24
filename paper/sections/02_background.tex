@@ -27,27 +27,29 @@ instead~\cite{xia2026lah}. In KV serving, HotPrefix~\cite{li2025hotprefix} admit
 memory and promotes them to the GPU, and OrbitFlow~\cite{ma2026orbitflow} prices GPU--host transfers
 inside one request's plan.
 
-\begin{table}[t]
-\centering\footnotesize\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}p{2.2cm}p{2.1cm}p{1.75cm}p{1.75cm}@{}}
+\begin{table*}[t]
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}p{2.9cm}p{3.2cm}p{2.1cm}p{2.3cm}p{2.6cm}p{3.1cm}@{}}
 \toprule
-study & when it decides & bound reported & moves priced \\
+study & when it decides & bound reported & moves priced & which hits count & what a store costs \\
 \midrule
-CachedAttention~\cite{gao2024cachedattention} & online; warm-up on 10K turns, evaluate on the next 42K & none & storage, not moves \\
-Mooncake~\cite{qin2024mooncake} & online, LRU store & infinite cache & in scheduling, not eviction \\
-KVCache in the wild~\cite{wang2025kvcachewild} & online & infinite cache & ``negligible'' \\
-Fancy eviction~\cite{liu2026fancyeviction} & simulated online & Belady, compute-aware & compute, not moves \\
-PolarKV~\cite{zhang2026polarkv} & online LRU, background offload & none & budget, not moves \\
-Baleen~\cite{S12_wong2024baleen} & trained on day 1, tested after & episode OPT & flash writes \\
+CachedAttention~\cite{gao2024cachedattention} & online; warm-up on 10K turns, evaluate on the next 42K & none & storage, not moves & a whole session & overlapped with compute, measured \\
+Mooncake~\cite{qin2024mooncake} & online, LRU store & infinite cache & in scheduling, not eviction & prefix to first miss & overlapped with prefill \\
+KVCache in the wild~\cite{wang2025kvcachewild} & online & infinite cache & ``negligible'' & prefix (vLLM) & asynchronous, ``negligible'' \\
+Fancy eviction~\cite{liu2026fancyeviction} & simulated online & Belady, compute-aware & compute, not moves & every resident block & not charged \\
+PolarKV~\cite{zhang2026polarkv} & online LRU, background offload & none & budget, not moves & prefix (chained hash) & measured end to end \\
+Baleen~\cite{S12_wong2024baleen} & trained on day 1, tested after & episode OPT & flash writes & a whole IO & flash-write budget \\
 \midrule
-this work & split instant and online replay & references with stated tie rules & measured; five ledgers \\
+this work & split instant and online replay & references with stated tie rules & measured; five ledgers & prefix; to first miss for PrefixSim & blocking and asynchronous, measured \\
 \bottomrule
 \end{tabular}
 \caption{How cache studies close to ours evaluate, from each paper's evaluation section. All evaluate online
 policies, whose own admission rule orders new blocks; none uses a split-time reference, the setting where
-the tie rule of \Cref{sec:ties} decides the result.}
+the tie rule of \Cref{sec:ties} decides the result. Only Fancy eviction's simulator counts a block behind a
+miss (\Cref{sec:matching}); three of the six overlap stores with computation, the asynchronous path of
+\Cref{sec:writepath}.}
 \label{tab:protocols}
-\end{table}
+\end{table*}
 
 \paragraph{How KV-cache placement is evaluated} \Cref{tab:protocols} lists the closest studies. They
 warm a cache on a prefix of the trace and measure on the rest, or bound a policy by an infinite cache
