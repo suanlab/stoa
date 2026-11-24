@@ -1,6 +1,7 @@
 \section{Convention 2: Which Hits Count}
 \label{sec:matching}
-The conventions an evaluation fixes are not ours alone. PrefixSim, the open simulator of a recent study of
+Counted the way vLLM and SGLang match a request, a published simulator's headline, a compute-aware policy
+ahead of LRU, becomes a loss. The conventions an evaluation fixes are not ours alone: PrefixSim, the open simulator of a recent study of
 fourteen eviction policies on production prefix-cache traces~\cite{liu2026fancyeviction}, counts a cached
 block as a hit even when an earlier block of the same request missed; its documentation says so, and notes
 that vLLM and SGLang stop matching at a request's first miss. Under that count, a compute-aware policy that

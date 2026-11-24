@@ -50,7 +50,7 @@ replayed into vLLM near saturation, storing every block raises median time to fi
 none when the store blocks the step (LMCache), and stays within run-to-run noise when the store is asynchronous
 (vLLM's offloading connector); where admission leaves hits unchanged, a clairvoyant admission rule is 32.7\%
 faster on the first path and within 2.1\% on the second. In SGLang, a write rule documented to store a block on
-its second access stores every block, and storing at a request's completion rather than at its prefill lowers
+its second access stores every request that decodes a second token, and storing at a request's completion rather than at its prefill lowers
 mean latency by 8.8\% at the heavier load (the median by 17--23\%) with the same hits (\Cref{sec:contract}).
 
 With the three fixed, the remaining comparisons are short. Static analysis assumes that a block, once placed,
@@ -62,8 +62,8 @@ times the price at which any policy that moves blocks stops paying. In an additi
 of billing a move we tried, and with every policy also billed for storing each new block from the GPU, none of
 the replayed policies that move blocks beats a static frequency heuristic on the production traces, unless a
 move to the remote tier, which we could not measure, costs less than about a quarter of a read plus a write.
-That holds when a move blocks the request; with asynchronous moves, as on vLLM's offloading connector, the bill
-approaches the free ledger, where recency wins. Reactive replacement stays within a few points
+That holds while a move takes link time a load needs, as on our host; a move hidden on an idle link would cost
+less, and the free ledger bounds what recency could gain. Reactive replacement stays within a few points
 of plain rules: the adaptive family (ARC, LeCaR, CACHEUS) beats the best plain rule chosen per operating point
 by at most 4.6 points of Belady when frequency remembers evicted blocks (8.5 at the tightest tier when it does
 not), a learned LRB does not beat ARC, and S3-FIFO, SIEVE and W-TinyLFU stay below that per-point best
@@ -81,9 +81,10 @@ everywhere (\Cref{sec:reaction}).
   \item \textbf{(C2) Findings with the conventions fixed}, replicated on Alibaba's traces where the data allow:
   while the live blocks fit in the fast tier, deadness, not ranking, is what placement has to get right, and a
   parameter-free prefix rule recovers about half of what knowing it is worth; at the move prices we measured,
-  none of the replayed policies that move blocks pays when moves block, unless remote moves are nearly
-  free; and modern
-  one-hit-wonder policies do not beat the best plain rule chosen per operating point (\Cref{sec:fixed}).
+  none of the replayed policies that move blocks pays while a move takes link time a load needs, unless
+  remote moves cost under a quarter of a read plus a write; and modern
+  one-hit-wonder policies do not beat the best plain rule chosen per operating point
+  (\Cref{sec:ladder,sec:arrival,sec:fixed}).
   \item \textbf{(C3) An artifact and a record.} Every number regenerates from public traces, on CPU except the GPU
   timings, and a checker fails on drift; the thirty-one defects that each produced a plausible number on the way here,
   four of them retracted claims, are catalogued with the control that catches each (\Cref{sec:lessons}),

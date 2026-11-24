@@ -3036,3 +3036,35 @@ quoted each one's evaluation text with section and page. Every cell is a short l
   likely explains vldb.org's file name `p4480-chen.pdf`.
 - Extracts are in the session scratchpad, not the repository.
 - The table is now full-width (`table*`), which moved it to page 4 and saved space.
+
+**A post-restructure review (2026-11-24) and what it corrected.** A fresh review of the restructured paper
+found ten problems. The most serious was mine.
+- **I overclaimed asynchronous moves.** The previous commit said that with asynchronous moves "the bill
+  approaches the free ledger, where LRU wins". §8.1's own A100 measurement says otherwise: the two copy
+  directions did not overlap, and a background move took the link time of a load, so the measured price
+  applies whether a move blocks or not. The only asynchronous evidence is stores on the A6000 at loads where
+  the link had time to spare. The paper now says the move result holds while a move takes link time a load
+  needs, and that the free ledger (84.5% / 87.7%) bounds what recency could gain. Fixed in the abstract,
+  introduction, C2, §8.1, the conclusion and the README.
+- **Capacity qualifications carried through.**
+  - The retraction now reads "retracted for a pooled fast tier", in §5.2 and Table 4; at one GPU's worth of KV
+    the two references nearly coincide.
+  - Figure 1's caption says "at our pooled tier sizes".
+  - The §9 lesson needs "the fast tier holds the live ones", and tier capacity joins the swept variables.
+- **The 39.2% / 43.3% are a static-bill result.** The abstract and conclusion now say "in a static bill";
+  §5.3 already says that charging the rearrangement loses 37–160%.
+- **References and order.**
+  - C2 cites §5.3 and §5.6 as well as §8.
+  - Arrival (§5.4) now precedes "why" (§5.5), because "why" uses the estimated prior.
+  - §7.1 reconciles its 0.77 (serving-stack estimate) with §8.1's 0.75–1.87 (raw copies), and points
+    forward to §8.1 for the online LRU numbers.
+  - Figures 1 and 2 are now cited in the text.
+- **Leftovers of the cuts.** Table 4's agentic and sampling items now say "on an agentic trace, since
+  dropped". Its unchecked "up to 56 points" came from a fixed-byte window experiment (40–56) and sat beside
+  a tie-rule swing given as 48–63; it now reads 48–63, which is checked.
+- **Section openings.**
+  - §5, §6 and §7 each open with the conclusion they reverse.
+  - §8 opens with the frame it assumes.
+  - §10 says "move costs were measured on one host".
+  - The SGLang rule is described as storing every request that decodes a second token, in the abstract and
+    the introduction.

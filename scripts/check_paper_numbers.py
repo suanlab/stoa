@@ -995,7 +995,7 @@ if _wc:
           f"({_up2:.1f}\\% at 0.2$\\times$)", "", "write_contract_a6000")
     _nc = _p50(S1, "none", "store-all", 0.35)
     claim("in-stack multi-tier recency vs no host tier", f"is {100 * (1 - _p50(S1, 'offload', 'store-all', 0.35) / _nc):.1f}"
-          f"\\% faster than no host tier at\n40\\,GB, and LMCache's blocking stores make it "
+          f"\\% faster than no host tier at 40\\,GB, and\nthrough LMCache's blocking stores "
           f"{100 * (_p50(S1, 'lmcache', 'store-all', 0.35) / _nc - 1):.1f}\\% slower", "", "write_contract_a6000")
     claim("saturation baseline", f"where median TTFT is already {_ms(_p50(S1, 'none', 'store-all', 0.35))}\\,ms without a\n"
           f"connector against {_ms(_p50(S1, 'none', 'store-all', 0.2))} at 0.2$\\times$", "", "write_contract_a6000")

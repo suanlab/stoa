@@ -1,5 +1,8 @@
 \section{Convention 1: The Tie Rule for Blocks Without Evidence}
 \label{sec:evidence}
+Whether a clairvoyant split-time reference reaches a sixth of the oracle's advantage or three quarters depends
+only on where the dead seen blocks are ordered (\Cref{fig:ties}); the first reading was our earlier headline,
+and at one GPU's worth of KV the two readings nearly coincide.
 
 \subsection{Most blocks a policy can see are dead}
 \label{sec:dead}
@@ -20,7 +23,8 @@ which of two zero-belief blocks goes first is a tie rule. A stable sort in item 
 block ahead of every new one, and the reference then reaches 20.4\% and 15.3\% of the oracle's advantage
 with tier-only actions (15.6\% and 12.4\% with all actions), which reads as most of the advantage being
 out of a split-time policy's reach, the conclusion an earlier version of this paper drew and that we
-retract (\Cref{sec:lessons}). Parking the dead blocks behind the new ones instead costs them
+retract for a pooled fast tier (\Cref{sec:lessons}); at one GPU's worth of KV the two references nearly
+coincide, as shown below. Parking the dead blocks behind the new ones instead costs them
 nothing --- they are never read --- and the same reference reaches:
 
 \begin{center}\footnotesize\setlength{\tabcolsep}{3.5pt}
@@ -42,7 +46,7 @@ same, all actions & 15.6 / 50.8 & 12.4 / 49.4 & 45.4 / 62.7 \\
   \includegraphics[width=\columnwidth]{fig_ties.pdf}
   \caption{The same clairvoyant split-time reference under the two tie rules for blocks without
   evidence, and the causal rule that parks seen-once blocks behind new ones, across splits (tier-only
-  actions). The tie rule moves the reference by 48--63 points.}
+  actions). The tie rule moves the reference by 48--63 points at our pooled tier sizes.}
   \label{fig:ties}
 \end{figure}
 

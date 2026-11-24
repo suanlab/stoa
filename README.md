@@ -23,7 +23,8 @@ a store costs a request. The short version:
   at most 8.2% / 7.4% (`run_evidence_ladder.py`, notebook §BA).
 - **Online, the price of a move decides.** A multi-tier LRU captures 84.5% / 87.7% when moves are free;
   timed on an A100 PCIe host a move costs 0.75–1.87x one read plus one write, and under five ways of
-  billing a move none of the replayed policies that move blocks beats the static frequency heuristic
+  billing a move none of the replayed policies that move blocks beats the static frequency heuristic while a
+  move takes link time a load needs, as on that host; with free moves LRU wins
   (`run_reactive_cost.py`, `measure_tier_costs.py`, `run_migration_ledger.py`; §AV, §AX, §AY).
 - **Reaction stays near plain rules.** Rules that forecast nothing reach 75–99% of Belady on toolagent and
   40–94% on conversation; ARC, LeCaR and CACHEUS beat the best of them by at most 4.6 points, LRB stays
@@ -35,7 +36,7 @@ a store costs a request. The short version:
   asynchronous (vLLM's offloading connector); where
   admission leaves host hits unchanged, a clairvoyant admission rule is 32.7% faster on the first path and
   within 2.1% on the second. The additive store price is wrong both ways. In SGLang, a write rule documented to
-  store a block on its second access stores every block, and storing at a request's completion rather than at
+  store a block on its second access stores every request that decodes a second token, and storing at a request's completion rather than at
   its prefill lowers mean latency by 8.8% at the heavier load (median 17–23%) with the same hits (`run_write_contract.py`, `serving_replay/`, §BM).
 
 A block's creation (its KV is computed) is a compulsory miss and is never billed; billing it as a cache

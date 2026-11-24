@@ -1,7 +1,8 @@
 \section{Convention 3: What a Store Costs}
 \label{sec:writepath}
-An additive bill prices a tier by what a block costs to move there; a serving stack decides what that costs a
-request. We first measure per-block prices in a stack, then replay store admission inside it.
+Under an additive bill a clairvoyant admission rule saves exactly the store time it avoids; inside vLLM, at
+equal hits, it saves many times that when the store blocks and nothing measurable when it does not. We first
+measure per-block prices in a stack, then replay store admission inside it.
 
 \subsection{What a serving stack measures}
 \label{sec:serving}
@@ -29,13 +30,13 @@ recomputing costs 41.0\,ms; loading from the cold disk costs 45.4\,ms, more than
 host a disk tier does not pay at any prefix length we tried. A first run that did not flush the disk
 controller's cache loaded twice as fast as the array reads cold; we report it as cache-assisted and do
 not use it. Under these costs, moving a block from GPU to host memory costs 0.77 of the read-plus-write
-price. These are per-block costs from a tier probe, a block's cost taken as linear in the prefix length, and
+price (raw copies on the same host give 0.75--1.87, \Cref{sec:online}). These are per-block costs from a tier probe, a block's cost taken as linear in the prefix length, and
 what follows is the additive model under measured costs, not a measurement of the policies' latency;
 \Cref{sec:contract} replays store admission, but not the policies that move blocks, inside a stack. Replacing the declared latency
 table with the measured costs, and sweeping the unmeasured remote tier from twice the host cost to just
 under the disk cost, leaves every conclusion in place: the reference
 moves from 13.8--21.9\% with dead blocks first to 69.1--89.7\% with them last, the seen-once rule captures
 31.8--58.9\%, and LRU, at 82.2--92.3\% with free moves, falls to $-574.8$\% to $-220.3$\% at the
-read-plus-write price and breaks even only below 0.13--0.29 of it. Every replay keeps each block in some tier; none may drop a
+read-plus-write price and breaks even only below 0.13--0.29 of it (online replay, \Cref{sec:online}). Every replay keeps each block in some tier; none may drop a
 block and recompute it, although on this host that is cheaper than a cold-disk load, so a policy allowed
 to do so might do better than the placements compared here.

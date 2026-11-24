@@ -1,6 +1,6 @@
 \section{Limitations}
 \label{sec:limits}
-Costs were measured on one host, with one model and one serving stack (\Cref{sec:serving}); its disk is
+Move costs were measured on one host, with one model and one serving stack (\Cref{sec:serving}); its disk is
 rotational and it has no NVMe and no RDMA fabric, so the remote tier's cost is swept rather than measured,
 and the online conclusion holds only if a remote move costs at least about a quarter of a read plus a write
 (\Cref{sec:online}). The bill is additive and per block: it has no overlap of moves with computation or
