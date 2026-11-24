@@ -1,5 +1,5 @@
 {
-  "pdf": "ee8fbe64d246bf20c1c280917bd6cab0dc0576f2d00dad0f4bb88f6ccb827389",
+  "pdf": "4c8cac37f1acc00fd94cf71f9b537837f4f33820efbc6a0ffca0178d7ec285e1",
   "sources": {
     "../docs/references.bib": "9617204a9c2212846692cb170e83cfa2c9174991b7765cf7342fe9068b6c922b",
     "ACM-Reference-Format.bst": "0590db3b8d255a3af91982ab710f3ace5fcaa52434020c9af8a4f141b00b68f3",
@@ -17,15 +17,15 @@
     "figs/fig_sequential.pdf": "271b849d4e46ea2911eecba5ad5713610b959f5264e359ce5b66ed861397648c",
     "figs/fig_tier_ablation.pdf": "0f65332c927650cbf531f1d522dcdea453e8b70007d75341f61d29fcf0d18ae7",
     "figs/fig_ties.pdf": "40f98ae61b8c74b91bbd83f7e98a5e584cb98e48c1fb39aae6f86b8309ec642c",
-    "main.tex": "f924a2ad03a44b46f07a53e1e070d197535429345460608c8a138bb6ff586eaf",
+    "main.tex": "f1292b1c3b3fb977282c1767850fac74a9850b04f5f5723f5c25068e1cc3e375",
     "pvldb.sty": "52ad3948f3231b31d2ac90f470c1759e7f96add7b577ec4e267dfbdc87fc4eb2",
-    "sections/01_introduction.tex": "3e299cb3aead664f925864ad369e9a852229942f9addd3666a5c10089ecaed74",
+    "sections/01_introduction.tex": "f5a285b6850f435993e0fc1e6cb55653bb119307058d8b221dc925a364d4195f",
     "sections/02_background.tex": "e2684a41e40ba1d37b79fa268e335cfb3257daa642650cf743a75fde2affd1f5",
     "sections/03_definitions.tex": "a4aa5539b6e6a3494ed1413da8a3022756a449256e57b6b35ff5ef55c07cb92d",
     "sections/04_workloads.tex": "85a0a8c28871ad7d3a5d52a546db04e854dded442618da0f1858468b8774c5d5",
     "sections/05a_evidence.tex": "bc719f7e80d1f2cfc4e748de068004a58b469dd6c2bad41249dc2c8e34f290ab",
     "sections/05b1_arrival.tex": "a587cdc77f29f0dd3501580895cb17b78358bbcf0f5da3f4cdb9edf3aed96f28",
-    "sections/05b2_online.tex": "4cdab150276598771c4489e86c3700d4e927f4f67f4fb9ad07ecfad5e436eafe",
+    "sections/05b2_online.tex": "d32ce18e00af4927f873d567dbb98a1f38c6326bf0e42039ee6b42da03b1a551",
     "sections/05c_reaction.tex": "17f4263072446132548efd15b29259c92613de6395b5e0eb0fa50bc189d08dcb",
     "sections/05d_ranking.tex": "c851ebc48d13f7fc72cf575a5193578e0418fcf0d11745ca47440120aa5c23fc",
     "sections/05f_serving.tex": "174c331c8b82985ec42ff549da0650ccf4ec53fd1eb5281f525e13c784d4d373",
@@ -34,6 +34,6 @@
     "sections/05i_contract.tex": "a8126256769d72bc1926294cc7a2a4633654106749379678baa59997dd90b92a",
     "sections/06_lessons.tex": "43af9c831ebedbd3b889646cd6218d59ceb88cd2becab20b2048fe424569b50f",
     "sections/07_limits.tex": "bc3b9dfd58c7757d494ebe678f6f33c1b00b12b25b04522da90ad494e3d52cfe",
-    "sections/08_conclusion.tex": "f8469e536cdc11067bfc159f28334c6ece8ed80febde5501ca1abca81efb52ea"
+    "sections/08_conclusion.tex": "a07250890e0e6f950d39973afbf5b2bdb3590f50d7f43e2b0938faf6169157da"
   }
 }

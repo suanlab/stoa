@@ -8,8 +8,8 @@ simulator's headline. The write path decides whether storing a block costs a req
 its transfer time, so the additive price that tiering studies use is wrong both ways. With the three fixed,
 knowing which seen blocks are dead is worth as much as knowing their whole future while the live blocks fit
 in the fastest tier, a parameter-free rule recovers about half of that, none of the replayed policies that
-move blocks beats a static frequency heuristic at the move prices we measured unless remote moves are nearly
-free, and reactive replacement stays within a few points of plain rules.
+move blocks beats a static frequency heuristic at the move prices we measured when moves block, unless remote
+moves are nearly free, and reactive replacement stays within a few points of plain rules.
 
 For whoever evaluates a memory scheduler next, the practical content is short: report the tie rule for
 blocks without evidence, the matching rule and the write path, sweep every convenience choice, bill

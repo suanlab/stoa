@@ -47,7 +47,11 @@ the paths separately bounds the tier we could not measure: with GPU--host moves 
 that touches the remote tier or the disk free, LRU gains 20.4\% and 20.8\% under write-through. It stops
 paying once such a move costs more than 0.02--0.23 of read-plus-write, depending on the ledger, and never
 pays under the reread ledger or with GPU--host moves at 1.87. The conclusion therefore rests on a remote
-move costing at least about a quarter of a read plus a write, which we did not measure.
+move costing at least about a quarter of a read plus a write, which we did not measure, and on a move blocking
+the request. Under an asynchronous write path, which hid stores entirely at the loads of \Cref{sec:contract},
+a move leaves the request's path and the bill approaches the free ledger, where LRU wins. Inside vLLM the
+same multi-tier recency, the offloading connector storing every block, is 5.8\% faster than no host tier at
+40\,GB, and LMCache's blocking stores make it 76.7\% slower (\Cref{tab:contract}).
 
 Moving a block only once it has paid for the move does not change this. A ski-rental policy promotes a
 block when the extra cost of its accesses from a slower tier reaches the price of the move, the rule that

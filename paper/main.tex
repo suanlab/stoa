@@ -67,8 +67,9 @@ much as knowing their whole future while the live blocks fit in the fastest tier
 that parks blocks seen once behind new ones recovers 39.2\% and 43.3\% (47.0\% and 51.7\% with an estimated
 prior); at the move prices we measured on one A100 host, 0.75--1.87 times one read plus one write, and under
 five ways of billing a move, none of the replayed policies that move blocks beats a static frequency heuristic
-in an additive cost model, which charges a move's write even where an asynchronous path would hide it, unless
-remote moves cost under a quarter of that; and reactive replacement, S3-FIFO,
+in an additive cost model when a move blocks the request, unless remote moves cost under a quarter of that,
+while with asynchronous moves the bill approaches the free one, under which multi-tier LRU captures 84.5\% and
+87.7\%; and reactive replacement, S3-FIFO,
 SIEVE and W-TinyLFU included, stays within a few points of plain rules. An artifact regenerates every number
 from public traces, on CPU except the GPU timings, and we catalogue the thirty-one defects, four of them
 retracted claims, that produced plausible numbers on the way.

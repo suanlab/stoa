@@ -993,6 +993,10 @@ if _wc:
     _up2 = _ws["store_all_minus_store_none"]["lmcache@0.2"]["pct"]
     claim("section: store-all over none, both loads", f"raise median TTFT by {_up:.0f}\\% over\nstoring none "
           f"({_up2:.1f}\\% at 0.2$\\times$)", "", "write_contract_a6000")
+    _nc = _p50(S1, "none", "store-all", 0.35)
+    claim("in-stack multi-tier recency vs no host tier", f"is {100 * (1 - _p50(S1, 'offload', 'store-all', 0.35) / _nc):.1f}"
+          f"\\% faster than no host tier at\n40\\,GB, and LMCache's blocking stores make it "
+          f"{100 * (_p50(S1, 'lmcache', 'store-all', 0.35) / _nc - 1):.1f}\\% slower", "", "write_contract_a6000")
     claim("saturation baseline", f"where median TTFT is already {_ms(_p50(S1, 'none', 'store-all', 0.35))}\\,ms without a\n"
           f"connector against {_ms(_p50(S1, 'none', 'store-all', 0.2))} at 0.2$\\times$", "", "write_contract_a6000")
     claim("section: async within noise", f"on the asynchronous path the difference, {_down:.1f}\\%, is within the "

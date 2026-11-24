@@ -3003,3 +3003,17 @@ new or changed checks read these from `ties_by_capacity.json`.
 - §4 now names PrefixSim's traces and the A6000 host.
 - Removed `.tex` files are deleted. The checker greps every file in `sections/`, so an un-`\input` file would
   still have satisfied its checks; it did, until they were deleted.
+
+**The move headline holds when moves block (2026-11-24).** The review called "none of the moving policies
+beats the static heuristic" fatal as worded, because §7 shows an asynchronous store costing a request
+nothing.
+- Worked through the ledgers, an asynchronous write path takes every move off the request's path. A
+  demotion is a background copy, and a promotion's read is the serving access itself. The bill then
+  approaches the zero ledger, where multi-tier LRU captures 84.5% and 87.7% and beats the static heuristic.
+- The abstract, introduction (paragraph and C2), §8.1 and the conclusion now say the result holds when a move
+  blocks the request.
+- §8.1 cites the in-stack counterpart from the replay: at 40 GB and 0.35×, multi-tier recency through the
+  asynchronous offloading connector is 5.8% faster than no host tier (1,168 against 1,240 ms). The same
+  tiering through LMCache's blocking stores is 76.7% slower (2,191 ms).
+- No static placement was replayed inside a stack; vLLM offers no way to pin a split-time assignment. The
+  static-versus-moving comparison inside a stack remains open.
