@@ -1,5 +1,5 @@
 {
-  "pdf": "2bd9e44bc149d6672e76bb817f6455b42ac6ca924274f96a0ded1f4308a4f5d7",
+  "pdf": "39b8ea906644b2b3b0009e2dc0ebe9bef63392102961f2c92c937406c5e0c8bf",
   "sources": {
     "../docs/references.bib": "9617204a9c2212846692cb170e83cfa2c9174991b7765cf7342fe9068b6c922b",
     "ACM-Reference-Format.bst": "0590db3b8d255a3af91982ab710f3ace5fcaa52434020c9af8a4f141b00b68f3",
@@ -26,11 +26,11 @@
     "sections/05a_evidence.tex": "2bae51f32408e0e91bcb821e2d40a147f093e7c9a00fb713dbf756c7c43f3816",
     "sections/05b1_arrival.tex": "a587cdc77f29f0dd3501580895cb17b78358bbcf0f5da3f4cdb9edf3aed96f28",
     "sections/05b2_online.tex": "3d5d4e4e021841dc17c41dae22b7c1bf1461cd7ac3137435b539b219d4ea0318",
-    "sections/05c_reaction.tex": "17f4263072446132548efd15b29259c92613de6395b5e0eb0fa50bc189d08dcb",
+    "sections/05c_reaction.tex": "7e5d7ab13b4cd4a4ca27f058acf1a36c2d083aef6419edb125dd486e1e8f7064",
     "sections/05d_ranking.tex": "c851ebc48d13f7fc72cf575a5193578e0418fcf0d11745ca47440120aa5c23fc",
     "sections/05f_serving.tex": "d48b917ef40ece032fc254bf0cff8cfee9902fd12be1d0608708e59c17c9abd3",
     "sections/05g_why.tex": "c60dcca5be4995f0b071e8305351ba2948af2d8b8777a6b9a69591c47e8d5481",
-    "sections/05h_matching.tex": "0e722f390496ef654cc820567efb9d9a7a16311b6e3028fbda8b10a4ab63f28d",
+    "sections/05h_matching.tex": "d43bc98fd22e98d525a6cd506c8f5e3f0ba9583351e1a4f1ecadf4626532088a",
     "sections/05i_contract.tex": "a8126256769d72bc1926294cc7a2a4633654106749379678baa59997dd90b92a",
     "sections/06_lessons.tex": "76a86404c78abe5b613791a4cdc8cb06ff14f1fd5cc6368981a6fb7a5fc8b3f4",
     "sections/07_limits.tex": "8c22d8a07ea84373b1e2e2e3f2af889db5248152736def85d163616565f7f3bc",

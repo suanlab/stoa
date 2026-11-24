@@ -41,4 +41,8 @@ per request from 9.3 to 1.06, close to LRU's 0.93, yet loses as much (20.9\% of 
 hole, against 21.6\%): one hole early in a long prefix is enough. The study is explicit about holes and
 proposes an engine change that recomputes them in place; its headline holds for such an engine and reverses on
 today's. The difference shrinks as the cache grows, to 1.5 points at 256k blocks. Which hits count is one more
-convention an evaluation fixes, and here it decides the sign of the result.
+convention an evaluation fixes, and here it decides the sign of the result. Nor is the convention PrefixSim's
+alone: of ten other open simulators and replayers whose source we read, two count blocks behind a miss on the
+data they ship with (libCacheSim's flat prefix-trace mode and an LMCache analysis script), three would where a
+miss leaves a gap, and five stop at the first miss as the engines do; those that charge a store treat it as
+asynchronous, or add it serially (versions and lines in the artifact).

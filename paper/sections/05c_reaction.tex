@@ -82,11 +82,9 @@ reimplement it: GBDT regression on log time-to-next-request over inter-access de
 decayed counters, sampled eviction, online retraining from a sliding memory window, right-censored
 labels.
 
-Our first version of it measured something else entirely. The training buffer was capped by truncating to
-its tail; labelled rows arrive one at a time as blocks are re-accessed while censored rows arrive in one
-contiguous burst per checkpoint, so from the third retrain onward every training label was identical, the
-regressor returned a constant, and eviction degenerated to a uniform draw over the sampled candidates.
-We report the repaired numbers and, because two defensible repairs disagree, we report them as a band:
+Our first version measured random eviction: capping the training buffer by truncating it to its tail, where
+censored rows arrive in bursts, left every label identical from the third retrain on (\Cref{sec:lessons}). Two
+defensible repairs disagree, so we report a band:
 
 \begin{center}\small
 \begin{tabular}{@{}lrrrr@{}}
@@ -119,10 +117,7 @@ points of Belady, and the seeds spread LRB over up to 6.4 points on conversation
 claim we keep is narrower: \textbf{LRB does not beat ARC}, and it is below ARC by 9 points or more at five
 of the other six operating points, more than the seed spread; at toolagent's 20\% tier the margin is 1.4
 points, inside it. Both repairs and the retracted behaviour are selectable in the
-artifact, so the band is regenerated rather than reported. We do not claim the band bounds every
-reasonable reimplementation: a third repair produced in an AI-agent review we ran (see the Acknowledgments)
-reported a figure at the 10\% conversation tier above our band but still below ARC; since
-its code is not ours to ship, we neither reproduce nor rely on it.
+artifact, so the band is regenerated rather than reported.
 
 The mechanism appears to be the one that limits ARC, seen from the other side. LRB learns from labels the
 trace supplies when a sampled block is requested again; a block that never returns yields a

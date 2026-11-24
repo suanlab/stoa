@@ -3068,3 +3068,33 @@ found ten problems. The most serious was mine.
   - §10 says "move costs were measured on one host".
   - The SGLang rule is described as storing every request that decodes a second token, in the abstract and
     the introduction.
+
+**Which hits count, beyond PrefixSim (2026-11-24).** An agent read the source of ten other open KV/prefix-cache
+simulators and replayers. Every row is from code (repo@commit, file:lines); no row rests on a README alone.
+
+Hit rules: (a) prefix up to the first missing block; (b) every resident block, regardless of earlier misses;
+(d) longest matching token prefix.
+
+| tool | hit rule | store cost |
+|---|---|---|
+| libCacheSim `cachesim -t lcp` (1a1a11a/libCacheSim@4b66d97, `traceReader/customizedReader/lcp.c:273-299`) | (b): one block per lookup | none |
+| LMCache `examples/agents/prefix_analysis.py` (@f2067e5, substring mode `:71-117`) | (b): a chunk anywhere in an earlier request counts | none |
+| Mooncake `benchmarks/storage_benchmark_v1/benchmark.py:142-162` (@bf3b95a) | (b) by code; equal to (a) on its traces (no eviction, chained ids) | blocking: write latency added serially |
+| kv-cache-tester `trace_replay_tester.py` (@94f6046) | expected hits `:1325-1336` (b), latent on the shipped traces; metadata hit rate `:494-510` stops at the first miss and drops later blocks from the denominator (the agent's measurement: 99.1% against 96.6% pooled) | not modelled (drives a live server) |
+| UniCache (@e7b231e, `vllm/core/block/prefix_caching_block.py:1554-1593`) | (a) intended; the binary search assumes prefix-closed residency, which its evictors can break. The bisect behaviour was checked; the simulator was not run. | none |
+| Vidur canary branch (@25e0082, `base_kv_cache_manager.py:124-136`) | (a) | no I/O time charged |
+| LLMServingSim (@4c7f0ad, `serving/core/kv_cache_manager.py:166-171`) | (a) | write-through not charged (asynchronous) |
+| NVIDIA aisimulate (@c348ae5, `vllm_block_pool.rs:653-677`) | (a) | asynchronous; bandwidth-shared transfers |
+| Marconi (@0801661, `radix_cache_hybrid.py:345-368`) | (d) | none |
+| Prefix-Route (`prefixroute/sim/engine.py:80-90`) | (a) | none |
+
+The §6 sentence in the paper counts: two in (b) on their shipped data (libCacheSim lcp, LMCache substring); three
+that would differ where a miss leaves a gap (Mooncake's benchmark, kv-cache-tester's expected hits, UniCache);
+five at the first miss or a token prefix (Vidur, LLMServingSim, aisimulate, Marconi, Prefix-Route). Those that
+charge a store treat it as asynchronous (LLMServingSim, aisimulate) or add it serially (Mooncake's benchmark).
+Clones were made in the session scratchpad, not in this repository.
+
+To keep the body at 12 pages, §8.2's LRB paragraph lost:
+- its account of the truncation bug, now one sentence that points to §9;
+- the sentence about a third repair from an AI-agent review, which the paper does not rely on and the
+  Acknowledgments still mention.
