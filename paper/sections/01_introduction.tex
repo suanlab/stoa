@@ -35,50 +35,53 @@ their requests are shuffled, but on the traces as recorded they overpredict a se
 8.4 times, consistent with the session-bounded lifetimes Liu et al.\ measured~\cite{liu2026fancyeviction}
 (\Cref{sec:why}).
 
-Static analysis assumes that a block, once placed, stays. Replayed online, plain recency does the same job
-better: a multi-tier LRU captures 84.5\% and 87.7\% when moving a block is free, more than any arrival-time
-policy (\Cref{sec:online}). Whether anything that moves blocks pays is set by the price of a move, which
-KV-cache studies usually assume away (\Cref{tab:protocols}). We measured it on one A100 host: a move
-between GPU and host memory costs 0.75--1.87 times one read plus one write, at least 2.5 times the price
-at which any policy that moves blocks stops paying. In an additive cost model, under every way of billing a
-move we tried, and with every policy also billed for storing each new block from the GPU, none of the
-replayed policies that move blocks beats a static frequency heuristic on the production traces, unless a
-move to the remote tier, which we could not measure, costs less than about a quarter of a read plus a
-write. The per-block costs of a serving stack (vLLM with LMCache) on the same host give the same answer,
-and loading a block from a cold rotational disk there costs more than recomputing it (\Cref{sec:serving}).
-Replayed inside the stack, though, the additive price of a store is wrong both ways, because what a request
-pays for it depends on the connector's write path. On a trace slice replayed into vLLM near saturation, storing
-every block raises median time to first token by 76\% over storing none when the store blocks the step
-(LMCache), and stays within run-to-run noise when the store is asynchronous (vLLM's offloading connector); where admission leaves
-hits unchanged, a clairvoyant admission rule is 32.7\% faster on the first path and within 2.1\% on the
-second. In SGLang, a write rule documented to store a block on its second access stores every block, and
-storing at a request's completion rather than at its prefill lowers mean latency by 8.8\% at the heavier load
-(the median by 17--23\%) with the same hits (\Cref{sec:contract}). Reactive
-replacement, finally, stays within a few points of plain rules: the adaptive family (ARC, LeCaR, CACHEUS)
-beats the best plain rule chosen per operating point by at most 4.6 points of Belady when frequency
-remembers evicted blocks (8.5 at the tightest tier when it does not), a learned LRB does
-not beat ARC, and S3-FIFO, SIEVE and W-TinyLFU stay below that per-point best everywhere
-(\Cref{sec:reaction}). The same holds for evaluations other than ours. The open simulator of a recent
+The second convention decides which cached blocks count as hits. An engine reuses a block only behind its
+whole prefix: vLLM and SGLang stop matching a request at its first miss. The open simulator of a recent
 eviction study counts a cached block as a hit even behind a block that missed; counted the way vLLM and SGLang
-match a request, which stops at its first miss, its headline compute-aware policy goes from 10.4 points ahead
-of LRU to 19.6 points behind (\Cref{sec:matching}).
+match a request, its headline compute-aware policy goes from 10.4 points ahead of LRU to 19.6 points behind
+(\Cref{sec:matching}). Our own replays are safe from it on these traces, where a block's id fixes its
+predecessor (\Cref{sec:defs}).
+
+The third decides what a store costs. Evaluations bill a store, like a move, as a constant per block; we
+measured the constants on one A100 host, and loading a block from a cold rotational disk there costs more than
+recomputing it (\Cref{sec:serving}). Replayed inside a serving stack, though, the additive price of a store is
+wrong both ways, because what a request pays for it depends on the connector's write path. On a trace slice
+replayed into vLLM near saturation, storing every block raises median time to first token by 76\% over storing
+none when the store blocks the step (LMCache), and stays within run-to-run noise when the store is asynchronous
+(vLLM's offloading connector); where admission leaves hits unchanged, a clairvoyant admission rule is 32.7\%
+faster on the first path and within 2.1\% on the second. In SGLang, a write rule documented to store a block on
+its second access stores every block, and storing at a request's completion rather than at its prefill lowers
+mean latency by 8.8\% at the heavier load (the median by 17--23\%) with the same hits (\Cref{sec:contract}).
+
+With the three fixed, the remaining comparisons are short. Static analysis assumes that a block, once placed,
+stays; replayed online, plain recency does the same job better: a multi-tier LRU captures 84.5\% and 87.7\%
+when moving a block is free, more than any arrival-time policy (\Cref{sec:online}). Whether anything that moves
+blocks pays is set by the price of a move, which KV-cache studies usually assume away (\Cref{tab:protocols}).
+On the A100 host a move between GPU and host memory costs 0.75--1.87 times one read plus one write, at least 2.5
+times the price at which any policy that moves blocks stops paying. In an additive cost model, under every way
+of billing a move we tried, and with every policy also billed for storing each new block from the GPU, none of
+the replayed policies that move blocks beats a static frequency heuristic on the production traces, unless a
+move to the remote tier, which we could not measure, costs less than about a quarter of a read plus a write;
+the write-path results bound how far that model can be trusted. Reactive replacement stays within a few points
+of plain rules: the adaptive family (ARC, LeCaR, CACHEUS) beats the best plain rule chosen per operating point
+by at most 4.6 points of Belady when frequency remembers evicted blocks (8.5 at the tightest tier when it does
+not), a learned LRB does not beat ARC, and S3-FIFO, SIEVE and W-TinyLFU stay below that per-point best
+everywhere (\Cref{sec:reaction}).
 
 \paragraph{Contributions}
 \begin{itemize}
-  \item \textbf{(C1) What an evaluation has to fix.} The decision instant, information set, billing of
-  creations, references, tie rule for blocks without evidence, and the price and ledger of a move, each
-  stated and swept (\Cref{sec:defs}), plus the rule that decides which cached blocks count as hits and the
-  write path that decides what a store costs a request. The tie
-  rule decides split-time references, which none of the
-  online KV-cache studies we read uses (\Cref{tab:protocols}).
-  \item \textbf{(C2) Findings on production traces}, replicated on Alibaba's traces where the data allow:
-  the tie rule moves a clairvoyant reference by 48--63 points with a pooled fast tier; while the live blocks fit in the fast
-  tier, deadness, not ranking, is what placement has to get right, and a parameter-free prefix rule
-  recovers about half of what knowing it is worth; at the move prices we measured, none of the replayed
-  policies that move blocks pays unless remote moves are nearly free; modern one-hit-wonder policies do not
-  beat the best plain rule chosen per operating point; a published simulator's headline reverses under the
-  matching rule serving engines implement; and inside a serving stack, whether store admission changes
-  latency is decided by the connector's write path, not by the additive price.
+  \item \textbf{(C1) Three conventions that reverse conclusions}, defined with the rest of an evaluation's
+  frame (\Cref{sec:defs}) and measured: the tie rule for blocks without evidence moves a clairvoyant reference
+  by 48--63 points with a pooled fast tier (\Cref{sec:evidence}); the matching rule serving engines implement
+  reverses a published simulator's headline (\Cref{sec:matching}); and inside a serving stack, whether store
+  admission changes latency is decided by the connector's write path, not by the additive price
+  (\Cref{sec:writepath}). The tie rule decides split-time references, which none of the online KV-cache
+  studies we read uses (\Cref{tab:protocols}).
+  \item \textbf{(C2) Findings with the conventions fixed}, replicated on Alibaba's traces where the data allow:
+  while the live blocks fit in the fast tier, deadness, not ranking, is what placement has to get right, and a
+  parameter-free prefix rule recovers about half of what knowing it is worth; at the move prices we measured,
+  none of the replayed policies that move blocks pays unless remote moves are nearly free; and modern
+  one-hit-wonder policies do not beat the best plain rule chosen per operating point (\Cref{sec:fixed}).
   \item \textbf{(C3) An artifact and a record.} Every number regenerates from public traces, on CPU except the GPU
   timings, and a checker fails on drift; the thirty-one defects that each produced a plausible number on the way here,
   four of them retracted claims, are catalogued with the control that catches each (\Cref{sec:lessons}),
@@ -87,6 +90,5 @@ of LRU to 19.6 points behind (\Cref{sec:matching}).
 
 {\sloppy\paragraph{Artifact} Every result in this paper except the GPU timings is regenerated on CPU, without a paid API, by the
 released package at \url{\artifacturl}; \texttt{make verify} re-derives each one from its stored result
-in a few minutes; \texttt{make reproduce-full} regenerates them from the public Mooncake and
-kv-cache-tester traces, \texttt{make reproduce-external} the Alibaba replication, and the block-move
+in a few minutes; \texttt{make reproduce-full} regenerates them from the public traces, \texttt{make reproduce-external} the Alibaba replication, and the block-move
 timings need a CUDA host (\texttt{measure\_tier\_costs.py}).\par}

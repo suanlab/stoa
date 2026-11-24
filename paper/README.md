@@ -15,8 +15,9 @@ split-time reference reaches 20.4% / 15.3% of the oracle's advantage with dead b
 rule recovers about half of it; online, at measured move prices, nothing that moves blocks beats a static
 frequency heuristic. **Reframed 2026-11-06** after notebook §AZ showed the earlier headline ("84.4% /
 87.6% out of a split-time policy's reach", "2.3–4.9x the split ceiling") was that tie rule; sections 3–4
-(the MDP formulation and control-plane sketch) and Table 1 were removed, and the paper is now organized
-around evaluation definitions (§3), blocks without evidence (§5.1–5.3), online cost (§5.4) and reaction.
+(the MDP formulation and control-plane sketch) and Table 1 were removed, and the paper was then organized
+around blocks without evidence. Since 2026-11-24 it is organized around three conventions: the tie rule (§5),
+the matching rule (§6) and the write path (§7), with the remaining findings in §8 (notebook BN).
 
 An earlier PVLDB version, with a different framing, is `main_pvldb.tex` (git tag `pvldb-final-2026-09`);
 it was never submitted. Since the ICDE version, the paper drops the two LLM-dependent sections
@@ -121,16 +122,13 @@ paper reads — an earlier revision had two such files diverge silently.
 | Section | State |
 |---|---|
 | §1 Introduction, §2 Background (with the evaluation-protocol table) | complete; references verified (notebook §BC) |
-| §3 Definitions | split, billing, references, tie rules for blocks without evidence, move ledgers |
-| §4 Workloads | Mooncake x3, Alibaba Qwen x4, kv-cache-tester; A100 host for move timings |
-| §5.1–5.3 Blocks without evidence | dead shares, tie-rule references (incl. the newsvendor reference), evidence ladder (`evidence_ladder.json`, `ceiling_ties.json`, `reuse_split.json`, `reservation.json`) |
-| §5.4 Why: KV reuse is not stationary | Robbins / Good–Turing vs a shuffled-order control, evaluation window, age and session rules (`irm_departure*.json`, `eval_window.json`, `age_rules*.json`, `session_age.json`) |
-| §5.5–5.7 Arrival, online, serving | estimated prior, recency, measured move price, five ledgers, ski rental, vLLM + LMCache serving costs and the measured latency table (`ski_rental.json`, `serving_tiers_a100.json`, `measured_table.json`) |
-| §5.8 Admission inside a serving stack | store-all / oracle / store-none replayed into vLLM through a blocking (LMCache) and an asynchronous (offloading) connector on one RTX A6000; the write path decides whether admission changes TTFT; SGLang HiCache's three write policies, where a "selective" rule stores everything and write timing alone moves mean TTFT 8.8% (median 17–23%) (`write_contract_a6000.json`, `run_write_contract.py`, `serving_replay/`) |
-| §5.9–5.10 Ranking, reaction | capacity ladder, ARC/LeCaR/CACHEUS/LRB + S3-FIFO/SIEVE/W-TinyLFU |
-| §5.11 A published evaluator and its matching rule | PrefixSim on its own traces: counted as vLLM/SGLang match, RandomCompute's +10.4-point lead over LRU becomes −19.6 (`run_prefixsim_audit.py`) |
-| §5.12 Sampling | the sampling retraction |
-| §6 What the measurement took | thirty-one defects, four retracted claims |
+| §3 What an evaluation has to fix | the three conventions (tie rule, matching rule, write path), then split, billing, references, move ledgers |
+| §4 Workloads | Mooncake x3, Alibaba Qwen x4, PrefixSim's two traces; A100 host for move timings, A6000 host for the serving replay |
+| §5 Convention 1: the tie rule (5.1–5.6) | dead shares, tie-rule references and their capacity dependence (`ties_by_capacity.json`, scale 0.05 ≈ one GPU), evidence ladder, why (Robbins / Good–Turing, age and session rules), the ranker ladder, arrival-time admission |
+| §6 Convention 2: which hits count | PrefixSim on its own traces: counted as vLLM/SGLang match, RandomCompute's +10.4-point lead over LRU becomes −19.6 (`run_prefixsim_audit.py`) |
+| §7 Convention 3: what a store costs (7.1–7.2) | vLLM + LMCache per-block prices on the A100 (`serving_tiers_a100.json`); store admission replayed into vLLM through a blocking (LMCache) and an asynchronous (offloading) connector on one RTX A6000, and SGLang HiCache's three write policies (`write_contract_a6000.json`, `run_write_contract.py`, `serving_replay/`) |
+| §8 With the conventions fixed (8.1–8.2) | recency, measured move price, five ledgers, ski rental, the measured latency table; reaction: ARC/LeCaR/CACHEUS/LRB + S3-FIFO/SIEVE/W-TinyLFU and libCacheSim's implementations |
+| §9 What the measurement took | thirty-one defects, four retracted claims |
 
 Every number in the paper is asserted against its artifact by `../scripts/check_paper_numbers.py`; run it
 after regenerating any experiment.

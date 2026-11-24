@@ -87,7 +87,7 @@ The cost is that our GBDT is not `HistGradientBoostingRegressor`, and we say so 
 
 ## Read this before trusting a number
 
-The paper's §6 catalogues **thirty-one measurement defects whose only symptom was a plausible number**;
+The paper's §9 catalogues **thirty-one measurement defects whose only symptom was a plausible number**;
 `docs/claims_dependency.md` records each one, with its fix and the guard that now catches it. The paper
 counts **four retracted claims**: three in its "Retracted claims" row and the split-time "ceiling" (§AZ).
 Two earlier retractions predate the paper's framing and are counted only here. Two of the retractions

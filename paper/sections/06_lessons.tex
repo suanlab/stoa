@@ -55,12 +55,15 @@ its artifact.}
 \label{tab:defects}
 \end{table*}
 
-Three lessons generalize beyond KV caches. \emph{State the order of blocks without evidence}: any
-reference or policy that gives two blocks the same belief places them by a tie rule, and when most
-blocks have no evidence the rule is the result; LRU-K named this case in 1993 and left it to a
-``subsidiary policy''~\cite{oneil1993lruk}. \emph{Treat every convenience choice as a variable}: the
-split, trace length, action space, tie rule, magnitude scale and billing of creations each moved a
-headline by tens of points here. \emph{Price what a policy does, not only what it serves}: a policy that
-moves blocks is only as good as the move is cheap, and the price has to be measured or bounded rather
-than assumed. The harness ships with these as sweeps, and with a checker that re-derives every number in
+Three lessons generalize beyond KV caches, one per convention. \emph{State the order of blocks without
+evidence}: any reference or policy that gives two blocks the same belief places them by a tie rule, and when
+most blocks have no evidence the rule is the result; LRU-K named this case in 1993 and left it to a
+``subsidiary policy''~\cite{oneil1993lruk}. \emph{Count hits the way the engine serves them}: a simulator
+that scores a resident block behind a miss reports what no engine delivers, and a policy that fragments
+prefixes can win on that count and lose on the engine's. \emph{Price what a policy does by the path it
+takes}: a store or a move costs a request what its write path makes it cost, from nothing on an asynchronous
+connector to many times its transfer time on a blocking one under load, so the price has to be measured in
+the stack or bounded, not assumed. Behind all three sits a fourth: treat every convenience choice as a
+variable; the split, trace length, action space, magnitude scale and billing of creations each moved a
+headline by tens of points here. The harness ships with these as sweeps, and with a checker that re-derives every number in
 this paper from its artifact and fails on drift.
