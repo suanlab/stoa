@@ -2,7 +2,7 @@
 %%% Do NOT edit. File created by BibTeX with style
 %%% ACM-Reference-Format-Journals [18-Jan-2012].
 
-\begin{thebibliography}{24}
+\begin{thebibliography}{26}
 
 %%% ====================================================================
 %%% NOTE TO THE USER: you can override these defaults by providing
@@ -55,6 +55,16 @@
 \newblock \bibinfo{journal}{\emph{arXiv}} (\bibinfo{year}{2025}).
 \newblock
 \showeprint[arxiv]{2510.09665}
+
+
+\bibitem[\protect\citeauthoryear{Doudali, Zahka, and Gavrilovska}{Doudali et~al\mbox{.}}{2021}]%
+        {doudali2021cori}
+\bibfield{author}{\bibinfo{person}{Thaleia~Dimitra Doudali}, \bibinfo{person}{Daniel Zahka}, {and} \bibinfo{person}{Ada Gavrilovska}.} \bibinfo{year}{2021}\natexlab{}.
+\newblock \showarticletitle{Cori: Dancing to the Right Beat of Periodic Data Movements over Hybrid Memory Systems}. In \bibinfo{booktitle}{\emph{2021 IEEE International Parallel and Distributed Processing Symposium (IPDPS)}}. \bibinfo{pages}{350--359}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1109/IPDPS49936.2021.00043}
+\showDOI{\tempurl}
 
 
 \bibitem[\protect\citeauthoryear{Einziger, Friedman, and Manes}{Einziger et~al\mbox{.}}{2017}]%
@@ -244,6 +254,17 @@
 \newblock
 \urldef\tempurl%
 \url{https://www.usenix.org/conference/osdi26/presentation/xia}
+\showURL{%
+\tempurl}
+
+
+\bibitem[\protect\citeauthoryear{Yang, Li, Li, and Lloyd}{Yang et~al\mbox{.}}{2025}]%
+        {yang2025lpc}
+\bibfield{author}{\bibinfo{person}{Dongsheng Yang}, \bibinfo{person}{Austin Li}, \bibinfo{person}{Kai Li}, {and} \bibinfo{person}{Wyatt Lloyd}.} \bibinfo{year}{2025}\natexlab{}.
+\newblock \showarticletitle{Learned Prefix Caching for Efficient {LLM} Inference}. In \bibinfo{booktitle}{\emph{Advances in Neural Information Processing Systems (NeurIPS)}}.
+\newblock
+\urldef\tempurl%
+\url{https://neurips.cc/virtual/2025/poster/117662}
 \showURL{%
 \tempurl}
 

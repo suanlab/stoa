@@ -17,13 +17,14 @@
 PY ?= python3
 SHELL := /bin/bash
 
-.PHONY: reproduce-external reproduce-prefixsim help verify reproduce-fast reproduce-full reproduce-llm figures paper clean data-check
+.PHONY: reproduce-external reproduce-prefixsim reproduce-cori help verify reproduce-fast reproduce-full reproduce-llm figures paper clean data-check
 
 help:
 	@echo "make verify          — 329 tests + every paper number against its artifact (no data needed)"
 	@echo "make data-check      — are the traces present and the right length?"
 	@echo "make reproduce-fast  — regenerate the central claims from the Mooncake traces (~40 min)"
 	@echo "make reproduce-full  — the above plus the LRB hyperparameter sweep (~6 h)"
+	@echo "make reproduce-cori     — Cori's page-scheduler simulator under eight tie orders (~1 h on 48 cores, Python 2.7)"
 	@echo "make reproduce-prefixsim — PrefixSim on its own traces with first-miss scoring (~3 h, C++ toolchain)"
 	@echo "make reproduce-llm   — the two LoCoMo claims; needs OPENAI_API_KEY, costs about \$$5"
 	@echo "make figures paper   — redraw figures, rebuild the PDF"
@@ -130,6 +131,13 @@ reproduce-external:
 # A third-party simulator on its own public traces (section 5.10, notebook BK): builds PrefixSim at a pinned
 # commit with one scoring patch, downloads its two traces at a pinned revision (~0.3 GB, SHA-256 checked),
 # and runs ~3 h on 8 jobs. Needs CMake, Ninja, pkg-config, glib, zstd, xxhash (see the script's docstring).
+CORI_DIR ?= /tmp/stoa-cori
+PY27 ?= python2.7
+reproduce-cori:
+	$(PY) scripts/run_cori_tie_audit.py setup $(CORI_DIR)
+	$(PY) scripts/run_cori_tie_audit.py run $(CORI_DIR) --python $(PY27) --jobs 48
+	$(PY) scripts/run_cori_tie_audit.py collect $(CORI_DIR)
+
 PREFIXSIM_DIR ?= /tmp/stoa-prefixsim
 reproduce-prefixsim:
 	$(PY) scripts/run_prefixsim_audit.py setup $(PREFIXSIM_DIR)

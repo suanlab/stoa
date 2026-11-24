@@ -1095,6 +1095,20 @@ if _wc:
           f"{-_rb['sglang_selective_vs_write_through/first@0.35']['mean_pct']:.1f}\\% at the heavier load", "",
           "write_contract_a6000")
 
+_cr = load("cori_ties.json")
+if _cr:
+    print("\nthe tie rule in Cori's simulator (cori_ties.json)")
+    _ch, _cs = _cr["summary"]["history"], _cr["summary"]
+    assert _cr["modes"][0] == "default" and len(_cr["trace_sha256"]) == 9, "nine bundled traces, the published order first"
+    claim("Cori: cut inside a tie", f"inside a tie in {_ch['periods_cut_in_tie']:,}".replace(",", "{,}")
+          + f" of the tuned scheduler's {_ch['periods_over_capacity']:,}".replace(",", "{,}")
+          + " over-capacity periods", "", "cori_ties")
+    claim("Cori: spread, best period, best runtime", f"moves a slowdown by up to {_cs['max_spread_points']:.1f} points, "
+          f"moves the best period on {['zero','one','two','three','four','five','six','seven','eight','nine'][_ch['best_period_moves_traces']]} "
+          f"of the nine\ntraces, and moves the best period's runtime by up to {_ch['best_runtime_change_pct']:.1f}\\%", "",
+          "cori_ties")
+    assert _ch["best_runtime_change_pct"] > 2 * 3, "the paper says twice the 3% of Cori's headline"
+
 _pm = load("prefixsim_matching.json")
 if _pm:
     print("\nPrefixSim matching rule (prefixsim_matching.json)")
@@ -1386,7 +1400,6 @@ if NOTEBOOK.exists():
 # they are regenerable and unguarded, which is the honest description of an unused plot.
 FIG_SOURCES = {
     "fig_conventions.pdf": (),
-    "fig_reactive.pdf": ("reactive_real_full_lrb.json",),
     "fig_ties.pdf": ("ties_by_capacity.json",),
     "fig_price.pdf": ("migration_ledger.json", "measured_migration.json"),
 }
@@ -1470,7 +1483,8 @@ REQUIRED = ("reactive_real_full_lrb.json", "headroom_by_length.json", "lrb_retra
             "measured_table.json", "irm_departure.json", "irm_departure_bailian.json", "eval_window.json",
             "age_rules.json", "age_rules_bailian.json", "ski_rental.json", "reservation.json",
             "session_age.json", "ties_by_capacity.json", "physical_ledger.json", "lrb_seeds.json",
-            "prefixsim_matching.json", "prefixsim_mooncake.json", "write_contract_a6000.json")
+            "prefixsim_matching.json", "prefixsim_mooncake.json", "write_contract_a6000.json",
+            "cori_ties.json")
 missing = [n for n in REQUIRED if not (EXP / n).exists()]
 if missing:
     failures.append("artifacts absent, so their claims went unchecked: " + ", ".join(missing))

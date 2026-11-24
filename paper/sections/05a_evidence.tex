@@ -63,6 +63,16 @@ arrival distribution. On the small workloads the average does help: the same rul
 between the dead-last reference and the exhaustive search. We therefore report both references and call
 neither a ceiling.
 
+\paragraph{The tie rule elsewhere} Cori~\cite{doudali2021cori} tunes how often a hybrid-memory page scheduler moves
+pages. Its public simulator ranks a period's pages by access counts rounded down to multiples of 20 and breaks
+ties with numpy's default sort; the paper states no tie rule. Rerun unmodified on its nine bundled traces, the
+fast tier's cut falls inside a tie in 1{,}885 of the tuned scheduler's 1{,}970 over-capacity periods, and
+changing only the tie order moves a slowdown by up to 55.0 points, moves the best period on six of the nine
+traces, and moves the best period's runtime by up to 6.4\%, twice the 3\% by which the paper places its tuned
+period from the best. LPC~\cite{yang2025lpc}, a learned prefix-cache eviction policy, gives every block of a
+conversation that will not continue the same oracle score, zero, and orders those blocks by recency and block
+id, also unstated.
+
 \subsection{Knowing which seen blocks are dead is most of the prize}
 \label{sec:ladder}
 Separating what the oracle knows into parts, each billed at the true cost (tier-only, split 0.5; the

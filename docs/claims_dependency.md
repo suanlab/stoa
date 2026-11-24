@@ -3125,3 +3125,51 @@ within the 12-page limit.
 - **Cut to fit:** the conclusion's LRU-K aside (the introduction keeps it), and the Limitations sentence on
   Hawkeye and Mockingjay. Hawkeye and Mockingjay are not run because a KV block hash has no program counter
   for their predictors to index.
+
+## §BP — the tie rule outside our own evaluation (2026-11-25)
+
+The review's strongest remaining objection: the tie rule reverses only our own earlier headline. An agent
+searched published evaluations with a split-time or oracle-relative reference and an unstated order among
+equal-score items. It read each paper and its code, and dropped cases where a tie cannot matter.
+
+**Cori (Doudali, Zahka, Gavrilovska, IPDPS'21; DOI 10.1109/IPDPS49936.2021.00043).** The case is measured
+here.
+- The public simulator (GTkernel/cori-sim@ca2ef92) ranks the pages touched in a period by access count,
+  rounded down to multiples of 20 (`sim/scheduler.py`, `set_oracle_cnts`). It keeps only nonzero counts
+  (`sim/memory.py:115`) and orders them with `np.argsort(...)[::-1]` (`sim/memory.py:120`), which is unstable.
+  Fast memory holds 20% of the pages. No tie rule is stated.
+- `run_cori_tie_audit.py` reruns it unmodified under Python 2.7 / numpy 1.16.5, the version it is written
+  for. The default mode reproduces an unpatched run exactly (pennant, oracle, 50,000 requests per period:
+  55.39% slowdown, 74.13% hit rate).
+- It covers Cori's own candidate periods (`run_cori.py` steps 1–2), the history scheduler Cori tunes and the
+  oracle scheduler, and eight tie orders. 2,720 runs in all.
+- Under the history scheduler, the cut falls inside a tie in 1,885 of 1,970 over-capacity periods.
+- Changing only the tie order:
+  - moves a slowdown by up to 55.0 points (quicksilver);
+  - moves the best period on 6 of 9 traces;
+  - moves the best period's runtime by up to 6.4% (hotspot: 63.6 to 74.1% slowdown).
+- Cori's headline is "on average a 3% slowdown compared to when using the best possible frequency" (§V-A,
+  verified in the paper's text). The tie order alone moves "the best" by more than twice that.
+- An earlier rerun by the agent replaced Cori's LRU list with an OrderedDict and ran Cronus's copy of the
+  simulator. It is superseded by this unmodified audit.
+
+**LPC (Yang, Li, Li, Lloyd, NeurIPS'25, poster 117662).** Cited from code, not measured.
+- Its oracle (yangdsh/LPC@3e750fa, `vllm/benchmarks/backend_request_func.py:456-462`, mode 3 `ml-true`) scores
+  a block `(next_timestamp < 1e8) * random()*0.9`. Every block of a conversation that will not continue
+  scores zero.
+- The evictor orders blocks by `(score, last_accessed, block_id)` (`vllm/vllm/core/evictor.py:186`), so ties
+  fall to recency and block id.
+- Figure 9's stored results contain only the mode-3 run. The paper states no tie rule.
+- Rerunning it needs a GPU and was not done; the paper cites the code only.
+
+**Considered and not used:**
+- Baleen: OPT's own number is tie-insensitive within a tied group; only its training labels are affected.
+- LRB: its paper states the tie rule (random).
+- Parrot: its headline is safe; only a figure-level claim could move.
+- Kleio: no public code.
+- Hawkeye, Glider and Mockingjay: Belady's hit count is tie-invariant among never-reused lines.
+- Others had no oracle-relative number or no code: Sibyl, GL-Cache, 3L-Cache, HALP, Flashield, Zhou & Maas,
+  and an MLSys'25 storage-placement study.
+
+**To fit the paragraph into 12 pages,** §8.2's Figure 3 (the reactive bar chart) is removed. The table beside
+it carries the same numbers, and `make_figures.py` still draws the figure.

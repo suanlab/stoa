@@ -4,7 +4,7 @@ The alternative to forecasting is to react. On the full Mooncake traces, reactiv
 reaches 75--99\% of Belady's hit rate on the toolagent trace and 40--94\% on open-ended conversation
 using LRU, LFU or a fill-once cache alone (our LFU, like the frequency experts of LeCaR and CACHEUS below,
 keeps a block's count after the block is evicted); admitting the adaptive and learned policies below widens the
-per-operating-point envelope only to 76--99\% and 42--94\% (\Cref{fig:reactive}). This section's metric is
+per-operating-point envelope only to 76--99\% and 42--94\%. This section's metric is
 a single cache's hit rate as a fraction of Belady's, with no move price, not the captured share of the
 sections before it.
 
@@ -134,14 +134,3 @@ tier (six settings of window, sample size and trees per trace), LRB spans 41.9--
 conversation and 77.6--86.4\% on toolagent, below ARC's 77.5\% and 92.3\% at every setting; the band
 is too wide to quote one LRB number, but not wide enough to reach ARC.
 
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{fig_reactive.pdf}
-  \caption{Reactive tiering as a fraction of Belady's hit rate, full Mooncake traces. Bars are a
-  per-operating-point best-of-seven envelope, an oracle over policies rather than a policy. Diamonds are
-  ARC, which meets the envelope at 5\% on both traces and at 10\% on conversation but falls short
-  elsewhere; crosses are the
-  LRB-style learned policy (seed 0), which is below ARC everywhere; other seeds reach ARC at the 2\% tier.}
-  \label{fig:reactive}
-\end{figure}
