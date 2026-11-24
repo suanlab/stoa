@@ -1,30 +1,25 @@
 \section{What an Evaluation Has To Fix}
 \label{sec:defs}
-A placement evaluation fixes, often silently, when the policy decides, what it may know, what it is billed
-for and what it is compared with. Three of its conventions each reverse a conclusion in this study: the
-\emph{tie rule} for blocks without evidence, the \emph{matching rule} that decides which cached blocks count
-as hits, and the \emph{write path} that decides what a store costs a request. This section defines the three
-and states the rest of the frame; \Cref{sec:evidence,sec:matching,sec:writepath} measure them.
+An evaluation fixes, often silently, when a policy decides, what it may know, what it is billed for and what
+it is compared with. This section states our frame and defines the three conventions of
+\Cref{fig:conventions}; \Cref{sec:evidence,sec:matching,sec:writepath} measure them.
 
 \paragraph{Trace, blocks, tiers} A trace is a time-ordered sequence of requests, each naming the KV
 blocks it reads; a repeated block id is a genuine reuse because ids are content hashes of the token
 prefix. Blocks are immutable once computed and, within a source, uniform in size. A placement assigns
 each block to one of four tiers, GPU, host DRAM, remote DRAM over RDMA, and local disk, with capacities
-of 10\%, 30\%, 60\% and unbounded shares of the trace's distinct blocks, counted in block slots. The
-experimenter sets them from the whole trace; a running system would fix them in bytes in advance, and we
-sweep them (\Cref{sec:ties}). The replay is in slots, so a block's byte size does not enter it; the move
-prices we measured are for one 64\,MiB block on one host and are applied per slot. A block's first access
+of 10\%, 30\%, 60\% and unbounded shares of the trace's distinct blocks, counted in block slots.  We sweep them
+(\Cref{fig:ties}); the replay is in slots, and the move prices we measured for one 64\,MiB block are applied per
+slot. A block's first access
 \emph{creates} it (its KV is computed), a compulsory miss that no placement can serve, so only later
 accesses are billed. Billing a creation as a read from its tier, as every earlier version of this work
 did, inflated the oracle's advantage about threefold.
 
 \paragraph{Cost} An access to a block on tier $t$ costs $\lambda_L\,\ell_t$ plus a context-token term
 that does not depend on the tier, with $\lambda_L = 0.1$ per ms and per-tier read latencies $\ell_t$
-from a declared table: 0.2, 2, 6 and 12\,ms for GPU, host, remote and disk (\Cref{sec:limits}). We report
-results with \emph{tier-only} actions unless we say otherwise: a KV block is moved, not re-encoded. The
-artifact's cost model also lets a placement change a block's representation and when that change is paid
-for; we call that space \emph{all actions} and report it only where noted, to show how much a
-model-dependent action space moves the numbers.
+from a declared table: 0.2, 2, 6 and 12\,ms for GPU, host, remote and disk (\Cref{sec:limits}). Results use
+\emph{tier-only} actions (a KV block is moved, not re-encoded) unless noted; \emph{all actions} also lets a
+placement change a block's representation, and we report it only to show how much that space moves a number.
 
 \paragraph{The split instant} An offline evaluation picks a split $s$, a request index (the midpoint
 unless stated), lets the policy observe the requests before $s$, and bills the placement on the accesses at or after $s$. A block is \emph{visible} if it was
@@ -40,13 +35,11 @@ For uniform blocks, tier-only costs that rise with latency and a cost linear in 
 oracle's greedy order is optimal by the rearrangement inequality. No reference between the two is an
 upper bound for a class of causal policies here, and we do not call one a ceiling (\Cref{sec:evidence}).
 
-\paragraph{Convention 1: blocks without evidence} A reference that knows the futures of the visible blocks gives two
-kinds of block the same belief, zero: a \emph{new} block, which no policy has seen, and a \emph{dead} visible block,
-which has a history but will not be read again. A policy cannot tell a dead block from a live one; the
-reference can. The frequency heuristic ranks every visible block, dead or not, above every new
-one. Under the reference, the order of the two zero-belief kinds is set by a tie rule, usually item
-order. We vary that rule explicitly, and
-\Cref{sec:evidence} shows it decides most of what a split-time evaluation reports.
+\paragraph{Convention 1: blocks without evidence} A reference that knows the visible blocks' futures gives two
+kinds of block the same belief, zero: a \emph{new} block, which no policy has seen, and a \emph{dead} visible
+block, which has a history but will not be read again (\Cref{fig:conventions}a). A policy cannot tell a dead
+block from a live one; the reference can. Their order is a tie rule, usually item order; we vary it
+(\Cref{sec:evidence}).
 
 \paragraph{Convention 2: which hits count} Blocks are billed independently, although an engine reuses a block
 only behind its whole prefix: vLLM and SGLang stop matching a request at its first miss, so a cached block
@@ -58,9 +51,8 @@ independent implementation checks the adaptive ones (\Cref{sec:reaction}). A sim
 resident block as a hit can report what no engine serves (\Cref{sec:matching}).
 
 \paragraph{Convention 3: what a store costs} Our bill is additive: every read and every move adds its price,
-with no overlap, queueing or batching. In a serving stack, what a store costs the request that creates the
-block depends on the connector's write path: a blocking connector holds the step until the save completes,
-an asynchronous one does not, and under load the difference is not a constant (\Cref{sec:writepath}).
+with no overlap, queueing or batching. In a serving stack, what a store costs a request depends on the
+connector's write path (\Cref{fig:conventions}c), and under load it is not a constant (\Cref{sec:writepath}).
 
 \paragraph{Online replay and the price of a move} Static placements are one capacity-constrained
 assignment over the evaluation window. Online policies replay the post-split accesses from the same

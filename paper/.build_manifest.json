@@ -1,5 +1,5 @@
 {
-  "pdf": "39b8ea906644b2b3b0009e2dc0ebe9bef63392102961f2c92c937406c5e0c8bf",
+  "pdf": "895a8dd8da7d3732dc27e0aa163f2a0540e42c76d526db4c3291a020444fb4cd",
   "sources": {
     "../docs/references.bib": "9617204a9c2212846692cb170e83cfa2c9174991b7765cf7342fe9068b6c922b",
     "ACM-Reference-Format.bst": "0590db3b8d255a3af91982ab710f3ace5fcaa52434020c9af8a4f141b00b68f3",
@@ -7,6 +7,7 @@
     "figs/fig_architecture.pdf": "5da04c218947e652d37ca346c665992d5038ebdc8b0b52e8240a04e17095a36d",
     "figs/fig_budget_frontier.pdf": "79b9eaceeddc60ca48baaac04a5988f39cf849ad0f80ab4060116671f2b76683",
     "figs/fig_capacity_ladder.pdf": "d7fefb6279c90373e0753aeb96bf38620c4ef21c760afb3256dfd95634230789",
+    "figs/fig_conventions.pdf": "3e9461158ca8acde680b66c60b6cfc26a5c8eec734658f2aea17227133cd44e7",
     "figs/fig_learnability.pdf": "e956e94816b39e1497686284173c8642ce9abe6aed18fefe5d70e7d5a78ceee3",
     "figs/fig_locomo.pdf": "7f4659bf8527e1f461a9005b58e69e47f87ff9ebbcdeb323a8d2bedd53b19b0d",
     "figs/fig_locomo_baselines.pdf": "fc3d4efc5baecf122467b5f8513d8490d1cde60cfc1a7f0cbd0bc20a1518bf75",
@@ -16,14 +17,14 @@
     "figs/fig_reactive.pdf": "f1b62a82732caad95f9ff59dce6809d838c1ace7a3b5cb34012692b25a1fb8b0",
     "figs/fig_sequential.pdf": "271b849d4e46ea2911eecba5ad5713610b959f5264e359ce5b66ed861397648c",
     "figs/fig_tier_ablation.pdf": "0f65332c927650cbf531f1d522dcdea453e8b70007d75341f61d29fcf0d18ae7",
-    "figs/fig_ties.pdf": "40f98ae61b8c74b91bbd83f7e98a5e584cb98e48c1fb39aae6f86b8309ec642c",
+    "figs/fig_ties.pdf": "3846af2a7e63bf8b11266c14d5063ac1848e0cea62b1182655320f3f21b88191",
     "main.tex": "dd64c55bc64b5cf9f5282b2e933314386b9631886182aab4dc6c10288bbc412f",
     "pvldb.sty": "52ad3948f3231b31d2ac90f470c1759e7f96add7b577ec4e267dfbdc87fc4eb2",
-    "sections/01_introduction.tex": "e93c6465f4db5680b4e429c1bb5a25daed0a2a58cfaced93ef469e430e111818",
+    "sections/01_introduction.tex": "7bb15edd51dc61375546a358f71d9a35c8e65d35fd9ad6dd0c4c45e005c3b47e",
     "sections/02_background.tex": "b32a1f2187870288253e20fafd7b607d30c33431b68ae71b373f74a1fee53431",
-    "sections/03_definitions.tex": "a4aa5539b6e6a3494ed1413da8a3022756a449256e57b6b35ff5ef55c07cb92d",
+    "sections/03_definitions.tex": "d8cccb42a1fd5123866e1b8f48f47510164a7d7d1f8b9a02185ba4ce4fdcffab",
     "sections/04_workloads.tex": "85a0a8c28871ad7d3a5d52a546db04e854dded442618da0f1858468b8774c5d5",
-    "sections/05a_evidence.tex": "2bae51f32408e0e91bcb821e2d40a147f093e7c9a00fb713dbf756c7c43f3816",
+    "sections/05a_evidence.tex": "0f450f0e12327fde358d55f507d912e42c8de86effcf2530aab007f526dbf755",
     "sections/05b1_arrival.tex": "a587cdc77f29f0dd3501580895cb17b78358bbcf0f5da3f4cdb9edf3aed96f28",
     "sections/05b2_online.tex": "3d5d4e4e021841dc17c41dae22b7c1bf1461cd7ac3137435b539b219d4ea0318",
     "sections/05c_reaction.tex": "7e5d7ab13b4cd4a4ca27f058acf1a36c2d083aef6419edb125dd486e1e8f7064",
@@ -33,7 +34,7 @@
     "sections/05h_matching.tex": "d43bc98fd22e98d525a6cd506c8f5e3f0ba9583351e1a4f1ecadf4626532088a",
     "sections/05i_contract.tex": "a8126256769d72bc1926294cc7a2a4633654106749379678baa59997dd90b92a",
     "sections/06_lessons.tex": "76a86404c78abe5b613791a4cdc8cb06ff14f1fd5cc6368981a6fb7a5fc8b3f4",
-    "sections/07_limits.tex": "8c22d8a07ea84373b1e2e2e3f2af889db5248152736def85d163616565f7f3bc",
-    "sections/08_conclusion.tex": "7437b24661d7890a0878d53886c4ca7f63f357ec28cb3db0572e16b5db58c410"
+    "sections/07_limits.tex": "286c5568331d7f5290f4d900f7d33c182da0752a65429ec06b6dad074a85637e",
+    "sections/08_conclusion.tex": "76c710e05c8b0d416513b571ac749518d3247c662f87483c4d01ca6b6f6b54b7"
   }
 }

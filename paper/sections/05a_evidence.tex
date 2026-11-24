@@ -1,8 +1,7 @@
 \section{Convention 1: The Tie Rule for Blocks Without Evidence}
 \label{sec:evidence}
-Whether a clairvoyant split-time reference reaches a sixth of the oracle's advantage or three quarters depends
-only on where the dead seen blocks are ordered (\Cref{fig:ties}); the first reading was our earlier headline,
-and at one GPU's worth of KV the two readings nearly coincide.
+Where a reference puts dead seen blocks decides whether it reaches a sixth of the oracle's advantage or three
+quarters; the first was our earlier headline (\Cref{fig:ties}).
 
 \subsection{Most blocks a policy can see are dead}
 \label{sec:dead}
@@ -25,28 +24,16 @@ with tier-only actions (15.6\% and 12.4\% with all actions), which reads as most
 out of a split-time policy's reach, the conclusion an earlier version of this paper drew and that we
 retract for a pooled fast tier (\Cref{sec:lessons}); at one GPU's worth of KV the two references nearly
 coincide, as shown below. Parking the dead blocks behind the new ones instead costs them
-nothing --- they are never read --- and the same reference reaches:
-
-\begin{center}\footnotesize\setlength{\tabcolsep}{3.5pt}
-\begin{tabular}{@{}lrrr@{}}
-\toprule
-reference (tier-only actions) & conv. & tool. & synth. \\
-\midrule
-dead visible blocks ahead of new ones & 20.4 & 15.3 & 60.2 \\
-dead visible blocks behind new ones & \textbf{77.8} & \textbf{76.2} & 84.1 \\
-\midrule
-same, all actions & 15.6 / 50.8 & 12.4 / 49.4 & 45.4 / 62.7 \\
-\bottomrule
-\end{tabular}
-\end{center}
-\noindent{\footnotesize Percent of the oracle's advantage over the frequency heuristic, split 0.5.}
+nothing --- they are never read --- and the same reference reaches \textbf{77.8\% and 76.2\%} (84.1\% on the
+synthetic control; with all actions 50.8\% and 49.4\%, against 15.6\% and 12.4\% with the dead blocks first).
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{fig_ties.pdf}
-  \caption{The same clairvoyant split-time reference under the two tie rules for blocks without
-  evidence, and the causal rule that parks seen-once blocks behind new ones, across splits (tier-only
-  actions). The tie rule moves the reference by 48--63 points at our pooled tier sizes.}
+  \caption{The clairvoyant split-time reference with dead seen blocks ordered last or first, a reference
+  that knows only which seen blocks are dead, and the causal seen-once rule, against the size of the GPU
+  tier (split 0.5, tier-only actions, the three bounded tiers scaled together). At our pooled sizes the
+  tie rule moves the reference by 48--63 points; at one GPU's worth of KV the two readings nearly meet.}
   \label{fig:ties}
 \end{figure}
 
@@ -90,6 +77,7 @@ frequency heuristic & 0.0 & 0.0 & 0.0 \\
 \emph{causal:} seen-once behind new & 39.2 & 43.3 & 15.4 \\
 \emph{causal:} estimated prior & 47.0 & 51.7 & 0.0 \\
 which visible blocks are dead & 77.8 & 76.2 & 67.0 \\
+visible futures, dead first & 20.4 & 15.3 & 60.2 \\
 visible futures, dead last & 77.8 & 76.2 & 84.1 \\
 oracle & 100 & 100 & 100 \\
 \bottomrule

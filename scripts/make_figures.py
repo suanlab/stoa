@@ -250,30 +250,36 @@ def fig_reactive():
 
 
 def fig_ties():
-    """The clairvoyant split-time reference under both tie rules, and the causal seen-once rule,
-    across splits (tier-only actions). Source: evidence_ladder.json."""
-    d = _load("evidence_ladder.json")
+    """The clairvoyant split-time reference under both tie rules, knowing only deadness, and the causal
+    seen-once rule, against the fast tier's size (split 0.5, tier-only, the three bounded tiers scaled
+    together). Source: ties_by_capacity.json."""
+    d = _load("ties_by_capacity.json")
     if not d:
         return
-    fig, axes = plt.subplots(1, 2, figsize=(3.45, 1.9), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=(3.45, 2.0), sharey=True)
     for ax, tr in zip(axes, ("conversation", "toolagent")):
-        rows = sorted((r for r in d["rows"] if r["trace"] == tr and r["actions"] == "tier"),
-                      key=lambda r: r["split"])
-        xs = [r["split"] for r in rows]
-        for key, lab, col, mk in (("visible-dead-last", "reference, dead blocks last", OI["blue"], "o"),
-                                  ("seen-once-last", "causal: seen-once last", OI["green"], "s"),
-                                  ("visible-dead-first", "reference, dead blocks first", OI["vermillion"], "^")):
-            ax.plot(xs, [r["captured_pct"][key] for r in rows], "-" + mk, color=col, lw=1.4, ms=3.5,
+        rows = sorted((r for r in d["rows"] if r["trace"] == tr), key=lambda r: r["scale"])
+        xs = [r["gpu_slots"] for r in rows]
+        for key, lab, col, mk, ls in (("dead-last", "reference, dead blocks last", OI["blue"], "o", "-"),
+                                      ("dead-known", "knowing only deadness", OI["skyblue"], "", ":"),
+                                      ("seen-once-last", "causal: seen-once last", OI["green"], "s", "-"),
+                                      ("dead-first", "reference, dead blocks first", OI["vermillion"], "^", "-")):
+            ax.plot(xs, [r["captured_pct"][key] for r in rows], ls, marker=mk or None, color=col, lw=1.3, ms=3,
                     label=lab)
+        one = [r for r in rows if r["scale"] == 0.05][0]["gpu_slots"]
+        base = [r for r in rows if r["scale"] == 1.0][0]["gpu_slots"]
+        for x, txt in ((one, "one 80 GB\nGPU"), (base, "our\ndefault")):
+            ax.axvline(x, color=MUTED, lw=0.6, ls="--")
+            ax.text(x * 1.08, 97, txt, fontsize=5.2, color=MUTED, va="top")
+        ax.set_xscale("log")
         ax.set_title(tr, fontsize=8)
-        ax.set_xticks(xs)
-        ax.set_xticklabels([f"{x:.1f}" for x in xs], fontsize=7)
-        ax.set_xlabel("split", fontsize=8)
+        ax.set_xlabel("GPU-tier slots (64 MiB)", fontsize=7)
+        ax.tick_params(labelsize=6.5)
         ax.set_ylim(0, 100)
         ax.grid(True, axis="y")
-    axes[0].set_ylabel("% of oracle's advantage", fontsize=8)
+    axes[0].set_ylabel("% of oracle's advantage", fontsize=7.5)
     h, lab = axes[0].get_legend_handles_labels()
-    fig.legend(h, lab, loc="upper center", ncol=3, bbox_to_anchor=(0.5, 1.08), fontsize=5.4,
+    fig.legend(h, lab, loc="upper center", ncol=2, bbox_to_anchor=(0.5, 1.13), fontsize=5.6,
                handletextpad=0.3, columnspacing=0.8)
     _save(fig, "fig_ties")
 
@@ -450,7 +456,79 @@ def fig_architecture():
     _save(fig, "fig_architecture")
 
 
+def fig_conventions():
+    """The three conventions of the paper as one schematic (Fig 1). Not data-driven: the numbers in it are
+    an illustration, not a result."""
+    from matplotlib.patches import Rectangle
+
+    fig, axes = plt.subplots(1, 3, figsize=(7.1, 1.85), gridspec_kw={"width_ratios": [1.2, 1.0, 1.05]})
+    for ax in axes:
+        ax.set_xlim(0, 10); ax.set_ylim(0, 6.2); ax.axis("off")
+    live, dead, new, hole = OI["green"], "#BBBBBB", OI["blue"], "#FFFFFF"
+    T, L, S = 6.6, 5.6, 4.8          # title, label, small text sizes
+
+    def cell(ax, x, y, fc, w, h=0.6, txt=None, tc=INK, fs=S):
+        ax.add_patch(Rectangle((x, y), w, h, fc=fc, ec=INK, lw=0.5))
+        if txt:
+            ax.text(x + w / 2, y + h / 2, txt, ha="center", va="center", fontsize=fs, color=tc)
+
+    # (a) tie rule: the order a reference places blocks in; the fast tier takes the first six
+    ax = axes[0]
+    ax.text(0, 5.75, "(a) Tie rule: which zero-belief block first", fontsize=T, weight="bold")
+    x0, w = 2.3, 0.52
+    for r, (lab, seq, note) in enumerate((("dead first", [live] * 2 + [dead] * 7 + [new] * 4, "fast tier holds dead blocks"),
+                                          ("dead last", [live] * 2 + [new] * 4 + [dead] * 7, "fast tier holds new blocks"))):
+        y = 3.85 - 1.95 * r
+        ax.text(0, y + 0.3, lab, fontsize=L, va="center")
+        for k, c in enumerate(seq):
+            cell(ax, x0 + 0.56 * k, y, c, w)
+        ax.text(x0, y - 0.45, note, fontsize=S, color=MUTED)
+    xc = x0 + 0.56 * 6 - 0.02
+    ax.plot([xc] * 2, [1.35, 4.85], ls="--", lw=0.8, color=OI["vermillion"])
+    ax.text(xc + 0.1, 4.72, "fast-tier capacity", fontsize=S, color=OI["vermillion"])
+    for x, c, lab in ((0.0, live, "live, seen"), (2.6, dead, "dead, seen (belief 0)"), (6.6, new, "new (belief 0)")):
+        cell(ax, x, 0.25, c, 0.4, 0.4)
+        ax.text(x + 0.5, 0.45, lab, fontsize=S, va="center")
+
+    # (b) which hits count: one request's blocks, cached or not
+    ax = axes[1]
+    ax.text(0, 5.75, "(b) Matching rule: which hits count", fontsize=T, weight="bold")
+    res = [True, False, True, True, True, False]
+    x0, w = 3.2, 0.7
+    for lab, sub, y in (("cached?", None, 4.0), ("engine", "stops at 1st miss", 2.45), ("simulator", "every cached block", 0.9)):
+        ax.text(0, y + 0.42 if sub else y + 0.3, lab, fontsize=L, va="center")
+        if sub:
+            ax.text(0, y + 0.08, sub, fontsize=S, va="center", color=MUTED)
+    for k, r in enumerate(res):
+        cell(ax, x0 + 0.78 * k, 4.0, OI["skyblue"] if r else hole, w, txt=f"b{k + 1}")
+        cell(ax, x0 + 0.78 * k, 2.45, live if k == 0 else hole, w, txt="hit" if k == 0 else None, tc="white")
+        cell(ax, x0 + 0.78 * k, 0.9, live if r else hole, w, txt="hit" if r else None, tc="white")
+    ax.text(x0 + 0.78 * 6 + 0.05, 2.75, "1 hit", fontsize=L, va="center")
+    ax.text(x0 + 0.78 * 6 + 0.05, 1.2, "4 hits", fontsize=L, va="center")
+
+    # (c) what a store costs: a request's steps and the save of its new blocks
+    ax = axes[2]
+    ax.text(0, 5.75, "(c) Write path: what a store costs", fontsize=T, weight="bold")
+    for r, (lab, blocking) in enumerate((("blocking", True), ("asynchronous", False))):
+        y = 3.75 - 2.2 * r
+        ax.text(0, y + 0.3, lab, fontsize=L, va="center")
+        x = 2.9
+        for _ in range(3):
+            cell(ax, x, y, "#E8F0FB", 1.0, txt="step")
+            if blocking:
+                cell(ax, x + 1.0, y, OI["orange"], 0.85, txt="save")
+                x += 1.85
+            else:
+                cell(ax, x + 0.1, y - 0.72, OI["orange"], 0.85, 0.52, txt="save")
+                x += 1.0
+    ax.text(2.9, 4.6, "the next step waits for each save", fontsize=S, color=MUTED)
+    ax.text(2.9, 0.1, "saves run on another stream", fontsize=S, color=MUTED)
+    fig.subplots_adjust(wspace=0.06, left=0.01, right=0.99)
+    _save(fig, "fig_conventions")
+
+
 def main():
+    fig_conventions()
     fig_architecture()
     fig_budget_frontier()
     fig_tier_ablation()

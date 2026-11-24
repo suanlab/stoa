@@ -3098,3 +3098,30 @@ To keep the body at 12 pages, §8.2's LRB paragraph lost:
 - its account of the truncation bug, now one sentence that points to §9;
 - the sentence about a third repair from an AI-agent review, which the paper does not rely on and the
   Acknowledgments still mention.
+
+## §BO — a readability rewrite with figures (2026-11-24/25)
+
+The author asked for a full rewrite for readability, with figures and charts that help understanding,
+within the 12-page limit.
+
+**Stage 1:**
+- **Figure 1 (new, full width, data-free).** The three conventions as one schematic
+  (`make_figures.fig_conventions`):
+  - (a) the tie rule decides whether dead or new blocks fill the fast tier;
+  - (b) an engine stops at the first miss, while a simulator that counts every cached block reports more
+    hits;
+  - (c) a blocking save holds the next step, while an asynchronous one runs on another stream.
+  The numbers in it are illustrative, and the caption says so.
+- **Figure 2 (was Figure 1, redrawn).** The tie rule against the GPU tier's size, from
+  `ties_by_capacity.json` instead of the split sweep from `evidence_ladder.json`. The split robustness
+  (48–63 points) stays in the text. The figure marks "one 80 GB GPU" and "our default"; at one GPU the two
+  references nearly meet and the seen-once rule captures nothing.
+- **Introduction.** Rewritten as one labelled paragraph per convention, then "With the three fixed". Detail
+  the body already carries was dropped: the A100 disk constant, the shuffled-order IRM test, and the Alibaba
+  replication note.
+- **§3.** Tightened, and now refers to Figure 1's panels.
+- **§5.** The tie-rule inline table is merged into the ladder table (new row "visible futures, dead first");
+  its all-actions and synthetic values moved into the sentence and are checked there.
+- **Cut to fit:** the conclusion's LRU-K aside (the introduction keeps it), and the Limitations sentence on
+  Hawkeye and Mockingjay. Hawkeye and Mockingjay are not run because a KV block hash has no program counter
+  for their predictors to index.

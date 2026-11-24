@@ -7,67 +7,66 @@ Which tier holds which block is a buffer-management decision~\cite{pan2025dbpers
 such decision it is evaluated by replaying a trace: let a policy observe part of it, place blocks, and bill
 the rest against a hindsight reference. This paper is about what that evaluation has to fix, because on
 production KV traces the choices it makes silently decide what it reports. We measure three such
-conventions, and each reverses a conclusion (one of them our own earlier headline): the tie rule for blocks without evidence, the rule that decides
+conventions (\Cref{fig:conventions}), and each reverses a conclusion (one of them our own earlier headline): the tie rule for blocks without evidence, the rule that decides
 which cached blocks count as hits, and the write path that decides what a store costs a request.
 
-Most blocks such an evaluation shows a policy are already dead. On two production Mooncake traces,
-\textbf{92.8\% and 95.0\%} of the blocks seen before the split, the request halfway through the trace,
-are never read again. Dead and unseen blocks give a split-time policy no evidence of future use, and a
-reference that gives both the same belief orders them by a tie rule, the case LRU-K left to a
-``subsidiary policy''~\cite{oneil1993lruk}. With tier-only actions, a clairvoyant split-time reference
-that breaks the tie by item order, putting the dead blocks first, reaches \textbf{20.4\% and 15.3\%} of a
-hindsight oracle's advantage, which suggests that a split-time policy can reach little of it; parking the dead blocks behind the new ones costs them nothing, and the same reference reaches
-\textbf{77.8\% and 76.2\%} (\Cref{sec:ties}). The swing holds across splits, and across tier capacities while the fast tier is large beside the live
-blocks; at one GPU's worth of KV it nearly vanishes. Where it holds, it
-is not a detail: measured against the first reference, the strongest learned ranker we trained (with all
-actions, where it was trained) is more than half of the way there, against the second about a sixth. Neither reference is an upper bound, and an
-evaluation that does not state its tie rule does not say which one it reports.
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{fig_conventions.pdf}
+  \caption{The three conventions this paper measures. (a) A reference that knows the seen blocks' futures
+  gives dead seen blocks and new blocks the same belief, zero; their order decides what fills the fast tier
+  (\Cref{sec:evidence}). (b) An engine stops matching a request at its first missing block; a simulator that
+  counts every cached block reports hits no engine serves (\Cref{sec:matching}). (c) A blocking connector makes
+  the next step wait for each save; an asynchronous one runs saves on another stream (\Cref{sec:writepath}).}
+  \label{fig:conventions}
+\end{figure*}
 
-Separating what the oracle knows shows what placement has to get right. On the production traces,
-knowing \emph{which} seen blocks are dead is worth as much as knowing every seen block's future, because
-the live ones fit in the fastest tier; where they do not, as on the synthetic control, ranking them
-matters again (\Cref{sec:ladder}). The prefix approximates it: a block seen once is dead with probability 0.95 and
-0.97, and a rule that parks seen-once blocks behind new ones, with no parameters, captures 39.2\% and
-43.3\% of the advantage; an estimated prior for new blocks captures 47.0\% and 51.7\%, and on three of
-Alibaba's four serving traces it points the same way (\Cref{sec:arrival}). Counts mislead because KV
-reuse departs from the independent reference model: estimators that assume it hold on our traces once
-their requests are shuffled, but on the traces as recorded they overpredict a seen block's reuse 3.7 to
-8.4 times, consistent with the session-bounded lifetimes Liu et al.\ measured~\cite{liu2026fancyeviction}
-(\Cref{sec:why}).
+\paragraph{The tie rule} Most blocks an evaluation shows a policy are already dead. On two production Mooncake
+traces, \textbf{92.8\% and 95.0\%} of the blocks seen before the split, the request halfway through the trace,
+are never read again. A clairvoyant reference gives these dead blocks and the blocks not yet created the same
+belief, zero, and orders them by a tie rule, the case LRU-K left to a ``subsidiary policy''~\cite{oneil1993lruk}.
+With the dead blocks first, as item order puts them, the reference reaches \textbf{20.4\% and 15.3\%} of a
+hindsight oracle's advantage (tier-only actions), which suggests that a split-time policy can reach little of it;
+with them last, which costs them nothing, the same reference reaches \textbf{77.8\% and 76.2\%}
+(\Cref{sec:ties}). The swing holds across splits while the fast tier is large beside the live blocks, and
+nearly vanishes at one GPU's worth of KV. Where it holds it decides how a result reads: the strongest learned
+ranker we trained (with all actions, where it was trained) is more than half of the way to the first reference
+and about a sixth of the way to the second.
 
-The second convention decides which cached blocks count as hits. An engine reuses a block only behind its
-whole prefix: vLLM and SGLang stop matching a request at its first miss. The open simulator of a recent
-eviction study counts a cached block as a hit even behind a block that missed; counted the way vLLM and SGLang
-match a request, its headline compute-aware policy goes from 10.4 points ahead of LRU to 19.6 points behind
-(\Cref{sec:matching}). Our own replays are safe from it on these traces, where a block's id fixes its
-predecessor (\Cref{sec:defs}).
+What the oracle knows can be taken apart. While the live blocks fit in the fastest tier, knowing \emph{which}
+seen blocks are dead is worth as much as knowing every seen block's future (\Cref{sec:ladder}). The prefix
+approximates deadness: a block seen once is dead with probability 0.95 and 0.97, and a rule that parks
+seen-once blocks behind new ones, with no parameters, captures 39.2\% and 43.3\% of the advantage in a static
+bill, and an estimated prior for new blocks 47.0\% and 51.7\% (\Cref{sec:arrival}). Counts mislead because KV
+reuse is bounded by sessions~\cite{liu2026fancyeviction}: estimators that assume independent references
+overpredict a seen block's reuse 3.7 to 8.4 times (\Cref{sec:why}).
 
-The third decides what a store costs. Evaluations bill a store, like a move, as a constant per block; we
-measured the constants on one A100 host, and loading a block from a cold rotational disk there costs more than
-recomputing it (\Cref{sec:serving}). Replayed inside a serving stack, though, the additive price of a store is
-wrong both ways, because what a request pays for it depends on the connector's write path. On a trace slice
-replayed into vLLM near saturation, storing every block raises median time to first token by 76\% over storing
-none when the store blocks the step (LMCache), and stays within run-to-run noise when the store is asynchronous
-(vLLM's offloading connector); where admission leaves hits unchanged, a clairvoyant admission rule is 32.7\%
-faster on the first path and within 2.1\% on the second. In SGLang, a write rule documented to store a block on
-its second access stores every request that decodes a second token, and storing at a request's completion rather than at its prefill lowers
-mean latency by 8.8\% at the heavier load (the median by 17--23\%) with the same hits (\Cref{sec:contract}).
+\paragraph{The matching rule} An engine reuses a block only behind its whole prefix: vLLM and SGLang stop
+matching a request at its first miss. The open simulator of a recent eviction study counts a cached block as a
+hit even behind a block that missed; counted the way vLLM and SGLang match a request, its headline
+compute-aware policy goes from 10.4 points ahead of LRU to 19.6 points behind (\Cref{sec:matching}).
 
-With the three fixed, the remaining comparisons are short. Static analysis assumes that a block, once placed,
-stays; replayed online, plain recency does the same job better: a multi-tier LRU captures 84.5\% and 87.7\%
-when moving a block is free, more than any arrival-time policy (\Cref{sec:online}). Whether anything that moves
-blocks pays is set by the price of a move, which KV-cache studies usually assume away (\Cref{tab:protocols}).
-On the A100 host a move between GPU and host memory costs 0.75--1.87 times one read plus one write, at least 2.5
-times the price at which any policy that moves blocks stops paying. In an additive cost model, under every way
-of billing a move we tried, and with every policy also billed for storing each new block from the GPU, none of
-the replayed policies that move blocks beats a static frequency heuristic on the production traces, unless a
-move to the remote tier, which we could not measure, costs less than about a quarter of a read plus a write.
-That holds while a move takes link time a load needs, as on our host; a move hidden on an idle link would cost
-less, and the free ledger bounds what recency could gain. Reactive replacement stays within a few points
-of plain rules: the adaptive family (ARC, LeCaR, CACHEUS) beats the best plain rule chosen per operating point
-by at most 4.6 points of Belady when frequency remembers evicted blocks (8.5 at the tightest tier when it does
-not), a learned LRB does not beat ARC, and S3-FIFO, SIEVE and W-TinyLFU stay below that per-point best
-everywhere (\Cref{sec:reaction}).
+\paragraph{The write path} Evaluations bill a store, like a move, as a constant per block. Inside a serving stack
+that price is wrong both ways, because what a request pays for a store depends on the connector's write path.
+On a trace slice replayed into vLLM near saturation, storing every block raises median time to first token by
+76\% over storing none when the store blocks the step (LMCache), and stays within run-to-run noise when the
+store is asynchronous (vLLM's offloading connector); where admission leaves hits unchanged, a clairvoyant
+admission rule is 32.7\% faster on the first path and within 2.1\% on the second. In SGLang, a write rule
+documented to store a block on its second access stores every request that decodes a second token, and storing
+at a request's completion rather than at its prefill lowers mean latency by 8.8\% at the heavier load (the
+median by 17--23\%) with the same hits (\Cref{sec:contract}).
+
+\paragraph{With the three fixed} Replayed online, plain recency does better than any arrival-time policy when
+moving a block is free: a multi-tier LRU captures 84.5\% and 87.7\% (\Cref{sec:online}). On one A100 host a move
+between GPU and host memory costs 0.75--1.87 times one read plus one write, at least 2.5 times the price at
+which any policy that moves blocks stops paying. In an additive cost model, under every way of billing a move we
+tried, none of the replayed policies that move blocks beats a static frequency heuristic on the production
+traces, unless a move to the remote tier, which we could not measure, costs less than about a quarter of a read
+plus a write. That holds while a move takes link time a load needs, as on our host; the free ledger bounds what
+recency could gain. Reactive replacement stays within a few points of plain rules: the adaptive family (ARC,
+LeCaR, CACHEUS) beats the best plain rule chosen per operating point by at most 4.6 points of Belady when
+frequency remembers evicted blocks (8.5 at the tightest tier when it does not), a learned LRB does not beat ARC,
+and S3-FIFO, SIEVE and W-TinyLFU stay below that per-point best everywhere (\Cref{sec:reaction}).
 
 \paragraph{Contributions}
 \begin{itemize}

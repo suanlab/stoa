@@ -318,14 +318,12 @@ if _el and _rs and _ct and _hz and _hzt:
           f"{_rsm['toolagent']['reuse_on_new_pct']:.1f}\\%. A policy", "", "reuse_split")
     # the tie-rule table and its prose
     T = ("conversation", "toolagent", "synthetic")
-    claim("ties row: dead first", "dead visible blocks ahead of new ones & " + " & ".join(
+    claim("ladder: dead first", "visible futures, dead first & " + " & ".join(
         f1(L(t, "visible-dead-first", "tier")) for t in T) + " \\\\", "", "evidence_ladder")
-    claim("ties row: dead last", "dead visible blocks behind new ones & " + " & ".join(
-        (f"\\textbf{{{f1(L(t, 'visible-dead-last', 'tier'))}}}" if t in PROD else f1(L(t, "visible-dead-last", "tier")))
-        for t in T) + " \\\\", "", "evidence_ladder")
-    claim("ties row: all actions", "same, all actions & " + " & ".join(
-        f"{f1(L(t, 'visible-dead-first', 'all'))} / {f1(L(t, 'visible-dead-last', 'all'))}" for t in T) + " \\\\",
-        "", "evidence_ladder")
+    claim("dead last: synthetic and all actions", f"({f1(L('synthetic', 'visible-dead-last', 'tier'))}\\% on the\n"
+          f"synthetic control; with all actions {f1(L('conversation', 'visible-dead-last', 'all'))}\\% and "
+          f"{f1(L('toolagent', 'visible-dead-last', 'all'))}\\%, against {f1(L('conversation', 'visible-dead-first', 'all'))}"
+          f"\\% and {f1(L('toolagent', 'visible-dead-first', 'all'))}\\% with the dead blocks first)", "", "evidence_ladder")
     _gap = [r["captured_pct"]["visible-dead-last"] - r["captured_pct"]["visible-dead-first"]
             for r in _el["rows"] if r["trace"] in PROD and r["actions"] == "tier"]
     claim("tie-rule gap across splits", f"by {min(_gap):.0f}--{max(_gap):.0f} points", "", "evidence_ladder")
@@ -378,7 +376,7 @@ if _el and _rs and _ct and _hz and _hzt:
     _ha = [HZ(t, _hz["rows"]) for t in PROD]
     claim("prior, tier and all", f"It captures {_hp[0]:.1f}\\% and {_hp[1]:.1f}\\% with tier-only actions\n"
           f"({_ha[0]:.1f}\\% and {_ha[1]:.1f}\\% with all actions)", "", "hazard_prior*")
-    claim("prior, intro", f"captures {_hp[0]:.1f}\\% and {_hp[1]:.1f}\\%, and on three", "", "hazard_prior_tier")
+    claim("prior, intro", f"an estimated prior for new blocks {_hp[0]:.1f}\\% and {_hp[1]:.1f}\\%", "", "hazard_prior_tier")
     claim("prior, abstract", f"({_hp[0]:.1f}\\% and {_hp[1]:.1f}\\% with an estimated", "", "hazard_prior_tier")
     assert abs(_hzv["synthetic"]) < 0.05, "the paper says the prior captures nothing on synthetic (tier-only)"
     # The estimate is tie-invariant by construction; assert it rather than trust it.
@@ -1387,8 +1385,9 @@ if NOTEBOOK.exists():
 # covering one fifth of it. `make_figures.py` still produces the others for a longer version;
 # they are regenerable and unguarded, which is the honest description of an unused plot.
 FIG_SOURCES = {
+    "fig_conventions.pdf": (),
     "fig_reactive.pdf": ("reactive_real_full_lrb.json",),
-    "fig_ties.pdf": ("evidence_ladder.json",),
+    "fig_ties.pdf": ("ties_by_capacity.json",),
     "fig_price.pdf": ("migration_ledger.json", "measured_migration.json"),
 }
 FIGS = ROOT / "paper" / "figs"
@@ -1398,7 +1397,7 @@ failures += verify.stale_figures(FIG_SOURCES, FIGS, EXP)
 # compressed) stays declared data-free, because an exemption on the record is not an omission.
 failures += verify.figure_coverage_gaps(
     PAPER_SOURCES,
-    FIG_SOURCES, data_free=("fig_architecture.pdf",))
+    FIG_SOURCES, data_free=("fig_architecture.pdf", "fig_conventions.pdf"))
 
 # The last edge of the chain: a correction in the .tex is not a correction until the PDF is
 # rebuilt, and the PDF is what a reviewer reads.
