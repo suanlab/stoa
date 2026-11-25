@@ -51,7 +51,7 @@ that price is wrong both ways, because what a request pays for a store depends o
 On a trace slice replayed into vLLM near saturation, storing every block raises median time to first token by
 76\% over storing none when the store blocks the step (LMCache), and stays within run-to-run noise when the
 store is asynchronous (vLLM's offloading connector); where admission leaves hits unchanged, a clairvoyant
-admission rule is 32.7\% faster on the first path and within 2.1\% on the second. In SGLang, a write rule
+admission rule is 31.1\% faster on the first path and within 0.3\% on the second. In SGLang, a write rule
 documented to store a block on its second access stores every request that decodes a second token, and storing
 at a request's completion rather than at its prefill lowers mean latency by 8.8\% at the heavier load (the
 median by 17--23\%) with the same hits (\Cref{sec:contract}).

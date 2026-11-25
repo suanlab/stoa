@@ -51,8 +51,8 @@ move costing at least about a quarter of a read plus a write, which we did not m
 link time a load needs, as on our A100 host. An asynchronous store left the request's path entirely at the
 loads of \Cref{sec:contract}, where the link had time to spare; where moves are hidden the same way, the bill
 falls toward the free ledger, which bounds what recency could gain. Inside vLLM, multi-tier recency through
-the asynchronous offloading connector, storing every block, is 5.8\% faster than no host tier at 40\,GB, and
-through LMCache's blocking stores 76.7\% slower (\Cref{tab:contract}).
+the asynchronous offloading connector, storing every block, is 28.6\% faster than no host tier at 120\,GB, and
+through LMCache's blocking stores 7.2\% slower (\Cref{fig:contract}).
 
 Moving a block only once it has paid for the move does not change this. A ski-rental policy promotes a
 block when the extra cost of its accesses from a slower tier reaches the price of the move, the rule that

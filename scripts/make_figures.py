@@ -527,8 +527,49 @@ def fig_conventions():
     _save(fig, "fig_conventions")
 
 
+def fig_contract():
+    """Median time to first token of every replay run, by write path and store rule, in three settings
+    (one dot per run). Source: write_contract_a6000.json (summary.cells)."""
+    d = _load("write_contract_a6000.json")
+    if not d:
+        return
+    cells = {(c["workload"], c["host_gb"], c["connector"], c["policy"], c["speed"]): c["p50_ms"]
+             for c in d["summary"]["cells"]}
+    panels = (("traceA, 120 GB, 0.35x", "traceA600", 120, 0.35,
+               (("none", "store-all"), ("lmcache", "store-all"), ("lmcache", "oracle"),
+                ("offload", "store-all"), ("offload", "oracle"))),
+              ("traceA, 40 GB, 0.35x", "traceA1200", 40, 0.35,
+               (("none", "store-all"), ("lmcache", "store-all"), ("lmcache", "store-none"), ("lmcache", "oracle"),
+                ("offload", "store-all"), ("offload", "store-none"), ("offload", "oracle"))),
+              ("coder, 120 GB, 0.12x", "coder600", 120, 0.12,
+               (("none", "store-all"), ("lmcache", "store-all"), ("lmcache", "oracle"),
+                ("offload", "store-all"), ("offload", "oracle"))))
+    col = {"none": MUTED, "lmcache": OI["vermillion"], "offload": OI["blue"]}
+    lab = {"store-all": "all", "oracle": "oracle", "store-none": "none"}
+    fig, axes = plt.subplots(1, 3, figsize=(3.45, 1.95), gridspec_kw={"width_ratios": [5, 7, 5]})
+    for ax, (title, wl, cap, sp, cats) in zip(axes, panels):
+        for i, (conn, pol) in enumerate(cats):
+            v = cells[(wl, 0 if conn == "none" else cap, conn, pol, sp)]
+            ax.scatter([i] * len(v), v, s=7, color=col[conn], zorder=3, lw=0)
+            ax.plot([i - 0.3, i + 0.3], [sum(v) / len(v)] * 2, color=col[conn], lw=1.0)
+        ax.set_xticks(range(len(cats)))
+        ax.set_xticklabels(["no tier" if c == "none" else lab[p] for c, p in cats], rotation=90, fontsize=5.6)
+        ax.set_title(title, fontsize=6.2)
+        ax.tick_params(axis="y", labelsize=5.6)
+        ax.set_ylim(0, None)
+        ax.grid(True, axis="y")
+    axes[0].set_ylabel("median TTFT (ms)", fontsize=6.5)
+    from matplotlib.lines import Line2D
+    h = [Line2D([], [], marker="o", ls="", color=col[k], ms=3) for k in ("lmcache", "offload", "none")]
+    fig.legend(h, ["blocking (LMCache)", "asynchronous (offloading)", "no host tier"], loc="upper center", ncol=3,
+               bbox_to_anchor=(0.5, 1.07), fontsize=5.6, handletextpad=0.2, columnspacing=0.8)
+    fig.subplots_adjust(wspace=0.45)
+    _save(fig, "fig_contract")
+
+
 def main():
     fig_conventions()
+    fig_contract()
     fig_architecture()
     fig_budget_frontier()
     fig_tier_ablation()

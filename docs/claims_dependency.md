@@ -3173,3 +3173,56 @@ here.
 
 **To fit the paragraph into 12 pages,** §8.2's Figure 3 (the reactive bar chart) is removed. The table beside
 it carries the same numbers, and `make_figures.py` still draws the figure.
+
+### §BM, continued — repeats, a second trace, a causal rule, and a profile (2026-11-24/26)
+
+**Campaigns** (`scripts/serving_replay/campaigns/`, seeded shuffled order). 82 runs were scheduled; 74 ran.
+The 8 failures were all on the offloading connector with a 160 GB host tier: the engine died at start-up
+while allocating its pinned CPU tensors, although the same configuration ran at 120 GB. The artifact records
+them under `failed_runs`, and coder was rerun at 120 GB for both connectors.
+
+**Pooled results** (`summary.cells`: every run of a cell; `summary.pooled`: the mean of per-run medians).
+
+| setting | blocking (LMCache) | asynchronous (offloading) |
+|---|---|---|
+| traceA600, 120 GB, 0.35×, oracle vs store-all (5 runs each) | −31.1% | +0.3% |
+| traceA600, 120 GB, 0.2×, oracle vs store-all (5 runs each) | −18.0% | +0.5% |
+| coder600, 120 GB, 0.12×, oracle vs store-all (3 runs each) | −21.9% | −1.3% |
+| traceA1200, 40 GB, 0.35×, store-all vs store-none (5 runs each) | +72.4% | −2.8% |
+| traceA600, 120 GB, 0.35×, store-all vs no connector | +7.2% | −28.6% |
+| traceA600, 120 GB, 0.35×, causal long-prompt rule vs store-all (3 runs) | −4.7% | +6.0% |
+
+- On coder at 0.12×, the asynchronous oracle's mean drops 9%. Its host hits are 30.1% against 27.1–27.6% for
+  store-all: 120 GB does not equalise hits on this slice, as the simulation had warned.
+- The coder load of 0.12× matches traceA's prefill tokens per second at 0.35×.
+- Every blocking oracle run is faster than every blocking store-all run, and every asynchronous oracle run is
+  within 5% of the asynchronous store-all mean. The checker asserts both; the paper says "held in every run".
+
+**A claim the repeats removed.** §8.1 said asynchronous multi-tier recency is "5.8% faster than no host tier at
+40 GB" (1,168 against 1,240 ms). With five runs, store-all spans 1,168–1,251 ms and no connector 1,197–1,240 ms,
+so the difference is noise. §8.1 now cites the 120 GB comparison, where the runs do not overlap:
+- asynchronous store-all, 614–640 ms;
+- no connector, 852–904 ms;
+- blocking store-all, 922–980 ms.
+
+**The causal rule** stores only prompts of at least 2,048 tokens: 89% of new tokens, 92% of the oracle's. It
+helps the blocking path a little and hurts the asynchronous one. By tokens, no deployable rule we tried sits
+between store-all and store-none.
+
+**SGLang profile** (`profile_sgl.sh`, `profile_overlap.py`, `sglang_profile`). Under nsys, the 60-second
+window covers the measured period. In it:
+
+| policy | prefill kernels | overlapped a copy kernel | mean duration, overlapped vs alone |
+|---|---|---|---|
+| write-through | 3,495 | 53 | 1.05 vs 0.51 ms |
+| selective | 3,590 | 2 | 0.64 vs 0.61 ms |
+
+That totals a few tens of milliseconds, against a gap of about 85 ms of mean TTFT per request. The
+direct-transfer runs had already kept the gap without copy kernels. So copy/prefill contention is ruled out as
+the main cause, and the cause stays open.
+- The client errors in the profiling runs are nsys stopping the server at the end of the window, so those
+  runs' latencies are not used.
+
+**In the paper:**
+- §7.2 is rewritten around Figure 5 (every run's median as a dot), which replaces Table 3.
+- The introduction's 32.7% / 2.1% (first runs) are now the pooled 31.1% / 0.3%.

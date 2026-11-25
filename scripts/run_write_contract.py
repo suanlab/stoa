@@ -102,10 +102,11 @@ def collect(d: Path) -> None:
             stem = f.with_suffix("")
             runs[f"{stage}/{stem.name}"] = parse_run(stem, warm)
     workloads = {}
-    for name in ("traceA1200", "traceA600"):
+    for name in ("traceA1200", "traceA600", "coder600"):
         rows = [json.loads(line) for line in open(d / f"{name}.jsonl")]
         meas = [r for r in rows if not r["warmup"]]
-        src = ROOT / "data" / "bailian_qwen_traceA_blksz_16.jsonl"
+        src = ROOT / "data" / ("bailian_qwen_coder_blksz_16.jsonl" if name.startswith("coder") else
+                               "bailian_qwen_traceA_blksz_16.jsonl")
         workloads[name] = {"source": src.name, "source_sha256": sha256(src),
                            "sha256": sha256(d / f"{name}.jsonl"), "requests": len(rows), "warmup": len(rows) - len(meas),
                            "span_s": round(rows[-1]["t"] - rows[0]["t"], 1),
@@ -119,6 +120,21 @@ def collect(d: Path) -> None:
     for f in sorted((d / "rep").glob("stage1_r*/*.jsonl")):     # traceA1200: 400 warm-up requests
         stem = f.with_suffix("")
         runs[str(stem.relative_to(d))] = parse_run(stem, 400)
+    # repeat campaigns in a seeded shuffled order: line n of runs.txt (CPU_GB CONNECTOR POLICY SPEED WORKLOAD)
+    # ran in directory NN_cpuCPU_GB; a run whose server never came up left no records
+    failed = []
+    for camp in ("campaign", "campaign2", "campaign3"):
+        for n, line in enumerate((d / camp / "runs.txt").read_text().split("\n"), 1):
+            if not line.strip():
+                continue
+            cap, conn, pol, sp, wl = line.split()
+            stem = d / camp / f"{n:02d}_cpu{cap}" / f"{conn}_{pol}_x{sp}"
+            key = str(stem.relative_to(d))
+            if not Path(f"{stem}.jsonl").exists():
+                failed.append({"run": key, "workload": wl[:-6], "host_tier_gb": int(cap)})
+                continue
+            runs[key] = parse_run(stem, 400 if wl == "traceA1200.jsonl" else 200)
+            runs[key].update({"workload": wl[:-6], "host_tier_gb": int(cap)})
     tiers = {m: json.loads((d / "tiers" / f"{m}.json").read_text()) for m in ("none", "cpu")}
     for t in tiers.values():
         t.pop("lmcache_env", None)
@@ -144,7 +160,13 @@ def collect(d: Path) -> None:
         "stages": {k: {"stage": s, "host_tier_gb": cap, "workload": wl, "warmup": w}
                    for k, (s, cap, wl, w) in STAGES.items()},
         "workloads": workloads, "runs": runs,
-        "tier_probe": {"runs": tiers, "lmcache_logged": logged}}, separators=(",", ":")) + "\n")
+        # all on vLLM's offloading connector with a 160 GB host tier: the engine died while allocating its
+        # pinned CPU tensors (the same configuration ran at 120 GB); rerun at 120 GB for both connectors
+        "failed_runs": failed,
+        "tier_probe": {"runs": tiers, "lmcache_logged": logged},
+        # nsys over 60 s of the measured period, 120 GB, traceA600 at 0.35x (serving_replay/profile_sgl.sh,
+        # profile_overlap.py)
+        "sglang_profile": json.loads((d / "prof" / "overlap.json").read_text())}, separators=(",", ":")) + "\n")
     print("wrote", OUT)
 
 
@@ -322,6 +344,49 @@ def summarize(d: dict) -> dict:
         rb[f"sglang_selective_vs_write_through/{k}@0.35"] = robust(f"{base}/sgl_write_through_x0.35",
                                                                    f"{base}/sgl_write_through_selective_x0.35")
     out["robust"] = rb
+
+    # every run of a cell, from the stages, the replicates and the campaigns
+    where = {"stage1_cpu40": ("traceA1200", 40), "stage2_cpu120": ("traceA600", 120),
+             "stage2_cpu40": ("traceA600", 40), "rep/vllm_r1": ("traceA600", 120), "rep/stage1_r1": ("traceA1200", 40)}
+    pool = {}
+    for key, r in d["runs"].items():
+        if "workload" in r:
+            wl, cap = r["workload"], r["host_tier_gb"]
+        else:
+            loc = next((w for w in where if key.startswith(w + "/")), None)
+            if loc is None:
+                continue
+            wl, cap = where[loc]
+        if r["connector"] == "none":
+            cap = 0
+        t = [x for x in r["ttft_ms"] if x is not None]
+        h = r.get("hits")
+        pool.setdefault((wl, cap, r["connector"], r["policy"], r["speed"]), []).append(
+            {"p50_ms": pct(t, 0.5), "mean_ms": round(sum(t) / len(t), 3),
+             "host_hit_share": round(h["host_hit"] / h["tokens"], 4) if h else None})
+    # comparisons of cell means (each run's median, averaged over runs): pct change from base to alt
+    def pc(wl, cap, conn, base, alt, sp, conn_alt=None):
+        a = pool[(wl, 0 if conn == "none" else cap, conn, base, sp)]
+        b = pool[(wl, 0 if (conn_alt or conn) == "none" else cap, conn_alt or conn, alt, sp)]
+        ma, mb = sum(x["p50_ms"] for x in a) / len(a), sum(x["p50_ms"] for x in b) / len(b)
+        return {"pct": round(100 * (mb / ma - 1), 1), "runs": [len(a), len(b)]}
+    A6, A12, C6 = "traceA600", "traceA1200", "coder600"
+    out["pooled"] = {
+        "oracle_vs_all/traceA600/120/lmcache@0.35": pc(A6, 120, "lmcache", "store-all", "oracle", 0.35),
+        "oracle_vs_all/traceA600/120/offload@0.35": pc(A6, 120, "offload", "store-all", "oracle", 0.35),
+        "oracle_vs_all/traceA600/120/lmcache@0.2": pc(A6, 120, "lmcache", "store-all", "oracle", 0.2),
+        "oracle_vs_all/traceA600/120/offload@0.2": pc(A6, 120, "offload", "store-all", "oracle", 0.2),
+        "oracle_vs_all/coder600/120/lmcache@0.12": pc(C6, 120, "lmcache", "store-all", "oracle", 0.12),
+        "oracle_vs_all/coder600/120/offload@0.12": pc(C6, 120, "offload", "store-all", "oracle", 0.12),
+        "all_vs_none/traceA1200/40/lmcache@0.35": pc(A12, 40, "lmcache", "store-none", "store-all", 0.35),
+        "all_vs_none/traceA1200/40/offload@0.35": pc(A12, 40, "offload", "store-none", "store-all", 0.35),
+        "longprompt_vs_all/traceA600/120/lmcache@0.35": pc(A6, 120, "lmcache", "store-all", "long-prompt", 0.35),
+        "longprompt_vs_all/traceA600/120/offload@0.35": pc(A6, 120, "offload", "store-all", "long-prompt", 0.35),
+        "all_vs_no_tier/traceA600/120/lmcache@0.35": pc(A6, 120, "none", "store-all", "store-all", 0.35, "lmcache"),
+        "all_vs_no_tier/traceA600/120/offload@0.35": pc(A6, 120, "none", "store-all", "store-all", 0.35, "offload")}
+    out["cells"] = [{"workload": k[0], "host_gb": k[1], "connector": k[2], "policy": k[3], "speed": k[4],
+                     "runs": len(v), "p50_ms": [x["p50_ms"] for x in v], "mean_ms": [x["mean_ms"] for x in v],
+                     "host_hit_share": [x["host_hit_share"] for x in v]} for k, v in sorted(pool.items())]
     # what the blocking path pays per ms of store time an additive bill charges, on the two equal-hit
     # comparisons: the oracle at 120 GB (per ms it avoids) and store-all over store-none at 40 GB (per ms it adds)
     def multiples(sp, stat):
