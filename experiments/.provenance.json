@@ -617,6 +617,6 @@
     "traces.py": "9b0d127bca5bc1db76d5818916c2b668f4fe9c10768b06acd77e9eef49999ccb"
   },
   "write_contract_a6000.json": {
-    "scripts/run_write_contract.py": "37b37e6c13cc866911f358bd0c48c8772d0f125656f1c33b8a6c98f36e388d5e"
+    "scripts/run_write_contract.py": "cdce94b8661902881f8d768c3f646ac4762e44ba7f2eed1bdbbac38b99c05e79"
   }
 }
