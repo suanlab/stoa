@@ -1,12 +1,11 @@
 \subsection{Where reaction stands}
 \label{sec:reaction}
-The alternative to forecasting is to react. On the full Mooncake traces, reactive tiering
-reaches 75--99\% of Belady's hit rate on the toolagent trace and 40--94\% on open-ended conversation
-using LRU, LFU or a fill-once cache alone (our LFU, like the frequency experts of LeCaR and CACHEUS below,
-keeps a block's count after the block is evicted); admitting the adaptive and learned policies below widens the
-per-operating-point envelope only to 76--99\% and 42--94\%. This section's metric is
-a single cache's hit rate as a fraction of Belady's, with no move price, not the captured share of the
-sections before it.
+The alternative to forecasting is to react. This section measures something different from the sections
+before it: a single cache's hit rate as a fraction of Belady's, with no move price. On the full Mooncake
+traces, reactive tiering reaches 75--99\% of Belady's hit rate on the toolagent trace and 40--94\% on
+open-ended conversation using LRU, LFU or a fill-once cache alone. Our LFU, like the frequency experts of
+LeCaR and CACHEUS below, keeps a block's count after the block is evicted. Admitting the adaptive and learned
+policies below widens the per-operating-point envelope only to 76--99\% and 42--94\%.
 
 The interesting question is not the envelope --- that is an oracle over policies, not something anyone
 deploys --- but whether any \emph{single} policy attains it, and whether the adaptive designs built for

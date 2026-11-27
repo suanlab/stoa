@@ -3226,3 +3226,17 @@ the main cause, and the cause stays open.
 **In the paper:**
 - §7.2 is rewritten around Figure 5 (every run's median as a dot), which replaces Table 3.
 - The introduction's 32.7% / 2.1% (first runs) are now the pooled 31.1% / 0.3%.
+
+**§BO, stage 2 (2026-11-28): a sentence-level pass over §5–§9.**
+- **Figure 1:** text enlarged; overlapping labels fixed.
+- **§5.2:** the opening and the capacity paragraph are split so that each sentence makes one claim, and the
+  capacity statement points to Figure 2.
+- **§5.3:** the regime (why deadness equals every future here) and the prefix rule are now separate
+  paragraphs.
+- **§5.5:** the estimators, the shuffled-order test and the two consequences are separate paragraphs.
+- **§8.1:** the move-timing sentence is now four sentences; the one-ledger paragraph names its two
+  asymmetries in turn.
+- **§8.2:** the hit-rate metric is defined before the numbers that use it.
+- **§9:** the "who found which defect" chronology, which the grouped table does not follow, is replaced by
+  its sources.
+- No number changed. Four checks were re-pointed to the rewritten sentences, and all checks pass.
