@@ -9,14 +9,14 @@ heuristic, so they compare policies on one scale; an online policy is not bounde
 its share could exceed 100\%. Creations are unbilled for every policy, online or static.
 
 Whether either pays is set by the price of a move (\Cref{fig:price}). Billed one read plus one write per move, LRU falls to
-$-400.5$\% and $-401.4$\%, no replayed arrival-time policy beats the static heuristic, and the estimated prior
-keeps 70\% of its static gain only if a move costs at most 7.3\% and 7.2\% of that price. We timed the
-price on one host (an A100 80GB on PCIe Gen4 x16, six runs, a 64\,MiB Mooncake block of an 8B-class
-model): a move between GPU and host memory costs 0.75--1.87 times the read-plus-write price, whether it
-blocks serving or overlaps it, because the two copy directions did not overlap on this host and a
-background move took the link time of a load (timed with the link saturated; a stack whose link sits
-idle between loads could hide part of a move, which this additive bill does not represent); a demotion to the host's rotational disk costs 0.90--1.46
-times. Every measured price is at least 10 times that 70\% threshold.
+$-400.5$\% and $-401.4$\%, and no replayed arrival-time policy beats the static heuristic; the estimated prior
+keeps 70\% of its static gain only if a move costs at most 7.3\% and 7.2\% of that price. We timed the price on
+one host, an A100 80GB on PCIe Gen4 x16 (six runs, a 64\,MiB Mooncake block of an 8B-class model). A move
+between GPU and host memory costs 0.75--1.87 times the read-plus-write price, and a demotion to the host's
+rotational disk costs 0.90--1.46 times. The price holds whether a move blocks serving or overlaps it: the two
+copy directions did not overlap on this host, and a background move took the link time of a load. We timed
+with the link saturated; a stack whose link sits idle between loads could hide part of a move, which this
+additive bill does not represent. Every measured price is at least 10 times that 70\% threshold.
 
 \begin{figure}[t]
   \centering
@@ -36,12 +36,11 @@ demote blocks just created, which have no copy below. Only on the synthetic cont
 pay, cache-on-second-hit under the two copy-keeping ledgers (2.6\% and 4.5\%). The remote tier, which
 receives most of the arrival-time policies' online demotions, could not be measured.
 
-\paragraph{One ledger for static and online} Two asymmetries remain in these bills. A block created after
-the split costs nothing wherever it lands, although its KV is computed on the GPU, so a static placement
-that puts it on the remote tier performs a store that LRU, which creates on the GPU, never makes; and a
-static assignment's rearrangement at the split is free. Billing every policy for both, each new block's
-store from the GPU and each static policy's rearrangement, at one price in the measured band and on the
-same scale as above, LRU still loses 46--333\% on the production traces under every ledger and caching on
+\paragraph{One ledger for static and online} Two asymmetries remain in these bills. First, a block created after
+the split costs nothing wherever it lands, although its KV is computed on the GPU: a static placement that puts
+it on the remote tier performs a store that LRU, which creates on the GPU, never makes. Second, a static
+assignment's rearrangement at the split is free. Billing every policy for both, at one price in the measured
+band and on the same scale as above, LRU still loses 46--333\% on the production traces under every ledger and caching on
 the second hit 275--892\%, while even the oracle's placement keeps at most 65\% of its advantage. Pricing
 the paths separately bounds the tier we could not measure: with GPU--host moves at 0.75 and every move
 that touches the remote tier or the disk free, LRU gains 20.4\% and 20.8\% under write-through. It stops

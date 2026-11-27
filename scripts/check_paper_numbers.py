@@ -486,7 +486,7 @@ if _ir and _irb and _hz6 and _ar2:
           f"{_Fend['toolagent']['captured_pct']['visible-dead-last']:.1f}\\%", "", "eval_window fixed")
     _gf = [r["captured_pct"]["visible-dead-last"] - r["captured_pct"]["visible-dead-first"]
            for r in _hz6["fixed_capacity_rows"] if r["trace"] in PROD]
-    claim("fixed-capacity tie gap", f"moves it by {min(_gf):.0f}--{max(_gf):.0f} points;", "", "eval_window fixed")
+    claim("fixed-capacity tie gap", f"moves it by {min(_gf):.0f}--{max(_gf):.0f} points. The", "", "eval_window fixed")
     claim("fixed-capacity seen-once", f"loses {-_F[('conversation', 7.5)]['captured_pct']['seen-once-last']:.1f}\\% and "
           f"{-_F[('toolagent', 7.5)]['captured_pct']['seen-once-last']:.1f}\\% at 7.5 minutes", "", "eval_window fixed")
     assert all(_F[(t, 7.5)]["gpu_slots_fixed"] > _F[(t, 7.5)]["gpu_slots_per_window"] for t in PROD)
