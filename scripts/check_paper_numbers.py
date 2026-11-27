@@ -546,7 +546,7 @@ if _tc and _el and _ct:
                and _base[t]["captured_pct"]["dead-last"] == _ctr[(t, "tier")]["dead_last_ceiling_pct"] for t in PROD), \
         "the capacity sweep at our capacities disagrees with ceiling_ties.json"
     _sw = [r["tie_rule_swing"] for r in _R]
-    claim("tie-rule swing across capacities", f"by {min(_sw):.0f}--{max(_sw):.0f} points when the three bounded tiers",
+    claim("tie-rule swing across capacities", f"the three bounded tiers move the reference by {min(_sw):.0f}--{max(_sw):.0f} points",
           "", "ties_by_capacity")
     _small = [r for r in _R if r["scale"] == min(_tc["config"]["scales"])]
     assert all(r["tie_rule_swing"] == min(x["tie_rule_swing"] for x in _R if x["trace"] == r["trace"]) for r in _small), \
@@ -554,7 +554,7 @@ if _tc and _el and _ct:
     _dl = sorted(r["captured_pct"]["dead-last"] for r in _small)
     claim("dead-last at the smallest tiers", f"reaches only {_dl[0]:.0f}--{_dl[-1]:.0f}\\%", "", "ties_by_capacity")
     _one = {r["trace"]: r for r in _small}
-    claim("one GPU's worth of slots", f"at a twentieth, {_one['conversation']['gpu_slots']} and "
+    claim("one GPU's worth of slots", f"At a twentieth, {_one['conversation']['gpu_slots']} and "
           f"{_one['toolagent']['gpu_slots']} slots", "", "ties_by_capacity")
     claim("swing and gap at one GPU", f"the swing is {_one['conversation']['tie_rule_swing']:.1f} and "
           f"{_one['toolagent']['tie_rule_swing']:.1f} points", "", "ties_by_capacity")
@@ -563,7 +563,7 @@ if _tc and _el and _ct:
           "points short", "", "ties_by_capacity")
     assert min(_tc["config"]["scales"]) == 0.05, "the paper calls the smallest scale a twentieth"
     _syn = [r["tie_rule_swing"] for r in _tc["rows"] if r["trace"] == "synthetic"]
-    claim("synthetic swing across capacities", f"moves by {min(_syn):.0f}--{max(_syn):.0f} points", "", "ties_by_capacity")
+    claim("synthetic swing across capacities", f"({min(_syn):.0f}--{max(_syn):.0f} points on the synthetic\ncontrol)", "", "ties_by_capacity")
     _ms = {t: _base[t]["oracle_advantage_ms_per_request"] for t in PROD}
     claim("oracle advantage in ms", f"{_ms['conversation']:.1f} and {_ms['toolagent']:.1f}\\,ms of block reads per",
           "", "ties_by_capacity")

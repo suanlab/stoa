@@ -465,7 +465,7 @@ def fig_conventions():
     for ax in axes:
         ax.set_xlim(0, 10); ax.set_ylim(0, 6.2); ax.axis("off")
     live, dead, new, hole = OI["green"], "#BBBBBB", OI["blue"], "#FFFFFF"
-    T, L, S = 6.6, 5.6, 4.8          # title, label, small text sizes
+    T, L, S = 7.2, 6.2, 5.4          # title, label, small text sizes
 
     def cell(ax, x, y, fc, w, h=0.6, txt=None, tc=INK, fs=S):
         ax.add_patch(Rectangle((x, y), w, h, fc=fc, ec=INK, lw=0.5))
@@ -494,17 +494,17 @@ def fig_conventions():
     ax = axes[1]
     ax.text(0, 5.75, "(b) Matching rule: which hits count", fontsize=T, weight="bold")
     res = [True, False, True, True, True, False]
-    x0, w = 3.2, 0.7
-    for lab, sub, y in (("cached?", None, 4.0), ("engine", "stops at 1st miss", 2.45), ("simulator", "every cached block", 0.9)):
+    x0, w = 3.4, 0.68
+    for lab, sub, y in (("cached?", None, 4.0), ("engine", "to 1st miss", 2.45), ("simulator", "all cached", 0.9)):
         ax.text(0, y + 0.42 if sub else y + 0.3, lab, fontsize=L, va="center")
         if sub:
             ax.text(0, y + 0.08, sub, fontsize=S, va="center", color=MUTED)
     for k, r in enumerate(res):
-        cell(ax, x0 + 0.78 * k, 4.0, OI["skyblue"] if r else hole, w, txt=f"b{k + 1}")
-        cell(ax, x0 + 0.78 * k, 2.45, live if k == 0 else hole, w, txt="hit" if k == 0 else None, tc="white")
-        cell(ax, x0 + 0.78 * k, 0.9, live if r else hole, w, txt="hit" if r else None, tc="white")
-    ax.text(x0 + 0.78 * 6 + 0.05, 2.75, "1 hit", fontsize=L, va="center")
-    ax.text(x0 + 0.78 * 6 + 0.05, 1.2, "4 hits", fontsize=L, va="center")
+        cell(ax, x0 + 0.76 * k, 4.0, OI["skyblue"] if r else hole, w, txt=f"b{k + 1}")
+        cell(ax, x0 + 0.76 * k, 2.45, live if k == 0 else hole, w, txt="hit" if k == 0 else None, tc="white")
+        cell(ax, x0 + 0.76 * k, 0.9, live if r else hole, w, txt="hit" if r else None, tc="white")
+    ax.text(x0 + 0.76 * 6 + 0.05, 2.75, "1 hit", fontsize=L, va="center")
+    ax.text(x0 + 0.76 * 6 + 0.05, 1.2, "4 hits", fontsize=L, va="center")
 
     # (c) what a store costs: a request's steps and the save of its new blocks
     ax = axes[2]
@@ -514,12 +514,12 @@ def fig_conventions():
         ax.text(0, y + 0.3, lab, fontsize=L, va="center")
         x = 2.9
         for _ in range(3):
-            cell(ax, x, y, "#E8F0FB", 1.0, txt="step")
+            cell(ax, x, y, "#E8F0FB", 1.0, txt="step", fs=S - 0.4)
             if blocking:
-                cell(ax, x + 1.0, y, OI["orange"], 0.85, txt="save")
-                x += 1.85
+                cell(ax, x + 1.0, y, OI["orange"], 0.9, txt="save", fs=S - 0.4)
+                x += 1.9
             else:
-                cell(ax, x + 0.1, y - 0.72, OI["orange"], 0.85, 0.52, txt="save")
+                cell(ax, x + 0.05, y - 0.72, OI["orange"], 0.9, 0.52, txt="save", fs=S - 0.4)
                 x += 1.0
     ax.text(2.9, 4.6, "the next step waits for each save", fontsize=S, color=MUTED)
     ax.text(2.9, 0.1, "saves run on another stream", fontsize=S, color=MUTED)

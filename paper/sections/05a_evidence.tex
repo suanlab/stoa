@@ -17,14 +17,13 @@ gives dead and new blocks the same belief, zero.
 \subsection{The reference is set by a tie rule}
 \label{sec:ties}
 A natural reference for split-time policies gives every visible block its true future count and every
-new block zero, and places them greedily~(\Cref{sec:defs}). Its dead visible blocks also get zero, and
-which of two zero-belief blocks goes first is a tie rule. A stable sort in item order puts every visible
-block ahead of every new one, and the reference then reaches 20.4\% and 15.3\% of the oracle's advantage
-with tier-only actions (15.6\% and 12.4\% with all actions), which reads as most of the advantage being
-out of a split-time policy's reach, the conclusion an earlier version of this paper drew and that we
-retract for a pooled fast tier (\Cref{sec:lessons}); at one GPU's worth of KV the two references nearly
-coincide, as shown below. Parking the dead blocks behind the new ones instead costs them
-nothing --- they are never read --- and the same reference reaches \textbf{77.8\% and 76.2\%} (84.1\% on the
+new block zero, and places them greedily~(\Cref{sec:defs}). Its dead visible blocks also get zero, so
+which of two zero-belief blocks goes first is a tie rule. A stable sort in item order puts every visible block
+ahead of every new one. The reference then reaches 20.4\% and 15.3\% of the oracle's advantage with tier-only
+actions. That reads as most of the advantage being out of a split-time policy's reach: the conclusion an
+earlier version of this paper drew, and that we retract for a pooled fast tier (\Cref{sec:lessons}). Parking
+the dead blocks behind the new ones costs them nothing, since they are never read, and the same reference
+reaches \textbf{77.8\% and 76.2\%} (84.1\% on the
 synthetic control; with all actions 50.8\% and 49.4\%, against 15.6\% and 12.4\% with the dead blocks first).
 
 \begin{figure}[t]
@@ -39,14 +38,14 @@ synthetic control; with all actions 50.8\% and 49.4\%, against 15.6\% and 12.4\%
 
 \medskip
 \noindent With tier-only actions the rule moves the reference by 48--63 points across splits on the
-production traces, and by 1--72 points when the three bounded tiers are scaled together from a twentieth
-to one and a half times their sizes (the synthetic control moves by 0--40 points). The swing needs a fast
-tier that is large beside the live visible blocks. Our GPU tier, 18{,}279 slots of 64\,MiB, is a pooled tier;
-at a twentieth, 913 and 916 slots, about one 80\,GB GPU's worth of KV, the swing is 1.2 and 5.2 points, the
-reference with dead blocks last reaches only 42--52\%, and knowing deadness falls 8.6 and 5.1 points short of
-knowing every visible future. In serving
-units, under the declared latencies the oracle's advantage is 32.6 and 16.2\,ms of block reads per
-request after the split, so the rule moves the reference by 18.7 and 9.9\,ms per request.
+production traces. It needs a fast tier that is large beside the live visible blocks (\Cref{fig:ties}). Our
+GPU tier, 18{,}279 slots of 64\,MiB, is a pooled tier. Scaled together from a twentieth to one and a half times
+their sizes, the three bounded tiers move the reference by 1--72 points (0--40 points on the synthetic
+control). At a twentieth, 913 and 916 slots, about one 80\,GB GPU's worth
+of KV, the swing is 1.2 and 5.2 points. There the reference with dead blocks last reaches only 42--52\%, and
+knowing deadness falls 8.6 and 5.1 points short of knowing every visible future. In serving units, under the
+declared latencies the oracle's advantage is 32.6 and 16.2\,ms of block reads per request after the split, so
+the rule moves the reference by 18.7 and 9.9\,ms per request.
 
 The rule decides how a result reads. The strongest ranker of \Cref{sec:capacity}, an MLP trained with
 all actions, gains 8.2\% and 7.4\% of the oracle's advantage: 52.6\% and 59.5\% of the way to the
@@ -96,16 +95,17 @@ oracle & 100 & 100 & 100 \\
 
 \medskip
 \noindent On the production traces, knowing only \emph{which} visible blocks are dead is worth as
-much as knowing every visible block's future, to the hundredth of a point. That is a regime, not a law:
-the 7{,}248 and 4{,}901 live visible blocks fit in the GPU tier's 18{,}279 and 18{,}330 slots, so their
+much as knowing every visible block's future, to the hundredth of a point. That is a regime, not a law.
+Here the 7{,}248 and 4{,}901 live visible blocks fit in the GPU tier's 18{,}279 and 18{,}330 slots, so their
 order cannot matter. Shrinking the tiers until up to eight times as many live blocks as GPU slots remain
 opens a gap of at most 8.6 points; on the synthetic control, with 1.8--54 times as many, ranking the live
-blocks is worth 17--75 points. What remains, 22--24\%, is the order among new blocks. The prefix approximates deadness
-well: a block seen once before the split is dead with probability 0.95 and 0.97, and seen-once blocks are
-78--80\% of the dead ones. Parking them behind new blocks, a rule with no parameters, captures 39.2\%
-and 43.3\% (25.6--52.3\% across splits). Liu et al.\ observe that early frequency predicts whether a
-block is reused at all~\cite{liu2026fancyeviction}; the ladder prices that observation inside a
-placement. The estimated prior of \Cref{sec:arrival}, which places new blocks
+blocks is worth 17--75 points. What remains, 22--24\%, is the order among new blocks.
+
+The prefix approximates deadness well. A block seen once before the split is dead with probability 0.95 and
+0.97, and seen-once blocks are 78--80\% of the dead ones. Parking them behind new blocks, a rule with no
+parameters, captures 39.2\% and 43.3\% (25.6--52.3\% across splits). Liu et al.\ observe that early
+frequency predicts whether a block is reused at all~\cite{liu2026fancyeviction}; the ladder prices that
+observation inside a placement. The estimated prior of \Cref{sec:arrival}, which places new blocks
 between seen-twice and seen-three-times, captures 47.0\% and 51.7\%. On the synthetic control fewer blocks
 are dead (57--72\%), seen once is a weaker sign of it, and the same rule captures 7.5--15.4\%. The
 rule also needs room: with the bounded tiers at a quarter of their sizes it captures 14.1\% and 16.4\% on

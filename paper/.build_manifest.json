@@ -1,5 +1,5 @@
 {
-  "pdf": "135850c0d11ae0dc85960eff6ff8ada1a33d6c7cd8003a6fb0b722b22cc1150f",
+  "pdf": "38e21fdf8f6f9b536c17ccc61308c0233d385fa7874216208cfcd9e866be2bfb",
   "sources": {
     "../docs/references.bib": "965962cd149832a8248df9b07b2c73a8d6c823455692699450127f9b79aa322b",
     "ACM-Reference-Format.bst": "0590db3b8d255a3af91982ab710f3ace5fcaa52434020c9af8a4f141b00b68f3",
@@ -8,7 +8,7 @@
     "figs/fig_budget_frontier.pdf": "79b9eaceeddc60ca48baaac04a5988f39cf849ad0f80ab4060116671f2b76683",
     "figs/fig_capacity_ladder.pdf": "d7fefb6279c90373e0753aeb96bf38620c4ef21c760afb3256dfd95634230789",
     "figs/fig_contract.pdf": "ad98e2f704aaea494a2ce46ea2c4e7dc78d72aa55eafd7bf228f74f75490a060",
-    "figs/fig_conventions.pdf": "3e9461158ca8acde680b66c60b6cfc26a5c8eec734658f2aea17227133cd44e7",
+    "figs/fig_conventions.pdf": "f764054a80d90480beeab7bc39d7569fff4c67c3f30e3b0ffefe3d74ec2cd16d",
     "figs/fig_learnability.pdf": "e956e94816b39e1497686284173c8642ce9abe6aed18fefe5d70e7d5a78ceee3",
     "figs/fig_locomo.pdf": "7f4659bf8527e1f461a9005b58e69e47f87ff9ebbcdeb323a8d2bedd53b19b0d",
     "figs/fig_locomo_baselines.pdf": "fc3d4efc5baecf122467b5f8513d8490d1cde60cfc1a7f0cbd0bc20a1518bf75",
@@ -25,7 +25,7 @@
     "sections/02_background.tex": "b32a1f2187870288253e20fafd7b607d30c33431b68ae71b373f74a1fee53431",
     "sections/03_definitions.tex": "d8cccb42a1fd5123866e1b8f48f47510164a7d7d1f8b9a02185ba4ce4fdcffab",
     "sections/04_workloads.tex": "85a0a8c28871ad7d3a5d52a546db04e854dded442618da0f1858468b8774c5d5",
-    "sections/05a_evidence.tex": "7dd14341b418b8eb38e77492613f0c77f465a366ab7077485298569ec84ae126",
+    "sections/05a_evidence.tex": "d1906963915b7dd2af19defbdb0ac0959280122f30adbaacf8152d9306be7966",
     "sections/05b1_arrival.tex": "a587cdc77f29f0dd3501580895cb17b78358bbcf0f5da3f4cdb9edf3aed96f28",
     "sections/05b2_online.tex": "29ed80870af32cda864307e6a9bff350d1bf55ad91742f8eec8b6422c24e2f79",
     "sections/05c_reaction.tex": "618bc7872d6abc0044264766648351f423d97d1e15f38e89fe37e2143d95951c",
